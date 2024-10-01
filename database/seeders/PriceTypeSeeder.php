@@ -1,0 +1,34 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\PriceType;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class PriceTypeSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        PriceType::create([
+            'name' => 'regular',
+            'description' => 'venta regular al publico',
+            'is_active' => true
+        ]);
+
+        PriceType::create([
+            'name' => 'cortesia',
+            'description' => 'venta regular al publico',
+            'is_active' => true
+        ]);
+
+        PriceType::create([
+            'name' => 'promocion',
+            'description' => 'venta regular al publico',
+            'is_active' => true
+        ]);
+    }
+}
