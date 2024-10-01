@@ -46,7 +46,7 @@ function handleImageError() {
                 <div class="tw-flex tw-flex-col tw-gap-7 lg:tw-pl-[15%]">
                     <div class="tw-flex tw-gap-3 tw-items-center">
                         <img class="tw-w-20 tw-h-auto" src="https://adminmart.com/wp-content/uploads/2023/01/users.png" alt="users">
-                        <p><span class="tw-font-bold">1,902+</span> Fanaticos & publico han usado nuestra plataforma.</p>
+                        <p><span class="tw-font-bold">1,903+</span> Fanaticos & publico han usado nuestra plataforma.</p>
                     </div>
                     <div class="tw-font-bold tw-text-4xl md:tw-text-6xl tw-max-w-2xl tw-leading-[50px] md:tw-leading-[70px]">Aplicacion web oficial del equipo Halcones de xalapa!</div>
 
