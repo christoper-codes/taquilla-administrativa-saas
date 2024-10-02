@@ -81,8 +81,8 @@ class Stadium extends Model
         return $this->hasMany(LeagueType::class);
     }
 
-   /* public function ticketOffices()
+   public function ticketOffices()
     {
         return $this->hasMany(TicketOffice::class);
-    } */
+    }
 }

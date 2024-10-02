@@ -94,8 +94,23 @@ class User extends Authenticatable
                     ->withTimestamps();
     }
 
-    /* public function saleTicket()
+    public function seasonTickets()
+    {
+        return $this->hasMany(SeasonTicket::class);
+    }
+
+    public function cashRegisters()
+    {
+        return $this->hasMany(CashRegister::class);
+    }
+
+    public function saleTickets()
     {
         return $this->hasMany(SaleTicket::class);
-    } */
+    }
+
+    public function EventSeatCatalogues()
+    {
+        return $this->hasMany(EventSeatCatalog::class);
+    }
 }

@@ -28,8 +28,8 @@ class Serie extends Model
         return $this->hasMany(Event::class);
     }
 
-    /* public function seasonTickets()
+    public function seasonTickets()
     {
         return $this->hasMany(SeasonTicket::class);
-    } */
+    }
 }

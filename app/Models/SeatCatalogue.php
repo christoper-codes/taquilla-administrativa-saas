@@ -52,4 +52,14 @@ class SeatCatalogue extends Model
                     ->withPivot('season_ticket_id', 'seat_catalogue_status_id', 'sale_ticket_id', 'is_verified')
                     ->withTimestamps();
     }
+
+    public function seasonTickets()
+    {
+        return $this->hasMany(SeasonTicket::class);
+    }
+
+    public function EventSeatCatalogues()
+    {
+        return $this->hasMany(EventSeatCatalog::class);
+    }
 }

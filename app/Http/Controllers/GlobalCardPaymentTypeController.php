@@ -2,21 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Event;
+use App\Models\GlobalCardPaymentType;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
-class EventController extends Controller
+class GlobalCardPaymentTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $events = Event::all()->load('globalImage');
-        return Inertia::render('Pos/Events', [
-            'events' => $events,
-        ]);
+        //
     }
 
     /**
@@ -38,18 +34,15 @@ class EventController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($slug, $id)
+    public function show(GlobalCardPaymentType $globalCardPaymentType)
     {
-        $event = Event::find($id)->load('globalImage');
-        return Inertia::render('Pos/Event', [
-            'event' => $event,
-        ]);
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Event $event)
+    public function edit(GlobalCardPaymentType $globalCardPaymentType)
     {
         //
     }
@@ -57,7 +50,7 @@ class EventController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Event $event)
+    public function update(Request $request, GlobalCardPaymentType $globalCardPaymentType)
     {
         //
     }
@@ -65,7 +58,7 @@ class EventController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Event $event)
+    public function destroy(GlobalCardPaymentType $globalCardPaymentType)
     {
         //
     }
