@@ -62,8 +62,8 @@ class GlobalImage extends Model
         return $this->hasOne(Event::class);
     }
 
-   /*  public function ticketOffice()
+    public function ticketOffice()
     {
         return $this->hasOne(TicketOffice::class);
-    } */
+    }
 }

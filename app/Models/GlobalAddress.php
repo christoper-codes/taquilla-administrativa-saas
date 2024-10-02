@@ -34,9 +34,9 @@ class GlobalAddress extends Model
         return $this->hasMany(Stadium::class);
     }
 
-    /* public function ticketOffices()
+    public function ticketOffices()
     {
         return $this->hasMany(TicketOffice::class);
-    } */
+    }
 
 }

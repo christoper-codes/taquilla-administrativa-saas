@@ -14,6 +14,7 @@ class Event extends Model
         'serie_id',
         'global_image_id',
         'name',
+        'slug',
         'description',
         'start_date',
         'end_date',
@@ -35,20 +36,25 @@ class Event extends Model
         return $this->belongsTo(GlobalImage::class);
     }
 
-/*     public function cashRegisters()
-    {
-        return $this->hasMany(CashRegister::class);
-    }
-
-    public function saleTicket()
-    {
-        return $this->hasMany(SaleTicket::class);
-    } */
-
     public function seatCatalogues()
     {
         return $this->belongsToMany(SeatCatalogue::class, 'event_seat_catalogue', 'event_id', 'seat_catalogue_id')
                     ->withPivot('season_ticket_id', 'seat_catalogue_status_id', 'sale_ticket_id', 'is_verified')
                     ->withTimestamps();
+    }
+
+    public function cashRegisters()
+    {
+        return $this->hasMany(CashRegister::class);
+    }
+
+    public function saleTickets()
+    {
+        return $this->hasMany(SaleTicket::class);
+    }
+
+    public function EventSeatCatalogues()
+    {
+        return $this->hasMany(EventSeatCatalog::class);
     }
 }

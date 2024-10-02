@@ -48,6 +48,13 @@ onMounted(() => {
 }
 });
 
+const props = defineProps({
+    event: {
+        type: Object,
+        required: true,
+    },
+});
+
 
 </script>
 
@@ -58,7 +65,7 @@ onMounted(() => {
 
     <section class="tw-overflow-hidden tw-mt-[100px] lg:tw-mt-[111px]">
         <v-parallax
-            class="tw-h-60 md:tw-h-[350px]" src="https://web.halconesdexalapa.com.mx/upload/fdei3Kgy3uu.jpeg"
+            class="tw-h-60 md:tw-h-[350px]" :src="`/storage/${event.global_image.file_path}`"
         >
             <div class="d-flex flex-column fill-height justify-start align-start text-white tw-bg-purple-900/50">
 

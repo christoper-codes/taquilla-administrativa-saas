@@ -1,11 +1,22 @@
 <script setup>
 import NavigationDrawer from '@/Components/NavigationDrawer.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import Footer from '@/Components/Footer.vue';
 import { onMounted } from 'vue';
 
+const props = defineProps({
+    events: {
+        type: Array,
+        required: true,
+    },
+});
+
+
 onMounted(() => {
+
+    console.log(props.events);
+
   if(document.querySelector('#leaflet-map')) {
     var map = L.map('leaflet-map').setView([19.513615, -96.916121], 17);
     if(map) {
@@ -19,6 +30,7 @@ onMounted(() => {
     }
 }
 });
+
 
 </script>
 
@@ -62,18 +74,20 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-items-center tw-justify-between tw-gap-10 tw-w-full tw-mt-10 lg:tw-mt-16">
 
-                    <div class="tw-w-full tw-flex tw-flex-col md:tw-flex-row tw-items-start tw-justify-between tw-gap-5">
+                <div v-if="events" class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-items-center tw-justify-between tw-gap-10 tw-w-full tw-mt-10 lg:tw-mt-16">
+                    <div v-for="event in events" :key="event.id">
+                        <div class="tw-w-full tw-flex tw-flex-col md:tw-flex-row tw-items-start tw-justify-between tw-gap-5">
                         <div class="tw-w-full md:tw-w-[60%]">
-                            <div class="tw-h-[180px] tw-w-full tw-block tw-shadow-xl tw-overflow-hidden tw-rounded-lg" style="background-image: url('https://web.halconesdexalapa.com.mx/upload/fdei3Kgy3uu.jpeg'); background-size: cover;">
+                            <div class="tw-h-[180px] tw-w-full tw-block tw-shadow-xl tw-overflow-hidden tw-rounded-lg hover:tw-translate-y-[-10px] tw-transition-transform tw-duration-500"
+                            :style="{ backgroundImage: `url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
                                 <div class="tw-bg-white tw-py-1 tw-px-1.5 tw-rounded-lg tw-inline-flex tw-ml-3 tw-mt-3">
                                     🔥
                                 </div>
                             </div>
                             <div class="tw-mt-5">
                                 <Link
-                                :href="route('evento.show')"
+                                :href="route('eventos.show', { slug: event.slug, id: event.id } )"
                                 >
                                     <v-btn variant="elevated" class="text-none !tw-bg-tw-secondary-200 !tw-text-tw-secondary-700" rounded="lg" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
                                 </Link>
@@ -82,11 +96,11 @@ onMounted(() => {
                         <div class="tw-w-full md:tw-w-[40%] tw-text-gray-600">
                            <h4 class="tw-font-bold tw-text-lg">Info</h4>
                             <div class="tw-text-sm tw-flex tw-flex-col tw-gap-2">
-                                <div>Halcones de Xalapa vs Puebla</div>
+                                <div> {{ event.name }} </div>
                                 <div>📍 | El nido del halcon. Xalapa Ver.</div>
                                 <div>🔥 | 2x1 en boletos para zonas A Y B</div>
                                 <div>🎧 | Fan fest en el nido</div>
-                                <div>📅 | 27 de septiembre del 2024</div>
+                                <div>📅 | {{ event.start_date }} </div>
                             </div>
                            <div class="tw-flex tw-gap-2 lg:tw-flex-col tw-w-44 tw-mt-2">
                                 <v-btn color="purple" variant="tonal" class="text-none" rounded="lg" size="small"><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">person</span>Edad +3</v-btn>
@@ -94,33 +108,7 @@ onMounted(() => {
                            </div>
                         </div>
                     </div>
-                    <div class="tw-w-full tw-flex tw-flex-col md:tw-flex-row tw-items-start tw-justify-between tw-gap-5">
-                        <div class="tw-w-full md:tw-w-[60%]">
-                            <div class="tw-h-[180px] tw-w-full tw-block tw-shadow-xl tw-overflow-hidden tw-rounded-lg" style="background-image: url('https://web.halconesdexalapa.com.mx/upload/fdei3Kgy3uu.jpeg'); background-size: cover;">
-                                <div class="tw-bg-white tw-py-1 tw-px-1.5 tw-rounded-lg tw-inline-flex tw-ml-3 tw-mt-3">
-                                    🔥
-                                </div>
-                            </div>
-                            <div class="tw-mt-5">
-                                <v-btn variant="elevated" class="text-none !tw-bg-tw-secondary-200 !tw-text-tw-secondary-700" rounded="lg" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
-                            </div>
-                        </div>
-                        <div class="tw-w-full md:tw-w-[40%] tw-text-gray-600">
-                           <h4 class="tw-font-bold tw-text-lg">Info</h4>
-                            <div class="tw-text-sm tw-flex tw-flex-col tw-gap-2">
-                                <div>Halcones de Xalapa vs Puebla</div>
-                                <div>📍 | El nido del halcon. Xalapa Ver.</div>
-                                <div>🔥 | 2x1 en boletos para zonas A Y B</div>
-                                <div>🎧 | Fan fest en el nido</div>
-                                <div>📅 | 27 de septiembre del 2024</div>
-                            </div>
-                           <div class="tw-flex tw-gap-2 lg:tw-flex-col tw-w-44 tw-mt-2">
-                                <v-btn color="purple" variant="tonal" class="text-none" rounded="lg" size="small"><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">person</span>Edad +3</v-btn>
-                                <v-btn color="purple" variant="tonal" class="text-none" rounded="lg" size="small"><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">checkroom</span>Vetimenta | casual</v-btn>
-                           </div>
-                        </div>
                     </div>
-
                 </div>
 
             </main>
