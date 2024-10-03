@@ -30,11 +30,12 @@ class DatabaseSeeder extends Seeder
             GlobalSeasonsSeeder::class,
             SeriesSeeder::class,
             EventsSeeder::class,
-           /*  CashRegisterTypesSeeder::class,
-            TypeCashRegisterMovementsSeeder::class,
-            GlobalPaymentTypesSeeder::class,
             SeatCatalogueStatusesSeeder::class,
-            SaleTicketStatusesSeeder::class */
+            CashRegisterTypesSeeder::class,
+            TicketOfficesSeeder::class,
+            CashRegisterMovementTypesSeeder::class,
+            SaleTicketStatusesSeeder::class,
+            GlobalPaymentTypesSeeder::class,
         ]);
     }
 }

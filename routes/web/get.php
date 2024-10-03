@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 * |POS | ROUTES
 */
 Route::get('/eventos', [EventController::class, 'index'])->name('eventos.index');
-Route::get('/evento', [EventController::class, 'show'])->name('evento.show');
+Route::get('/eventos/{slug}/{id}', [EventController::class, 'show'])->name('eventos.show');
 
 
 /*

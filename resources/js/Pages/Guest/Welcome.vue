@@ -79,14 +79,14 @@ function handleImageError() {
             </div>
             <div class="tw-w-full tw-bg-transparent tw-flex tw-items-start tw-justify-between tw-gap-5 tw-h-96 lg:tw-h-screen tw-overflow-hidden">
                 <div class="tw-w-full tw-h-full slider-up">
-                    <img class="tw-w-full tw-h-full" src="../../../public/img/bannerimg1.svg" alt="">
-                    <img class="tw-w-full tw-h-full" src="../../../public/img/bannerimg1.svg" alt="">
-                    <img class="tw-w-full tw-h-full" src="../../../public/img/bannerimg1.svg" alt="">
+                    <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg1.svg" alt="">
+                    <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg1.svg" alt="">
+                    <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg1.svg" alt="">
                 </div>
                 <div class="tw-w-full tw-h-full slider-down">
-                    <img class="tw-w-full tw-h-full" src="../../../public/img/bannerimg1.svg" alt="">
-                    <img class="tw-w-full tw-h-full" src="../../../public/img/bannerimg1.svg" alt="">
-                    <img class="tw-w-full tw-h-full" src="../../../public/img/bannerimg1.svg" alt="">
+                    <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg1.svg" alt="">
+                    <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg1.svg" alt="">
+                    <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg1.svg" alt="">
                 </div>
             </div>
         </section>
@@ -307,10 +307,10 @@ function handleImageError() {
                 <div class="slider-container lg:tw-bg-slate-200 py-10">
                     <div class="slider-track">
                         <div class="slider-group">
-                            <img class="tw-h-[600px]" src="../../../public/img/bannerimg3.svg">
+                            <img class="tw-h-[600px]" src="../../../../public/img/bannerimg3.svg">
                         </div>
                         <div class="slider-group">
-                            <img class="tw-h-[600px]" src="../../../public/img/bannerimg3.svg">
+                            <img class="tw-h-[600px]" src="../../../../public/img/bannerimg3.svg">
                         </div>
                         <!-- Repite los elementos según sea necesario -->
                     </div>
