@@ -29,7 +29,7 @@ class SeatCatalogueController extends Controller
         $user = Auth::user()->load('globalImages');
         $flash = $user->is_new ? 'is_new_user' : null;
 
-        return Inertia::render('Dashboard', [
+        return Inertia::render('App/Dashboard', [
             'user' => $user,
             'flash' => $flash,
         ]);

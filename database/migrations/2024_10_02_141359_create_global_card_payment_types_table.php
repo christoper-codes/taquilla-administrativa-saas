@@ -11,16 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('events', function (Blueprint $table) {
+        Schema::create('global_card_payment_types', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('event_type_id')->constrained('event_types');
-            $table->foreignId('serie_id')->constrained('series');
-            $table->foreignId('global_image_id')->nullable()->constrained('global_images');
             $table->string('name');
-            $table->string('slug');
             $table->string('description');
-            $table->dateTime('start_date')->nullable();
-            $table->dateTime('end_date')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
@@ -31,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('events');
+        Schema::dropIfExists('global_card_payment_types');
     }
 };
