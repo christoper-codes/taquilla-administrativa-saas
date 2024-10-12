@@ -15,7 +15,9 @@ const remember = useField('remember');
 const data  = useFormInertia({
     email: '',
     password: '',
-    remember: false,
+    remember: true,
+    slug: '',
+    id: '',
 });
 
 const show = ref(false);
@@ -26,6 +28,8 @@ const submit = handleSubmit((values) => {
     data.email = email.value;
     data.password = password.value;
     data.remember = remember.value;
+    data.slug = props.slug;
+    data.id = props.id;
 
     data.post(route('login'), {
         onFinish: () => {
@@ -34,14 +38,21 @@ const submit = handleSubmit((values) => {
     });
 });
 
-defineProps({
+const props = defineProps({
     canResetPassword: {
         type: Boolean,
     },
     status: {
         type: String,
     },
+    slug: {
+        type: String,
+    },
+    id: {
+        type: String,
+    },
 });
+
 
 </script>
 
@@ -97,8 +108,17 @@ defineProps({
                                 ></v-checkbox>
                             <v-btn @click="submit" :loading="loading" variant="elevated" :class="{ 'tw-opacity-25': data.processing }" :disabled="data.processing" class="text-none !tw-bg-tw-primary-500 !tw-text-white tw-w-full lg:tw-w-auto" size="large" rounded="lg">Iniciar sesion</v-btn>
                             <div class="lg:tw-hidden tw-mt-5">
-                                ¿Aun no tienes cuenta? <Link :href="route('register')"><span class="tw-text-blue-600 tw-underline">Registrarte ahora</span></Link>
+                                ¿Aun no tienes cuenta?
+                                <Link :href="route('register', { slug: slug, id: id})">
+                                    <span class="tw-text-blue-600 tw-underline">Registrarte ahora</span>
+                                </Link>
                             </div>
+                        </div>
+                        <div class="tw-hidden lg:tw-block tw-mt-5">
+                            ¿Aun no tienes cuenta?
+                            <Link :href="route('register', { slug: slug, id: id})">
+                                <span class="tw-text-blue-600 tw-underline">Registrarte ahora</span>
+                            </Link>
                         </div>
                     </v-form>
 

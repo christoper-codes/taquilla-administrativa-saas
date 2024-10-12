@@ -36,6 +36,9 @@ class DatabaseSeeder extends Seeder
             CashRegisterMovementTypesSeeder::class,
             SaleTicketStatusesSeeder::class,
             GlobalPaymentTypesSeeder::class,
+            GlobalCardPaymentTypesSeeder::class,
+            PriceCataloguesSeeder::class,
+            SeatCataloguesSeeder::class,
         ]);
     }
 }

@@ -24,5 +24,11 @@ class GlobalPaymentTypesSeeder extends Seeder
             'description' => 'Pago con tarjeta',
             'is_active' => true
         ]);
+
+        GlobalPaymentType::create([
+            'name' => 'cortesia',
+            'description' => 'pago por cortesia',
+            'is_active' => true
+        ]);
     }
 }
