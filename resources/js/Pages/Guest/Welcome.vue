@@ -5,6 +5,7 @@ import NavigationDrawer from '@/Components/NavigationDrawer.vue';
 import Footer from '@/Components/Footer.vue';
 import ClubDrawer from '@/Components/ClubDrawer.vue';
 import { ref } from 'vue';
+import ErrorSession from '@/Components/ErrorSession.vue';
 
 const activePanel = ref([0]);
 defineProps({
@@ -51,7 +52,7 @@ function handleImageError() {
                     <div class="tw-font-bold tw-text-4xl md:tw-text-6xl tw-max-w-2xl tw-leading-[50px] md:tw-leading-[70px]">Aplicacion web oficial del equipo Halcones de xalapa!</div>
 
                     <p class="tw-text-lg">Descubre las <span class="tw-font-bold">nuevas novedades en la plataforma oficial</span> del equipo de baloncesto, como comprar boletos con increibles promociones u ofertas especiales</p>
-
+                    <ErrorSession />
                   <div class="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-gap-4 md:tw-gap-5">
                     <div class="tw-w-full lg:tw-w-auto">
                         <v-tooltip color="primary" location="bottom center" origin="auto" no-click-animation>
@@ -68,7 +69,11 @@ function handleImageError() {
                     <div class="tw-w-full lg:tw-w-auto">
                         <v-tooltip color="primary" location="bottom center" origin="auto" no-click-animation>
                         <template v-slot:activator="{ props }">
-                            <v-btn v-bind="props" variant="tonal" class="text-none tw-block tw-w-full lg:tw-w-auto !tw-bg-tw-primary-100 !tw-text-tw-primary-600" size="large" rounded="lg">Mis boletos</v-btn>
+                            <Link
+                            :href="route('login')"
+                            >
+                                <v-btn v-bind="props" variant="tonal" class="text-none tw-block tw-w-full lg:tw-w-auto !tw-bg-tw-primary-100 !tw-text-tw-primary-600" size="large" rounded="lg">Mis boletos</v-btn>
+                            </Link>
                         </template>
                         <div>Tickets!</div>
                         </v-tooltip>

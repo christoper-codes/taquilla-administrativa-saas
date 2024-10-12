@@ -39,7 +39,7 @@ class WebResponseHelper
         return redirect()->back()->with('message', $errorDetails);
     }
 
-    public static function sendResponse($result, $message = 'Éxito en el proceso', $route = 'welcome', $code = 200, $is_redirect = true)
+    public static function sendResponse($result, $message = 'Éxito en el proceso', $route = 'welcome', $code = 200, $is_redirect = true, $is_render = false)
     {
         $response = [
             'success' => true,
@@ -51,6 +51,10 @@ class WebResponseHelper
 
         if($is_redirect) {
             return redirect(route($route, absolute: false))->with('message', $response);
+        }
+
+        if($is_render) {
+            return $response;
         }
 
         return redirect()->back()->with('message', $response);

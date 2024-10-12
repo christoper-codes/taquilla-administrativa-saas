@@ -4,6 +4,7 @@ import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import Footer from '@/Components/Footer.vue';
 import { onMounted } from 'vue';
+import ErrorSession from '@/Components/ErrorSession.vue';
 
 const props = defineProps({
     events: {
@@ -14,8 +15,6 @@ const props = defineProps({
 
 
 onMounted(() => {
-
-    console.log(props.events);
 
   if(document.querySelector('#leaflet-map')) {
     var map = L.map('leaflet-map').setView([19.513615, -96.916121], 17);
@@ -41,7 +40,7 @@ onMounted(() => {
 
     <section class="tw-overflow-hidden tw-mt-[100px] lg:tw-mt-[111px]">
         <v-parallax
-            class="tw-h-96 md:tw-h-auto" src="https://scontent.fjal1-1.fna.fbcdn.net/v/t39.30808-6/428374201_729566115939185_868365580026172018_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=86c6b0&_nc_ohc=cw9JwoDuLSYQ7kNvgFAIHy1&_nc_ht=scontent.fjal1-1.fna&oh=00_AYAMbK_1Y84lQpNmryyLhduhK6xO_EpDUlBIVcgE72owQQ&oe=66FF93C9"
+            class="tw-h-96 md:tw-h-auto" src="/storage/public/back-hdx-img.jpg"
         >
             <div class="d-flex flex-column fill-height justify-start align-start text-white tw-bg-purple-500/50">
 
@@ -74,6 +73,7 @@ onMounted(() => {
                     </div>
                 </div>
 
+                <ErrorSession />
 
                 <div v-if="events" class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-items-center tw-justify-between tw-gap-10 tw-w-full tw-mt-10 lg:tw-mt-16">
                     <div v-for="event in events" :key="event.id">
@@ -87,9 +87,16 @@ onMounted(() => {
                             </div>
                             <div class="tw-mt-5">
                                 <Link
-                                :href="route('eventos.show', { slug: event.slug, id: event.id } )"
+                                    v-if="$page.props.auth.user"
+                                    :href="route('eventos.show', { slug: event.slug, id: event.id } )"
+                                    >
+                                    <v-btn variant="elevated" class="text-none !tw-bg-tw-secondary-300 !tw-text-tw-secondary-700" rounded="lg" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                </Link>
+                                <Link
+                                    v-else
+                                    :href="route('login', { slug: event.slug, id: event.id})"
                                 >
-                                    <v-btn variant="elevated" class="text-none !tw-bg-tw-secondary-200 !tw-text-tw-secondary-700" rounded="lg" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                    <v-btn variant="elevated" class="text-none !tw-bg-tw-secondary-300 !tw-text-tw-secondary-700" rounded="lg" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
                                 </Link>
                             </div>
                         </div>

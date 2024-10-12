@@ -17,7 +17,7 @@ const slides = ref([
 <template>
    <main class="tw-min-h-screen tw-w-full tw-flex tw-flex-col lg:tw-flex-row lg:tw-justify-between">
     <div class="tw-hidden tw-min-h-screen tw-w-[35%] tw-bg-center tw-bg-no-repeat lg:tw-flex tw-flex-col tw-justify-between tw-gap-10 tw-p-10"
-        style="background-image: url('https://enlink.themenate.net/assets/images/others/sign-up-1.jpg'); background-size: cover; position: relative;">
+        style="background-image: url('/storage/public/img-login.jpg'); background-size: cover; position: relative;">
         <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(169, 0, 254, 0.5);"></div>
 
 

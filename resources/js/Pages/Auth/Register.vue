@@ -29,6 +29,8 @@ const data  = useFormInertia({
     email: '',
     password: '',
     password_confirmation: '',
+    slug: '',
+    id: '',
 });
 
 const show = ref(false);
@@ -47,6 +49,8 @@ const submit = handleSubmit((values) => {
     data.email = email.value;
     data.password = password.value;
     data.password_confirmation = password_confirmation.value;
+    data.slug = props.slug;
+    data.id = props.id;
 
     data.post(route('register'), {
         onFinish: () => {
@@ -67,6 +71,15 @@ const onFileChange = (event) => {
     reader.readAsDataURL(file);
   }
 };
+
+const props = defineProps({
+    slug: {
+        type: String,
+    },
+    id: {
+        type: Number,
+    },
+});
 
 </script>
 

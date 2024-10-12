@@ -2,22 +2,43 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\WebResponseHelper;
 use App\Models\Event;
+use App\Models\GlobalCardPaymentType;
+use App\Models\GlobalPaymentType;
+use App\Models\PriceCatalogue;
+use App\Models\PriceTypeSeatCatalogue;
+use App\Services\EventService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class EventController extends Controller
 {
+    protected $event_service;
+
+    public function __construct(EventService $event_service)
+    {
+        $this->event_service = $event_service;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $events = Event::all()->load('globalImage');
-        return Inertia::render('Pos/Events', [
-            'events' => $events,
-        ]);
+      try {
+            $events = $this->event_service->getAll();
+
+            return Inertia::render('Pos/Events', [
+                'events' => $events,
+            ]);
+
+      } catch (\Exception $e) {
+        WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar los eventos');
+      }
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -40,10 +61,26 @@ class EventController extends Controller
      */
     public function show($slug, $id)
     {
-        $event = Event::find($id)->load('globalImage');
-        return Inertia::render('Pos/Event', [
-            'event' => $event,
-        ]);
+        try {
+            $response = $this->event_service->getById($id);
+
+            return Inertia::render('Pos/Event', [
+                'event' => $response['event'],
+                'a_zone' => $response['a_zone'],
+                'b_zone' => $response['b_zone'],
+                'c_zone' => $response['c_zone'],
+                'user_roles' => $response['user_roles'],
+                'global_payment_types' => $response['global_payment_types'],
+                'global_card_payment_types' => $response['global_card_payment_types'],
+            ]);
+        } catch (\Exception $e) {
+            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar el evento');
+        }
+    }
+
+    public function success()
+    {
+        return Inertia::render('Pos/Success');
     }
 
     /**

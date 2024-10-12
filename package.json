@@ -19,8 +19,10 @@
     },
     "dependencies": {
         "@mdi/font": "^7.4.47",
+        "@paypal/paypal-js": "^8.1.2",
         "canvas-confetti": "^1.9.3",
         "chart.js": "^4.4.4",
+        "panzoom": "^9.4.3",
         "vee-validate": "^4.13.2",
         "vue-chartjs": "^5.3.1",
         "vue-svg-pan-zoom": "^2.1.0",
