@@ -42,7 +42,7 @@ import { drawerClubState } from '@/composables/drawersStates';
   </div>
 </template>
 
-<style>
+<style scoped>
     .v-navigation-drawer__scrim{
         backdrop-filter: blur(4px) !important;
     }

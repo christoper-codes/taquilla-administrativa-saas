@@ -30,7 +30,11 @@ const toggleFav = () => {
                 </Link>
                 <div class="lg:tw-flex tw-items-center tw-gap-10 tw-hidden">
                     <div class="tw-flex tw-items-center tw-gap-3">
-                        <v-btn  href="#" color="blue-grey" variant="text" class="text-none" rounded="lg"><span class="material-symbols-outlined tw-text-lg">home</span>Inicio</v-btn>
+                        <Link
+                            :href="route('welcome')"
+                        >
+                            <v-btn color="blue-grey" variant="text" class="text-none" rounded="lg"><span class="material-symbols-outlined tw-text-lg">home</span>Inicio</v-btn>
+                        </Link>
                         <div class="text-center">
                             <v-menu
                             v-model="menu"
@@ -104,7 +108,11 @@ const toggleFav = () => {
                             </v-card>
                             </v-menu>
                         </div>
-                        <v-btn  href="#" color="blue-grey" variant="text" class="text-none" rounded="lg"><span class="material-symbols-outlined tw-text-xl">note_stack</span> blog</v-btn>
+                        <Link
+                            :href="route('eventos.index')"
+                        >
+                            <v-btn color="blue-grey" variant="text" class="text-none" rounded="lg"><span class="material-symbols-outlined tw-text-xl">note_stack</span>Eventos</v-btn>
+                        </Link>
                     </div>
                     <Link
                             v-if="$page.props.auth.user"
@@ -113,7 +121,11 @@ const toggleFav = () => {
                         <v-btn variant="tonal" class="text-none !tw-bg-tw-primary-100 !tw-text-tw-primary-600" size="large" rounded="lg">Dashboard</v-btn>
                     </Link>
                     <div v-else class="tw-flex tw-items-center tw-gap-3">
-                        <v-btn variant="elevated" class="text-none !tw-bg-tw-primary-500 !tw-text-white" size="large" rounded="lg">Registrarse</v-btn>
+                        <Link
+                            :href="route('register')"
+                        >
+                            <v-btn variant="elevated" class="text-none !tw-bg-tw-primary-500 !tw-text-white" size="large" rounded="lg">Registrarse</v-btn>
+                        </Link>
                         <Link
                             :href="route('login')"
                         >

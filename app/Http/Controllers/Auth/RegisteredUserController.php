@@ -30,9 +30,12 @@ class RegisteredUserController extends Controller
     /**
      * Display the registration view.
      */
-    public function create(): Response
+    public function create($slug = null, $id = null): Response
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Auth/Register',[
+            'slug' => $slug,
+            'id' => $id,
+        ]);
     }
 
     /**
@@ -111,6 +114,10 @@ class RegisteredUserController extends Controller
                 Auth::login($user);
 
                 DB::commit();
+
+                if($request->slug && $request->id) {
+                    return redirect()->route('eventos.show', ['slug' => $request->slug, 'id' => $request->id]);
+                }
 
                 WebResponseHelper::sendResponse($user, 'Usuario registrado con éxito', 'dashboard', 200, true);
 

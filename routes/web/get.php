@@ -12,7 +12,17 @@ use Illuminate\Support\Facades\Route;
 * |POS | ROUTES
 */
 Route::get('/eventos', [EventController::class, 'index'])->name('eventos.index');
-Route::get('/eventos/{slug}/{id}', [EventController::class, 'show'])->name('eventos.show');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* | POS Auth | ROUTES
+*/
+Route::middleware('auth')->group(function() {
+    Route::get('/eventos/{slug}/{id}', [EventController::class, 'show'])->name('eventos.show');
+    Route::get('/pago-exitoso', [EventController::class, 'success'])->name('eventos.success');
+});
 
 
 /*
@@ -21,7 +31,6 @@ Route::get('/eventos/{slug}/{id}', [EventController::class, 'show'])->name('even
 * |--------------------------------------------------------------------------
 * |Auth | dashboard
 */
-
 Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [SeatCatalogueController::class, 'index'])->name('dashboard');

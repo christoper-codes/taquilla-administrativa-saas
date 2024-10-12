@@ -20,4 +20,11 @@ class PriceCatalogue extends Model
     {
         return $this->belongsTo(Stadium::class);
     }
+
+    public function priceTypes()
+    {
+        return $this->belongsToMany(PriceType::class, 'price_type_seat_catalogue', 'price_catalogue_id', 'price_type_id')
+                ->withPivot('seat_catalogue_id', 'is_active')
+                ->withTimestamps();
+    }
 }

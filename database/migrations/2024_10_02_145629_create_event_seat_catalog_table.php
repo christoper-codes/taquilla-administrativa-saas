@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('season_ticket_id')->nullable()->constrained('season_tickets');
             $table->foreignId('seat_catalogue_status_id')->constrained('seat_catalogue_statuses');
             $table->foreignId('sale_ticket_id')->nullable()->constrained('sale_tickets');
-            $table->decimal('price', 14, 4)->default('0.0000');
+            $table->decimal('price', 14, 4)->nullable();
             $table->boolean('is_verified')->default(false);
             $table->boolean('is_active')->default(true);
             $table->timestamps();

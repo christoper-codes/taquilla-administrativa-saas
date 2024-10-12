@@ -14,9 +14,12 @@ return new class extends Migration
         Schema::create('seat_catalogues', function (Blueprint $table) {
             $table->id();
             $table->foreignId('stadium_id')->constrained('stadiums');
-            $table->foreignId('zone_type_id')->constrained('zone_types');
+            $table->foreignId('zone_type_id')->nullable()->constrained('zone_types');
             $table->foreignId('seat_type_id')->constrained('seat_types');
-            $table->foreignId('row_type_id')->constrained('row_types');
+            $table->foreignId('row_type_id')->nullable()->constrained('row_types');
+            $table->string('zone')->nullable();
+            $table->string('row')->nullable();
+            $table->string('seat')->nullable();
             $table->string('code')->unique();
             $table->string('description')->default('generic');
             $table->boolean('is_active')->default(true);

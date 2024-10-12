@@ -14,6 +14,9 @@ class SeatCatalogue extends Model
         'zone_type_id',
         'seat_type_id',
         'row_type_id',
+        'zone',
+        'row',
+        'seat',
         'code',
         'description',
         'is_active'
@@ -48,8 +51,8 @@ class SeatCatalogue extends Model
 
     public function events()
     {
-        return $this->belongsToMany(Event::class, 'event_seat_catalogue', 'seat_catalogue_id', 'event_id')
-                    ->withPivot('season_ticket_id', 'seat_catalogue_status_id', 'sale_ticket_id', 'is_verified')
+        return $this->belongsToMany(Event::class, 'event_seat_catalog', 'seat_catalogue_id', 'event_id')
+                    ->withPivot('user_id','season_ticket_id', 'seat_catalogue_status_id', 'sale_ticket_id','price', 'is_verified', 'is_active')
                     ->withTimestamps();
     }
 
@@ -62,4 +65,5 @@ class SeatCatalogue extends Model
     {
         return $this->hasMany(EventSeatCatalog::class);
     }
+
 }

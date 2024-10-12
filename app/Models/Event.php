@@ -38,8 +38,8 @@ class Event extends Model
 
     public function seatCatalogues()
     {
-        return $this->belongsToMany(SeatCatalogue::class, 'event_seat_catalogue', 'event_id', 'seat_catalogue_id')
-                    ->withPivot('season_ticket_id', 'seat_catalogue_status_id', 'sale_ticket_id', 'is_verified')
+        return $this->belongsToMany(SeatCatalogue::class, 'event_seat_catalog', 'event_id', 'seat_catalogue_id')
+                    ->withPivot('user_id', 'season_ticket_id', 'seat_catalogue_status_id', 'sale_ticket_id', 'price', 'is_verified', 'is_active')
                     ->withTimestamps();
     }
 

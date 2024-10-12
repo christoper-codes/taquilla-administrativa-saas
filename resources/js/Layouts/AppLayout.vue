@@ -196,8 +196,6 @@ const user = usePage().props.auth.user;
     </main>
    </div>
 
-
-
 </template>
 
 

@@ -67,4 +67,32 @@
     border-radius: 10px !important;
 }
 
+.v-expansion-panel-text__wrapper {
+    padding: 0px !important;
+}
+.v-navigation-drawer__scrim {
+    position: fixed !important;
+}
 
+
+html {
+    touch-action: manipulation !important;
+}
+
+::-webkit-scrollbar {
+    width: 15px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #ffffff;
+
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #e0be4d;
+    border-radius: 0px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c9aa47;
+  }
