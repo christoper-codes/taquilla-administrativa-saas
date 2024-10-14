@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Interfaces\CashRegisterRepositoryInterface;
+use App\Models\CashRegister;
 
 class CashRegisterService
 {
@@ -49,13 +50,24 @@ class CashRegisterService
 
     /*
     * |--------------------------------------------------------------------------
-    * | Save cash register
+    * | Open cash register
     */
-    public function save(array $data)
+    public function openCashRegister(array $data)
     {
         try {
-            $cash_register = $this->cash_register_repository->save($data);
-            return $cash_register;
+
+                /*
+                * Determine if the user who is opening the cash register has any asscociated and active cash register
+                */
+                $cash_register_is_active = CashRegister::where('seller_user_opening_id', $data['seller_user_opening_id'])
+                                    ->where('is_open', 1)
+                                    ->first();
+                if ($cash_register_is_active) {
+                    throw new \Exception('El usuario ya tiene una caja abierta');
+                }
+
+
+
         } catch (\Exception $e) {
             throw $e;
         }
