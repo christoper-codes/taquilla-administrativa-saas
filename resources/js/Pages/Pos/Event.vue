@@ -11,6 +11,8 @@ import PaymentDrawer from '@/Components/PaymentDrawer.vue';
 import useUserPolicy from '@/composables/UserPolicy';
 import panzoom from 'panzoom';
 import ErrorSession from '@/Components/ErrorSession.vue';
+import Breadcrumb from '@/Components/Breadcrumb.vue';
+import { drawerPaymentState } from '@/composables/drawersStates';
 
 
 /*
@@ -207,12 +209,23 @@ const selectZones = () => {
     stadiumHdxImg.classList.add('tw-rotate-0');
 };
 
+function completePurchase(isActive) {
+  isActive.value = false;
+  drawerPaymentState.value = !drawerPaymentState.value;
+}
+
 </script>
 
 <template>
     <Head title="Evento" />
     <GuestLayout />
     <NavigationDrawer />
+
+    <Breadcrumb>
+            <template #title>
+                <span>Partido actual</span>
+            </template>
+    </Breadcrumb>
 
     <div v-if="seatsSelected.length > 0" @click="scrollTopaymentSection" class="tw-fixed tw-bottom-20 tw-right-3 tw-z-[60]">
         <div class="tw-flex tw-items-center tw-justify-center tw-cursor-pointer hover:tw-scale-110 tw-transition-transform tw-duration-700">
@@ -224,74 +237,71 @@ const selectZones = () => {
         </div>
     </div>
 
-    <section class="tw-overflow-hidden tw-mt-[100px] lg:tw-mt-[111px]">
+    <section class="tw-overflow-hidden tw-mt-6 lg:tw-mt-0">
        <div class="lg:tw-hidden">
             <img class="tw-w-full" :src="`/storage/${event.global_image.file_path}`" alt="">
         </div>
-
-        <div class="tw-hidden lg:tw-block">
-            <v-parallax
-                class="tw-h-60 md:tw-h-[350px]" src="/storage/public/back-hdx-img.jpg"
-            >
-                <div class="d-flex flex-column fill-height justify-start align-start text-white tw-bg-purple-900/50">
-
-                </div>
-            </v-parallax>
-        </div>
     </section>
 
-    <section class="tw-w-full tw-min-h-screen tw-bg-white tw-mt-[-37px] tw-rounded-[35px] lg:tw-rounded-[60px] tw-relative">
-        <div class="tw-absolute -tw-top-16 tw-left-20 lg:tw-block tw-hidden ">
-            <div class="tw-flex tw-items-center tw-gap-5">
-                <v-btn color="white" variant="elevated" class="text-none" rounded="lg" size="large" block><span class="material-symbols-outlined tw-text-xl">deployed_code</span>{{ event.name }}</v-btn>
-            </div>
-        </div>
-        <div class="max-w-full md:tw-max-w-[90%] tw-mx-auto tw-py-7 lg:tw-py-12 tw-px-4 lg:tw-px-0">
-            <div class="lg:tw-hidden tw-flex tw-items-center tw-gap-5 tw-w-full">
-                <v-btn color="purple" variant="tonal" class="text-none" rounded="lg" size="large" block><span class="material-symbols-outlined tw-text-xl">deployed_code</span>El nido del halcon</v-btn>
-            </div>
-
+    <section class="tw-w-full tw-min-h-screen tw-bg-white tw-mt-[-37px] lg:tw-mt-0 tw-rounded-[35px] lg:tw-rounded-[0px] tw-relative tw-mb-20">
+        <div class="max-w-full md:tw-max-w-[90%] tw-mx-auto tw-py-1 lg:tw-py-7 tw-px-4 lg:tw-px-0">
             <main class="">
 
-                <div class="tw-mt-5 lg:tw-mt-0 tw-inline-flex tw-w-full">
-                    <h3 class="lg:tw-text-2xl tw-text-center lg:tw-text-left tw-text-xs lg:tw-font-bold tw-text-gray-500 tw-px-5 tw-py-3 tw-bg-gray-50 md:tw-bg-gray-100 tw-rounded-xl tw-w-full">{{ event.name }}</h3>
-                </div>
-
                 <div class="tw-mt-10 tw-w-full tw-flex tw-flex-col lg:tw-flex-row tw-items-start tw-justify-between tw-gap-7 lg:tw-gap-10">
-
                     <div class="tw-w-full lg:tw-w-[70%] tw-relative lg:tw-min-h-[1000pxx]">
-                        <div class="tw-stickyy tw-top-20 ">
+                        <div class="tw-space-y-5 lg:tw-space-y-8">
+                            <Link :href="route('welcome')">
+                                <div class="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-x-1.5 tw-text-sm tw-text-gray-600 tw-decoration-2 hover:tw-underline focus:tw-outline-none focus:tw-underline">
+                                    <svg class="tw-shrink-0 tw-size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                                    Regresar al inicio
+                                </div>
+                            </Link >
+
+                            <h2 class="tw-text-3xl tw-font-bold lg:tw-text-5xl">{{ event.name }}</h2>
+
+                            <div class="tw-flex tw-items-center tw-gap-x-5">
+                                <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
+                                    <span class="material-symbols-outlined tw-text-xl">location_on</span>El nido del halcon
+                                </div>
+                                <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
+                                    <span class="material-symbols-outlined tw-text-xl">calendar_today</span>{{ event.start_date }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tw-mt-7">
                             <div class="tw-flex tw-flex-col tw-gap-3 tw-justify-between mb-4">
                                 <div>
                                     <p class="tw-font-bold tw-text-xl">Mapa de disponibilidad</p>
                                     <ErrorSession />
-                                    <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-5 tw-items-center tw-gap-3 tw-mt-2">
+                                    <PaymentDrawer v-bind:seatsSelected="seatsSelected" v-bind:total="total" />
+
+                                    <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-5 tw-items-center tw-gap-3 tw-mt-7">
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
-                                            <div class="tw-h-7 tw-w-full tw-bg-yellow-500 tw-flex tw-items-center tw-justify-center tw-rounded-[4px]">
+                                            <div @click="drawerPaymentState = !drawerPaymentState" class="tw-h-9 tw-w-full tw-bg-yellow-500 tw-flex tw-items-center tw-justify-center tw-rounded-full">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">done_outline</span>
                                             </div>
                                             <p>Disponible</p>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
-                                            <div class="tw-h-7 tw-w-full tw-bg-purple-500 tw-flex tw-items-center tw-justify-center tw-rounded-[4px]">
+                                            <div class="tw-h-9 tw-w-full tw-bg-purple-500 tw-flex tw-items-center tw-justify-center tw-rounded-full">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">star</span>
                                             </div>
                                             <p>Vendido</p>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
-                                            <div class="tw-h-7 tw-w-full tw-bg-pink-600 tw-flex tw-items-center tw-justify-center tw-rounded-[4px]">
+                                            <div class="tw-h-9 tw-w-full tw-bg-pink-600 tw-flex tw-items-center tw-justify-center tw-rounded-full">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
                                             <p>No vendible</p>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
-                                            <div class="tw-h-7 tw-w-full tw-bg-gray-600 tw-flex tw-items-center tw-justify-center tw-rounded-[4px]">
+                                            <div class="tw-h-9 tw-w-full tw-bg-gray-600 tw-flex tw-items-center tw-justify-center tw-rounded-full">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
                                             <p>Inhabilitado</p>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2 tw-col-span-2 lg:tw-col-span-1">
-                                            <div class="tw-h-7 tw-w-full tw-bg-green-500 tw-flex tw-items-center tw-justify-center tw-rounded-[4px]">
+                                            <div class="tw-h-9 tw-w-full tw-bg-green-500 tw-flex tw-items-center tw-justify-center tw-rounded-full">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">web_traffic</span>
                                             </div>
                                             <p>Seleccionado</p>
@@ -301,17 +311,17 @@ const selectZones = () => {
                                 <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-w-full tw-gap-3 tw-my-3">
                                     <div class="tw-flex tw-items-center tw-gap-3 tw-flex-col md:tw-flex-row">
                                         <div class="tw-flex tw-items-center tw-gap-3">
-                                            <v-btn @click="zoomIn" color="purple" variant="tonal" class="text-none" rounded="lg" size="large"><span class="material-symbols-outlined tw-text-2xl">add</span>zoom</v-btn>
-                                            <v-btn @click="zoomOut" color="purple" variant="tonal" class="text-none" rounded="lg" size="large"><span class="material-symbols-outlined tw-text-2xl">remove</span>zoom</v-btn>
+                                            <v-btn @click="zoomIn" color="purple" variant="tonal" class="text-none" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-2xl">add</span>zoom</v-btn>
+                                            <v-btn @click="zoomOut" color="purple" variant="tonal" class="text-none" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-2xl">remove</span>zoom</v-btn>
                                         </div>
                                     </div>
                                     <div class="tw-font-bold tw-text-3xl tw-text-center tw-hidden lg:tw-block">
                                         {{ viewSelectedSection}}
                                     </div>
                                     <div class="tw-flex tw-items-center tw-gap-3">
-                                        <v-btn @click="resetZoom" color="purple" variant="tonal" class="text-none" rounded="lg" size="large"><span class="material-symbols-outlined tw-text-2xl">my_location</span>reset</v-btn>
+                                        <v-btn @click="resetZoom" color="purple" variant="tonal" class="text-none" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-2xl">my_location</span>reset</v-btn>
 
-                                        <v-btn @click="selectZones" color="purple" variant="tonal" class="text-none" rounded="lg" size="large"><span class="material-symbols-outlined tw-text-2xl">location_on</span>zonas</v-btn>
+                                        <v-btn @click="selectZones" color="purple" variant="tonal" class="text-none" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-2xl">location_on</span>zonas</v-btn>
                                     </div>
                                 </div>
 
@@ -338,7 +348,7 @@ const selectZones = () => {
                     </div>
 
 
-                    <div class="tw-w-full lg:tw-w-[30%]">
+                    <div class="tw-w-full lg:tw-w-[30%] tw-sticky tw-top-20 ">
                         <h3 class="tw-text-2xl tw-font-bold">Asientos seleccionados</h3>
                         <h4 class="tw-text-sm mt-1">📍 El nido del halcon | Xalapa Ver.</h4>
                         <div class="tw-min-h-[570px] tw-w-full mt-3 tw-shadow-xl tw-rounded-2xl tw-overflow-hidden">
@@ -365,15 +375,11 @@ const selectZones = () => {
                                 </div>
                             </div>
                             <div class="tw-px-5 tw-relative tw-flex tw-flex-col-reverse">
-                                <transition name="fade">
-                                    <div v-if="seatsSelected.length == 0" class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-7">
-                                        <p class="tw-border-l-8 tw-border-l-gray-700 tw-w-full tw-text-center tw-text-xs tw-p-2 tw-bg-gray-100 tw-rounded-sm">No se han selecionado asientos</p>
-                                        <img class="tw-w-60 tw-h-auto" src="../../../../public/img/seats-no-selected-img.svg" alt="">
-                                    </div>
-                                </transition>
-
-                                <transition name="fade">
-                                    <div v-if="seatsSelected.length > 0" class="">
+                                <div v-if="seatsSelected.length == 0" class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-7">
+                                    <p class="tw-w-full tw-text-center tw-text-xs tw-p-3 tw-rounded-full tw-bg-gray-100 tw-mt-5">No se han selecionado asientos</p>
+                                    <img class="tw-w-60 tw-h-auto" src="../../../../public/img/seats-no-selected-img.svg" alt="">
+                                </div>
+                                <div v-if="seatsSelected.length > 0" class="">
                                     <div ref="paymentSection" class="tw-w-full ">
                                         <v-radio-group inline label="Tipo de venta a realizar" v-model="radios">
                                             <v-radio color="purple" label="partido" value="one"></v-radio>
@@ -493,13 +499,30 @@ const selectZones = () => {
                                         <div class="tw-my-5">
                                             <p class="tw-opacity-50 tw-text-right tw-mb-3">Subtotal (precio regular): {{ formatPrice(total) }}</p>
                                             <p class="tw-font-semibold tw-text-right tw-mb-3">Total: {{ formatPrice(total) }}</p>
-                                            <PaymentDrawer v-bind:seatsSelected="seatsSelected" v-bind:total="total" />
+                                            <v-dialog max-width="500">
+                                                <template v-slot:activator="{ props: activatorProps }">
+                                                    <v-btn v-bind="activatorProps" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                                </template>
+                                                <template v-slot:default="{ isActive }">
+                                                    <v-card title="¿Estas seguro de realizar la compra?">
+                                                    <v-card-text>
+                                                        <p class="tw-opacity-50 tw-mt-3">Subtotal (precio regular): {{ formatPrice(total) }}</p>
+                                                        <p class="tw-font-semibold">Total: {{ formatPrice(total) }}</p>
+                                                    </v-card-text>
+
+                                                    <v-card-actions>
+                                                        <v-spacer></v-spacer>
+                                                        <v-btn color="red" rounded="xl" variant="tonal" class="text-none" text="Cancelar" @click="isActive.value = false"></v-btn>
+                                                        <v-btn rounded="xl" variant="elevated" class="text-none !tw-bg-green-500 !tw-text-white tw-mb-2" text="Completar compra" @click="completePurchase(isActive)"></v-btn>
+                                                    </v-card-actions>
+
+                                                    </v-card>
+                                                </template>
+                                            </v-dialog>
                                         </div>
 
                                     </div>
                                 </div>
-                                </transition>
-
                             </div>
                         </div>
                     </div>

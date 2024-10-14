@@ -116,7 +116,7 @@ class RegisteredUserController extends Controller
                 DB::commit();
 
                 if($request->slug && $request->id) {
-                    return redirect()->route('eventos.show', ['slug' => $request->slug, 'id' => $request->id]);
+                    return redirect()->route('events.show', ['slug' => $request->slug, 'id' => $request->id]);
                 }
 
                 WebResponseHelper::sendResponse($user, 'Usuario registrado con éxito', 'dashboard', 200, true);
