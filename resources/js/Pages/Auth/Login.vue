@@ -60,7 +60,7 @@ const props = defineProps({
     <Head title="Log in" />
         <AuthenticationCard>
             <NavigationDrawer />
-            <div class="tw-w-full lg:tw-w-[55%] tw-h-auto tw-mx-auto tw-px-4 lg:tw-px-0 tw-py-32 lg:tw-py-0">
+            <div class="tw-w-full lg:tw-w-[55%] tw-h-auto tw-mx-auto tw-px-4 lg:tw-px-0 tw-py-10 lg:tw-py-0">
                 <div class="">
                     <ErrorSession />
                     <h2 class="tw-text-3xl tw-font-bold">Iniciar sesion</h2>
@@ -106,7 +106,7 @@ const props = defineProps({
                                 label="Recordar contraseña"
                                 hint="Mantener la sesion iniciada"
                                 ></v-checkbox>
-                            <v-btn @click="submit" :loading="loading" variant="elevated" :class="{ 'tw-opacity-25': data.processing }" :disabled="data.processing" class="text-none !tw-bg-tw-primary-500 !tw-text-white tw-w-full lg:tw-w-auto" size="large" rounded="lg">Iniciar sesion</v-btn>
+                            <v-btn  @click="submit" :loading="loading" :class="{ 'tw-opacity-25': data.processing }" :disabled="data.processing" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">person</span>Iniciar sesion</v-btn>
                             <div class="lg:tw-hidden tw-mt-5">
                                 ¿Aun no tienes cuenta?
                                 <Link :href="route('register', { slug: slug, id: id})">
@@ -117,7 +117,7 @@ const props = defineProps({
                         <div class="tw-hidden lg:tw-block tw-mt-5">
                             ¿Aun no tienes cuenta?
                             <Link :href="route('register', { slug: slug, id: id})">
-                                <span class="tw-text-blue-600 tw-underline">Registrarte ahora</span>
+                                <span class="tw-text-purple-600 tw-underline">Registrarte ahora</span>
                             </Link>
                         </div>
                     </v-form>

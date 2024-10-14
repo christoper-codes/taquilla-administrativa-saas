@@ -39,66 +39,75 @@ function handleImageError() {
     <NavigationDrawer />
     <ClubDrawer />
 
+    <section class="tw-overflow-hidden tw-h-[900px] lg:tw-h-[650px]">
+        <v-parallax
+            class="tw-rounded-none" src="https://preview.colorlib.com/theme/theconference/images/index.jpg.webp"
+        >
+            <div class="d-flex flex-column fill-height justify-center align-center text-white tw-bg-gray-950/50 ">
+                <div class="tw-max-w-7xl tw-mx-auto tw-px-4 lg:tw-px-0">
+                    <section class="tw-flex tw-flex-col tw-max-w-7xl tw-mx-auto lg:tw-flex-row tw-items-center tw-justify-between tw-gap-10 tw-overflow-hidden tw-min-h-screen tw-pt-32 lg:tw-pt-0 tw-text-white">
+                        <div class="tw-w-full tw-flex tw-items-center tw-justify-center">
+                            <div class="tw-flex tw-flex-col tw-gap-7">
+                                <div class="tw-flex tw-gap-3 tw-items-center tw-text-gray-300">
+                                    <img class="tw-w-20 tw-h-auto" src="https://adminmart.com/wp-content/uploads/2023/01/users.png" alt="users">
+                                    <p><span class="tw-font-bold">1,903+</span> Fanaticos & publico han usado nuestra plataforma.</p>
+                                </div>
+                                <div class="tw-font-bold tw-text-4xl md:tw-text-6xl tw-max-w-2xl tw-leading-[50px] md:tw-leading-[70px]">Aplicacion web oficial del equipo Halcones de xalapa!</div>
+
+                                <p class="tw-text-lg tw-text-gray-300">Descubre las <span class="tw-font-bold">nuevas novedades en la plataforma oficial</span> del equipo de baloncesto, como comprar boletos con increibles promociones u ofertas especiales</p>
+                                <ErrorSession />
+                            <div class="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-gap-4 md:tw-gap-5">
+                                <div class="tw-w-full lg:tw-w-auto">
+                                    <v-tooltip color="primary" location="bottom center" origin="auto" no-click-animation>
+                                    <template v-slot:activator="{ props }">
+                                        <Link
+                                            :href="route('events.index')"
+                                        >
+                                            <v-btn v-bind="props" variant="elevated" class="text-none !tw-block md:!tw-hidden tw-w-full lg:tw-w-auto !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Proximos partios</v-btn>
+                                            <v-btn v-bind="props" variant="elevated" class="text-none !tw-hidden md:!tw-block tw-w-full lg:tw-w-auto !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="x-large" rounded="xl">Proximos partios</v-btn>
+                                        </Link>
+                                    </template>
+                                    <div>Partidos oficiales!</div>
+                                    </v-tooltip>
+                                </div>
+                                <div class="tw-w-full lg:tw-w-auto">
+                                    <v-tooltip color="primary" location="bottom center" origin="auto" no-click-animation>
+                                    <template v-slot:activator="{ props }">
+                                        <Link
+                                        :href="route('login')"
+                                        >
+                                            <v-btn v-bind="props" variant="tonal" class="text-none !tw-block md:!tw-hidden tw-w-full lg:tw-w-auto !tw-bg-tw-primary-100 !tw-text-tw-primary-600 !tw-px-7" size="large" rounded="xl">Mis boletos</v-btn>
+                                            <v-btn v-bind="props" variant="tonal" class="text-none !tw-hidden md:!tw-block tw-w-full lg:tw-w-auto !tw-bg-tw-primary-100 !tw-text-tw-primary-600 !tw-px-7" size="x-large" rounded="xl">Mis boletos</v-btn>
+                                        </Link>
+                                    </template>
+                                    <div>Tickets!</div>
+                                    </v-tooltip>
+                                </div>
+
+                            </div>
+                            </div>
+                        </div>
+                        <div class="tw-w-full tw-bg-transparent tw-flex tw-items-start tw-justify-between tw-gap-5 tw-h-96 lg:tw-h-screen tw-overflow-hidden">
+                            <div class="tw-w-full tw-h-full slider-up">
+                                <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg_black.svg" alt="">
+                                <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg_black.svg" alt="">
+                                <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg_black.svg" alt="">
+                            </div>
+                            <div class="tw-w-full tw-h-full slider-down">
+                                <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg_black.svg" alt="">
+                                <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg_black.svg" alt="">
+                                <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg_black.svg" alt="">
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </v-parallax>
+    </section>
     <main class="tw-px-4 lg:tw-px-0 tw-relative tw-overflow-hidden">
-        <img class="tw-w-full tw-scale-100 tw-h-auto tw-absolute tw-top-0 tw-right-0 -tw-z-10 " src="https://salient.tailwindui.com/_next/static/media/background-faqs.55d2e36a.jpg" alt="">
-
-        <section class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-gap-10 tw-overflow-hidden tw-min-h-screen tw-pt-28 lg:tw-pt-0">
-            <div class="tw-w-full tw-flex tw-items-center tw-justify-center">
-                <div class="tw-flex tw-flex-col tw-gap-7 lg:tw-pl-[15%]">
-                    <div class="tw-flex tw-gap-3 tw-items-center">
-                        <img class="tw-w-20 tw-h-auto" src="https://adminmart.com/wp-content/uploads/2023/01/users.png" alt="users">
-                        <p><span class="tw-font-bold">1,903+</span> Fanaticos & publico han usado nuestra plataforma.</p>
-                    </div>
-                    <div class="tw-font-bold tw-text-4xl md:tw-text-6xl tw-max-w-2xl tw-leading-[50px] md:tw-leading-[70px]">Aplicacion web oficial del equipo Halcones de xalapa!</div>
-
-                    <p class="tw-text-lg">Descubre las <span class="tw-font-bold">nuevas novedades en la plataforma oficial</span> del equipo de baloncesto, como comprar boletos con increibles promociones u ofertas especiales</p>
-                    <ErrorSession />
-                  <div class="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-gap-4 md:tw-gap-5">
-                    <div class="tw-w-full lg:tw-w-auto">
-                        <v-tooltip color="primary" location="bottom center" origin="auto" no-click-animation>
-                        <template v-slot:activator="{ props }">
-                            <Link
-                                :href="route('eventos.index')"
-                            >
-                                <v-btn v-bind="props" variant="elevated" class="text-none tw-block tw-w-full lg:tw-w-auto !tw-bg-tw-primary-500 !tw-text-white" size="large" rounded="lg">Proximos partios</v-btn>
-                            </Link>
-                        </template>
-                        <div>Partidos oficiales!</div>
-                        </v-tooltip>
-                    </div>
-                    <div class="tw-w-full lg:tw-w-auto">
-                        <v-tooltip color="primary" location="bottom center" origin="auto" no-click-animation>
-                        <template v-slot:activator="{ props }">
-                            <Link
-                            :href="route('login')"
-                            >
-                                <v-btn v-bind="props" variant="tonal" class="text-none tw-block tw-w-full lg:tw-w-auto !tw-bg-tw-primary-100 !tw-text-tw-primary-600" size="large" rounded="lg">Mis boletos</v-btn>
-                            </Link>
-                        </template>
-                        <div>Tickets!</div>
-                        </v-tooltip>
-                    </div>
-
-                  </div>
-                </div>
-            </div>
-            <div class="tw-w-full tw-bg-transparent tw-flex tw-items-start tw-justify-between tw-gap-5 tw-h-96 lg:tw-h-screen tw-overflow-hidden">
-                <div class="tw-w-full tw-h-full slider-up">
-                    <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg1.svg" alt="">
-                    <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg1.svg" alt="">
-                    <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg1.svg" alt="">
-                </div>
-                <div class="tw-w-full tw-h-full slider-down">
-                    <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg1.svg" alt="">
-                    <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg1.svg" alt="">
-                    <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg1.svg" alt="">
-                </div>
-            </div>
-        </section>
-
         <section>
             <!-- Testimonials with Stats -->
-            <div class="tw-max-w-[85rem] tw-px-4 tw-py-10 sm:tw-px-6 lg:tw-px-8 lg:tw-py-32 tw-mx-auto">
+            <div class="tw-max-w-7xl tw-py-10 lg:tw-py-32 tw-mx-auto">
             <!-- Grid -->
             <div class="tw-flex tw-items-start tw-justify-between tw-gap-20 tw-flex-col md:tw-flex-row">
                 <div>
@@ -128,11 +137,11 @@ function handleImageError() {
                     <footer class="tw-mt-6">
                     <div class="tw-flex tw-items-center tw-gap-x-4">
                         <div class="tw-shrink-0">
-                        <img class="tw-size-8 tw-rounded-full" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=320&h=320&q=80" alt="Avatar">
+                        <img class="tw-size-8 tw-rounded-full tw-ring-2 tw-ring-purple-200" src="../../../../public/img/user-img.svg" alt="Avatar">
                         </div>
                         <div class="tw-grow">
-                        <div class="tw-font-semibold tw-text-gray-800">Josh Grazioso</div>
-                        <div class="tw-text-xs tw-text-gray-500">Director & Entrenador | <span class="tw-font-bold">Halcones</span>Xalapa</div>
+                        <div class="tw-font-semibold tw-text-gray-800">Halcones de xalapa</div>
+                        <div class="tw-text-xs tw-text-gray-500">Soporte & Directiva | <span class="tw-font-bold">Halcones</span>Xalapa</div>
                         </div>
                     </div>
                     </footer>
@@ -150,54 +159,56 @@ function handleImageError() {
                     <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-start tw-justify-between tw-gap-10">
 
                         <!-- Card -->
-                        <a class="tw-w-full lg:tw-w-1/2 group tw-flex tw-flex-col tw-h-full hover:tw-translate-y-[-5px] focus:tw-outline-none focus:tw-border-transparent focus:tw-shadow-lg tw-transition tw-duration-500 tw-rounded-xl" href="#">
-                        <div class="tw-h-60 tw-w-full">
-                            <img class="tw-h-full tw-w-full tw-object-cover tw-object-top tw-rounded-xl tw-bg-gray-200" src="" alt="Blog Image">
-                        </div>
-                        <div class="tw-my-6">
-                            <h3 class="tw-text-xl tw-font-semibold tw-text-gray-800">
-                                How Google Assistant now helps you record stories for kids
-                            </h3>
-                            <p class="tw-mt-5 tw-text-gray-600">
-                                Google is constantly updating its consumer AI, Google Assistant, with new features.
-                            </p>
-                        </div>
-                        <div class="tw-mt-auto tw-flex tw-items-center tw-gap-x-3">
-                            <img class="tw-size-8 tw-rounded-full" src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=320&h=320&q=80" alt="Avatar">
-                            <div>
-                            <h5 class="tw-text-sm tw-text-gray-800">By Aaron Larsson</h5>
+                         <Link :href="route('blogs.show', 1)" class="tw-w-full lg:tw-w-1/2 group tw-cursor-pointer tw-flex tw-flex-col tw-h-full hover:tw-scale-110 tw-transition-all tw-duration-500 tw-rounded-xl">
+                            <div class="tw-h-60 tw-w-full">
+                                <img class="tw-h-full tw-w-full tw-object-cover tw-object-top tw-rounded-xl tw-bg-gray-200" src="/storage/public/back-hdx-img.jpg" alt="Blog Image">
                             </div>
-                        </div>
-                        </a>
+                            <div class="tw-my-6">
+                                <h3 class="tw-text-xl tw-font-semibold tw-text-gray-800">
+                                    ¡Los Halcones de Xalapa Deslumbran en la Temporada 2024!
+                                </h3>
+                                <p class="tw-mt-5 tw-text-gray-600">
+                                    Halcones de Xalapa han demostrado ser uno de los equipos más competitivos de la liga profesional.
+                                </p>
+                            </div>
+                            <div class="tw-mt-auto tw-flex tw-items-center tw-gap-x-3">
+                                <img class="tw-size-8 tw-rounded-full tw-ring-2 tw-ring-purple-200" src="../../../../public/img/user-img.svg" alt="Avatar">
+                                <div>
+                                <h5 class="tw-text-sm tw-text-gray-800">De | Directiva halcones</h5>
+                                </div>
+                            </div>
+                        </Link>
                         <!-- End Card -->
 
                         <!-- Card -->
-                        <a class="tw-w-full lg:tw-w-1/2 group tw-flex tw-flex-col tw-h-full hover:tw-translate-y-[-5px] focus:tw-outline-none focus:tw-border-transparent focus:tw-shadow-lg tw-transition tw-duration-500 tw-rounded-xl" href="#">
-                        <div class="tw-h-60 tw-w-full">
-                            <img class="tw-h-full tw-w-full tw-object-cover tw-object-top tw-rounded-xl tw-bg-gray-200" src="" alt="Blog Image">
-                        </div>
-                        <div class="tw-my-6">
-                            <h3 class="tw-text-xl tw-font-semibold tw-text-gray-800">
-                                Front accounts - lets work together
-                            </h3>
-                            <p class="tw-mt-5 tw-text-gray-600">
-                                Are you an accountant? Are you a company formation advisor?
-                            </p>
-                        </div>
-                        <div class="tw-mt-auto tw-flex tw-items-center tw-gap-x-3">
-                            <img class="tw-size-8 tw-rounded-full" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=320&h=320&q=80" alt="Avatar">
-                            <div>
-                            <h5 class="tw-text-sm tw-text-gray-800">By Lauren Waller</h5>
+                        <Link :href="route('blogs.show', 2)" class="tw-w-full lg:tw-w-1/2 group tw-cursor-pointer tw-flex tw-flex-col tw-h-full hover:tw-scale-110 tw-transition tw-duration-500 tw-rounded-xl">
+                            <div class="tw-h-60 tw-w-full">
+                                <img class="tw-h-full tw-w-full tw-object-cover tw-object-top tw-rounded-xl tw-bg-gray-200" src="/storage/public/blog1-hdx-img.jpg" alt="Blog Image">
                             </div>
-                        </div>
-                        </a>
-                        <!-- End Card -->
+                            <div class="tw-my-6">
+                                <h3 class="tw-text-xl tw-font-semibold tw-text-gray-800">
+                                    ¡Vive la emoción de los Halcones de Xalapa en cada partido local!
+                                </h3>
+                                <p class="tw-mt-5 tw-text-gray-600">
+                                    La temporada de los Halcones de Xalapa no solo se trata de baloncesto.
+                                </p>
+                            </div>
+                            <div class="tw-mt-auto tw-flex tw-items-center tw-gap-x-3">
+                                <img class="tw-size-8 tw-rounded-full tw-ring-2 tw-ring-purple-200" src="../../../../public/img/user-img.svg" alt="Avatar">
+                                <div>
+                                <h5 class="tw-text-sm tw-text-gray-800">De | Directiva halcones</h5>
+                                </div>
+                            </div>
+                        </Link>
+                    <!-- End Card -->
                     </div>
                     <!-- End Grid -->
 
                     <!-- Card -->
                     <div class="tw-mt-12 tw-text-center tw-w-full lg:tw-w-1/4 tw-mx-auto">
-                        <v-btn  href="#" variant="tonal" class="text-none tw-block tw-w-full lg:tw-w-auto !tw-bg-tw-primary-100 !tw-text-tw-primary-600" size="large" rounded="lg">Leer mas</v-btn>
+                         <Link :href="route('blogs.show', 1)">
+                            <v-btn variant="tonal" class="text-none tw-block tw-w-full lg:tw-w-auto !tw-bg-tw-primary-100 !tw-text-tw-primary-600" size="large" rounded="xl">Leer mas</v-btn>
+                        </Link >
                     </div>
                     <!-- End Card -->
                     </div>
@@ -215,8 +226,12 @@ function handleImageError() {
             <v-parallax
                class="tw-rounded-3xl lg:tw-rounded-none tw-bg-purple-500/50" src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
             >
-                <div class="d-flex flex-column fill-height justify-center align-center text-white tw-bg-purple-500/50">
-                    <div class="tw-max-w-5xl tw-bg-white/10 tw-p-16 tw-rounded-3xl tw-text-center tw-backdrop-blur-md ">
+                <div class="d-flex flex-column fill-height justify-center align-center text-white tw-bg-purple-500/70">
+                    <div class="tw-max-w-5xl tw-bg-white/10 tw-p-16 tw-rounded-3xl tw-text-center tw-backdrop-blur-md tw-relative">
+                        <div class="tw-absolute tw-top-0 tw-right-0 tw-bg-white tw-p-2 tw-rounded-tr-3xl tw-rounded-bl-lg tw-text-gray-500 tw-flex tw-items-center tw-gap-2">
+                            <span class="tw-text-xs tw-font-bold">Proximos partidos</span>
+                            <svg class="tw-w-4 tw-h-auto" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18 15 12 9 6"/></svg>
+                        </div>
                         <h1 class="tw-text-4xl lg:tw-text-6xl tw-font-bold tw-w-full">
                             Halcones de Xalapa
                         </h1>
@@ -241,7 +256,7 @@ function handleImageError() {
 
                     <!-- SVG Element -->
                     <div class="tw-hidden md:tw-block tw-absolute tw-top-0 tw-end-0 -tw-translate-y-5 tw-translate-x-10">
-                    <svg class="tw-w-16 tw-h-auto tw-text-red-400" width="121" height="135" viewBox="0 0 121 135" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="tw-w-16 tw-h-auto tw-text-orange-400" width="121" height="135" viewBox="0 0 121 135" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5 16.4754C11.7688 27.4499 21.2452 57.3224 5 89.0164" stroke="currentColor" stroke-width="10" stroke-linecap="round"/>
                         <path d="M33.6761 112.104C44.6984 98.1239 74.2618 57.6776 83.4821 5" stroke="currentColor" stroke-width="10" stroke-linecap="round"/>
                         <path d="M50.5525 130C68.2064 127.495 110.731 117.541 116 78.0874" stroke="currentColor" stroke-width="10" stroke-linecap="round"/>
@@ -251,7 +266,7 @@ function handleImageError() {
 
                     <!-- SVG Element -->
                     <div class="tw-hidden md:tw-block tw-absolute tw-bottom-0 tw-start-0 tw-translate-y-24 -tw-translate-x-16">
-                    <svg class="tw-w-40 tw-h-auto tw-text-blue-500" width="347" height="188" viewBox="0 0 347 188" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="tw-w-40 tw-h-auto tw-text-purple-500" width="347" height="188" viewBox="0 0 347 188" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 82.4591C54.7956 92.8751 30.9771 162.782 68.2065 181.385C112.642 203.59 127.943 78.57 122.161 25.5053C120.504 2.2376 93.4028 -8.11128 89.7468 25.5053C85.8633 61.2125 130.186 199.678 180.982 146.248L214.898 107.02C224.322 95.4118 242.9 79.2851 258.6 107.02C274.299 134.754 299.315 125.589 309.861 117.539L343 93.4426" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
                     </svg>
                     </div>
@@ -306,8 +321,7 @@ function handleImageError() {
 
         </section>
 
-        <section>
-
+        <!-- <section>
             <div class="lg:tw-py-28 tw-py-10">
                 <div class="slider-container lg:tw-bg-slate-200 py-10">
                     <div class="slider-track">
@@ -317,19 +331,152 @@ function handleImageError() {
                         <div class="slider-group">
                             <img class="tw-h-[600px]" src="../../../../public/img/bannerimg3.svg">
                         </div>
-                        <!-- Repite los elementos según sea necesario -->
+                    </div>
+                </div>
+            </div>
+        </section> -->
+        <section>
+
+            <div class="lg:tw-py-28 tw-py-10 tw-w-full">
+                <div class="lg:tw-bg-slate-200 tw-py-20 tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-gap-0 tw-items-center tw-justify-center tw-w-full">
+                    <div class="tw-border-t-4 tw-border-t-purple-500 tw-h-[550px] tw-bg-white tw-w-full lg:tw-w-80 tw-shadow-lg lg:tw-shadow-none tw-border lg:tw-border-none tw-rounded-xl tw-px-5 tw-py-7 tw-flex tw-items-center tw-flex-col tw-justify-between hover:tw-scale-105 tw-transition-all tw-duration-500">
+                        <div class="tw-flex tw-items-center tw-gap-2 tw-flex-col">
+                            <span class="tw-text-xs tw-py-2 tw-px-4 tw-rounded-md tw-bg-purple-200">Tienda en el nido del halcon</span>
+                            <h3 class="tw-font-bold tw-text-3xl tw-text-center">Bar vip</h3>
+                        </div>
+                        <div>
+                            <ul class=" tw-space-y-2.5 tw-text-sm">
+                                <li class="tw-flex tw-gap-x-2">
+                                    <span class="material-symbols-outlined">task_alt</span>
+                                    <span class="">
+                                        Promociones en bebidas
+                                    </span>
+                                </li>
+                                <li class="tw-flex tw-gap-x-2">
+                                    <span class="material-symbols-outlined">task_alt</span>
+                                    <span class="">
+                                        Patitos bebidas
+                                    </span>
+                                </li>
+                                <li class="tw-flex tw-gap-x-2">
+                                    <span class="material-symbols-outlined">task_alt</span>
+                                    <span class="">
+                                        Micheladas y cervezas
+                                    </span>
+                                </li>
+                                <li class="tw-flex tw-gap-x-2">
+                                    <span class="material-symbols-outlined">task_alt</span>
+                                    <span class="">
+                                        y mucho mas!..
+                                    </span>
+                                </li>
+                            </ul>
+                            <div class="tw-flex tw-items-center tw-justify-center tw-mt-5">
+                                <span class="material-symbols-outlined tw-text-5xl tw-text-orange-400">local_bar</span>
+                            </div>
+                        </div>
+
+                        <div class="tw-bg-gradient-to-tr tw-from-pink-500 tw-to-purple-500 tw-py-2 tw-px-5 tw-text-center tw-rounded-md tw-text-white">
+                            <span class="">Disponible en el estadio</span>
+                        </div>
+                    </div>
+                    <div class="tw-text-white tw-h-[550px] tw-z-20 tw-bg-gradient-to-tr tw-from-pink-500 tw-to-purple-500 tw-w-full lg:tw-w-80 tw-rounded-xl lg:tw-scale-110 shadow-x tw-px-5 tw-py-7 tw-flex tw-items-center tw-flex-col tw-justify-between hover:tw-scale-[115%] tw-transition-all tw-duration-500">
+                        <div class="tw-flex tw-items-center tw-gap-2 tw-flex-col">
+                            <span class="tw-text-xs tw-py-2 tw-px-4 tw-rounded-md tw-bg-purple-200/20">Tienda en el nido del halcon</span>
+                            <h3 class="tw-font-bold tw-text-3xl tw-text-center">Snack Bar</h3>
+                        </div>
+                        <div>
+                            <ul class=" tw-space-y-2.5 tw-text-sm">
+                                <li class="tw-flex tw-gap-x-2">
+                                    <span class="material-symbols-outlined">task_alt</span>
+                                    <span class="">
+                                        Combos de snacks
+                                    </span>
+                                </li>
+                                <li class="tw-flex tw-gap-x-2">
+                                    <span class="material-symbols-outlined">task_alt</span>
+                                    <span class="">
+                                        Nachos y palomitas
+                                    </span>
+                                </li>
+                                <li class="tw-flex tw-gap-x-2">
+                                    <span class="material-symbols-outlined">task_alt</span>
+                                    <span class="">
+                                        Hot dogs y hamburguesas
+                                    </span>
+                                </li>
+                                <li class="tw-flex tw-gap-x-2">
+                                    <span class="material-symbols-outlined">task_alt</span>
+                                    <span class="">
+                                        y mucho mas!..
+                                    </span>
+                                </li>
+                            </ul>
+                            <div class="tw-flex tw-items-center tw-justify-center tw-mt-5">
+                                <span class="material-symbols-outlined tw-text-5xl tw-text-orange-300">fastfood</span>
+                            </div>
+                        </div>
+
+                        <div class="tw-bg-white tw-py-2 tw-px-5 tw-text-center tw-rounded-md tw-text-gray-600">
+                            <span class="">Disponible en el estadio</span>
+                        </div>
+                    </div>
+                    <div class="tw-border-t-4 tw-border-t-purple-500 tw-h-[550px] tw-bg-white tw-w-full lg:tw-w-80 tw-shadow-lg lg:tw-shadow-none tw-border lg:tw-border-none tw-rounded-xl tw-px-5 tw-py-7 tw-flex tw-items-center tw-flex-col tw-justify-between hover:tw-scale-105 tw-transition-all tw-duration-500">
+                        <div class="tw-flex tw-items-center tw-gap-2 tw-flex-col">
+                            <span class="tw-text-xs tw-py-2 tw-px-4 tw-rounded-md tw-bg-purple-200">Tienda en el nido del halcon</span>
+                            <h3 class="tw-font-bold tw-text-3xl tw-text-center">Tienda fan</h3>
+                        </div>
+                        <div>
+                            <ul class=" tw-space-y-2.5 tw-text-sm">
+                                <li class="tw-flex tw-gap-x-2">
+                                    <span class="material-symbols-outlined">task_alt</span>
+                                    <span class="">
+                                        Jerseys y chamarras
+                                    </span>
+                                </li>
+                                <li class="tw-flex tw-gap-x-2">
+                                    <span class="material-symbols-outlined">task_alt</span>
+                                    <span class="">
+                                        Posters y souvenirs
+                                    </span>
+                                </li>
+                                <li class="tw-flex tw-gap-x-2">
+                                    <span class="material-symbols-outlined">task_alt</span>
+                                    <span class="">
+                                        Accesorios del equipo
+                                    </span>
+                                </li>
+                                <li class="tw-flex tw-gap-x-2">
+                                    <span class="material-symbols-outlined">task_alt</span>
+                                    <span class="">
+                                        y mucho mas!..
+                                    </span>
+                                </li>
+                            </ul>
+                            <div class="tw-flex tw-items-center tw-justify-center tw-mt-5">
+                                <span class="material-symbols-outlined tw-text-5xl tw-text-orange-400">laundry</span>
+                            </div>
+                        </div>
+
+                        <div class="tw-bg-gradient-to-tr tw-from-pink-500 tw-to-purple-500 tw-py-2 tw-px-5 tw-text-center tw-rounded-md tw-text-white">
+                            <span class="">Disponible en el estadio</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
         </section>
 
-        <Footer />
-
     </main>
+
+    <Footer />
+
 </template>
 
 <style scoped>
+.shadow-x {
+    box-shadow: 20px 0 30px -5px rgba(0, 0, 0, 0.3), -20px 0 30px -5px rgba(0, 0, 0, 0.3);
+}
 .slider-up {
     animation: slide-up 20s linear infinite;
 }

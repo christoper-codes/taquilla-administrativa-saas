@@ -48,6 +48,7 @@ onMounted(async () => {
             return actions.order.capture().then(details => {
                 document.getElementById('result-message').innerText = `Transaction completed by ${details.payer.name.given_name}`;
                 console.log('Transaction details:', details);
+                drawerPaymentState.value = false;
                 router.visit('/pago-exitoso');
             });
         },
@@ -71,11 +72,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
-    <div class="" @click="drawerPaymentState = !drawerPaymentState">
-        <v-btn variant="elevated" class="text-none !tw-bg-green-500 !tw-text-white" size="large" rounded="lg" block=""><span class="material-symbols-outlined tw-text-xl">shopping_bag</span>Completar pedido</v-btn>
-    </div>
-
+  <div class="tw-z-50">
     <v-layout >
       <v-navigation-drawer v-model="drawerPaymentState" temporary>
         <div>

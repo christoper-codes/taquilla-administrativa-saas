@@ -17,17 +17,20 @@ const slides = ref([
 <template>
    <main class="tw-min-h-screen tw-w-full tw-flex tw-flex-col lg:tw-flex-row lg:tw-justify-between">
     <div class="tw-hidden tw-min-h-screen tw-w-[35%] tw-bg-center tw-bg-no-repeat lg:tw-flex tw-flex-col tw-justify-between tw-gap-10 tw-p-10"
-        style="background-image: url('/storage/public/img-login.jpg'); background-size: cover; position: relative;">
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(169, 0, 254, 0.5);"></div>
+        style="background-image: url('https://preview.colorlib.com/theme/theconference/images/index.jpg.webp'); background-size: cover; position: relative;">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(17, 20, 34, 0.6);"></div>
 
 
             <div class="tw-relative">
-                <Link :href="route('welcome')" class="tw-flex tw-flex-col tw-gap-1">
-                    <ApplicationLogo class="tw-w-11 tw-h-auto tw-fill-current" />
-                    <div class="tw-font-bold tw-text-white tw-text-3xl">
-                        <span class="tw-block">Halcones<span class="tw-font-extralight">xalapa</span></span>
+                <div class="tw-flex tw-items-center tw-gap-3">
+                    <Link :href="route('welcome')" class="lg:tw-block tw-hidden">
+                        <ApplicationLogo class="tw-w-16 tw-h-auto tw-fill-current"/>
+                    </Link>
+                    <div class="tw-flex tw-gap-1 tw-flex-col">
+                        <h1 class="tw-bg-clip-text tw-bg-gradient-to-r tw-from-purple-600 tw-to-yellow-300 tw-text-transparent tw-text-lg md:tw-text-2xl tw-font-bold">Halcones de xalapa</h1>
+                        <p class="tw-text-gray-300 tw-text-xs">Club de baloncesto | Temporada 2024 - 2025</p>
                     </div>
-                </Link>
+                </div>
             </div>
 
             <div class="tw-mt-[-50px]">

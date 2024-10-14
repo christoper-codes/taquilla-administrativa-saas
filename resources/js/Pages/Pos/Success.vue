@@ -52,8 +52,6 @@ onMounted(() => {
 
 });
 
-
-
 </script>
 
 <template>
@@ -66,7 +64,7 @@ onMounted(() => {
                 <div class="tw-flex tw-justify-center">
                 <a class="tw-inline-flex tw-items-center tw-gap-x-2 tw-bg-white tw-border tw-border-gray-200 tw-text-xs tw-text-gray-600 tw-p-2 tw-px-3 tw-rounded-full tw-transition hover:tw-border-gray-300 focus:tw-outline-none focus:tw-border-gray-300" href="#">
                     Seguir comprando entradas
-                    <Link :href="route('eventos.index')">
+                    <Link :href="route('events.index')">
                         <span class="tw-flex tw-items-center tw-gap-x-1">
                         <span class="tw-border-s tw-border-gray-200 tw-text-purple-600 tw-ps-2">Explorar</span>
                         <svg class="tw-shrink-0 tw-size-4 tw-text-purple-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
@@ -91,7 +89,7 @@ onMounted(() => {
                 <!-- Buttons -->
                 <div class="tw-mt-8 tw-gap-3 tw-flex tw-justify-center">
                 <Link :href="route('dashboard')">
-                    <v-btn variant="elevated" class="text-none !tw-bg-gradient-to-br tw-from-tw-primary-600 tw-to-blue-400 !tw-text-white" size="large" rounded="xl" block=""><span class="material-symbols-outlined tw-text-xl">confirmation_number</span>Ver mis boletos</v-btn>
+                    <v-btn variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">confirmation_number</span>Ver mis boletos</v-btn>
                 </Link>
                 </div>
                 <!-- End Buttons -->

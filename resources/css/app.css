@@ -79,7 +79,7 @@ html {
     touch-action: manipulation !important;
 }
 
-::-webkit-scrollbar {
+/* ::-webkit-scrollbar {
     width: 15px;
   }
 
@@ -95,4 +95,4 @@ html {
 
   ::-webkit-scrollbar-thumb:hover {
     background: #c9aa47;
-  }
+  } */

@@ -44,4 +44,9 @@ class TicketOffice extends Model
     {
         return $this->hasMany(CashRegister::class);
     }
+
+    public function cashRegistersActives()
+    {
+        return $this->hasMany(CashRegister::class)->where('is_open', true);
+    }
 }
