@@ -86,7 +86,7 @@ const props = defineProps({
 <template>
     <Head title="Log in" />
         <AuthenticationCard>
-            <div class="tw-w-full tw-px-4 lg:tw-px-0 lg:tw-w-[75%] tw-h-auto tw-mx-auto tw-py-32 lg:tw-py-0">
+            <div class="tw-w-full tw-px-4 lg:tw-px-0 lg:tw-w-[75%] tw-h-auto tw-mx-auto tw-py-10 lg:tw-py-0">
                 <div class="">
 
                     <ErrorSession />
@@ -243,9 +243,10 @@ const props = defineProps({
 
                         <div class="tw-mt-5 lg:tw-mt-0 tw-flex lg:tw-flex-row tw-flex-col-reverse tw-gap-7 lg:tw-gap-0 tw-items-center tw-justify-between">
                             <div>
-                                ¿Ya tienes una cuenta? <Link :href="route('login')"><span class="tw-text-blue-600 tw-underline">Inicia sesion</span></Link>
+                                ¿Ya tienes una cuenta? <Link :href="route('login')"><span class="tw-text-purple-600 tw-underline">Iniciar sesion</span></Link>
                             </div>
-                            <v-btn @click="submit" :loading="loading" variant="elevated" :class="{ 'tw-opacity-25': data.processing }" :disabled="data.processing" class="text-none !tw-bg-tw-primary-500 !tw-text-white tw-w-full lg:tw-w-auto" size="large" elevation="8"  rounded="lg">Registrase ahora</v-btn>
+                            <v-btn block @click="submit" :loading="loading" :class="{ 'tw-opacity-25': data.processing }" :disabled="data.processing" variant="elevated" class="lg:!tw-hidden text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">person</span>Registrase ahora</v-btn>
+                            <v-btn @click="submit" :loading="loading" :class="{ 'tw-opacity-25': data.processing }" :disabled="data.processing" variant="elevated" class="!tw-hidden lg:!tw-block text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">person</span>Registrase ahora</v-btn>
                         </div>
                     </v-form>
 

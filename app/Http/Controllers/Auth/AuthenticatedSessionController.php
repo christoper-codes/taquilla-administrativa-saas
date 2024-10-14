@@ -36,7 +36,7 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         if($request->slug && $request->id) {
-            return redirect()->route('eventos.show', ['slug' => $request->slug, 'id' => $request->id]);
+            return redirect()->route('events.show', ['slug' => $request->slug, 'id' => $request->id]);
         }
 
         return redirect()->intended(route('dashboard', absolute: false));

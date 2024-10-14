@@ -15,19 +15,19 @@ class CashRegisterTypesSeeder extends Seeder
     {
         CashRegisterType::create([
             'name' => '1',
-            'description' => 'Caja 1',
+            'description' => 'caja registradora 1',
             'is_active' => true
         ]);
 
         CashRegisterType::create([
             'name' => '2',
-            'description' => 'Caja 2',
+            'description' => 'caja registradora 2',
             'is_active' => true
         ]);
 
         CashRegisterType::create([
             'name' => '3',
-            'description' => 'Caja 3',
+            'description' => 'caja registradora 3',
             'is_active' => true
         ]);
     }

@@ -17,15 +17,15 @@ return new class extends Migration
             $table->foreignId('ticket_office_id')->constrained('ticket_offices');
             $table->foreignId('cash_register_type_id')->constrained('cash_register_types');
             $table->foreignId('seller_user_opening_id')->constrained('users');
-            $table->foreignId('seller_user_closing_id')->constrained('users');
+            $table->foreignId('seller_user_closing_id')->nullable()->constrained('users');
             $table->string('description')->nullable();
             $table->boolean('is_open')->default(true);
-            $table->boolean('confirmed_closure')->default(false);
+            $table->boolean('confirmed_closure')->nullable()->default(false);
             $table->integer('batch_cash_register')->nullable();
             $table->string('batch_code')->nullable();
             $table->decimal('opening_balance', 14, 4)->default('0.0000');
             $table->decimal('current_balance', 14, 4)->default('0.0000');
-            $table->decimal('closing_balance', 14, 4)->default('0.0000');
+            $table->decimal('closing_balance', 14, 4)->nullable();
             $table->timestamps();
         });
     }

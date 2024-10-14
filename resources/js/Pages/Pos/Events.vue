@@ -38,7 +38,7 @@ onMounted(() => {
     <GuestLayout />
     <NavigationDrawer />
 
-    <section class="tw-overflow-hidden tw-mt-[100px] lg:tw-mt-[111px]">
+    <section class="tw-overflow-hidden">
         <v-parallax
             class="tw-h-96 md:tw-h-auto" src="/storage/public/back-hdx-img.jpg"
         >
@@ -49,74 +49,117 @@ onMounted(() => {
     </section>
 
     <section class="tw-w-full tw-min-h-screen tw-bg-white tw-mt-[-37px] tw-rounded-[35px] lg:tw-rounded-[60px] tw-relative">
-        <div class="tw-absolute -tw-top-16 tw-left-20 lg:tw-block tw-hidden ">
-            <div class="tw-flex tw-items-center tw-gap-5 tw-w-36">
-                <v-btn color="white" variant="elevated" class="text-none" rounded="lg" size="large" block><span class="material-symbols-outlined tw-text-xl">info</span>Informacion</v-btn>
-                <v-btn color="white" variant="elevated" class="text-none" rounded="lg" size="large" block><span class="material-symbols-outlined tw-text-xl">share</span>Compartir</v-btn>
-            </div>
-        </div>
-        <div class="tw-max-w-7xl tw-mx-auto tw-py-7 lg:tw-py-12 tw-px-4 lg:tw-px-0">
-            <div class="lg:tw-hidden tw-flex tw-items-center tw-justify-center tw-gap-5 tw-w-full">
-                <v-btn color="purple" variant="tonal" class="text-none" rounded="lg"><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">info</span>Informacion</v-btn>
-                <v-btn color="purple" variant="tonal" class="text-none" rounded="lg"><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">share</span>Compartir</v-btn>
-            </div>
-
+        <div class="tw-max-w-7xl tw-mx-auto tw-py-3 lg:tw-py-12 tw-px-4 lg:tw-px-0">
             <main class="">
-
-                <div class="tw-mt-5 lg:tw-mt-0">
-                    <h3 class="lg:tw-text-4xl tw-text-2xl tw-font-bold tw-text-gray-500">Eventos disponibles</h3>
-                </div>
-
-                <div class="tw-mt-5 lg:tw-mt-10">
-                    <div class="tw-h-[200px] lg:tw-h-[250px] tw-w-full mt-3 tw-shadow-xl tw-rounded-2xl tw-overflow-hidden">
-                        <div id="leaflet-map" class="tw-h-[200px] lg:tw-h-[250px] tw-w-full tw-z-10 tw-rounded-2xl tw-overflow-hidden"></div>
-                    </div>
-                </div>
-
                 <ErrorSession />
+                <section class="tw-max-w-7xl tw-min-h-screen tw-pt-0 tw-mx-auto">
+                    <!-- Blog Article -->
+                    <div class="tw-mx-auto">
+                    <div class="tw-grid lg:tw-grid-cols-3 tw-gap-y-8 lg:tw-gap-y-0 lg:tw-gap-x-6">
+                        <!-- Content -->
+                        <div class="lg:tw-col-span-2">
+                            <div v-if="events" class="tw-py-8 lg:tw-pe-8">
+                                <div v-for="event in events" :key="event.id"  class="tw-space-y-5 lg:tw-space-y-8">
+                                    <Link :href="route('welcome')">
+                                        <div class="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-x-1.5 tw-text-sm tw-text-gray-600 tw-decoration-2 hover:tw-underline focus:tw-outline-none focus:tw-underline">
+                                            <svg class="tw-shrink-0 tw-size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                                            Regresar al inicio
+                                        </div>
+                                    </Link >
 
-                <div v-if="events" class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-items-center tw-justify-between tw-gap-10 tw-w-full tw-mt-10 lg:tw-mt-16">
-                    <div v-for="event in events" :key="event.id">
-                        <div class="tw-w-full tw-flex tw-flex-col md:tw-flex-row tw-items-start tw-justify-between tw-gap-5">
-                        <div class="tw-w-full md:tw-w-[60%]">
-                            <div class="tw-h-[180px] tw-w-full tw-block tw-shadow-xl tw-overflow-hidden tw-rounded-lg hover:tw-translate-y-[-10px] tw-transition-transform tw-duration-500"
-                            :style="{ backgroundImage: `url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
-                                <div class="tw-bg-white tw-py-1 tw-px-1.5 tw-rounded-lg tw-inline-flex tw-ml-3 tw-mt-3">
-                                    🔥
+                                    <h2 class="tw-text-3xl tw-font-bold lg:tw-text-5xl">{{ event.name }}</h2>
+
+                                    <div class="tw-flex tw-items-center tw-gap-x-5">
+                                        <a class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200" href="#">
+                                            📍 | Evento deportivo
+                                        </a>
+                                        <p class="tw-text-xs sm:tw-text-sm tw-text-gray-800">📅 | {{ event.start_date }} </p>
+                                    </div>
+
+                                    <p class="tw-text-lg tw-text-gray-800 tw-hidden lg:tw-block">Xalapa, Veracruz - En un inicio de temporada emocionante, los Halcones de Xalapa han demostrado ser uno de los equipos más competitivos de la liga profesional de baloncesto en México</p>
+
+                                    <p class="tw-text-lg tw-text-gray-800">{{ event.description }}</p>
+
+                                    <div class="">
+                                        <div class="tw-h-44 lg:tw-h-96 tw-w-full tw-block tw-shadow-xl tw-overflow-hidden tw-rounded-lg hover:tw-translate-y-[-10px] tw-transition-transform tw-duration-500"
+                                        :style="{ backgroundImage: `url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
+                                            <div class="tw-bg-white tw-py-1 tw-px-3 tw-rounded-lg tw-inline-flex tw-ml-3 tw-mt-3">
+                                                <span class="material-symbols-outlined tw-text-2xl">bookmark</span>
+                                            </div>
+                                        </div>
+                                        <span class="tw-mt-3 tw-block tw-text-sm tw-text-center tw-text-gray-500">
+                                            Trabajando durante el proceso
+                                        </span>
+                                        <div class="tw-mt-3">
+                                            <Link
+                                                v-if="$page.props.auth.user"
+                                                :href="route('events.show', { slug: event.slug, id: event.id } )"
+                                                >
+                                                <v-btn variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="x-large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                            </Link>
+                                            <Link
+                                                v-else
+                                                :href="route('login', { slug: event.slug, id: event.id})"
+                                            >
+                                            <v-btn variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="x-large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                        </Link>
+                                        </div>
+                                    </div>
+
+                                    <div class="tw-flex tw-flex-col lg:tw-flex-row lg:tw-justify-between lg:tw-items-center tw-gap-y-5 lg:tw-gap-y-0">
+                                        <!-- Badges/Tags -->
+                                        <div>
+                                            <a class="tw-m-0.5 tw-inline-flex tw-items-center tw-gap-1.5 tw-py-2 tw-px-3 tw-rounded-full tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200" href="#">
+                                                Deportes
+                                            </a>
+                                            <a class="tw-m-0.5 tw-inline-flex tw-items-center tw-gap-1.5 tw-py-2 tw-px-3 tw-rounded-full tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200" href="#">
+                                                Baloncesto
+                                            </a>
+                                        </div>
+
+                                        <!-- Author -->
+                                        <div class="tw-flex tw-items-center tw-gap-x-3">
+                                            <img class="tw-h-10 tw-w-10 tw-rounded-full" src="../../../../public/img/user-img.svg" alt="Author Image">
+                                            <div>
+                                                <p class="tw-text-sm tw-font-medium tw-text-gray-800">Directiva Halcones</p>
+                                                <p class="tw-text-xs tw-text-gray-500">Autor</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tw-mb-10"></div>
                                 </div>
                             </div>
-                            <div class="tw-mt-5">
-                                <Link
-                                    v-if="$page.props.auth.user"
-                                    :href="route('eventos.show', { slug: event.slug, id: event.id } )"
-                                    >
-                                    <v-btn variant="elevated" class="text-none !tw-bg-tw-secondary-300 !tw-text-tw-secondary-700" rounded="lg" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
-                                </Link>
-                                <Link
-                                    v-else
-                                    :href="route('login', { slug: event.slug, id: event.id})"
-                                >
-                                    <v-btn variant="elevated" class="text-none !tw-bg-tw-secondary-300 !tw-text-tw-secondary-700" rounded="lg" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
-                                </Link>
+                        </div>
+
+                        <!-- Sidebar -->
+                        <aside class="lg:tw-col-span-1">
+                        <div class="tw-sticky tw-top-28 tw-hidden lg:tw-block">
+                            <div class="tw-p-4 tw-border tw-border-gray-200 tw-rounded-xl tw-shadow-sm">
+                                <h3 class="tw-text-lg tw-font-semibold">Subscribete a nuestra seccion</h3>
+                                <p class="tw-text-sm tw-text-gray-500"> Obten las ulimas y mas recientes actualizaciones de equipo de halcones de xalapa. </p>
+                                <form class="tw-mt-4">
+
+                                    <div>
+                                        <p class="tw-font-medium tw-mb-1"><span class="tw-text-red-500">*</span> Correo electronico</p>
+                                        <v-text-field
+                                            color="primary"
+                                            label="E-mail"
+                                            placeholder="user@gmail.com"
+                                            hint="Ingresa tu correo electronico"
+                                            ></v-text-field>
+                                    </div>
+                                    <v-btn variant="elevated" class="text-none !tw-bg-tw-secondary-500 !tw-text-white tw-w-full lg:tw-w-auto" size="large" rounded="xl" block>Subscribirse</v-btn>
+                                </form>
+                            </div>
+                            <div class="tw-h-[200px] tw-w-full tw-shadow-xl tw-rounded-lg tw-overflow-hidden tw-mt-5">
+                                <div id="leaflet-map" class="tw-h-[200px] tw-w-full tw-z-10"></div>
                             </div>
                         </div>
-                        <div class="tw-w-full md:tw-w-[40%] tw-text-gray-600">
-                           <h4 class="tw-font-bold tw-text-lg">Info</h4>
-                            <div class="tw-text-sm tw-flex tw-flex-col tw-gap-2">
-                                <div> {{ event.name }} </div>
-                                <div>📍 | El nido del halcon. Xalapa Ver.</div>
-                                <div>🔥 | 2x1 en boletos para zonas A Y B</div>
-                                <div>🎧 | Fan fest en el nido</div>
-                                <div>📅 | {{ event.start_date }} </div>
-                            </div>
-                           <div class="tw-flex tw-gap-2 lg:tw-flex-col tw-w-44 tw-mt-2">
-                                <v-btn color="purple" variant="tonal" class="text-none" rounded="lg" size="small"><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">person</span>Edad +3</v-btn>
-                                <v-btn color="purple" variant="tonal" class="text-none" rounded="lg" size="small"><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">checkroom</span>Vetimenta | casual</v-btn>
-                           </div>
-                        </div>
+                        </aside>
                     </div>
                     </div>
-                </div>
+
+                </section>
 
             </main>
 

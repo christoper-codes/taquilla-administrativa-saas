@@ -14,25 +14,25 @@ class SeatCatalogueStatusesSeeder extends Seeder
     public function run(): void
     {
         SeatCatalogueStatus::create([
-            'name' => 'Disponible',
+            'name' => 'disponible',
             'description' => 'Asiento disponible',
             'is_active' => true
         ]);
 
         SeatCatalogueStatus::create([
-            'name' => 'Reservado',
+            'name' => 'reservado',
             'description' => 'Asiento reservado',
             'is_active' => true
         ]);
 
         SeatCatalogueStatus::create([
-            'name' => 'Vendido',
+            'name' => 'vendido',
             'description' => 'Asiento vendido',
             'is_active' => true
         ]);
 
         SeatCatalogueStatus::create([
-            'name' => 'Inhabilitado',
+            'name' => 'inhabilitado',
             'description' => 'Asiento inhabilitado',
             'is_active' => true
         ]);

@@ -3,9 +3,11 @@ import { drawerNavState, draweAppNavState } from '@/composables/drawersStates';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import { Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import AppNavLink from './AppNavLink.vue';
 
 
 const fav = ref(true);
+const menu = ref(false);
 const menu1 = ref(false);
 const menu2 = ref(false);
 const message = ref(false);
@@ -25,42 +27,120 @@ const props = defineProps({
 </script>
 
 <template>
-  <div>
+  <div class="">
     <v-layout>
       <v-navigation-drawer v-model="draweAppNavState" temporary class="">
-        <div class="!tw-text-gray-600">
-
+        <div class="!tw-text-gray-100 tw-bg-slate-950 tw-min-h-screen tw-relative tw-overflow-hidden">
+            <div class="tw-absolute tw-left-1/2 tw-top-[80%] tw-h-[700px] tw-w-[500px] tw--translate-x-1/2 tw-rounded-full tw-bg-gradient-to-t tw-blur-[250px] tw-from-tw-primary-800 tw-to-tw-primary-600">
+            </div>
             <div class="tw-w-full">
-                <div class="tw-w-full tw-h-6 tw-bg-[#984CDC]">
-                </div>
                 <div class="w-full tw-py-3 lg:tw-py-4 tw-px-4">
-                        <div class="tw-flex tw-items-center tw-justify-between">
-                            <Link :href="route('welcome')" class="tw-flex tw-items-end tw-gap-1">
-                                <ApplicationLogo class="tw-w-11 tw-h-auto tw-fill-current" />
-                                <div class="tw-font-semibold tw-text-tw-text-primary-600 tw-text-xs">
-                                    <span class="tw-block">Halcones de</span>
-                                    <span class="tw-block">xalapa</span>
+
+                    <div class="text-center profile-btn tw-cursor-pointer">
+                            <v-menu
+                            v-model="menu"
+                            :close-on-content-click="false"
+                            location="bottom start" origin="top center"
+                            >
+                            <template v-slot:activator="{ props }">
+                                <v-btn
+                                    :class="fav ? 'text-purple' : '!tw-text-purple-500'"
+                                    class="!tw-rounded-full !tw-size-40"
+                                    v-bind="props"
+                                    variant="tonal"
+                                    @click="fav = !fav"
+                                    >
+                                    <div
+                                        class="tw-size-36 tw-overflow-hidden tw-rounded-full tw-flex tw-items-center tw-justify-center"
+                                        v-if="user.global_images.length > 0"
+                                        :style="{ backgroundImage: `url(/storage/${user.global_images[0].file_path})`, backgroundSize: 'cover', backgroundPosition: 'center' }"
+                                        >
+                                    </div>
+                                    <div v-else>
+                                        <img  class="tw-shrink-0 tw-size-40 tw-rounded-full" src="https://img.icons8.com/?size=100&id=m0c1h1XS3gNM&format=png&color=000000" alt="">
+                                    </div>
+                                </v-btn>
+                            </template>
+
+                            <v-card min-width="350" rounded="lg" class="!tw-bg-white tw-backdrop-blur-sm">
+                                <v-list class="!tw-bg-transparent">
+                                <v-list-item
+                                    :prepend-avatar="`/storage/${user.global_images[0].file_path}`"
+                                    :title="user.first_name"
+                                    :subtitle="'@'+user.username"
+                                >
+                                    <template v-slot:append>
+                                    <v-btn
+                                        :class="fav ? 'text-red' : ''"
+                                        icon="mdi-heart"
+                                        variant="tonal"
+                                        @click="fav = !fav"
+                                    ></v-btn>
+                                    </template>
+                                </v-list-item>
+                                </v-list>
+
+                                <v-divider></v-divider>
+
+                                <v-list class="!tw-bg-transparent">
+                                <v-list-item>
+                                    <v-switch
+                                    v-model="message"
+                                    color="purple"
+                                    label="Ver boeltos solo en web"
+                                    hide-details
+                                    ></v-switch>
+                                </v-list-item>
+
+                                <v-list-item>
+                                    <v-switch
+                                    v-model="hints"
+                                    color="purple"
+                                    label="Ver boletos en la app y web"
+                                    hide-details
+                                    ></v-switch>
+                                </v-list-item>
+                                </v-list>
+
+                                <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <div class="tw-w-full tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-overflow-hidden tw-shadow-lg tw-relative tw-mb-3">
+                                    <div class="tw-w-[55%] tw-p-3 tw-pr-0 tw-text-sm tw-font-semibold tw-text-gray-700">
+                                        <p class="">{{ user.first_name + ' ' + user.last_name }}</p>
+                                        <p class="tw-text-xs tw-font-normal tw-mb-1">@{{ user.username }}</p>
+                                        <Link :href="route('logout')" method="post" as="button">
+                                            <v-btn  color="red" variant="tonal" block class="text-none" rounded="lg">
+                                                Cerrar sesion
+                                        </v-btn>
+                                        </Link>
+                                    </div>
+                                    <img class="tw-w-[35%] tw-absolute tw-top-0 -tw-right-5" src="https://modernize-nuxt3-main.netlify.app/images/backgrounds/unlimited-bg.png" alt="">
                                 </div>
-                            </Link>
+                                </v-card-actions>
+                            </v-card>
+                            </v-menu>
                         </div>
+
                 </div>
             </div>
 
             <div class="tw-flex tw-flex-col tw-items-center tw-justify-between tw-gap-10 tw-p-4">
                     <div class="tw-flex tw-flex-col tw-w-full">
                         <h2 class="tw-font-semibold tw-text-sm tw-mb-3">Dashboard</h2>
-                        <div class="tw-flex tw-flex-col tw-items-center tw-gap-5 tw-w-full">
-                            <div class="left-zone tw-w-full">
-                                <v-btn  href="#" color="blue-grey" variant="text" class="text-none" rounded="lg" block><span class="material-symbols-outlined tw-text-xl">home</span> Mis boletos</v-btn>
+                        <div class="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-w-full">
+                            <div class="tw-w-full ">
+                                <AppNavLink :href="route('dashboard')" :active="route().current('dashboard')">
+                                    <span class="material-symbols-outlined tw-text-lg">home</span>Mis boletos
+                                </AppNavLink>
                             </div>
-                            <div class="text-center tw-w-full left-zone">
+                            <div class="tw-w-full ">
                                 <v-menu
                                 v-model="menu1"
                                 :close-on-content-click="false"
                                 location="bottom start" origin="top center"
                                 >
                                 <template v-slot:activator="{ props }">
-                                    <v-btn v-bind="props" color="blue-grey" variant="text" class="text-none" rounded="lg" block><span class="material-symbols-outlined tw-text-xl">keyboard_arrow_down</span>Promociones</v-btn>
+                                    <v-btn v-bind="props" variant="text" class="text-none !tw-h-[40px] !tw-w-full !tw-text-gray-300 !tw-bg-transparent !tw-justify-start" rounded="xl" block><span class="material-symbols-outlined tw-text-xl">keyboard_arrow_down</span>Promociones</v-btn>
                                 </template>
 
                                 <v-card min-width="300" rounded="lg" class="">
@@ -86,26 +166,30 @@ const props = defineProps({
                                 </v-card>
                                 </v-menu>
                             </div>
-                            <div class="left-zone tw-w-full">
-                                <v-btn  href="#" color="blue-grey" variant="text" class="text-none" rounded="lg" block><span class="material-symbols-outlined tw-text-xl">note_stack</span> Cuentas</v-btn>
+                            <div class=" tw-w-full">
+                                <AppNavLink :href="route('welcome')" :active="route().current('welcome')">
+                                    <span class="material-symbols-outlined tw-text-lg">note_stack</span>Cuentas
+                                </AppNavLink>
                             </div>
                         </div>
                     </div>
 
                     <div class="tw-flex tw-flex-col tw-w-full">
                         <h2 class="tw-font-semibold tw-text-sm tw-mb-3">Widgets</h2>
-                        <div class="tw-flex tw-flex-col tw-items-center tw-gap-5 tw-w-full">
-                            <div class="left-zone tw-w-full">
-                                <v-btn  href="#" color="blue-grey" variant="text" class="text-none" rounded="lg" block><span class="material-symbols-outlined tw-text-xl">folder</span> Historial</v-btn>
+                        <div class="tw-flex tw-flex-col tw-items-center tw-gap-3 tw-w-full">
+                            <div class="tw-w-full">
+                                <AppNavLink :href="route('welcome')" :active="route().current('welcome')">
+                                    <span class="material-symbols-outlined tw-text-lg">folder</span>Historial
+                                </AppNavLink>
                             </div>
-                            <div class="text-center tw-w-full left-zone">
+                            <div class="text-center tw-w-full ">
                                 <v-menu
                                 v-model="menu2"
                                 :close-on-content-click="false"
                                 location="bottom start" origin="top center"
                                 >
                                 <template v-slot:activator="{ props }">
-                                    <v-btn v-bind="props" color="blue-grey" variant="text" class="text-none" rounded="lg" block><span class="material-symbols-outlined tw-text-xl">keyboard_arrow_down</span>Servicios</v-btn>
+                                    <v-btn v-bind="props" variant="text" class="text-none !tw-h-[40px] !tw-w-full !tw-text-gray-300 !tw-bg-transparent !tw-justify-start" rounded="xl" block><span class="material-symbols-outlined tw-text-xl">keyboard_arrow_down</span>Servicios</v-btn>
                                 </template>
 
                                 <v-card min-width="300" rounded="lg" class="">
@@ -135,10 +219,9 @@ const props = defineProps({
                         </div>
                     </div>
 
-                    <div class="tw-w-full tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-overflow-hidden tw-shadow-xl tw-relative">
-                        <div class="tw-w-[55%] tw-p-3 tw-pr-0 tw-text-sm tw-font-semibold tw-text-gray-700">
-                            <p class="">{{ user.first_name + ' ' + user.last_name }}</p>
-                            <p class="tw-text-xs tw-font-normal tw-mb-1">@{{ user.username }}</p>
+                    <div class="tw-w-full tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-overflow-hidden tw-shadow-xl tw-relative tw-bg-white/10">
+                        <div class="tw-w-[55%] tw-p-3 tw-pr-0 tw-text-sm tw-font-semibold tw-text-gray-200">
+                            <p class="tw-mb-4">{{ user.first_name + ' ' + user.last_name }}</p>
                             <Link :href="route('logout')" method="post" as="button">
                                 <v-btn  color="red" variant="tonal" block class="text-none" rounded="lg">
                                     Cerrar sesion
@@ -162,11 +245,6 @@ const props = defineProps({
 .v-btn__content {
     gap: 5px;
 }
-
-.left-zone .v-btn.v-btn--density-default {
-    align-items: center !important;
-    justify-content: start !important;
-}
 .v-navigation-drawer__scrim {
     display: none !important;
 }
@@ -177,7 +255,7 @@ const props = defineProps({
 
 @media (min-width: 768px) {
     .v-navigation-drawer--temporary.v-navigation-drawer--active {
-        width: 260px !important;
+        width: 270px !important;
         box-shadow: none !important;
     }
 }

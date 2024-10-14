@@ -1,5 +1,8 @@
 <script setup>
 import { drawerClubState } from '@/composables/drawersStates';
+import { ref } from 'vue';
+
+const clubSelected = ref(true);
 
 </script>
 
@@ -29,11 +32,14 @@ import { drawerClubState } from '@/composables/drawersStates';
             </div>
             <div class="tw-p-4 tw-flex tw-flex-col tw-gap-3">
                 <div for="halcones" class="tw-flex  tw-p-3 tw-w-full tw-bg-white tw-border tw-border-gray-200 tw-rounded-lg tw-text-sm tw-cursor-pointer focus:tw-border-tw-primary-500 focus:tw-ring-tw-primary-500 hover:tw-scale-105 tw-transition-transform tw-duration-500">
-                    <v-checkbox
-                        color="primary"
-                        label="Halcones de xalapa"
-                        hint="Club deportivo a selecionar."
-                        ></v-checkbox>
+
+                <v-switch
+                    v-model="clubSelected"
+                    @click="clubSelected = !clubSelected"
+                    color="purple"
+                    label="Halcones de xalapa"
+                    hide-details
+                    ></v-switch>
                 </div>
             </div>
             </div>
@@ -43,20 +49,19 @@ import { drawerClubState } from '@/composables/drawersStates';
 </template>
 
 <style scoped>
-    .v-navigation-drawer__scrim{
-        backdrop-filter: blur(4px) !important;
-    }
-    .tw-animate-spin {
-        animation: tw-spin 2s linear infinite;
-    }
+.v-navigation-drawer__scrim{
+    backdrop-filter: blur(4px) !important;
+}
+.tw-animate-spin {
+    animation: tw-spin 2s linear infinite;
+}
+.v-navigation-drawer--temporary.v-navigation-drawer--active {
+    width: 75% !important;
+}
 
-    .v-navigation-drawer--temporary.v-navigation-drawer--active {
-        width: 75% !important;
+@media (min-width: 768px) {
+    .v-navigation-drawer--temporary.v-navigation-drawer--active{
+        width: 25% !important;
     }
-
-    @media (min-width: 768px) {
-        .v-navigation-drawer--temporary.v-navigation-drawer--active {
-            width: 260px !important;
-        }
-    }
+}
 </style>

@@ -2,17 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\WebResponseHelper;
 use App\Models\TicketOffice;
+use App\Services\EventService;
+use App\Services\TicketOfficeService;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class TicketOfficeController extends Controller
 {
+
+    protected $ticket_office_service;
+    protected $event_service;
+
+    public function __construct(TicketOfficeService $ticket_office_service, EventService $event_service)
+    {
+        $this->ticket_office_service = $ticket_office_service;
+        $this->event_service = $event_service;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        try {
+            $ticket_offices = $this->ticket_office_service->getAll();
+
+            return Inertia::render('Pos/TicketOffices', [
+                'ticket_offices' => $ticket_offices,
+            ]);
+
+        } catch (\Exception $e) {
+            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar las taquillas');
+        }
     }
 
     /**
@@ -36,7 +59,19 @@ class TicketOfficeController extends Controller
      */
     public function show(TicketOffice $ticketOffice)
     {
-        //
+        try {
+
+            $ticket_office = $this->ticket_office_service->getById($ticketOffice->id);
+            $events = $this->event_service->getAll();
+
+            return Inertia::render('Pos/TicketOffice', [
+                'ticket_office' => $ticket_office,
+                'events' => $events,
+            ]);
+
+        } catch (\Exception $e) {
+            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar la taquilla');
+        }
     }
 
     /**
