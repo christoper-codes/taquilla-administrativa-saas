@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\SeatCatalogueController;
+use App\Http\Controllers\TicketOfficeController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -11,7 +13,16 @@ use Illuminate\Support\Facades\Route;
 * |--------------------------------------------------------------------------
 * |POS | ROUTES
 */
-Route::get('/eventos', [EventController::class, 'index'])->name('eventos.index');
+Route::get('/eventos', [EventController::class, 'index'])->name('events.index');
+
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |BLOG | ROUTES
+*/
+Route::get('/blog/{id}', [BlogController::class, 'index'])->name('blogs.show');
 
 /*
 * |--------------------------------------------------------------------------
@@ -20,8 +31,10 @@ Route::get('/eventos', [EventController::class, 'index'])->name('eventos.index')
 * | POS Auth | ROUTES
 */
 Route::middleware('auth')->group(function() {
-    Route::get('/eventos/{slug}/{id}', [EventController::class, 'show'])->name('eventos.show');
-    Route::get('/pago-exitoso', [EventController::class, 'success'])->name('eventos.success');
+    Route::get('/eventos/{slug}/{id}', [EventController::class, 'show'])->name('events.show');
+    Route::get('/pago-exitoso', [EventController::class, 'success'])->name('events.success');
+    Route::get('/taquillas', [TicketOfficeController::class, 'index'])->name('ticket-offices.index');
+    Route::get('/taquillas/{ticketOffice}', [TicketOfficeController::class, 'show'])->name('ticket-offices.show');
 });
 
 

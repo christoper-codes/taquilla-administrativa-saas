@@ -6,6 +6,7 @@ import { Head, usePage } from '@inertiajs/vue3';
 import TicketCharts from '@/Components/TicketCharts.vue';
 import confetti from 'canvas-confetti';
 import { onMounted, ref, watch } from 'vue';
+import Breadcrumb from '@/Components/Breadcrumb.vue';
 
 const page = usePage().props;
 const tab = ref(null);
@@ -48,7 +49,7 @@ const shootConfetti = () => {
   });
 };
 
-const isNewUser = true
+const isNewUser = false;
 
 const shootConfettiTwice = () => {
   shootConfetti();
@@ -73,55 +74,73 @@ onMounted(() => {
 
     <AppLayout>
 
-        <div class="tw-w-full tw-px-4 lg:tw-px-8 tw-bg-white tw-overflow-hidden tw-py-6 tw-shadow-sm tw-rounded-lg tw-flex tw-items-center tw-gap-2 tw-flex-col">
-            <div class="tw-px-5 tw-py-2 tw-bg-green-100 tw-rounded-md tw-text-green-600 tw-text-sm"><span class="tw-font-bold">Bienvenido!!</span> Eres uno de los primeros usuarios en probar la nueva plataforma</div>
-            <div class="tw-text-gray-900 tw-font-medium">Boletos actuales!!</div>
-        </div>
+        <Breadcrumb class="!tw-h-[250px]">
+                <template #title>
+                    <span>Mis boletos</span>
+                </template>
+        </Breadcrumb>
 
-        <div class="tw-mt-10 tw-gap-5 tw-w-full tw-flex tw-flex-col-reverse lg:tw-flex-row tw-items-start tw-justify-between">
-            <div class="tw-w-full lg:tw-w-[47%] tw-shadow-lg tw-bg-white tw-px-5 tw-py-7 tw-rounded-lg">
-                <div class="tw-px-5 tw-py-2 tw-bg-gray-100 tw-rounded-md tw-text-gray-600 tw-text-sm"><span class="tw-font-bold">Seleciona </span> un partido para ver tus boletos</div>
-                <div class="tw-mt-5">
-                    <v-tabs
-                        v-model="tab"
-                        align-tabs="center"
-                        color="deep-purple-accent-4"
-                        >
-                        <v-tab value="one">Halcones de xala vs buap</v-tab>
-                        <v-tab value="two">Halcones de xala rojos</v-tab>
-                        <v-tab value="three">Halcones de xala vs monterrey</v-tab>
-                    </v-tabs>
+        <div class="tw-px-4 lg:tw-p-10">
+
+            <div class="tw-flex tw-items-center tw-gap-5">
+                <div class="tw-px-7 tw-py-2 tw-bg-gray-200 tw-text-md tw-rounded-full">
+                    <span>!Bienvenido a la nueva plataforma!</span>
+                </div>
+                <div class="tw-px-7 tw-py-2 tw-bg-gradient-to-tr tw-from-tw-primary-500 tw-to-pink-400 tw-text-white tw-text-md tw-rounded-full">
+                    <span>Mis boletos</span>
+                </div>
+                <div class="tw-px-7 tw-py-2 tw-bg-gray-200 tw-text-md tw-rounded-full">
+                    <span>Valipor por un partido</span>
+                </div>
+                <div class="tw-px-7 tw-py-2 tw-bg-gray-200 tw-text-md tw-rounded-full">
+                    <span>Halcones de xalapa</span>
                 </div>
             </div>
-            <div class="tw-w-full lg:tw-w-[50%] tw-bg-white tw-rounded-lg tw-p-5 tw-shadow-lg">
-                <TicketCharts/>
+
+            <div class="tw-mt-10 tw-gap-5 tw-w-full tw-flex tw-flex-col-reverse lg:tw-flex-row tw-items-start tw-justify-between">
+                <div class="tw-w-full tw-shadow-lg tw-bg-white tw-px-5 tw-py-7 tw-rounded-2xl tw-border">
+                    <div class="tw-px-7 tw-py-3 tw-bg-gray-200 tw-font-bold tw-text-lg tw-rounded-full tw-inline-block tw-text-gray-500">
+                        <span>Seleciona un partido para ver tus boletos</span>
+                    </div>
+                    <div class="tw-mt-5">
+                        <v-tabs
+                            v-model="tab"
+                            align-tabs="center"
+                            color="deep-purple-accent-4"
+                            >
+                            <v-tab value="one">Halcones de xala vs buap</v-tab>
+                            <v-tab value="two">Halcones de xala rojos</v-tab>
+                            <v-tab value="three">Halcones de xala vs monterrey</v-tab>
+                        </v-tabs>
+                    </div>
+                </div>
             </div>
-        </div>
 
 
-        <div class="tw-mt-10 tw-bg-white">
-            <v-tabs-window v-model="tab">
-                <v-tabs-window-item value="one">
-                    <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
-                        <SaleTicket/>
-                        <SaleTicket/>
-                    </div>
-                </v-tabs-window-item>
+            <div class="tw-mt-10 tw-bg-white">
+                <v-tabs-window v-model="tab">
+                    <v-tabs-window-item value="one">
+                        <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
+                            <SaleTicket/>
+                            <SaleTicket/>
+                        </div>
+                    </v-tabs-window-item>
 
-                <v-tabs-window-item value="two">
-                    <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
-                        <SaleTicket/>
-                    </div>
-                </v-tabs-window-item>
+                    <v-tabs-window-item value="two">
+                        <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
+                            <SaleTicket/>
+                        </div>
+                    </v-tabs-window-item>
 
-                <v-tabs-window-item value="three">
-                    <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
-                        <SaleTicket/>
-                        <SaleTicket/>
-                        <SaleTicket/>
-                    </div>
-                </v-tabs-window-item>
-            </v-tabs-window>
+                    <v-tabs-window-item value="three">
+                        <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
+                            <SaleTicket/>
+                            <SaleTicket/>
+                            <SaleTicket/>
+                        </div>
+                    </v-tabs-window-item>
+                </v-tabs-window>
+            </div>
         </div>
 
     </AppLayout>
