@@ -63,10 +63,12 @@ class TicketOfficeController extends Controller
 
             $ticket_office = $this->ticket_office_service->getById($ticketOffice->id);
             $events = $this->event_service->getAll();
+            $auth_user = auth()->user();
 
             return Inertia::render('Pos/TicketOffice', [
                 'ticket_office' => $ticket_office,
                 'events' => $events,
+                'auth_user' => $auth_user,
             ]);
 
         } catch (\Exception $e) {

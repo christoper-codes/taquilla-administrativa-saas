@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('cash_registers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('event_id')->constrained('events');
             $table->foreignId('ticket_office_id')->constrained('ticket_offices');
             $table->foreignId('cash_register_type_id')->constrained('cash_register_types');
             $table->foreignId('seller_user_opening_id')->constrained('users');
