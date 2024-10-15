@@ -1,11 +1,47 @@
 <script setup>
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router,  useForm as useFormInertia } from '@inertiajs/vue3';
 import  GuestLayout  from '@/Layouts/GuestLayout.vue';
 import NavigationDrawer from '@/Components/NavigationDrawer.vue';
 import Footer from '@/Components/Footer.vue';
 import { onMounted, ref } from 'vue';
 import ErrorSession from '@/Components/ErrorSession.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
+import { cashRegisterSchema } from '@/validation/cash.-registers/cash-regiser-schema';
+import { useForm, useField } from 'vee-validate'
+
+const { handleSubmit } = useForm({validationSchema : cashRegisterSchema});
+const cashRegisterFields = {
+    'cash_register_type_id': useField('cash_register_type_id'),
+    'opening_balance': useField('opening_balance'),
+}
+const loading = ref(false);
+
+const selectedEvents = ref([]);
+const cashRegisterData = useFormInertia({
+    'ticket_office_id': '',
+    'cash_register_type_id': '',
+    'seller_user_opening_id': '',
+    'opening_balance': '',
+})
+
+onMounted(() => {
+    selectedEvents.value = props.events.map((event) => event);
+})
+
+const cashRegisterSubmit = handleSubmit((values, isActive) => {
+    loading.value = true;
+    cashRegisterData.ticket_office_id = props.ticket_office.id;
+    cashRegisterData.seller_user_opening_id = props.auth_user.id;
+    cashRegisterData.cash_register_type_id = values.cash_register_type_id.id;
+    cashRegisterData.opening_balance = values.opening_balance;
+
+    cashRegisterData.post(route('cash-registers.store'), {
+        onFinish: () => {
+            loading.value = false;
+            isActive.evt.value = false;
+        }
+    });
+});
 
 const props = defineProps({
     'ticket_office': {
@@ -14,6 +50,10 @@ const props = defineProps({
     },
     'events': {
         type: Array,
+        required: true,
+    },
+    'auth_user': {
+        type: Object,
         required: true,
     },
 })
@@ -27,20 +67,13 @@ const eventProps = (item) => {
 
 const ticketOfficeProps = (item) => {
   return {
+    id: item.id,
     title: item.name,
     subtitle: item.description,
   };
 };
 
-const selectedEvents = ref([]);
-onMounted(() => {
-    selectedEvents.value = props.events.map((event) => event);
-})
-
-const opneCashRegister = (isActive) => {
-    //isActive.value = false;
-    router.visit('/eventos');
-}
+console.log(props.ticket_office);
 
 </script>
 
@@ -98,7 +131,8 @@ const opneCashRegister = (isActive) => {
                         </template>
                         <template v-slot:default="{ isActive }">
                             <v-card title="¿Estas seguro de abrir una caja registradora?">
-                            <v-card-text>
+                            <v-form>
+                                <v-card-text>
                                 <div>
                                     <v-select
                                         color="primary"
@@ -115,14 +149,18 @@ const opneCashRegister = (isActive) => {
                                         clearable
                                         label="Seleciona la caja"
                                         hint="Selecciona la caja"
+                                        v-model= "cashRegisterFields.cash_register_type_id.value.value"
                                         :item-props="ticketOfficeProps"
-                                        :items="ticket_office.cash_register_types"
+                                        :items="ticket_office.cash_register_types_no_actives"
+                                        :error-messages="cashRegisterFields.cash_register_type_id.errorMessage.value"
                                     ></v-select>
                                     <v-text-field
                                         color="primary"
                                         label="Saldo de apertura"
                                         placeholder="$1000.00"
                                         hint="Ingresa el saldo de apertura"
+                                        v-model="cashRegisterFields.opening_balance.value.value"
+                                        :error-messages="cashRegisterFields.opening_balance.errorMessage.value"
                                     ></v-text-field>
                                 </div>
                             </v-card-text>
@@ -131,9 +169,10 @@ const opneCashRegister = (isActive) => {
                                 <v-spacer></v-spacer>
                                <div class="tw-flex tw-items-center tw-gap-3 tw-mb-3">
                                     <v-btn variant="tonal" color="red" class="text-none !tw-px-7" size="large" rounded="xl" @click="isActive.value = false">Cancelar</v-btn>
-                                    <v-btn variant="elevated" class="text-none !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="large" rounded="xl" @click="opneCashRegister(isActive)">Abrir caja</v-btn>
+                                    <v-btn :loading="loading" variant="elevated" class="text-none !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="large" rounded="xl" @click="cashRegisterSubmit(isActive)">Abrir caja</v-btn>
                                </div>
                             </v-card-actions>
+                            </v-form>
 
                             </v-card>
                         </template>
@@ -150,24 +189,7 @@ const opneCashRegister = (isActive) => {
                             <v-card title="Resumen de cajas aperturadas">
                             <v-card-text>
                                 <div class="">
-                                    <v-list-item-group>
-                                        <v-list-item>
-                                            <v-list-item-content>
-                                                <v-list-item-title>Nombre de la caja</v-list-item-title>
-                                                <v-list-item-subtitle>Saldo de apertura</v-list-item-subtitle>
-                                                <v-list-item-subtitle>Saldo actual</v-list-item-subtitle>
-                                                <v-list-item-subtitle>Estado</v-list-item-subtitle>
-                                            </v-list-item-content>
-                                        </v-list-item>
-                                        <v-list-item>
-                                            <v-list-item-content>
-                                                <v-list-item-title>Nombre de la caja</v-list-item-title>
-                                                <v-list-item-subtitle>Saldo de apertura</v-list-item-subtitle>
-                                                <v-list-item-subtitle>Saldo actual</v-list-item-subtitle>
-                                                <v-list-item-subtitle>Estado</v-list-item-subtitle>
-                                            </v-list-item-content>
-                                        </v-list-item>
-                                    </v-list-item-group>
+                                    Resumen
                                 </div>
                             </v-card-text>
 

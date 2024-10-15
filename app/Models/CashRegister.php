@@ -10,7 +10,6 @@ class CashRegister extends Model
     use HasFactory;
 
     protected $fillable = [
-        'event_id',
         'ticket_office_id',
         'cash_register_type_id',
         'seller_user_opening_id',
