@@ -7,6 +7,7 @@ import TicketCharts from '@/Components/TicketCharts.vue';
 import confetti from 'canvas-confetti';
 import { onMounted, ref, watch } from 'vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
+import SuccessSession from '@/Components/SuccessSession.vue';
 
 const page = usePage().props;
 const tab = ref(null);
@@ -73,6 +74,7 @@ onMounted(() => {
     <Head title="Dashboard" />
 
     <AppLayout>
+        <SuccessSession />
 
         <Breadcrumb class="!tw-h-[250px]">
                 <template #title>
@@ -80,26 +82,26 @@ onMounted(() => {
                 </template>
         </Breadcrumb>
 
-        <div class="tw-px-4 lg:tw-p-10">
+        <div class="tw-px-4 tw-py-10 lg:tw-p-10">
 
-            <div class="tw-flex tw-items-center tw-gap-5">
-                <div class="tw-px-7 tw-py-2 tw-bg-gray-200 tw-text-md tw-rounded-full">
+            <div class="tw-flex tw-flex-wrap lg:tw-flex-row lg:tw-items-center tw-gap-2 lg:tw-gap-5">
+                <div class="tw-px-4 lg:tw-px-7 tw-py-2 tw-bg-gray-200 tw-text-xs lg:tw-text-base tw-rounded-full">
                     <span>!Bienvenido a la nueva plataforma!</span>
                 </div>
-                <div class="tw-px-7 tw-py-2 tw-bg-gradient-to-tr tw-from-tw-primary-500 tw-to-pink-400 tw-text-white tw-text-md tw-rounded-full">
+                <div class="tw-px-4 lg:tw-px-7 tw-py-2 tw-bg-gradient-to-tr tw-from-tw-primary-500 tw-to-pink-400 tw-text-white tw-text-xs lg:tw-text-base tw-rounded-full">
                     <span>Mis boletos</span>
                 </div>
-                <div class="tw-px-7 tw-py-2 tw-bg-gray-200 tw-text-md tw-rounded-full">
+                <div class="tw-px-4 lg:tw-px-7 tw-py-2 tw-bg-gray-200 tw-text-xs lg:tw-text-base tw-rounded-full">
                     <span>Valipor por un partido</span>
                 </div>
-                <div class="tw-px-7 tw-py-2 tw-bg-gray-200 tw-text-md tw-rounded-full">
+                <div class="tw-px-4 lg:tw-px-7 tw-py-2 tw-bg-gray-200 tw-text-xs lg:tw-text-base tw-rounded-full">
                     <span>Halcones de xalapa</span>
                 </div>
             </div>
 
             <div class="tw-mt-10 tw-gap-5 tw-w-full tw-flex tw-flex-col-reverse lg:tw-flex-row tw-items-start tw-justify-between">
                 <div class="tw-w-full tw-shadow-lg tw-bg-white tw-px-5 tw-py-7 tw-rounded-2xl tw-border">
-                    <div class="tw-px-7 tw-py-3 tw-bg-gray-200 tw-font-bold tw-text-lg tw-rounded-full tw-inline-block tw-text-gray-500">
+                    <div class="tw-px-7 tw-py-3 tw-bg-purple-200 tw-font-bold tw-text-xs lg:tw-text-lg tw-rounded-full tw-inline-block tw-text-purple-600">
                         <span>Seleciona un partido para ver tus boletos</span>
                     </div>
                     <div class="tw-mt-5">

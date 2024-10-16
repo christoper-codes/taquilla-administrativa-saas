@@ -3,6 +3,8 @@ import { drawerNavState } from '@/composables/drawersStates';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import { Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import AppNavLink from '@/Components/AppNavLink.vue';
+import GuestNavLink from '@/Components/GuestNavLink.vue';
 
 
 const fav = ref(true);
@@ -31,8 +33,20 @@ const toggleFav = () => {
             </Link>
             <div class="tw-flex tw-flex-col tw-items-center tw-justify-between tw-gap-10 tw-p-4">
                     <div class="tw-flex tw-flex-col tw-items-center tw-gap-5 tw-w-full">
-                        <div @click="drawerNavState = !drawerNavState" class="left-zone tw-w-full">
-                            <v-btn  href="#" color="blue-grey" variant="text" class="text-none" rounded="lg" block><span class="material-symbols-outlined tw-text-lg">home</span>Inicio</v-btn>
+                        <div class="tw-w-full ">
+                            <GuestNavLink :href="route('welcome')" :active="route().current('welcome')">
+                                <span class="material-symbols-outlined tw-text-lg">home</span>Inicio
+                            </GuestNavLink>
+                        </div>
+                        <div class="tw-w-full ">
+                            <GuestNavLink :href="route('dashboard')" :active="route().current('dashboard')">
+                                <span class="material-symbols-outlined tw-text-lg">local_activity</span>Mis boletos
+                            </GuestNavLink>
+                        </div>
+                        <div class="tw-w-full">
+                            <GuestNavLink :href="route('events.index')" :active="route().current('events.index') || route().current('events.show')">
+                                <span class="material-symbols-outlined tw-text-lg">note_stack</span>Eventos
+                            </GuestNavLink>
                         </div>
                         <div class="text-center tw-w-full left-zone">
                             <v-menu
@@ -41,7 +55,7 @@ const toggleFav = () => {
                             location="bottom start" origin="top center"
                             >
                             <template v-slot:activator="{ props }">
-                                <v-btn v-bind="props" color="blue-grey" variant="text" class="text-none" rounded="lg" block><span class="material-symbols-outlined tw-text-xl">settings</span>Servicios</v-btn>
+                                <v-btn v-bind="props" variant="text" class="text-none !tw-h-[40px] lg:!tw-rounded-none !tw-rounded-full lg:!tw-h-[80px] !tw-w-full !tw-justify-start lg:!tw-justify-center lg:!tw-w-24 !tw-text-gray-600 !tw-bg-transparent"><span class="material-symbols-outlined tw-text-lg">settings</span>Servicios</v-btn>
                             </template>
 
                             <v-card min-width="300" rounded="lg" class="">
@@ -107,8 +121,10 @@ const toggleFav = () => {
                             </v-card>
                             </v-menu>
                         </div>
-                        <div class="left-zone tw-w-full">
-                            <v-btn  href="#" color="blue-grey" variant="text" class="text-none" rounded="lg" block><span class="material-symbols-outlined tw-text-xl">note_stack</span> blog</v-btn>
+                        <div class="tw-w-full">
+                            <GuestNavLink :href="route('blogs.show', 1)" :active="route().current('blogs.show')">
+                                <span class="material-symbols-outlined tw-text-lg">bookmark</span>Blogs
+                            </GuestNavLink>
                         </div>
                     </div>
                     <Link
@@ -116,7 +132,7 @@ const toggleFav = () => {
                         :href="route('dashboard')"
                         class="tw-w-full"
                     >
-                        <v-btn variant="tonal" class="text-none !tw-bg-tw-primary-100 !tw-text-tw-primary-600" block size="large" rounded="lg">Dashboard</v-btn>
+                        <v-btn @click="drawerNavState = !drawerNavState" variant="tonal" class="text-none !tw-bg-tw-primary-100 !tw-text-tw-primary-600" block size="large" rounded="xl">Dashboard</v-btn>
                     </Link>
                     <div v-else class="tw-flex tw-flex-col tw-items-center tw-gap-3 tw-w-full">
                         <Link
@@ -124,14 +140,14 @@ const toggleFav = () => {
                             class="tw-w-full"
                             :href="route('register')"
                         >
-                            <v-btn variant="elevated" class="text-none !tw-bg-tw-primary-500 !tw-text-white" block size="large" rounded="lg">Registrarse</v-btn>
+                            <v-btn variant="elevated" class="text-none !tw-bg-tw-primary-500 !tw-text-white" block size="large" rounded="xl">Registrarse</v-btn>
                         </Link>
                         <Link
                             @click="drawerNavState = !drawerNavState"
                             class="tw-w-full"
                             :href="route('login')"
                         >
-                        <v-btn variant="tonal" class="text-none !tw-bg-tw-primary-100 !tw-text-tw-primary-600" block size="large" rounded="lg">Iniciar sesion</v-btn>
+                        <v-btn variant="tonal" class="text-none !tw-bg-tw-primary-100 !tw-text-tw-primary-600" block size="large" rounded="xl">Iniciar sesion</v-btn>
                         </Link>
                     </div>
                 </div>

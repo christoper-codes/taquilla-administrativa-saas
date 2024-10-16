@@ -23,7 +23,22 @@ class CashRegisterRepository implements CashRegisterRepositoryInterface
 
     public function save(array $data)
     {
-        return CashRegister::create($data);
+        $new_cash_register = new CashRegister();
+        $new_cash_register->ticket_office_id = $data['ticket_office_id'];
+        $new_cash_register->cash_register_type_id = $data['cash_register_type_id'];
+        $new_cash_register->seller_user_opening_id = $data['seller_user_opening_id'];
+        $new_cash_register->seller_user_closing_id = null;
+        $new_cash_register->description = 'apertura de caja registradora por user_id: ' . $data['seller_user_opening_id'];
+        $new_cash_register->is_open = true;
+        $new_cash_register->confirmed_closure = false;
+        $new_cash_register->batch_cash_register = $data['batch_cash_register'];
+        $new_cash_register->batch_code = $data['batch_code'] ?? uniqid();
+        $new_cash_register->opening_balance = $data['opening_balance'];
+        $new_cash_register->current_balance = $data['opening_balance'];
+        $new_cash_register->closing_balance = null;
+        $new_cash_register->save();
+
+        return $new_cash_register;
     }
 
     public function update($id, array $data)

@@ -18,8 +18,15 @@ class TicketOfficeRepository implements TicketOfficeRepositoryInterface
 
     public function getById($id)
     {
-        return TicketOffice::with('cashRegisterTypes', 'cashRegistersActives')->findOrFail($id);
+        $ticketOffice = TicketOffice::with('cashRegisterTypes')->findOrFail($id);
+
+        $cashRegisterTypesNoActives = $ticketOffice->cashRegisterTypesNoActives();
+
+        $ticketOffice->cash_register_types_no_actives = $cashRegisterTypesNoActives;
+
+        return $ticketOffice;
     }
+
 
     public function save(array $data)
     {

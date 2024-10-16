@@ -45,8 +45,19 @@ class TicketOffice extends Model
         return $this->hasMany(CashRegister::class);
     }
 
-    public function cashRegistersActives()
+    public function cashRegisterTypesNoActives()
     {
-        return $this->hasMany(CashRegister::class)->where('is_open', true);
+        $cash_registers = CashRegister::where('ticket_office_id', $this->id)
+            ->where('is_open', 1)
+            ->get();
+
+        $cash_register_types_ids = $cash_registers->pluck('cash_register_type_id')->toArray();
+
+        $cash_register_types_no_actives = CashRegisterType::whereHas('ticketOffices', function ($query) {
+            $query->where('ticket_office_id', $this->id);
+        })->whereNotIn('id', $cash_register_types_ids)->get();
+
+        return $cash_register_types_no_actives;
     }
+
 }

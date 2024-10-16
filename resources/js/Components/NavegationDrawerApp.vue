@@ -133,6 +133,11 @@ const props = defineProps({
                                     <span class="material-symbols-outlined tw-text-lg">home</span>Mis boletos
                                 </AppNavLink>
                             </div>
+                            <div class=" tw-w-full">
+                                <AppNavLink :href="route('events.index')" :active="route().current('events.index')">
+                                    <span class="material-symbols-outlined tw-text-lg">note_stack</span>Eventos
+                                </AppNavLink>
+                            </div>
                             <div class="tw-w-full ">
                                 <v-menu
                                 v-model="menu1"
@@ -165,11 +170,6 @@ const props = defineProps({
                                     </v-card-actions>
                                 </v-card>
                                 </v-menu>
-                            </div>
-                            <div class=" tw-w-full">
-                                <AppNavLink :href="route('welcome')" :active="route().current('welcome')">
-                                    <span class="material-symbols-outlined tw-text-lg">note_stack</span>Cuentas
-                                </AppNavLink>
                             </div>
                         </div>
                     </div>

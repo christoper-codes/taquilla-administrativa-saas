@@ -1,34 +1,35 @@
 <script setup>
 import { ref, watch } from 'vue';
 
-const enterVIF = ref(false);
+const showTostify = ref(false);
+const message = ref('Fracaso en el proceso!');
 
-watch(enterVIF, (value) => {
+watch(showTostify, (value) => {
     if(value) {
         Toastify({
-            text: "Failure! Fracaso en el proceso.",
-            duration: 5000,
-            className: "info",
+            text: message.value,
+            duration: -1,
+            className: "toastify-error",
             newWindow: true,
             close: true,
             gravity: "top",
             position: "right",
             stopOnFocus: true,
-            style: {
-                background: "linear-gradient(to right, #ff5f6d, #ffc371)"
-            },
             onClick: function(){}
         }).showToast();
     }
 
-    enterVIF.value = false;
+    showTostify.value = false;
 });
 
 </script>
 
 <template>
-    <div  v-if="$page.props.flash.message" class="tw-text-red-500 tw-my-5">
-        <span class="tw-hidden">{{ enterVIF = true }}</span>
+    <div  v-if="$page.props.flash && $page.props.flash.error" class="tw-text-red-500 tw-my-5">
+        <span class="tw-hidden">
+            {{ showTostify = true }}
+            {{ message = $page.props.flash.error.message }}
+        </span>
         <div class="tw-border-t-4 tw-border-tw-danger-primary-500 tw-rounded-lg tw-bg-tw-danger-primary-50 tw-p-4" role="alert" tabindex="-1" aria-labelledby="hs-bordered-red-style-label">
             <div class="tw-flex">
             <div class="tw-shrink-0">
@@ -43,10 +44,10 @@ watch(enterVIF, (value) => {
             </div>
             <div class="tw-ms-3">
                 <h3 id="hs-bordered-red-style-label" class="tw-text-tw-danger-primary-600 tw-font-semibold">
-                {{ $page.props.flash.message.message }}
+                {{ $page.props.flash.error.message }}
                 </h3>
                 <ul class="tw-mt-3 tw-list-disc tw-list-inside tw-text-xs">
-                <li v-for="(error, index) in $page.props.flash.message.error" :key="index" class="tw-font-normal tw-text-tw-danger-primary-600">
+                <li v-for="(error, index) in $page.props.flash.error.error" :key="index" class="tw-font-normal tw-text-tw-danger-primary-600">
                     <span class="tw-font-semibold">{{ index }}: </span>
                     <span>{{ error }}</span>
                 </li>

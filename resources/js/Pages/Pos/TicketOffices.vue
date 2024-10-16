@@ -54,9 +54,9 @@ const props =  defineProps({
                     <!-- End Title -->
                     <ErrorSession />
 
-                    <div v-if="ticket_offices" class="tw-w-full tw-flex tw-justify-between tw-gap-6 tw-mt-7">
+                    <div v-if="ticket_offices" class="tw-w-full tw-flex-col lg:tw-flex-row tw-flex tw-justify-between tw-gap-6 tw-mt-7">
                         <!-- Grid -->
-                        <div class="tw-grid sm:tw-grid-cols-2 tw-gap-6 tw-w-2/3">
+                        <div class="tw-grid sm:tw-grid-cols-2 tw-gap-6 tw-w-full lg:tw-w-2/3">
                             <!-- Card -->
                             <Link :href="route('ticket-offices.show', ticketOffice.id)" v-for="ticketOffice in ticket_offices" :key="ticketOffice.id" class="tw-group tw-flex tw-flex-col hover:tw-scale-105 tw-transition-all tw-duration-500">
                                 <div class="tw-relative tw-pt-[50%] sm:tw-pt-[70%] tw-rounded-xl tw-overflow-hidden">
@@ -83,7 +83,7 @@ const props =  defineProps({
                         </div>
                         <!-- End Grid -->
                         <!-- Card -->
-                        <div class="tw-group tw-relative tw-flex tw-flex-col tw-w-1/3 tw-min-h-60 tw-bg-slate-950 tw-rounded-xl tw-overflow-hidden  hover:tw-scale-105 tw-transition-all tw-duration-500">
+                        <div class="tw-group tw-relative tw-flex tw-flex-col tw-w-full lg:tw-w-1/3 tw-min-h-96  tw-bg-slate-950 tw-rounded-xl tw-overflow-hidden  hover:tw-scale-105 tw-transition-all tw-duration-500">
                             <div class="tw-absolute tw-left-1/2 tw-top-[80%] tw-h-[1280px] tw-w-[800px] tw--translate-x-1/2 tw-rounded-full tw-bg-gradient-to-t tw-blur-[250px] tw-from-tw-primary-800 tw-to-tw-primary-600">
                             </div>
                             <div class="tw-flex-auto tw-p-4 md:tw-p-6 tw-relative tw-z-20">

@@ -36,10 +36,10 @@ class WebResponseHelper
         ];
 
         //Session::flash('error', $errorDetails);
-        return redirect()->back()->with('message', $errorDetails);
+        return redirect()->back()->with('error', $errorDetails);
     }
 
-    public static function sendResponse($result, $message = 'Éxito en el proceso', $route = 'welcome', $code = 200, $is_redirect = true, $is_render = false)
+    public static function sendResponse($result, $message = 'Éxito en el proceso', $route = 'welcome', $is_redirect = true)
     {
         $response = [
             'success' => true,
@@ -47,16 +47,12 @@ class WebResponseHelper
             'data'    => $result,
         ];
 
-        Session::flash('message', $response);
+        //Session::flash('message', $response);
 
         if($is_redirect) {
             return redirect(route($route, absolute: false))->with('message', $response);
         }
 
-        if($is_render) {
-            return $response;
-        }
-
-        return redirect()->back()->with('message', $response);
+        return redirect()->back()->with('success', $response);
     }
 }

@@ -7,6 +7,7 @@ use App\Models\TicketOffice;
 use App\Services\EventService;
 use App\Services\TicketOfficeService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class TicketOfficeController extends Controller
@@ -63,10 +64,14 @@ class TicketOfficeController extends Controller
 
             $ticket_office = $this->ticket_office_service->getById($ticketOffice->id);
             $events = $this->event_service->getAll();
+            $auth_user = Auth::user();
+            $active_cash_register = $auth_user->cashRegisterActive($ticketOffice->id);
 
             return Inertia::render('Pos/TicketOffice', [
                 'ticket_office' => $ticket_office,
                 'events' => $events,
+                'auth_user' => $auth_user,
+                'active_cash_register' => $active_cash_register
             ]);
 
         } catch (\Exception $e) {
