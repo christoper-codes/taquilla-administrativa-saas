@@ -51,6 +51,20 @@ class CashRegisterService
 
     /*
     * |--------------------------------------------------------------------------
+    * | Cash register general history
+    */
+    public function getCashRegisterGeneralHistory($cash_register_id)
+    {
+        try {
+            $cash_register = $this->cash_register_repository->getById($cash_register_id);
+
+            return $cash_register;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+    /*
+    * |--------------------------------------------------------------------------
     * | Open cash register
     */
     public function openCashRegister(array $data)
@@ -103,18 +117,16 @@ class CashRegisterService
                 /*
                 * Verify if there are any cash register open for today
                 */
-                $cash_register_open_today = CashRegister::where('ticket_office_id', $data['ticket_office_id'])
+                $cash_register_open = CashRegister::where('ticket_office_id', $data['ticket_office_id'])
                                     ->where('is_open', 1)
-                                    ->whereDate('created_at', now()->toDateString())
                                     ->first();
-                if ($cash_register_open_today) {
+                if ($cash_register_open) {
                     /*
                     * Get all cash register open that the same batch code
                     */
                     $cash_register_open_batch_codes = CashRegister::where('ticket_office_id', $data['ticket_office_id'])
-                                    ->where('is_open', 1)
-                                    ->where('batch_cash_register', $cash_register_open_today->batch_cash_register)
-                                    ->where('batch_code', $cash_register_open_today->batch_code)
+                                    ->where('batch_cash_register', $cash_register_open->batch_cash_register)
+                                    ->where('batch_code', $cash_register_open->batch_code)
                                     ->get();
 
                     /*
@@ -122,20 +134,29 @@ class CashRegisterService
                     */
                     if($cash_register_open_batch_codes->count() != 0) {
                         foreach($cash_register_open_batch_codes as $cash_register) {
-                            if($cash_register->cash_register_type_id != $data['cash_register_type_id']) {
+                            if($cash_register->cash_register_type_id == $data['cash_register_type_id']) {
                                 throw new \Exception('Esta caja ya habia sido abierta en el mismo dia y mismo lote');
                             }
                         }
                     }
+                }
 
+                /*
+                * Vefify if there was any cash register opened today for the same ticket office
+                */
+                $cash_registers_open_today = CashRegister::where('ticket_office_id', $data['ticket_office_id'])
+                                    ->whereDate('created_at', now()->toDateString())
+                                    ->get();
+
+                if($cash_registers_open_today->count() != 0) {
                     /*
-                    * Validate if any cash register is not confirmed clousure
+                    * Validate if any cash register is not confirmed clousure, then create a new cash register in the same batch code
                     */
                     $new_cash_register_in_same_batch = false;
-                    foreach($cash_register_open_batch_codes as $cash_register) {
+                    foreach($cash_registers_open_today as $cash_register) {
                         if(!$cash_register->confirmed_closure) {
-                            $data['batch_cash_register'] = $cash_register_open_today->batch_cash_register;
-                            $data['batch_code'] = $cash_register_open_today->batch_code;
+                            $data['batch_cash_register'] = $cash_register->batch_cash_register;
+                            $data['batch_code'] = $cash_register->batch_code;
                             $new_cash_register = $this->cash_register_repository->save($data);
                             $new_cash_register_in_same_batch = true;
                             break;
@@ -170,6 +191,7 @@ class CashRegisterService
             throw $e;
         }
     }
+
 
 
 }

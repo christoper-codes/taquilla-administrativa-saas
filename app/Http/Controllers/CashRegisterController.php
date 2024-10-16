@@ -6,6 +6,7 @@ use App\Helpers\WebResponseHelper;
 use App\Models\CashRegister;
 use App\Services\CashRegisterService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CashRegisterController extends Controller
@@ -60,8 +61,7 @@ class CashRegisterController extends Controller
 
             DB::commit();
 
-
-
+            WebResponseHelper::sendResponse($cash_register, 'Caja registradora abierta correctamente', null, false);
 
         } catch (\Exception $e) {
             WebResponseHelper::rollback($e, 'Opps! Algo salió mal al abrir la caja registradora');
