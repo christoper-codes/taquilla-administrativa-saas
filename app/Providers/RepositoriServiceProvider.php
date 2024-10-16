@@ -10,12 +10,14 @@ use App\Interfaces\GlobalPaymentTypeRepositoryInterface;
 use App\Interfaces\SeatCatalogueRepositoryInterface;
 use App\Interfaces\TicketOfficeRepositoryInterface;
 use App\Repositories\CashRegisterRepository;
+use App\Interfaces\CardPaymentDetailRepositoryInterface;
 use App\Repositories\EventRepository;
 use App\Repositories\GlobalCardPaymentTypeRepository;
 use App\Repositories\GlobalImageRepository;
 use App\Repositories\GlobalPaymentTypeRepository;
 use App\Repositories\SeatCatalogueRepository;
 use App\Repositories\TicketOfficeRepository;
+use App\Repositories\CardPaymentDetailRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoriServiceProvider extends ServiceProvider
@@ -39,6 +41,7 @@ class RepositoriServiceProvider extends ServiceProvider
         $this->app->bind(GlobalCardPaymentTypeRepositoryInterface::class, GlobalCardPaymentTypeRepository::class);
         $this->app->bind(TicketOfficeRepositoryInterface::class, TicketOfficeRepository::class);
         $this->app->bind(CashRegisterRepositoryInterface::class, CashRegisterRepository::class);
+        $this->app->bind(CardPaymentDetailRepositoryInterface::class, CardPaymentDetailRepository::class);
     }
 
     /**
