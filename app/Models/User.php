@@ -101,7 +101,15 @@ class User extends Authenticatable
 
     public function cashRegisters()
     {
-        return $this->hasMany(CashRegister::class);
+        return $this->hasMany(CashRegister::class, 'seller_user_opening_id');
+    }
+
+    public function cashRegisterActive($ticket_office_id)
+    {
+        return $this->cashRegisters()
+            ->where('ticket_office_id', $ticket_office_id)
+            ->where('is_open', 1)
+            ->first();
     }
 
     public function saleTickets()
