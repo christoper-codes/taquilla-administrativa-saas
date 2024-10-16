@@ -5,6 +5,7 @@ import NavigationDrawer from '@/Components/NavigationDrawer.vue';
 import Footer from '@/Components/Footer.vue';
 import { onMounted, ref } from 'vue';
 import ErrorSession from '@/Components/ErrorSession.vue';
+import SuccessSession from '@/Components/SuccessSession.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { cashRegisterSchema } from '@/validation/cash.-registers/cash-regiser-schema';
 import { useForm, useField } from 'vee-validate'
@@ -18,10 +19,10 @@ const loading = ref(false);
 
 const selectedEvents = ref([]);
 const cashRegisterData = useFormInertia({
-    'ticket_office_id': '',
-    'cash_register_type_id': '',
-    'seller_user_opening_id': '',
-    'opening_balance': '',
+    ticket_office_id: '',
+    cash_register_type_id: '',
+    seller_user_opening_id: '',
+    opening_balance: '',
 })
 
 onMounted(() => {
@@ -56,6 +57,10 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    'active_cash_register': {
+        type: Object,
+        required: false,
+    },
 })
 
 const eventProps = (item) => {
@@ -73,7 +78,10 @@ const ticketOfficeProps = (item) => {
   };
 };
 
-console.log(props.ticket_office);
+const dialog = ref(false);
+const notifications = ref(false);
+const sound = ref(true);
+const widgets = ref(false);
 
 </script>
 
@@ -83,19 +91,16 @@ console.log(props.ticket_office);
     <NavigationDrawer />
 
     <main class="tw-relative tw-overflow-hidden">
-        <section class="tw-max-w-7xl tw-pt-28 lg:tw-pt-10 tw-mb-20 tw-mx-auto tw-px-4 lg:tw-px-0 ">
-            <ErrorSession />
-                <div class="tw-w-full tw-flex tw-gap-20">
-                    <div class="">
-                        <div class="tw-flex tw-h-full tw-w-full tw-not-prose">
-                            <div class="tw-relative tw-shadow-black/5 tw-shadow-none tw-rounded-large">
-                                <img src="https://i.pinimg.com/564x/4a/04/11/4a04110cc00a352c8c8bc63c4731db1c.jpg" class="tw-relative tw-w-[400px] tw-rounded-lg tw-z-10 tw-opacity-0 tw-shadow-black/5 data-[loaded=true]:tw-opacity-100 tw-shadow-none tw-transition-transform-opacity motion-reduce:tw-transition-none !tw-duration-300 tw-rounded-large tw-m-5" width="240" data-loaded="true">
-                                <img src="https://i.pinimg.com/564x/4a/04/11/4a04110cc00a352c8c8bc63c4731db1c.jpg" class="tw-absolute tw-z-0 tw-inset-0 tw-w-full tw-h-full tw-object-cover tw-filter tw-blur-sm tw-pr-[30px] tw-scale-105 tw-saturate-150 tw-opacity-30 tw-translate-y-1 tw-rounded-large" width="240" aria-hidden="true" data-loaded="true">
-                            </div>
+        <section class="tw-max-w-7xl tw-pt-10 tw-mb-20 tw-mx-auto tw-px-4 lg:tw-px-0 ">
+            <SuccessSession />
+                <div class="tw-w-full tw-flex tw-gap-10 lg:tw-gap-20 tw-flex-col lg:tw-flex-row">
+                    <div class="tw-group tw-relative tw-flex tw-flex-col tw-w-full lg:tw-w-1/3 tw-min-h-60 tw-bg-[url('https://i.pinimg.com/564x/4a/04/11/4a04110cc00a352c8c8bc63c4731db1c.jpg')] tw-bg-center tw-bg-cover tw-rounded-xl tw-hover:shadow-lg tw-focus:outline-none tw-focus:shadow-lg tw-transition" href="#">
+                        <div class="tw-absolute tw-bottom-5 tw-left-10 tw-w-[80%] tw-rounded-xl tw-bg-black/40 tw-p-3 tw-backdrop-blur-md tw-backdrop-brightness-150 tw-text-white tw-font-bold tw-text-center">
+                            {{ ticket_office.name }}
                         </div>
                     </div>
 
-                    <div class="tw-space-y-5 lg:tw-space-y-8 tw-max-w-2xl">
+                    <div class="tw-space-y-5 lg:tw-space-y-8 tw-w-full lg:tw-w-1/2">
                         <Link :href="route('welcome')">
                             <div class="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-x-1.5 tw-text-sm tw-text-gray-600 tw-decoration-2 hover:tw-underline focus:tw-outline-none focus:tw-underline">
                                 <svg class="tw-shrink-0 tw-size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -103,9 +108,9 @@ console.log(props.ticket_office);
                             </div>
                         </Link >
 
-                        <h2 class="tw-text-4xl tw-font-bold">{{ ticket_office.name }}. Administracion para el club halcones de xalapa</h2>
+                        <h2 class="lg:tw-text-4xl tw-text-3xl tw-font-bold">{{ ticket_office.name }}. Administracion para el club halcones de xalapa</h2>
 
-                        <div class="tw-flex tw-items-center tw-gap-x-5">
+                        <div class="tw-flex tw-flex-col lg:tw-flex-row lg:tw-items-center tw-gap-5">
                             <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
                                 <span class="material-symbols-outlined tw-text-xl">location_on</span>Halcones de Xalapa
                             </div>
@@ -122,8 +127,8 @@ console.log(props.ticket_office);
         </section>
 
         <div class="tw-w-full tw-bg-slate-950 tw-relative tw-overflow-hidden tw-mt-16 tw-mb-36">
-            <div class="tw-max-w-7xl tw-mx-auto tw-flex tw-items-center tw-justify-between tw-py-16 tw-gap-9">
-                <div class="tw-h-60 tw-w-96 tw-bg-white/10 tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-gap-5 tw-px-5 py-14 tw-flex-col hover:tw-scale-105 tw-transition-all tw-duration-500  tw-z-20">
+            <div class="tw-max-w-7xl tw-mx-auto tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-py-16 tw-gap-9 tw-px-4 lg:tw-px-0">
+                <div class="tw-h-60 tw-w-full lg:tw-w-96 tw-bg-white/10 tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-gap-5 tw-px-5 py-14 tw-flex-col hover:tw-scale-105 tw-transition-all tw-duration-500  tw-z-20">
                     <h3 class="text-white tw-text-2xl">Abrir cajas registradoras</h3>
                     <v-dialog max-width="700">
                         <template v-slot:activator="{ props: activatorProps }">
@@ -173,40 +178,68 @@ console.log(props.ticket_office);
                                </div>
                             </v-card-actions>
                             </v-form>
-
                             </v-card>
                         </template>
                     </v-dialog>
                 </div>
 
-                <div class="tw-h-60 tw-w-96 tw-bg-white/10 tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-gap-5 tw-px-5 py-14 tw-flex-col hover:tw-scale-105 tw-transition-all tw-duration-500  tw-z-20">
+                <div class="tw-h-60 tw-w-full lg:tw-w-96 tw-bg-white/10 tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-gap-5 tw-px-5 py-14 tw-flex-col hover:tw-scale-105 tw-transition-all tw-duration-500  tw-z-20 tw-relative">
+                    <div v-if="active_cash_register" class="tw-absolute -tw-top-1 -tw-right-1">
+                        <span class="tw-flex tw-h-6 tw-w-6">
+                        <span class="tw-animate-ping tw-absolute tw-inline-flex tw-h-full tw-w-full tw-rounded-full tw-bg-green-400 tw-opacity-75"></span>
+                        <span class="tw-inline-flex tw-rounded-full tw-h-6 tw-w-6 tw-bg-green-500"></span>
+                        </span>
+                    </div>
                     <h3 class="text-white tw-text-2xl">Resumen de cajas</h3>
-                    <v-dialog max-width="700">
-                        <template v-slot:activator="{ props: activatorProps }">
-                            <v-btn v-bind="activatorProps" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400 !tw-h-1/2" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">credit_score</span>Cajas aperturadas</v-btn>
-                        </template>
-                        <template v-slot:default="{ isActive }">
-                            <v-card title="Resumen de cajas aperturadas">
-                            <v-card-text>
-                                <div class="">
-                                    Resumen
-                                </div>
-                            </v-card-text>
+                    <div class="text-center pa-4">
+                        <v-dialog
+                            v-model="dialog"
+                            transition="dialog-bottom-transition"
+                            fullscreen
+                        >
+                            <template v-slot:activator="{ props: activatorProps }">
+                            <v-btn v-bind="activatorProps" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400 !tw-h-20 !tw-w-[335px]" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">credit_score</span>Cajas aperturadas</v-btn>
+                            </template>
 
-                            <v-card-actions>
+                            <v-card>
+                            <v-toolbar class="!tw-bg-gradient-to-r !tw-from-slate-950 !tw-via-purple-950 !tw-to-slate-950">
+                                <v-btn
+                                class="!tw-text-white"
+                                icon="mdi-close"
+                                @click="dialog = false"
+                                ></v-btn>
+
+                                <v-toolbar-title>
+                                    <div class="tw-font-bold tw-text-white">Resumen de caja</div>
+                                </v-toolbar-title>
+
                                 <v-spacer></v-spacer>
-                               <div class="tw-flex tw-items-center tw-gap-3 tw-mb-3">
-                                    <v-btn variant="tonal" color="red" class="text-none !tw-px-7" size="large" rounded="xl" @click="isActive.value = false">Cancelar</v-btn>
-                                    <v-btn variant="elevated" class="text-none !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="large" rounded="xl" @click="isActive.value = false">Aceptar</v-btn>
-                               </div>
-                            </v-card-actions>
 
+                                <v-toolbar-items>
+                                <v-btn
+                                    color="white"
+                                    text="Aceptar"
+                                    variant="tonal"
+                                    @click="dialog = false"
+                                ></v-btn>
+                                </v-toolbar-items>
+                            </v-toolbar>
+                            <div v-if="active_cash_register">
+                                    active
+                            </div>
+                            <div v-else class="tw-flex tw-items-center tw-justify-center tw-mt-20 tw-flex-col tw-gap-10">
+                                <div class="tw-font-bold tw-text-center tw-bg-gray-200 tw-rounded-full tw-inline-flex tw-px-7 tw-py-3 tw-text-gray-600">
+                                    No hay cajas abiertas para este usuario
+                                </div>
+                                <img class="tw-w-96" src="../../../../public/img/seats-no-selected-img.svg" alt="">
+                            </div>
                             </v-card>
-                        </template>
-                    </v-dialog>
+                        </v-dialog>
+                        </div>
+
                 </div>
 
-                <div class="tw-h-60 tw-w-96 tw-bg-white/10 tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-gap-5 tw-px-5 py-14 tw-flex-col hover:tw-scale-105 tw-transition-all tw-duration-500  tw-z-20">
+                <div class="tw-h-60 tw-w-full lg:tw-w-96 tw-bg-white/10 tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-gap-5 tw-px-5 py-14 tw-flex-col hover:tw-scale-105 tw-transition-all tw-duration-500  tw-z-20">
                     <h3 class="text-white tw-text-2xl">Registro de usuarios</h3>
                     <v-dialog max-width="700">
                         <template v-slot:activator="{ props: activatorProps }">
