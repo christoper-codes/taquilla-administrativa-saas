@@ -1,24 +1,27 @@
 <script setup>
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import { Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
+import { onMounted, ref } from 'vue';
 import { drawerNavState } from '@/composables/drawersStates';
+import useTicketOfficeState from '@/composables/TicketOfficeState';
 import ErrorSession from '@/Components/ErrorSession.vue';
 import GuestNavLink from '@/Components/GuestNavLink.vue';
+
+const { cashRegisterPresent } = useTicketOfficeState();
 
 const fav = ref(true);
 const menu = ref(false);
 const message = ref(false);
 const hints = ref(true);
-
 const toggleFav = () => {
   fav.value = !fav.value;
 };
 </script>
 
 <template>
-    <div class="tw-w-full tw-bg-white tw-max-w-7xl tw-mx-auto tw-py-3 lg:tw-py-5 tw-px-4 lg:tw-px-0 tw-flex tw-items-center tw-justify-between">
-        <div class="tw-flex tw-items-center tw-gap-3">
+    <div :class="{ 'tw-bg-white': cashRegisterPresent }">
+        <div class="tw-w-full tw-max-w-7xl tw-mx-auto tw-py-3 lg:tw-py-5 tw-px-4 lg:tw-px-0 tw-flex tw-items-center tw-justify-between">
+            <div class="tw-flex tw-items-center tw-gap-3">
             <Link :href="route('welcome')" class="lg:tw-block tw-hidden">
                 <ApplicationLogo class="tw-w-16 tw-h-auto tw-fill-current"/>
             </Link>
@@ -27,7 +30,15 @@ const toggleFav = () => {
                 <p class="tw-text-gray-500 tw-text-xs">Club de baloncesto | Temporada 2024 - 2025</p>
             </div>
         </div>
-        <div class="tw-flex tw-items-center tw-gap-4 lg:tw-gap-10 tw-text-gray-500">
+        <div v-if="cashRegisterPresent" class="tw-text-gray-700 tw-font-semibold lg:tw-text-3xl lg:tw-flex tw-items-center tw-gap-3">
+            <div class="tw-flex tw-gap-1 lg:tw-flex-col">
+                <div class="tw-h-2 tw-w-2 tw-rounded-full tw-bg-pink-400"></div>
+                <div class="tw-h-2 tw-w-2 tw-rounded-full tw-bg-yellow-400"></div>
+                <div class="tw-h-2 tw-w-2 tw-rounded-full tw-bg-green-400"></div>
+            </div>
+            <p>Caja<span class="tw-font-extralight tw-text-gray-500">Activa</span> {{ cashRegisterPresent }}</p>
+        </div>
+        <div v-else class="tw-flex tw-items-center tw-gap-4 lg:tw-gap-10 tw-text-gray-500">
             <div class="tw-flex tw-items-center tw-gap-2 lg:tw-gap-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="tw-fill-current tw-size-5 lg:tw-size-6" viewBox="0 0 24 24"><path d="M20 3H4a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h8.615v-6.96h-2.338v-2.725h2.338v-2c0-2.325 1.42-3.592 3.5-3.592.699-.002 1.399.034 2.095.107v2.42h-1.435c-1.128 0-1.348.538-1.348 1.325v1.735h2.697l-.35 2.725h-2.348V21H20a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z"></path></svg>
                 <svg xmlns="http://www.w3.org/2000/svg" class="tw-fill-current tw-size-5 lg:tw-size-6" viewBox="0 0 24 24"><path d="M20.947 8.305a6.53 6.53 0 0 0-.419-2.216 4.61 4.61 0 0 0-2.633-2.633 6.606 6.606 0 0 0-2.186-.42c-.962-.043-1.267-.055-3.709-.055s-2.755 0-3.71.055a6.606 6.606 0 0 0-2.185.42 4.607 4.607 0 0 0-2.633 2.633 6.554 6.554 0 0 0-.419 2.185c-.043.963-.056 1.268-.056 3.71s0 2.754.056 3.71c.015.748.156 1.486.419 2.187a4.61 4.61 0 0 0 2.634 2.632 6.584 6.584 0 0 0 2.185.45c.963.043 1.268.056 3.71.056s2.755 0 3.71-.056a6.59 6.59 0 0 0 2.186-.419 4.615 4.615 0 0 0 2.633-2.633c.263-.7.404-1.438.419-2.187.043-.962.056-1.267.056-3.71-.002-2.442-.002-2.752-.058-3.709zm-8.953 8.297c-2.554 0-4.623-2.069-4.623-4.623s2.069-4.623 4.623-4.623a4.623 4.623 0 0 1 0 9.246zm4.807-8.339a1.077 1.077 0 0 1-1.078-1.078 1.077 1.077 0 1 1 2.155 0c0 .596-.482 1.078-1.077 1.078z"></path><circle cx="11.994" cy="11.979" r="3.003"></circle></svg>
@@ -38,6 +49,7 @@ const toggleFav = () => {
             <svg xmlns="http://www.w3.org/2000/svg" class="tw-fill-current tw-size-5 lg:tw-size-6" viewBox="0 0 24 24"><path d="m12.954 11.616 2.957-2.957L6.36 3.291c-.633-.342-1.226-.39-1.746-.016l8.34 8.341zm3.461 3.462 3.074-1.729c.6-.336.929-.812.929-1.34 0-.527-.329-1.004-.928-1.34l-2.783-1.563-3.133 3.132 2.841 2.84zM4.1 4.002c-.064.197-.1.417-.1.658v14.705c0 .381.084.709.236.97l8.097-8.098L4.1 4.002zm8.854 8.855L4.902 20.91c.154.059.32.09.495.09.312 0 .637-.092.968-.276l9.255-5.197-2.666-2.67z"></path></svg>
             <svg xmlns="http://www.w3.org/2000/svg" class="tw-fill-current tw-size-5 lg:tw-size-6" viewBox="0 0 24 24"><path d="M19.665 16.811a10.316 10.316 0 0 1-1.021 1.837c-.537.767-.978 1.297-1.316 1.592-.525.482-1.089.73-1.692.744-.432 0-.954-.123-1.562-.373-.61-.249-1.17-.371-1.683-.371-.537 0-1.113.122-1.73.371-.616.25-1.114.381-1.495.393-.577.025-1.154-.229-1.729-.764-.367-.32-.826-.87-1.377-1.648-.59-.829-1.075-1.794-1.455-2.891-.407-1.187-.611-2.335-.611-3.447 0-1.273.275-2.372.826-3.292a4.857 4.857 0 0 1 1.73-1.751 4.65 4.65 0 0 1 2.34-.662c.46 0 1.063.142 1.81.422s1.227.422 1.436.422c.158 0 .689-.167 1.593-.498.853-.307 1.573-.434 2.163-.384 1.6.129 2.801.759 3.6 1.895-1.43.867-2.137 2.08-2.123 3.637.012 1.213.453 2.222 1.317 3.023a4.33 4.33 0 0 0 1.315.863c-.106.307-.218.6-.336.882zM15.998 2.38c0 .95-.348 1.838-1.039 2.659-.836.976-1.846 1.541-2.941 1.452a2.955 2.955 0 0 1-.021-.36c0-.913.396-1.889 1.103-2.688.352-.404.8-.741 1.343-1.009.542-.264 1.054-.41 1.536-.435.013.128.019.255.019.381z"></path></svg>
            </div>
+        </div>
         </div>
     </div>
    <div class="tw-bg-white/50 tw-sticky tw-w-full tw-z-50 tw-top-0 tw-left-0 tw-overflow-hidden tw-backdrop-filter tw-backdrop-blur-md">

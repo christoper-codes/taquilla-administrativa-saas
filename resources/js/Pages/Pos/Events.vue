@@ -5,6 +5,10 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import Footer from '@/Components/Footer.vue';
 import { onMounted } from 'vue';
 import ErrorSession from '@/Components/ErrorSession.vue';
+import useDateFormat from '@/composables/dateFormat';
+
+const { dateFormat } = useDateFormat();
+
 
 const props = defineProps({
     events: {
@@ -12,7 +16,6 @@ const props = defineProps({
         required: true,
     },
 });
-
 
 onMounted(() => {
 
@@ -73,7 +76,7 @@ onMounted(() => {
                                         <a class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200" href="#">
                                             📍 | Evento deportivo
                                         </a>
-                                        <p class="tw-text-xs sm:tw-text-sm tw-text-gray-800">📅 | {{ event.start_date }} </p>
+                                        <p class="tw-text-xs sm:tw-text-sm tw-text-gray-800">📅 | {{ dateFormat(event.start_date) }} </p>
                                     </div>
 
                                     <p class="tw-text-lg tw-text-gray-800 tw-hidden lg:tw-block">Xalapa, Veracruz - En un inicio de temporada emocionante, los Halcones de Xalapa han demostrado ser uno de los equipos más competitivos de la liga profesional de baloncesto en México</p>
@@ -81,14 +84,14 @@ onMounted(() => {
                                     <p class="tw-text-lg tw-text-gray-800">{{ event.description }}</p>
 
                                     <div class="">
-                                        <div class="tw-h-44 lg:tw-h-96 tw-w-full tw-block tw-shadow-xl tw-overflow-hidden tw-rounded-lg hover:tw-translate-y-[-10px] tw-transition-transform tw-duration-500"
-                                        :style="{ backgroundImage: `url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
-                                            <div class="tw-bg-white tw-py-1 tw-px-3 tw-rounded-lg tw-inline-flex tw-ml-3 tw-mt-3">
-                                                <span class="material-symbols-outlined tw-text-2xl">bookmark</span>
+                                        <div class="tw-relative tw-h-44 lg:tw-h-96 tw-w-full tw-block tw-shadow-xl tw-overflow-hidden tw-rounded-3xl hover:tw-scale-105 tw-transition-transform tw-duration-500"
+                                            :style="{ backgroundImage: `url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
+                                            <div class="tw-absolute tw-bottom-0 tw-w-[100%] tw-rounded-xl tw-bg-black/40 tw-p-5 tw-backdrop-blur-md tw-backdrop-brightness-150 tw-text-white tw-font-bold tw-text-center">
+                                                {{ dateFormat(event.start_date) }}
                                             </div>
                                         </div>
                                         <span class="tw-mt-3 tw-block tw-text-sm tw-text-center tw-text-gray-500">
-                                            Trabajando durante el proceso
+                                            Imagen de referencia del evento | Halcones
                                         </span>
                                         <div class="tw-mt-3">
                                             <Link

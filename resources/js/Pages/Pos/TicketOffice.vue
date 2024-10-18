@@ -9,6 +9,7 @@ import SuccessSession from '@/Components/SuccessSession.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { cashRegisterSchema } from '@/validation/cash.-registers/cash-regiser-schema';
 import { useForm, useField } from 'vee-validate'
+import useTicketOfficeState from '@/composables/TicketOfficeState';
 
 const { handleSubmit } = useForm({validationSchema : cashRegisterSchema});
 const cashRegisterFields = {
@@ -16,6 +17,7 @@ const cashRegisterFields = {
     'opening_balance': useField('opening_balance'),
 }
 const loading = ref(false);
+const { cashRegisterPresent } = useTicketOfficeState();
 
 const selectedEvents = ref([]);
 const cashRegisterData = useFormInertia({
@@ -37,6 +39,12 @@ const cashRegisterSubmit = handleSubmit((values, isActive) => {
     cashRegisterData.opening_balance = values.opening_balance;
 
     cashRegisterData.post(route('cash-registers.store'), {
+        onSuccess: (response) => {
+            cashRegisterFields.cash_register_type_id.value.value = '';
+            cashRegisterFields.opening_balance.value.value = '';
+            localStorage.setItem('cashRegisterData', JSON.stringify(response.props.active_cash_register));
+            cashRegisterPresent.value = response.props.active_cash_register.cash_register_type_id;
+        },
         onFinish: () => {
             loading.value = false;
             isActive.evt.value = false;
@@ -190,7 +198,7 @@ const widgets = ref(false);
                         <span class="tw-inline-flex tw-rounded-full tw-h-6 tw-w-6 tw-bg-green-500"></span>
                         </span>
                     </div>
-                    <h3 class="text-white tw-text-2xl">Resumen de cajas</h3>
+                    <h3 class="text-white tw-text-2xl">Resumen de caja <span v-if="active_cash_register">{{ active_cash_register.cash_register_type_id }}</span> </h3>
                     <div class="text-center pa-4">
                         <v-dialog
                             v-model="dialog"
@@ -229,7 +237,7 @@ const widgets = ref(false);
                             </div>
                             <div v-else class="tw-flex tw-items-center tw-justify-center tw-mt-20 tw-flex-col tw-gap-10">
                                 <div class="tw-font-bold tw-text-center tw-bg-gray-200 tw-rounded-full tw-inline-flex tw-px-7 tw-py-3 tw-text-gray-600">
-                                    No hay cajas abiertas para este usuario
+                                    No hay cajas abiertas para este usuario en esta taquilla
                                 </div>
                                 <img class="tw-w-96" src="../../../../public/img/seats-no-selected-img.svg" alt="">
                             </div>
