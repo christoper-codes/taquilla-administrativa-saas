@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Helpers\WebResponseHelper;
 use App\Models\TicketOffice;
+use App\Models\User;
 use App\Services\EventService;
 use App\Services\TicketOfficeService;
+use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 class TicketOfficeController extends Controller
@@ -27,6 +30,8 @@ class TicketOfficeController extends Controller
      */
     public function index()
     {
+        Gate::authorize('viewVendorTopics', Auth::user());
+
         try {
             $ticket_offices = $this->ticket_office_service->getAll();
 
@@ -60,6 +65,8 @@ class TicketOfficeController extends Controller
      */
     public function show(TicketOffice $ticketOffice)
     {
+        Gate::authorize('viewVendorTopics', Auth::user());
+
         try {
 
             $ticket_office = $this->ticket_office_service->getById($ticketOffice->id);

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\WebResponseHelper;
 use App\Models\SeatCatalogue;
+use App\Services\EventService;
 use App\Services\SeatCatalogueService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,10 +17,12 @@ class SeatCatalogueController extends Controller
     * Inject the SeatCatalogue service into the controller
     */
     protected $seat_catalogue_service;
+    protected $event_service;
 
-    public function __construct(SeatCatalogueService $seat_catalogue_service)
+    public function __construct(SeatCatalogueService $seat_catalogue_service, EventService $event_service)
     {
         $this->seat_catalogue_service = $seat_catalogue_service;
+        $this->event_service = $event_service;
     }
 
     /**
@@ -26,13 +30,32 @@ class SeatCatalogueController extends Controller
      */
     public function index()
     {
-        $user = Auth::user()->load('globalImages');
-        $flash = $user->is_new ? 'is_new_user' : null;
+        try{
 
-        return Inertia::render('App/Dashboard', [
-            'user' => $user,
-            'flash' => $flash,
-        ]);
+            $user = Auth::user()->load('globalImages');
+            $flash = $user->is_new ? 'is_new_user' : null;
+            $tickets = $user->EventSeatCatalogues()->with('event', 'seatCatalogue', 'seatCatalogueStatus')->get();
+            $events = $this->event_service->getAll();
+            $eventsWithTickets = [];
+
+            foreach ($events as $event) {
+                $eventsWithTickets[$event->id] = [
+                    'event' => $event,
+                    'tickets' => $tickets->filter(function($ticket) use ($event) {
+                        return $ticket->event_id == $event->id;
+                    })->values()
+                ];
+            }
+
+            return Inertia::render('App/Dashboard', [
+                'user' => $user,
+                'flash' => $flash,
+                'events_with_tickets' => $eventsWithTickets,
+            ]);
+
+        } catch (\Exception $e) {
+            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar el catálogo de asientos');
+        }
     }
 
     /**

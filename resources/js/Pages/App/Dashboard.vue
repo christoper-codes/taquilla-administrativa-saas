@@ -68,6 +68,15 @@ onMounted(() => {
     shootConfettiTwice();
   }
 }); */
+
+const props = defineProps({
+    'events_with_tickets': {
+        type: Object,
+        required: true,
+    },
+})
+
+console.log(props);
 </script>
 
 <template>
@@ -99,49 +108,51 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div class="tw-mt-10 tw-gap-5 tw-w-full tw-flex tw-flex-col-reverse lg:tw-flex-row tw-items-start tw-justify-between">
-                <div class="tw-w-full tw-shadow-lg tw-bg-white tw-px-5 tw-py-7 tw-rounded-2xl tw-border">
-                    <div class="tw-px-7 tw-py-3 tw-bg-purple-200 tw-font-bold tw-text-xs lg:tw-text-lg tw-rounded-full tw-inline-block tw-text-purple-600">
-                        <span>Seleciona un partido para ver tus boletos</span>
-                    </div>
-                    <div class="tw-mt-5">
-                        <v-tabs
-                            v-model="tab"
-                            align-tabs="center"
-                            color="deep-purple-accent-4"
-                            >
-                            <v-tab value="one">Halcones de xala vs buap</v-tab>
-                            <v-tab value="two">Halcones de xala rojos</v-tab>
-                            <v-tab value="three">Halcones de xala vs monterrey</v-tab>
-                        </v-tabs>
+            <div>
+                <div class="tw-mt-10 tw-gap-5 tw-w-full tw-flex tw-flex-col-reverse lg:tw-flex-row tw-items-start tw-justify-between">
+                    <div class="tw-w-full tw-shadow-lg tw-bg-white tw-px-5 tw-py-7 tw-rounded-2xl tw-border">
+                        <div class="tw-px-7 tw-py-3 tw-bg-purple-200 tw-font-bold tw-text-xs lg:tw-text-lg tw-rounded-full tw-inline-block tw-text-purple-600">
+                            <span>Seleciona un partido para ver tus boletos</span>
+                        </div>
+                        <div class="tw-mt-5">
+                            <v-tabs
+                                v-model="tab"
+                                align-tabs="center"
+                                color="deep-purple-accent-4"
+                                >
+                                <v-tab value="one">Halcones de xala vs buap</v-tab>
+                                <v-tab value="two">Halcones de xala rojos</v-tab>
+                                <v-tab value="three">Halcones de xala vs monterrey</v-tab>
+                            </v-tabs>
+                        </div>
                     </div>
                 </div>
-            </div>
 
 
-            <div class="tw-mt-10 tw-bg-white">
-                <v-tabs-window v-model="tab">
-                    <v-tabs-window-item value="one">
-                        <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
-                            <SaleTicket/>
-                            <SaleTicket/>
-                        </div>
-                    </v-tabs-window-item>
+                <div class="tw-mt-10 tw-bg-white">
+                    <v-tabs-window v-model="tab">
+                        <v-tabs-window-item value="one">
+                            <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
+                                <SaleTicket/>
+                                <SaleTicket/>
+                            </div>
+                        </v-tabs-window-item>
 
-                    <v-tabs-window-item value="two">
-                        <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
-                            <SaleTicket/>
-                        </div>
-                    </v-tabs-window-item>
+                        <v-tabs-window-item value="two">
+                            <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
+                                <SaleTicket/>
+                            </div>
+                        </v-tabs-window-item>
 
-                    <v-tabs-window-item value="three">
-                        <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
-                            <SaleTicket/>
-                            <SaleTicket/>
-                            <SaleTicket/>
-                        </div>
-                    </v-tabs-window-item>
-                </v-tabs-window>
+                        <v-tabs-window-item value="three">
+                            <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
+                                <SaleTicket/>
+                                <SaleTicket/>
+                                <SaleTicket/>
+                            </div>
+                        </v-tabs-window-item>
+                    </v-tabs-window>
+                </div>
             </div>
         </div>
 
