@@ -134,7 +134,12 @@ const props = defineProps({
                                 </AppNavLink>
                             </div>
                             <div class=" tw-w-full">
-                                <AppNavLink :href="route('events.index')" :active="route().current('events.index')">
+                                <AppNavLink :href="route('series.index')" :active="route().current('series.index')">
+                                    <span class="material-symbols-outlined tw-text-lg">signpost</span>series
+                                </AppNavLink>
+                            </div>
+                            <div class=" tw-w-full">
+                                <AppNavLink :href="route('event.management.indexManagement')" :active="route().current('event.management.indexManagement')">
                                     <span class="material-symbols-outlined tw-text-lg">note_stack</span>Eventos
                                 </AppNavLink>
                             </div>

@@ -6,6 +6,8 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\SeatCatalogueController;
 use App\Http\Controllers\TicketOfficeController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SerieController;
+use App\Models\Event;
 
 /*
 * |--------------------------------------------------------------------------
@@ -18,3 +20,21 @@ Route::middleware('auth')->group(function() {
     Route::post('/caja-registradora/store', [CashRegisterController::class, 'store'])->name('cash-registers.store');
 
 });
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Series | ROUTES
+*/
+Route::post('/series', [SerieController::class, 'store'])->name('series.store');
+
+
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Events | ROUTES
+*/
+Route::post('/eventos', [EventController::class, 'store'])->name('event.management.store');

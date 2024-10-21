@@ -16,6 +16,11 @@ class SeatCatalogueRepository implements SeatCatalogueRepositoryInterface
         return SeatCatalogue::all();
     }
 
+    public function getAllSeatsForStadium(int $id)
+    {
+        return SeatCatalogue::where('stadium_id',$id)->get();
+    }
+
     public function getById($id)
     {
         return SeatCatalogue::findOrfail($id);
@@ -24,6 +29,11 @@ class SeatCatalogueRepository implements SeatCatalogueRepositoryInterface
     public function save(array $data)
     {
         return SeatCatalogue::create($data);
+    }
+
+    public function saveAllSeatsForStadium(array $data){
+
+        return SeatCatalogue::insert($data);
     }
 
     public function update($id, array $data)
