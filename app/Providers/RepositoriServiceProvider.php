@@ -7,17 +7,27 @@ use App\Interfaces\EventRepositoryInterface;
 use App\Interfaces\GlobalCardPaymentTypeRepositoryInterface;
 use App\Interfaces\GlobalImageRepositoryInterface;
 use App\Interfaces\GlobalPaymentTypeRepositoryInterface;
+use App\Interfaces\GlobalSeasonRepositoryInterface;
 use App\Interfaces\SeatCatalogueRepositoryInterface;
 use App\Interfaces\TicketOfficeRepositoryInterface;
 use App\Repositories\CashRegisterRepository;
 use App\Interfaces\CardPaymentDetailRepositoryInterface;
+use App\Interfaces\EventSeatCatalogueRepositoryInterface;
+use App\Interfaces\EventTypeRepositoryInterface;
+use App\Interfaces\SeatCatalogueStatusesRepositoryInterface;
+use App\Interfaces\SerieRepositoryInterface;
 use App\Repositories\EventRepository;
 use App\Repositories\GlobalCardPaymentTypeRepository;
 use App\Repositories\GlobalImageRepository;
 use App\Repositories\GlobalPaymentTypeRepository;
+use App\Repositories\GlobalSeasonRepository;
 use App\Repositories\SeatCatalogueRepository;
 use App\Repositories\TicketOfficeRepository;
 use App\Repositories\CardPaymentDetailRepository;
+use App\Repositories\EventSeatCatalogueRepository;
+use App\Repositories\EventTypeRepository;
+use App\Repositories\SeatCatalogueStatusesRepository;
+use App\Repositories\SerieRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoriServiceProvider extends ServiceProvider
@@ -42,6 +52,11 @@ class RepositoriServiceProvider extends ServiceProvider
         $this->app->bind(TicketOfficeRepositoryInterface::class, TicketOfficeRepository::class);
         $this->app->bind(CashRegisterRepositoryInterface::class, CashRegisterRepository::class);
         $this->app->bind(CardPaymentDetailRepositoryInterface::class, CardPaymentDetailRepository::class);
+        $this->app->bind(SerieRepositoryInterface::class, SerieRepository::class);
+        $this->app->bind(GlobalSeasonRepositoryInterface::class, GlobalSeasonRepository::class);
+        $this->app->bind(EventTypeRepositoryInterface::class, EventTypeRepository::class);
+        $this->app->bind(EventSeatCatalogueRepositoryInterface::class, EventSeatCatalogueRepository::class);
+        $this->app->bind(SeatCatalogueStatusesRepositoryInterface::class, SeatCatalogueStatusesRepository::class);
     }
 
     /**
