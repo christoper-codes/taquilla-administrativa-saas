@@ -49,6 +49,9 @@ const props =  defineProps({
                             <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
                                 <span class="material-symbols-outlined tw-text-xl">calendar_today</span>000000
                             </div>
+                            <Link :href="route('ticket-offices.check')">
+                            <v-btn variant="elevated" class="text-none !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Verificar</v-btn>
+                            </Link>
                         </div>
                     </div>
                     <!-- End Title -->
