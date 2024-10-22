@@ -3,37 +3,32 @@
 </script>
 
 <template>
-    <section class="tw-overflow-hidden tw-h-[300px]">
-        <v-parallax
-            class="tw-rounded-none tw-h-[300px] tw-relative" src="https://preview.colorlib.com/theme/theconference/images/index.jpg.webp"
-        >
-        <div class="tw-hidden lg:tw-block tw-absolute tw-left-0 tw-top-[50%] tw-h-[1280px] tw-w-[800px] tw--translate-x-1/2 tw-rounded-full tw-bg-gradient-to-t tw-blur-[150px] tw-from-tw-primary-800 tw-to-tw-primary-600">
-        </div>
-            <div class="d-flex flex-column fill-height justify-center align-center text-white tw-bg-gray-950/50 lg:tw-backdrop-blur-sm">
-                <div class="tw-max-w-7xl tw-mx-auto tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-w-full tw-gap-5">
-                    <div class="tw-flex tw-items-center tw-gap-0 lg:tw-gap-3">
-                        <svg class="tw-shrink-0 tw-size-9" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="1"></circle>
-                            <circle cx="12" cy="5" r="1"></circle>
-                            <circle cx="12" cy="19" r="1"></circle>
-                        </svg>
-                        <h2 class="tw-font-bold tw-text-4xl lg:tw-text-6xl">
+    <section class="tw-h-[250px]">
+        <div class="tw-rounded-none tw-h-[300px] tw-relative tw-bg-white">
+            <img class="tw-w-[1300px] tw-h-auto tw-absolute tw-right-0 tw-top-0 lg:tw-mt-[-80px]" src="../../../public/img/hero.svg" alt="">
+            <div class="d-flex flex-column fill-height justify-center align-center text-white tw-relative tw-px-4 lg:tw-px-0">
+                <div class="tw-max-w-7xl tw-mx-auto tw-flex tw-flex-col tw-w-full tw-gap-10">
+                    <div class="tw-flex tw-items-end tw-gap-0 lg:tw-gap-3">
+                        <h2 class="tw-font-bold tw-text-3xl lg:tw-text-5xl tw-text-gray-600 tw-max-w-2xl">
                             <slot name="title" />
+                            <span>
+                                <svg class="tw-shrink-0 tw-ms-2 tw-size-10 tw-text-gray-500 tw-inline" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+                            </span>
                         </h2>
                     </div>
                     <div class="tw-flex tw-items-center">
                         <ol class="tw-flex tw-items-center tw-whitespace-nowrap">
                             <li class="tw-inline-flex tw-items-center tw-py-1.5 tw-px-2">
-                                <a class="tw-flex tw-items-center tw-text-sm tw-text-gray-400 hover:tw-text-purple-600" href="/">
+                                <a class="tw-flex tw-items-center tw-text-sm tw-text-gray-600 hover:tw-text-purple-600" href="/">
                                     Comienzo
                                 </a>
-                                <svg class="tw-shrink-0 tw-ms-2 tw-size-4 tw-text-gray-100" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="tw-shrink-0 tw-ms-2 tw-size-4 tw-text-gray-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="m9 18 6-6-6-6"></path>
                                 </svg>
                             </li>
                             <li class="tw-inline-flex tw-items-center tw-text-sm">
                                 <div class="[--placement:top-left] tw-relative tw-inline-flex">
-                                <div class="tw-flex tw-items-center gap-2 tw-bg-white/10 tw-py-2 tw-px-4 tw-rounded-full tw-cursor-pointer">
+                                <div class="tw-flex tw-items-center gap-2 tw-bg-gray-200 tw-py-2 tw-px-4 tw-rounded-full tw-cursor-pointer tw-text-gray-600">
                                     <svg class="tw-shrink-0 tw-size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="12" cy="12" r="1"></circle>
                                     <circle cx="12" cy="5" r="1"></circle>
@@ -50,21 +45,24 @@
                                     </a>
                                 </div>
                                 </div>
-                                <svg class="tw-shrink-0 tw-ms-2 tw-size-4 tw-text-gray-100" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="tw-shrink-0 tw-ms-2 tw-size-4 tw-text-gray-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="m9 18 6-6-6-6"></path>
                                 </svg>
                             </li>
-                            <li class="tw-inline-flex tw-items-center tw-py-1.5 tw-px-2 tw-text-sm tw-font-semibold tw-text-gray-800 tw-truncate" aria-current="page">
-                                <a class="tw-flex tw-items-center tw-text-sm tw-text-gray-400 hover:tw-text-purple-600" href="/">
+                            <li class="tw-inline-flex tw-items-center tw-py-1.5 tw-px-2">
+                                <a class="tw-flex tw-items-center tw-text-sm tw-text-gray-600 hover:tw-text-purple-600" href="/">
                                     Dashboard
                                 </a>
+                                <svg class="tw-shrink-0 tw-ms-2 tw-size-4 tw-text-gray-500 tw-hidden lg:tw-block" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m9 18 6-6-6-6"></path>
+                                </svg>
                             </li>
                         </ol>
 
                     </div>
                 </div>
             </div>
-        </v-parallax>
+        </div>
     </section>
 </template>
 

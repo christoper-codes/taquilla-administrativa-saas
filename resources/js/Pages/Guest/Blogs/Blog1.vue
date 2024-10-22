@@ -19,12 +19,12 @@ defineProps({
     <NavigationDrawer />
     <Breadcrumb>
             <template #title>
-                <span>Blogs</span>
+                <span>Los Halcones de Xalapa en la Temporada 2024 </span>
             </template>
     </Breadcrumb>
     <main class="tw-px-4 lg:tw-px-0 tw-relative">
 
-        <section class="tw-max-w-7xl tw-min-h-screen tw-pt-0 lg:tw-pt-10 tw-mx-auto">
+        <section class="tw-max-w-7xl tw-min-h-screen  tw-mx-auto">
             <!-- Blog Article -->
             <div class="tw-mx-auto">
             <div class="tw-grid lg:tw-grid-cols-3 tw-gap-y-8 lg:tw-gap-y-0 lg:tw-gap-x-6">
@@ -38,8 +38,6 @@ defineProps({
                             Regresar al inicio
                         </div>
                     </Link >
-
-                    <h2 class="tw-text-3xl tw-font-bold lg:tw-text-5xl">Los Halcones de Xalapa en la Temporada 2024</h2>
 
                     <div class="tw-flex tw-items-center tw-gap-x-5">
                         <a class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200" href="#">
@@ -56,14 +54,14 @@ defineProps({
                         <div class="tw-grid lg:tw-grid-cols-2 tw-gap-3">
                         <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-1 tw-gap-3">
                             <figure class="tw-relative tw-w-full tw-h-60">
-                            <img class="tw-size-full tw-absolute tw-top-0 tw-start-0 tw-object-cover tw-rounded-xl" src="https://scontent.fjal1-1.fna.fbcdn.net/v/t39.30808-6/458729357_18018868742582807_4334428936066628979_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=c6FKWxxkZK8Q7kNvgGQp5hq&_nc_ht=scontent.fjal1-1.fna&_nc_gid=AezX47U0yM8IhAiOLmpIn0B&oh=00_AYDcmJ2uzwntPfXESxzJ3VoYBOts6LfYXnyorYDrVV-A0A&oe=6711D902" alt="Blog Image">
+                            <img class="tw-size-full tw-absolute tw-top-0 tw-start-0 tw-object-cover tw-rounded-xl" src="https://scontent.fver1-1.fna.fbcdn.net/v/t39.30808-6/462803798_875575674671561_6338584069118770320_n.jpg?stp=cp6_dst-jpg&_nc_cat=101&ccb=1-7&_nc_sid=127cfc&_nc_ohc=ENPL-Sec5NIQ7kNvgGsxey_&_nc_ht=scontent.fver1-1.fna&_nc_gid=AcEKbLt5jw30eTCt-hZDweY&oh=00_AYCtDIwHBfGi9LSb_UHCNA5P4lVrLynW0XOxqRxSh4zMEA&oe=671BD96D" alt="Blog Image">
                             </figure>
                             <figure class="tw-relative tw-w-full tw-h-60">
-                            <img class="tw-size-full tw-absolute tw-top-0 tw-start-0 tw-object-cover tw-rounded-xl" src="https://scontent.fjal1-1.fna.fbcdn.net/v/t39.30808-6/458215778_848200180742444_352256646316606546_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=C4tcJJVEtAgQ7kNvgFef4ZB&_nc_ht=scontent.fjal1-1.fna&_nc_gid=AzNYx7-sU02J1HJdogu8stx&oh=00_AYBTfl76HzyaRbBDRDC3ygkb94_m2CUCL0kgwxuMsQXmeg&oe=6711EEF0" alt="Blog Image">
+                            <img class="tw-size-full tw-absolute tw-top-0 tw-start-0 tw-object-cover tw-rounded-xl" src="https://scontent.fver1-1.fna.fbcdn.net/v/t39.30808-6/462597651_18023125940582807_6608384078502731014_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=WFe88X6wSBAQ7kNvgFKm1hi&_nc_ht=scontent.fver1-1.fna&_nc_gid=AvH25F2smOjEpt8_vMBnR_J&oh=00_AYDqcDJ2cabFPFIGRvIutLK4EuWdt3u6sloPzYTXpOdC6w&oe=671BDE9C" alt="Blog Image">
                             </figure>
                         </div>
                         <figure class="tw-relative tw-w-full tw-h-72 sm:tw-h-96 lg:tw-h-full">
-                            <img class="tw-size-full tw-absolute tw-top-0 tw-start-0 tw-object-cover tw-rounded-xl" src="https://scontent.fjal1-1.fna.fbcdn.net/v/t39.30808-6/458501843_850305840531878_4284700994763982796_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=127cfc&_nc_ohc=TPtNOjC48f0Q7kNvgG9VAOA&_nc_ht=scontent.fjal1-1.fna&_nc_gid=AJnqoxyHmSurxUtqsv-MQmG&oh=00_AYAZoyMS6Cx4C713JDd2sbG4YCVgSyoPccD_x_0oVLBNPg&oe=6711E972" alt="Blog Image">
+                            <img class="tw-size-full tw-absolute tw-top-0 tw-start-0 tw-object-cover tw-rounded-xl" src="https://scontent.fver1-1.fna.fbcdn.net/v/t39.30808-6/462597651_18023125940582807_6608384078502731014_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=WFe88X6wSBAQ7kNvgFKm1hi&_nc_ht=scontent.fver1-1.fna&_nc_gid=AvH25F2smOjEpt8_vMBnR_J&oh=00_AYDqcDJ2cabFPFIGRvIutLK4EuWdt3u6sloPzYTXpOdC6w&oe=671BDE9C" alt="Blog Image">
                         </figure>
                         </div>
 

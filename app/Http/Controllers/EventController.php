@@ -11,6 +11,7 @@ use App\Models\PriceTypeSeatCatalogue;
 use App\Services\EventService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class EventController extends Controller
@@ -63,12 +64,14 @@ class EventController extends Controller
     {
         try {
             $response = $this->event_service->getById($id);
+            $user = Auth::user();
 
             return Inertia::render('Pos/Event', [
                 'event' => $response['event'],
                 'a_zone' => $response['a_zone'],
                 'b_zone' => $response['b_zone'],
                 'c_zone' => $response['c_zone'],
+                'user' => $user,
                 'user_roles' => $response['user_roles'],
                 'global_payment_types' => $response['global_payment_types'],
                 'global_card_payment_types' => $response['global_card_payment_types'],
@@ -78,10 +81,77 @@ class EventController extends Controller
         }
     }
 
+    /* *
+    * Show the complete purchase
+    */
     public function success()
     {
         return Inertia::render('Pos/Success');
     }
+
+    /**
+    *  Reserve seats to buy
+    */
+    public function reserveSeatsToBuy(Request $request)
+    {
+        $request->validate([
+            'seats' => 'required',
+            'event_id' => 'required',
+            'member_user_id' => 'required',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $response = $this->event_service->reserveSeatsToBuy($request->all());
+
+            DB::commit();
+
+            return WebResponseHelper::sendResponse($response, 'Asientos reservados correctamente', null, false);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return WebResponseHelper::rollback($e, 'Opps! Algo salió mal al reservar los asientos');
+        }
+    }
+
+    /**
+     * Confirm the purchase of the seats
+     */
+    public function confirmSeatsPurchase(Request $request)
+    {
+
+        $request->validate([
+            'event_id' => 'required',
+            'cash_register_id' => 'required',
+            'member_user_id' => 'nullable',
+            'seller_user_id' => 'required',
+            'price_type_id' => 'required',
+            'seats' => 'required',
+            'amount_received' => 'required',
+            'total_amount' => 'required',
+            'total_returned' => 'required',
+            'global_payment_types' => 'required|array',
+            'is_online' => 'required|boolean',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+
+            $response = $this->event_service->confirmSeatsPurchase($request->all());
+
+            DB::commit();
+
+            return WebResponseHelper::sendResponse($response, 'Compra de asientos confirmada correctamente', null, false);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return WebResponseHelper::rollback($e, 'Opps! Algo salió mal al confirmar la compra de los asientos');
+        }
+    }
+
+
+
 
     /**
      * Show the form for editing the specified resource.

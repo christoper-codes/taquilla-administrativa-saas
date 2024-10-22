@@ -14,4 +14,9 @@ class CashRegisterMovementType extends Model
         'description',
         'is_active'
     ];
+
+    public function cashRegisterMovements()
+    {
+        return $this->hasMany(CashRegisterMovement::class);
+    }
 }

@@ -14,9 +14,11 @@ class SaleTicket extends Model
         'seller_user_id',
         'cash_register_id',
         'sale_ticket_status_id',
+        'price_type_id',
         'amount_received',
         'total_amount',
-        'total_returned'
+        'total_returned',
+        'is_online',
     ];
 
     public function event()
@@ -49,5 +51,15 @@ class SaleTicket extends Model
     public function EventSeatCatalogues()
     {
         return $this->hasMany(EventSeatCatalog::class);
+    }
+
+    public function priceType()
+    {
+        return $this->belongsTo(PriceType::class);
+    }
+
+    public function cashRegisterMovements()
+    {
+        return $this->hasOne(CashRegisterMovement::class);
     }
 }

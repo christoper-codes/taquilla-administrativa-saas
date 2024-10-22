@@ -3,20 +3,58 @@ import { drawerPaymentState } from '@/composables/drawersStates';
 import { loadScript } from '@paypal/paypal-js';
 import { onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
+import CountdownTimer from '@/Components/CountdownTimer.vue';
+import { useForm as useFormInertia} from '@inertiajs/vue3';
 
 const CLIENT_ID = 'AVvNWWNci4r1r8VQUZ919IvcgLmDbPHCSktDNXcwQMaNHNdfqMCDKWdsR4SDs93oNYJQYw6q87Z4mHql';
 const SECRET_kEY = 'EAzjdcBn2Vp2CtTTYZtQfyiQuTLzZf4tQ2OQT_TmOytyz_m3uGW-DH9gYYduccLwHUxeLfgU_p-LPZrd';
 const currency = 'MXN';
 
 const props = defineProps({
-    seatsSelected: {
+    eventId: {
+        type: Number,
+        required: true,
+    },
+    cashRegisterId: {
+        type: Number,
+        required: true,
+    },
+    memberUserId: {
+        type: Number,
+        required: true,
+    },
+    sellerUserId: {
+        type: Number,
+        required: true,
+    },
+    priceTypeId: {
+        type: Number,
+        required: true,
+    },
+    seats: {
         type: Array,
         required: true,
     },
-    total : {
+    amountReceived: {
         type: Number,
         required: true,
-    }
+    },
+    totalAmount : {
+        type: Number,
+        required: true,
+    },
+    amountReturned: {
+        type: Number,
+        required: true,
+    },
+    globalPaymentTypes: {
+        type: Array,
+        required: true,
+    },
+    isOnline: {
+        type: Boolean,
+        required: true,
+    },
 })
 
 onMounted(async () => {
@@ -36,7 +74,7 @@ onMounted(async () => {
             purchase_units: [
                 {
                     amount: {
-                        value: props.total,
+                        value: props.totalAmount,
                         currency_code: 'MXN'
                     },
                     custom_id: 123,
@@ -46,10 +84,35 @@ onMounted(async () => {
         },
         onApprove: async (data, actions) => {
             return actions.order.capture().then(details => {
-                document.getElementById('result-message').innerText = `Transaction completed by ${details.payer.name.given_name}`;
-                console.log('Transaction details:', details);
-                drawerPaymentState.value = false;
-                router.visit('/pago-exitoso');
+
+                const seatsSelectedData = useFormInertia({
+                    event_id: props.eventId,
+                    cash_register_id: props.cashRegisterId,
+                    member_user_id: props.memberUserId,
+                    seller_user_id: props.sellerUserId,
+                    price_type_id: props.priceTypeId,
+                    seats: props.seats,
+                    amount_received: props.amountReceived,
+                    total_amount: props.totalAmount,
+                    total_returned: props.amountReturned,
+                    global_payment_types: props.globalPaymentTypes,
+                    is_online: props.isOnline,
+                });
+
+                seatsSelectedData.post(route('events.confirm-seats-purchase'), {
+                    onSuccess: (response) => {
+                        if(!response.props.flash.error) {
+                            document.getElementById('result-message').innerText = `Transaction completed by ${details.payer.name.given_name}`;
+                            console.log('Transaction details:', details);
+                            router.visit('/pago-exitoso');
+                        }
+                    },
+                    onFinish: () => {
+                        drawerPaymentState.value = false;
+                    }
+                });
+
+
             });
         },
         onCancel: (data) => {
@@ -101,6 +164,9 @@ onMounted(async () => {
             <div class="tw-p-4">
                 <div id="paypal-button-container"></div>
                 <p id="result-message"></p>
+                <div class="tw-mt-10">
+                    <CountdownTimer :initialMinutes="10" />
+                </div>
             </div>
         </div>
       </v-navigation-drawer>
@@ -116,7 +182,7 @@ onMounted(async () => {
 
     @media (min-width: 768px) {
         .v-navigation-drawer--temporary.v-navigation-drawer--active {
-            width: 35% !important;
+            width: 40% !important;
         }
     }
 </style>
