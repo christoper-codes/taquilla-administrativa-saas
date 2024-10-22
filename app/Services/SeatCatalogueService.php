@@ -24,9 +24,16 @@ class SeatCatalogueService
     */
     public function getAll()
     {
-        $seat_catalogue = $this->seat_catalogue_repository->getAll();
+        return $this->seat_catalogue_repository->getAll();
+    }
 
-        return $seat_catalogue;
+    /*
+    * |--------------------------------------------------------------------------
+    * | Get all seat catalogues
+    */
+    public function getAllSeatsForStadium(int $id)
+    {
+        return $this->seat_catalogue_repository->getAllSeatsForStadium($id);
     }
 
     /*
@@ -37,9 +44,24 @@ class SeatCatalogueService
     {
 
         try {
-            $seat_catalogue = $this->seat_catalogue_repository->save($data);
 
-            return $seat_catalogue;
+            return $this->seat_catalogue_repository->save($data);
+
+        } catch (\Exception $e) {
+
+            throw $e;
+        }
+    }
+
+    /*
+    * |--------------------------------------------------------------------------
+    * | Save new seat catalogue
+    */
+    public function saveAllSeatsForStadium(array $data)
+    {
+        try {
+
+            return $this->seat_catalogue_repository->saveAllSeatsForStadium($data);
 
         } catch (\Exception $e) {
 
