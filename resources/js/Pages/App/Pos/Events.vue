@@ -122,7 +122,7 @@ onMounted(() => {
 
                                         <!-- Author -->
                                         <div class="tw-flex tw-items-center tw-gap-x-3">
-                                            <img class="tw-h-10 tw-w-10 tw-rounded-full" src="../../../../public/img/user-img.svg" alt="Author Image">
+                                            <img class="tw-h-10 tw-w-10 tw-rounded-full" src="../../../../../public/img/user-img.svg" alt="Author Image">
                                             <div>
                                                 <p class="tw-text-sm tw-font-medium tw-text-gray-800">Directiva Halcones</p>
                                                 <p class="tw-text-xs tw-text-gray-500">Autor</p>

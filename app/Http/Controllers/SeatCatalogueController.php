@@ -55,7 +55,7 @@ class SeatCatalogueController extends Controller
                 ];
             }
 
-            return Inertia::render('App/Dashboard', [
+            return Inertia::render('App/Member/Dashboard', [
                 'user' => $user,
                 'flash' => $flash,
                 'events_with_tickets' => $eventsWithTickets,

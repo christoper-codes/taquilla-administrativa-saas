@@ -372,7 +372,7 @@ console.log(props.active_cash_register);
                                 <div class="tw-font-bold tw-text-center tw-bg-gray-200 tw-rounded-full tw-inline-flex tw-px-7 tw-py-3 tw-text-gray-600">
                                     No hay cajas abiertas para este usuario en esta taquilla
                                 </div>
-                                <img class="tw-w-96" src="../../../../public/img/seats-no-selected-img.svg" alt="">
+                                <img class="tw-w-96" src="../../../../../public/img/seats-no-selected-img.svg" alt="">
                             </div>
                             </v-card>
                         </v-dialog>
