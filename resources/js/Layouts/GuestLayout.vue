@@ -45,12 +45,14 @@ const toggleFav = () => {
            <div class="tw-items-center tw-gap-2 lg:tw-gap-4 tw-flex">
             <a class="tw-flex tw-group tw-min-w-[120px] tw-items-center tw-font-semibold tw-text-foreground tw-shadow-sm tw-gap-1.5 tw-relative tw-overflow-hidden tw-rounded-sm tw-p-[1.5px] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary" href="https://nextui.pro?utm_source=nextui.org&amp;utm_medium=top-banner" rel="noopener noreferrer">
                 <span class="tw-absolute tw-inset-[-1000%] tw-animate-[spin_3s_linear_infinite] tw-bg-[conic-gradient(from_90deg_at_50%_50%,#F54180_0%,#338EF7_50%,#F54180_100%)]"></span>
-                <div class="tw-inline-flex tw-h-full tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-bg-slate-900 tw-text-white tw-transition-background tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-foreground tw-backdrop-blur-3xl">
-                     Mis boletos
-                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" class="tw-outline-none tw-transition-transform group-hover:tw-translate-x-0.5 [&>path]:tw-stroke-[2px]" width="16" height="16" viewBox="0 0 24 24">
-                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 12h16m0 0l-6-6m6 6l-6 6"></path>
-                    </svg>
-                </div>
+                <Link :href="route('dashboard')" >
+                    <div class="tw-inline-flex tw-h-full tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-bg-slate-900 tw-text-white tw-transition-background tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-foreground tw-backdrop-blur-3xl">
+                        Mis boletos
+                        <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" class="tw-outline-none tw-transition-transform group-hover:tw-translate-x-0.5 [&>path]:tw-stroke-[2px]" width="16" height="16" viewBox="0 0 24 24">
+                        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 12h16m0 0l-6-6m6 6l-6 6"></path>
+                        </svg>
+                    </div>
+                </Link>
             </a>
            </div>
         </div>
