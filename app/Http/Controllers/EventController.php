@@ -49,7 +49,7 @@ class EventController extends Controller
       try {
             $events = $this->event_service->getAll();
 
-            return Inertia::render('Pos/Events', [
+            return Inertia::render('App/Pos/Events', [
                 'events' => $events,
             ]);
 
@@ -83,7 +83,7 @@ class EventController extends Controller
                 ];
             })->values();
 
-            return Inertia::render('Administration/Event/Event', [
+            return Inertia::render('App/Administration/Event/Event', [
                 'user' => $user,
                 'event_types' => $event_types,
                 'series' => $series,
@@ -162,7 +162,7 @@ class EventController extends Controller
             $response = $this->event_service->getById($id);
             $user = Auth::user();
 
-            return Inertia::render('Pos/Event', [
+            return Inertia::render('App/Pos/Event', [
                 'event' => $response['event'],
                 'a_zone' => $response['a_zone'],
                 'b_zone' => $response['b_zone'],
@@ -182,7 +182,7 @@ class EventController extends Controller
     */
     public function success()
     {
-        return Inertia::render('Pos/Success');
+        return Inertia::render('App/Pos/Success');
     }
 
     /**

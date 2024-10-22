@@ -4,8 +4,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import NavigationDrawer from '@/Components/NavigationDrawer.vue';
 import { ref } from 'vue';
 import { QrcodeStream } from 'vue-qrcode-reader';
-
-
+import Footer from '@/Components/Footer.vue';
 
 
 const decodedContent = ref('')
@@ -64,15 +63,18 @@ const preferredCamera = {
             </v-btn>
         </div>
         <div class="center-container tw-my-5">
-            <v-btn @click="switchCamera" variant="elevated"  class="tw-py-2" >Cambiar Cámara</v-btn>
+            <v-btn @click="switchCamera" variant="tonal" color="red" rounded="xl"  class="tw-py-2 text-none" >Cambiar Cámara</v-btn>
         </div>
         <div class="center-container tw-my-5">
             <div class="tw-py-2" v-if="showCamara">
-                <qrcode-stream @decode="onDecode" @init="onInit" :paused="activar" :camera="selectCamara" @unrecoverable-error="handleError"/>
+                <qrcode-stream class="tw-border-[10px] tw-rounded-2xl" @decode="onDecode" @init="onInit" :paused="activar" :camera="selectCamara" @unrecoverable-error="handleError"/>
             </div>
             <p>{{ decodedContent }}</p>
         </div>
     </div>
+
+    <Footer />
+
 </template>
 
 <style lang="scss" scoped>
