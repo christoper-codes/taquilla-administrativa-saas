@@ -54,4 +54,9 @@ class CashRegister extends Model
         return $this->hasMany(SaleTicket::class);
     }
 
+    public function cashRegisterMovements()
+    {
+        return $this->hasMany(CashRegisterMovement::class);
+    }
+
 }

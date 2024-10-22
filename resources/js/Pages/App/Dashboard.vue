@@ -2,15 +2,15 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import SaleTicket from '@/Components/SaleTicket.vue';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import TicketCharts from '@/Components/TicketCharts.vue';
 import confetti from 'canvas-confetti';
 import { onMounted, ref, watch } from 'vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import SuccessSession from '@/Components/SuccessSession.vue';
+import BreadcrumbApp from '@/Components/BreadcrumbApp.vue';
 
 const page = usePage().props;
-const tab = ref(null);
 
 const count = 200;
 const defaults = {
@@ -75,8 +75,9 @@ const props = defineProps({
         required: true,
     },
 })
-
-console.log(props);
+console.log(props.events_with_tickets);
+const eventsWithTickets = ref(Object.values(props.events_with_tickets));
+const tab = ref('tab-0');
 </script>
 
 <template>
@@ -85,11 +86,11 @@ console.log(props);
     <AppLayout>
         <SuccessSession />
 
-        <Breadcrumb class="!tw-h-[250px]">
+        <BreadcrumbApp>
                 <template #title>
                     <span>Mis boletos</span>
                 </template>
-        </Breadcrumb>
+        </BreadcrumbApp>
 
         <div class="tw-px-4 tw-py-10 lg:tw-p-10">
 
@@ -108,51 +109,39 @@ console.log(props);
                 </div>
             </div>
 
-            <div>
-                <div class="tw-mt-10 tw-gap-5 tw-w-full tw-flex tw-flex-col-reverse lg:tw-flex-row tw-items-start tw-justify-between">
-                    <div class="tw-w-full tw-shadow-lg tw-bg-white tw-px-5 tw-py-7 tw-rounded-2xl tw-border">
-                        <div class="tw-px-7 tw-py-3 tw-bg-purple-200 tw-font-bold tw-text-xs lg:tw-text-lg tw-rounded-full tw-inline-block tw-text-purple-600">
-                            <span>Seleciona un partido para ver tus boletos</span>
-                        </div>
-                        <div class="tw-mt-5">
-                            <v-tabs
-                                v-model="tab"
-                                align-tabs="center"
-                                color="deep-purple-accent-4"
-                                >
-                                <v-tab value="one">Halcones de xala vs buap</v-tab>
-                                <v-tab value="two">Halcones de xala rojos</v-tab>
-                                <v-tab value="three">Halcones de xala vs monterrey</v-tab>
-                            </v-tabs>
-                        </div>
+            <div class="tw-mt-10 tw-gap-5 tw-w-full tw-flex tw-flex-col-reverse lg:tw-flex-row tw-items-start tw-justify-between">
+                <div class="tw-w-full tw-shadow-lg tw-bg-gray-200 tw-px-5 tw-py-7 tw-overflow-x-scroll tw-rounded-2xl tw-border tw-flex tw-flex-col tw-items-center tw-justify-center tw-text-center">
+                    <span class="tw-text-sm tw-font-bold tw-text-gray-500 tw-text-center tw-inline-flex tw-bg-white tw-px-5 tw-py-2 tw-rounded-full">Seleciona un partido para ver tus boletos</span>
+
+                    <div class="tw-mt-5">
+                        <v-tabs v-model="tab" align-tabs="center" color="deep-purple-accent-4">
+                            <v-tab v-for="(event, index) in eventsWithTickets" :key="event.event.id" :value="`tab-${index}`">
+                                {{ event.event.name }}
+                            </v-tab>
+                        </v-tabs>
                     </div>
                 </div>
+            </div>
 
-
-                <div class="tw-mt-10 tw-bg-white">
-                    <v-tabs-window v-model="tab">
-                        <v-tabs-window-item value="one">
-                            <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
-                                <SaleTicket/>
-                                <SaleTicket/>
+            <div class="tw-mt-10 tw-bg-white">
+                <v-tabs-window v-model="tab">
+                    <v-tabs-window-item v-for="(event, index) in eventsWithTickets" :key="event.event.id" :value="`tab-${index}`">
+                        <div v-if="event.tickets.length > 0" class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
+                            <SaleTicket v-for="ticket in event.tickets" :key="ticket.id" v-bind:ticket="ticket" />
+                        </div>
+                        <div v-else class="tw-flex tw-items-center tw-flex-col tw-gap-5">
+                            <div class="tw-p-5 tw-text-center tw-text-gray-500">
+                                <span>No cuenta con boletos disponibles para este partido.</span>
                             </div>
-                        </v-tabs-window-item>
-
-                        <v-tabs-window-item value="two">
-                            <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
-                                <SaleTicket/>
+                            <div>
+                                <Link :href="route('events.index')">
+                                    <v-btn variant="tonal" color="purple" size="large" rounded="xl" class="text-none"><span class="material-symbols-outlined tw-text-lg">note_stack</span>Obtener boletos</v-btn>
+                                </Link>
                             </div>
-                        </v-tabs-window-item>
-
-                        <v-tabs-window-item value="three">
-                            <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
-                                <SaleTicket/>
-                                <SaleTicket/>
-                                <SaleTicket/>
-                            </div>
-                        </v-tabs-window-item>
-                    </v-tabs-window>
-                </div>
+                            <img class="tw-w-80" src="https://i.ibb.co/ck1SGFJ/Group.png" />
+                        </div>
+                    </v-tabs-window-item>
+                </v-tabs-window>
             </div>
         </div>
 

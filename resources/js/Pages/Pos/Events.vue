@@ -86,7 +86,7 @@ onMounted(() => {
                                     <div class="">
                                         <div class="tw-relative tw-h-44 lg:tw-h-96 tw-w-full tw-block tw-shadow-xl tw-overflow-hidden tw-rounded-3xl hover:tw-scale-105 tw-transition-transform tw-duration-500"
                                             :style="{ backgroundImage: `url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
-                                            <div class="tw-absolute tw-bottom-0 tw-w-[100%] tw-rounded-xl tw-bg-black/40 tw-p-5 tw-backdrop-blur-md tw-backdrop-brightness-150 tw-text-white tw-font-bold tw-text-center">
+                                            <div class="tw-absolute tw-bottom-0 tw-w-[100%] tw-rounded-b-3xl tw-bg-black/10 tw-p-2 lg:tw-p-5 tw-backdrop-blur-md tw-backdrop-brightness-150 tw-text-white tw-font-bold tw-text-center">
                                                 {{ dateFormat(event.start_date) }}
                                             </div>
                                         </div>

@@ -41,6 +41,8 @@ onMounted(() => {
         elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-pink-500');
       } else if (seat.seat_catalogue_status.name === 'inhabilitado') {
         elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-gray-600');
+      } else if (seat.seat_catalogue_status.name === 'transito') {
+        elemento.classList.add('tw-cursor-not-allowed','tw-fill-cyan-500');
       }
     }
   });

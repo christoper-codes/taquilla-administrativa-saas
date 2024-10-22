@@ -34,7 +34,12 @@ class SeatCatalogueController extends Controller
 
             $user = Auth::user()->load('globalImages');
             $flash = $user->is_new ? 'is_new_user' : null;
-            $tickets = $user->EventSeatCatalogues()->with('event', 'seatCatalogue', 'seatCatalogueStatus')->get();
+            $tickets = $user->EventSeatCatalogues()
+                ->with('event', 'seatCatalogue', 'seatCatalogueStatus')
+                ->whereHas('seatCatalogueStatus', function ($query) {
+                    $query->where('name', 'vendido');
+                })
+                ->get();
             $events = $this->event_service->getAll();
             $eventsWithTickets = [];
 

@@ -27,4 +27,9 @@ class PriceType extends Model
                 ->withTimestamps();
     }
 
+    public function saleTickets()
+    {
+        return $this->hasMany(SaleTicket::class);
+    }
+
 }

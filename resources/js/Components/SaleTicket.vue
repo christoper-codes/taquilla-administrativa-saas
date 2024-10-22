@@ -1,6 +1,21 @@
 <script setup>
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import useDateFormat from '@/composables/dateFormat';
+import usePriceFormat from '@/composables/priceFormat';
+import QrcodeVue from 'qrcode.vue'
+import { computed } from 'vue';
 
+const { dateFormat } = useDateFormat();
+const { formatPrice } = usePriceFormat();
+const props = defineProps({
+    ticket: {
+        type: Object,
+        required: true,
+    },
+});
+const qrValue = computed(() => {
+    return props.ticket.qr;
+})
 
 </script>
 
@@ -21,9 +36,8 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
                         </svg>
                         </button>
                     </div>
-                    <div class="tw-flex tw-items-center tw-justify-between tw-text-xs tw-mt-1 tw-mb-3">
-                        <p>John Doe</p>
-                        <p>john.doe@example.com</p>
+                    <div class="tw-flex tw-items-center tw-justify-center tw-mt-1 tw-mb-3 tw-font-bold">
+                        {{ ticket.event.name }}
                     </div>
                     <div class="tw-border-dashed tw-border-b-2 tw-mb-5"></div>
                     <div class="tw-flex tw-items-center">
@@ -31,24 +45,30 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
                         <div class="tw-flex-auto tw-text-xs tw-text-gray-400 tw-my-1">
                             <span class="tw-mr-1">2024 -</span><span>2025</span>
                         </div>
-                        <div class="tw-w-full tw-flex-none tw-text-lg tw-text-tw-primary-700 tw-font-bold tw-leading-none">Valido</div>
-                        <div class="tw-text-xs">Status</div>
+                        <div class="tw-w-full tw-flex-none tw-text-lg tw-text-tw-primary-700 tw-font-bold tw-leading-none">{{ ticket.is_verified ? 'Expiro' : 'Valido' }}</div>
+                        <div class="tw-text-xs">Estatus</div>
                         </div>
                         <div class="tw-flex tw-flex-col tw-mx-auto">
-                           <!--  <img class="tw-h-auto tw-w-[65px]" src="https://img.icons8.com/3d-fluency/94/bank-cards.png" alt="bank-cards" /> -->
+
                            <v-btn
+                                v-if="!ticket.is_verified"
                                 class="text-green"
                                 icon="mdi-check-bold"
                                 variant="tonal"
-                                @click="fav = !fav"
+                            ></v-btn>
+                           <v-btn
+                                v-else
+                                class="text-red"
+                                icon="mdi-close"
+                                variant="tonal"
                             ></v-btn>
                         </div>
                         <div class="tw-flex tw-flex-col">
                         <div class="tw-flex-auto tw-text-xs tw-text-gray-400 tw-my-1">
                             <span class="tw-mr-1">2024 -</span><span>2025</span>
                         </div>
-                        <div class="tw-w-full tw-flex-none tw-text-lg tw-text-tw-primary-700 tw-font-bold tw-leading-none">Valido</div>
-                        <div class="tw-text-xs">Status</div>
+                        <div class="tw-w-full tw-flex-none tw-text-lg tw-text-tw-primary-700 tw-font-bold tw-leading-none">{{ ticket.is_verified ? 'Expiro' : 'Valido' }}</div>
+                        <div class="tw-text-xs">Estatus</div>
                         </div>
                     </div>
                     <div class="tw-border-dashed tw-border-b-2 tw-my-1 tw-pt-5">
@@ -60,21 +80,21 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
                         <table class="tw-table-auto tw-w-full tw-text-left tw-whitespace-no-wrap tw-table">
                             <thead>
                             <tr>
-                                <th class="tw-px-4 tw-py-2 tw-text-xs">Producto</th>
+                                <th class="tw-px-4 tw-py-2 tw-text-xs">Asiento</th>
                                 <th class="tw-px-4 tw-py-2 tw-text-xs">Cantidad</th>
                                 <th class="tw-px-4 tw-py-2 tw-text-xs">Subtotal</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr class="tw-border-y">
-                                <td class="tw-px-4 tw-py-2 tw-text-xs">Guitar</td>
+                                <td class="tw-px-4 tw-py-2 tw-text-xs">{{ ticket.seat_catalogue.code }}</td>
                                 <td class="tw-px-4 tw-py-2 tw-text-xs">1</td>
-                                <td class="tw-px-4 tw-py-2 tw-text-xs">$1000</td>
+                                <td class="tw-px-4 tw-py-2 tw-text-xs">{{ formatPrice(ticket.price) }}</td>
                             </tr>
                             </tbody>
                         </table>
                         <div class="tw-flex tw-flex-col tw-mt-5 tw-justify-center tw-text-sm">
-                            <h6 class="tw-font-bold tw-text-center">Total: $1500</h6>
+                            <h6 class="tw-font-bold tw-text-center">Total: {{ formatPrice(ticket.price) }}</h6>
                         </div>
                         </div>
                     </div>
@@ -82,26 +102,19 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
                         <div class="tw-absolute tw-rounded-full tw-w-5 tw-h-5 tw-bg-tw-primary-500 -tw-mt-2 -tw-left-2"></div>
                         <div class="tw-absolute tw-rounded-full tw-w-5 tw-h-5 tw-bg-tw-primary-500 -tw-mt-2 -tw-right-2"></div>
                     </div>
-                    <div class="tw-flex tw-items-center tw-px-5 tw-pt-3 tw-text-sm tw-justify-between">
-                        <div class="tw-flex tw-flex-col">
-                        <span class="tw-font-semibold">Hora</span>
-                        <div>12:30:45</div>
-                        </div>
-                        <div class="tw-flex tw-flex-col">
-                        <span class="tw-font-semibold">Dia</span>
-                        <div>15</div>
-                        </div>
-                        <div class="tw-flex tw-flex-col">
-                        <span class="tw-font-semibold">Mes</span>
-                        <div>Enero</div>
-                        </div>
-                        <div class="tw-flex tw-flex-col">
-                        <span class="tw-font-semibold">Año</span>
-                        <div>2024</div>
-                        </div>
+                    <div class="tw-flex tw-items-center tw-px-5 tw-pt-3 tw-text-sm tw-justify-between tw-flex-col tw-gap-2">
+                        <div class="tw-text-xs">Fecha del evento</div>
+                        <div class="tw-font-bold">{{ dateFormat(ticket.event.start_date) }}</div>
                     </div>
                     <div class="tw-flex tw-pt-5 tw-pb-3 tw-justify-center tw-items-center tw-text-sm">
-                        <img class="tw-size-32 " src="https://pngimg.com/uploads/qr_code/qr_code_PNG6.png" alt="">
+                        <qrcode-vue
+                            :value="qrValue"
+                            :size="100"
+                            :level="'L'"
+                            :render-as="'svg'"
+                            :background="'#ffffff'"
+                            :foreground="'#000000'"
+                        />
                     </div>
                     </div>
                 </div>

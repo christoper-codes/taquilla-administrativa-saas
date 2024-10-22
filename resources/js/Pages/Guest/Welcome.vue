@@ -4,10 +4,42 @@ import  GuestLayout  from '@/Layouts/GuestLayout.vue';
 import NavigationDrawer from '@/Components/NavigationDrawer.vue';
 import Footer from '@/Components/Footer.vue';
 import ClubDrawer from '@/Components/ClubDrawer.vue';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import ErrorSession from '@/Components/ErrorSession.vue';
 
 const activePanel = ref([0]);
+
+onMounted(() => {
+
+    if (!HTMLMediaElement.prototype.hasOwnProperty('playing')) {
+    Object.defineProperty(HTMLMediaElement.prototype, 'playing', {
+        get: function () {
+            return !!(this.currentTime > 0 && !this.paused && !this.ended && this.readyState > 2);
+        }
+    });
+    } else {
+    console.warn('La propiedad "playing" ya está definida en HTMLMediaElement');
+    }
+
+    document.body.addEventListener('click', function () {
+        const videoElement = document.getElementById('home_video');
+        if (videoElement && !videoElement.playing) {
+            videoElement.play();
+        }
+    });
+
+    document.body.addEventListener('touchstart', function () {
+        const videoElement = document.getElementById('home_video');
+        if (videoElement && !videoElement.playing) {
+            videoElement.play();
+        }
+    })
+
+    const welcomeDialog = document.getElementById('welcome-dialog');
+    welcomeDialog.click();
+
+});
+
 defineProps({
     canLogin: {
         type: Boolean,
@@ -39,75 +71,81 @@ function handleImageError() {
     <NavigationDrawer />
     <ClubDrawer />
 
-    <section class="tw-overflow-hidden tw-h-[900px] lg:tw-h-[650px]">
-        <v-parallax
-            class="tw-rounded-none" src="https://preview.colorlib.com/theme/theconference/images/index.jpg.webp"
-        >
-            <div class="d-flex flex-column fill-height justify-center align-center text-white tw-bg-gray-950/50 ">
-                <div class="tw-max-w-7xl tw-mx-auto tw-px-4 lg:tw-px-0">
-                    <section class="tw-flex tw-flex-col tw-max-w-7xl tw-mx-auto lg:tw-flex-row tw-items-center tw-justify-between tw-gap-10 tw-overflow-hidden tw-min-h-screen tw-pt-32 lg:tw-pt-0 tw-text-white">
-                        <div class="tw-w-full tw-flex tw-items-center tw-justify-center">
-                            <div class="tw-flex tw-flex-col tw-gap-7">
-                                <div class="tw-flex tw-gap-3 tw-items-center tw-text-gray-300">
-                                    <img class="tw-w-20 tw-h-auto" src="https://adminmart.com/wp-content/uploads/2023/01/users.png" alt="users">
-                                    <p><span class="tw-font-bold">1,903+</span> Fanaticos & publico han usado nuestra plataforma.</p>
-                                </div>
-                                <div class="tw-font-bold tw-text-4xl md:tw-text-6xl tw-max-w-2xl tw-leading-[50px] md:tw-leading-[70px]">Aplicacion web oficial del equipo Halcones de xalapa!</div>
+    <section class="tw-overflow-hidden tw-h-[730px] lg:tw-h-[650px] tw-mt-[0px] lg:tw-mt-[-30px]">
+        <div class="tw-rounded-none tw-relative tw-bg-white tw-scale-110 lg:tw-scale-100">
+            <img class="tw-w-[1700px] tw-h-auto tw-absolute tw-right-0 tw-top-0 lg:tw-scale-150 lg:tw-mr-[100px] lg:tw-mt-[80px]" src="../../../../public/img/hero.svg" alt="">
+            <div class="bg-video tw-mx-auto tw-absolute tw-right-0 -tw-top-10 lg:tw-mr-[-250px] tw-w-[400px] lg:tw-w-[1020px] tw-h-[160px] lg:tw-h-[430px] tw-overflow-hidden">
+                <video id="home_video" class="tw-max-w-full tw-w-full tw-h-auto" autoplay loop muted playsinline>
+                    <source type="video/mp4" src="../../../../public/videos/bg-video.mp4">
+                </video>
+            </div>
+        </div>
 
-                                <p class="tw-text-lg tw-text-gray-300">Descubre las <span class="tw-font-bold">nuevas novedades en la plataforma oficial</span> del equipo de baloncesto, como comprar boletos con increibles promociones u ofertas especiales</p>
-                                <ErrorSession />
-                            <div class="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-gap-4 md:tw-gap-5">
-                                <div class="tw-w-full lg:tw-w-auto">
-                                    <v-tooltip color="primary" location="bottom center" origin="auto" no-click-animation>
-                                    <template v-slot:activator="{ props }">
-                                        <Link
-                                            :href="route('events.index')"
-                                        >
-                                            <v-btn v-bind="props" variant="elevated" class="text-none !tw-block md:!tw-hidden tw-w-full lg:tw-w-auto !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Proximos partios</v-btn>
-                                            <v-btn v-bind="props" variant="elevated" class="text-none !tw-hidden md:!tw-block tw-w-full lg:tw-w-auto !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="x-large" rounded="xl">Proximos partios</v-btn>
-                                        </Link>
-                                    </template>
-                                    <div>Partidos oficiales!</div>
-                                    </v-tooltip>
-                                </div>
-                                <div class="tw-w-full lg:tw-w-auto">
-                                    <v-tooltip color="primary" location="bottom center" origin="auto" no-click-animation>
-                                    <template v-slot:activator="{ props }">
-                                        <Link
-                                        :href="route('login')"
-                                        >
-                                            <v-btn v-bind="props" variant="tonal" class="text-none !tw-block md:!tw-hidden tw-w-full lg:tw-w-auto !tw-bg-tw-primary-100 !tw-text-tw-primary-600 !tw-px-7" size="large" rounded="xl">Mis boletos</v-btn>
-                                            <v-btn v-bind="props" variant="tonal" class="text-none !tw-hidden md:!tw-block tw-w-full lg:tw-w-auto !tw-bg-tw-primary-100 !tw-text-tw-primary-600 !tw-px-7" size="x-large" rounded="xl">Mis boletos</v-btn>
-                                        </Link>
-                                    </template>
-                                    <div>Tickets!</div>
-                                    </v-tooltip>
-                                </div>
+        <v-dialog max-width="700" max-height="300">
+            <template v-slot:activator="{ props: activatorProps }">
+                <v-btn id="welcome-dialog" v-bind="activatorProps" variant="elevated" class="!tw-hidden" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+            </template>
+            <template v-slot:default="{ isActive }">
+                <v-card>
+                <v-card-text class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-text-center">
+                    <h2 class="tw-bg-gray-100 tw-rounded-full tw-px-4 tw-py-1 tw-inline">Vienvenidos a</h2>
+                    <h1 class="tw-font-bold tw-text-xl lg:tw-text-2xl tw-mt-3 tw-text-gray-600">La nueva plataforma de Halcones de xalapa</h1>
+                </v-card-text>
 
-                            </div>
-                            </div>
-                        </div>
-                        <div class="tw-w-full tw-bg-transparent tw-flex tw-items-start tw-justify-between tw-gap-5 tw-h-96 lg:tw-h-screen tw-overflow-hidden">
-                            <div class="tw-w-full tw-h-full slider-up">
-                                <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg_black.svg" alt="">
-                                <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg_black.svg" alt="">
-                                <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg_black.svg" alt="">
-                            </div>
-                            <div class="tw-w-full tw-h-full slider-down">
-                                <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg_black.svg" alt="">
-                                <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg_black.svg" alt="">
-                                <img class="tw-w-full tw-h-full" src="../../../../public/img/bannerimg_black.svg" alt="">
-                            </div>
-                        </div>
-                    </section>
+                <v-card-actions>
+                    <v-btn color="purple" rounded="xl" variant="tonal" class="text-none !tw-px-4" text="Iniciar ahora" @click="isActive.value = false"></v-btn>
+                </v-card-actions>
+                </v-card>
+            </template>
+        </v-dialog>
+
+        <div class="tw-w-full tw-relative tw-max-w-7xl tw-mx-auto tw-mt-36 lg:tw-mt-20 tw-px-4 lg:tw-px-0">
+            <div class="tw-flex tw-flex-col tw-gap-7">
+                <div class="tw-gap-3 tw-items-center tw-text-gray-600 tw-hidden lg:tw-flex">
+                    <img class="tw-w-20 tw-h-auto" src="https://adminmart.com/wp-content/uploads/2023/01/users.png" alt="users">
+                    <p><span class="tw-font-bold">1,903+</span> Fanaticos & publico han usado nuestra plataforma.</p>
+                </div>
+                <div class="tw-font-bold tw-text-4xl md:tw-text-6xl tw-max-w-2xl tw-leading-[50px] md:tw-leading-[70px]">Aplicacion web oficial del equipo Halcones de xalapa!</div>
+
+                <p class="tw-text-lg tw-text-gray-500 tw-max-w-2xl">Descubre las <span class="tw-font-bold">nuevas novedades en la plataforma oficial</span> del equipo de baloncesto, como comprar boletos con increibles promociones u ofertas especiales</p>
+                <ErrorSession />
+                <div class="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-gap-4 md:tw-gap-5">
+                    <div class="tw-w-full lg:tw-w-auto">
+                        <v-tooltip color="primary" location="bottom center" origin="auto" no-click-animation>
+                        <template v-slot:activator="{ props }">
+                            <Link
+                                :href="route('events.index')"
+                            >
+                                <v-btn v-bind="props" variant="elevated" class="text-none !tw-block md:!tw-hidden tw-w-full lg:tw-w-auto !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Proximos partios</v-btn>
+                                <v-btn v-bind="props" variant="elevated" class="text-none !tw-hidden md:!tw-block tw-w-full lg:tw-w-auto !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="x-large" rounded="xl">Proximos partios</v-btn>
+                            </Link>
+                        </template>
+                        <div>Partidos oficiales!</div>
+                        </v-tooltip>
+                    </div>
+                    <div class="tw-w-full lg:tw-w-auto">
+                        <v-tooltip color="primary" location="bottom center" origin="auto" no-click-animation>
+                        <template v-slot:activator="{ props }">
+                            <Link
+                            :href="route('login')"
+                            >
+                                <v-btn v-bind="props" variant="tonal" class="text-none !tw-block md:!tw-hidden tw-w-full lg:tw-w-auto !tw-bg-tw-primary-100 !tw-text-tw-primary-600 !tw-px-7" size="large" rounded="xl">Mis boletos</v-btn>
+                                <v-btn v-bind="props" variant="tonal" class="text-none !tw-hidden md:!tw-block tw-w-full lg:tw-w-auto !tw-bg-tw-primary-100 !tw-text-tw-primary-600 !tw-px-7" size="x-large" rounded="xl">Mis boletos</v-btn>
+                            </Link>
+                        </template>
+                        <div>Tickets!</div>
+                        </v-tooltip>
+                    </div>
+
                 </div>
             </div>
-        </v-parallax>
+        </div>
     </section>
+
     <main class="tw-px-4 lg:tw-px-0 tw-relative tw-overflow-hidden">
         <section>
             <!-- Testimonials with Stats -->
-            <div class="tw-max-w-7xl tw-py-10 lg:tw-py-32 tw-mx-auto">
+            <div class="tw-max-w-7xl tw-pb-10 lg:tw-pb-32 tw-mx-auto">
             <!-- Grid -->
             <div class="tw-flex tw-items-start tw-justify-between tw-gap-20 tw-flex-col md:tw-flex-row">
                 <div>
@@ -474,6 +512,10 @@ function handleImageError() {
 </template>
 
 <style scoped>
+.bg-video {
+    border-radius: 0px 0px 0px 1000px/0px 0px 0px 380px;
+}
+
 .shadow-x {
     box-shadow: 20px 0 30px -5px rgba(0, 0, 0, 0.3), -20px 0 30px -5px rgba(0, 0, 0, 0.3);
 }

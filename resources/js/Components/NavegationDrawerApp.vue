@@ -45,13 +45,13 @@ const props = defineProps({
                             <template v-slot:activator="{ props }">
                                 <v-btn
                                     :class="fav ? 'text-purple' : '!tw-text-purple-500'"
-                                    class="!tw-rounded-full !tw-size-40"
+                                    class="!tw-rounded-full !tw-size-40 bg-profile !tw-bg-slate-800"
                                     v-bind="props"
                                     variant="tonal"
                                     @click="fav = !fav"
                                     >
                                     <div
-                                        class="tw-size-36 tw-overflow-hidden tw-rounded-full tw-flex tw-items-center tw-justify-center"
+                                        class="tw-size-36 tw-overflow-hidden tw-flex tw-items-center tw-justify-center bg-profile"
                                         v-if="user.global_images.length > 0"
                                         :style="{ backgroundImage: `url(/storage/${user.global_images[0].file_path})`, backgroundSize: 'cover', backgroundPosition: 'center' }"
                                         >
@@ -222,11 +222,32 @@ const props = defineProps({
                     <div class="tw-w-full tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-overflow-hidden tw-shadow-xl tw-relative tw-bg-white/10">
                         <div class="tw-w-[55%] tw-p-3 tw-pr-0 tw-text-sm tw-font-semibold tw-text-gray-200">
                             <p class="tw-mb-4">{{ user.first_name + ' ' + user.last_name }}</p>
-                            <Link :href="route('logout')" method="post" as="button">
-                                <v-btn  color="red" variant="tonal" block class="text-none" rounded="lg">
-                                    Cerrar sesion
-                            </v-btn>
-                            </Link>
+
+                            <v-dialog max-width="500">
+                                    <template v-slot:activator="{ props: activatorProps }">
+                                        <v-btn v-bind="activatorProps" color="red" variant="tonal" block class="text-none" rounded="lg">
+                                            Cerrar sesion
+                                        </v-btn>
+                                    </template>
+                                    <template v-slot:default="{ isActive }">
+                                        <v-card title="¿Estas seguro de finalizar tu sesion ?">
+                                        <v-card-text>
+                                            <p class="tw-opacity-50 tw-mt-3">Oprime 'cerrar sesion' para finalizar la autenticacion.</p>
+                                        </v-card-text>
+
+                                        <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn color="red" rounded="xl" variant="tonal" class="text-none !tw-px-4" text="Cancelar" @click="isActive.value = false"></v-btn>
+                                            <Link :href="route('logout')" method="post" as="button">
+                                                <v-btn rounded="xl" variant="elevated" class="text-none !tw-bg-purple-500 !tw-text-white tw-mb-2 !tw-px-4" @click="isActive.value = false">
+                                                    <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">person</span> Cerrar sesion
+                                                </v-btn>
+                                            </Link>
+                                        </v-card-actions>
+
+                                        </v-card>
+                                    </template>
+                            </v-dialog>
                         </div>
                         <img class="tw-w-[60%] tw-absolute tw-top-0 -tw-right-5" src="https://modernize-nuxt3-main.netlify.app/images/backgrounds/unlimited-bg.png" alt="">
                     </div>
@@ -239,6 +260,9 @@ const props = defineProps({
 
 
 <style scoped>
+.bg-profile{
+    border-radius: 100px 55px 55px 90px/80px 82px 75px 79px !important;
+}
 .v-btn__prepend {
     margin-right: 3px;
 }
