@@ -23,7 +23,7 @@ Route::get('/eventos', [EventController::class, 'index'])->name('events.index');
 * |BLOG | ROUTES
 */
 Route::get('/blog/{id}', [BlogController::class, 'index'])->name('blogs.show');
-
+Route::get('/taquillas/check-ticket', [TicketOfficeController::class, 'check'])->name('ticket-offices.check');
 /*
 * |--------------------------------------------------------------------------
 * | Web Routes

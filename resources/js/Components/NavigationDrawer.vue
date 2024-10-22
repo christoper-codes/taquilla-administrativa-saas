@@ -39,6 +39,11 @@ const toggleFav = () => {
                             </GuestNavLink>
                         </div>
                         <div class="tw-w-full ">
+                            <GuestNavLink :href="route('ticket-offices.index')" :active="route().current('ticket-offices.index')">
+                                <span class="material-symbols-outlined tw-text-lg">mp</span>Taquillas
+                            </GuestNavLink>
+                        </div>
+                        <div class="tw-w-full ">
                             <GuestNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                 <span class="material-symbols-outlined tw-text-lg">local_activity</span>Mis boletos
                             </GuestNavLink>
