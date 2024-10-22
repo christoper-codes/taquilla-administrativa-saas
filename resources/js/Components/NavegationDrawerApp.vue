@@ -33,15 +33,15 @@ const props = defineProps({
         <div class="!tw-text-gray-100 tw-bg-slate-950 tw-min-h-screen tw-relative tw-overflow-hidden">
             <div class="tw-absolute tw-left-1/2 tw-top-[80%] tw-h-[700px] tw-w-[500px] tw--translate-x-1/2 tw-rounded-full tw-bg-gradient-to-t tw-blur-[250px] tw-from-tw-primary-800 tw-to-tw-primary-600">
             </div>
-            <div class="tw-w-full">
+            <div class="tw-w-full tw-relative">
                 <div class="w-full tw-py-3 lg:tw-py-4 tw-px-4">
 
                     <div class="text-center profile-btn tw-cursor-pointer">
-                            <v-menu
-                            v-model="menu"
-                            :close-on-content-click="false"
-                            location="bottom start" origin="top center"
-                            >
+                        <v-menu
+                        v-model="menu"
+                        :close-on-content-click="false"
+                        location="bottom start" origin="top center"
+                        >
                             <template v-slot:activator="{ props }">
                                 <v-btn
                                     :class="fav ? 'text-purple' : '!tw-text-purple-500'"
@@ -118,8 +118,8 @@ const props = defineProps({
                                 </div>
                                 </v-card-actions>
                             </v-card>
-                            </v-menu>
-                        </div>
+                        </v-menu>
+                    </div>
 
                 </div>
             </div>

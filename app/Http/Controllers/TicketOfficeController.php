@@ -35,7 +35,7 @@ class TicketOfficeController extends Controller
         try {
             $ticket_offices = $this->ticket_office_service->getAll();
 
-            return Inertia::render('Pos/TicketOffices', [
+            return Inertia::render('App/Pos/TicketOffices', [
                 'ticket_offices' => $ticket_offices,
             ]);
 
@@ -48,7 +48,7 @@ class TicketOfficeController extends Controller
     {
         try {
 
-            return Inertia::render('Pos/CheckTickets');
+            return Inertia::render('App/Pos/CheckTickets');
 
         } catch (\Exception $e) {
             WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar las taquillas');
@@ -85,7 +85,7 @@ class TicketOfficeController extends Controller
             $auth_user = Auth::user();
             $active_cash_register = $auth_user->cashRegisterActive($ticketOffice->id);
 
-            return Inertia::render('Pos/TicketOffice', [
+            return Inertia::render('App/Pos/TicketOffice', [
                 'ticket_office' => $ticket_office,
                 'events' => $events,
                 'auth_user' => $auth_user,

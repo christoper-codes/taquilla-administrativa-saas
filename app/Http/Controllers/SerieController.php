@@ -34,7 +34,7 @@ class SerieController extends Controller
             $series = $this->serie_service->getAll();
             $global_seasons = $this->global_season_service->getAll();
 
-            return Inertia::render('Administration/Event/Series', [
+            return Inertia::render('App/Administration/Event/Series', [
                 'user' => $user,
                 'series' => $series,
                 'global_seasons'=> $global_seasons

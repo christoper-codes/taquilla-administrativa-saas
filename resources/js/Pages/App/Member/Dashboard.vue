@@ -75,7 +75,6 @@ const props = defineProps({
         required: true,
     },
 })
-console.log(props.events_with_tickets);
 const eventsWithTickets = ref(Object.values(props.events_with_tickets));
 const tab = ref('tab-0');
 </script>
