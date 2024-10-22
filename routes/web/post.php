@@ -4,6 +4,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\SeatCatalogueController;
+use App\Http\Controllers\SerieController;
 use App\Http\Controllers\TicketOfficeController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,3 +31,22 @@ Route::middleware('auth')->group(function() {
     Route::post('/eventos/confirmar-compra-de-asientos', [EventController::class, 'confirmSeatsPurchase'])->name('events.confirm-seats-purchase');
 });
 
+
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Series | ROUTES
+*/
+Route::post('/series', [SerieController::class, 'store'])->name('series.store');
+
+
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Events | ROUTES
+*/
+Route::post('/eventos', [EventController::class, 'store'])->name('event.management.store');

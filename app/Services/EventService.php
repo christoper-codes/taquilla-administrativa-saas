@@ -240,4 +240,58 @@ class EventService
         }
     }
 
+    /*
+    * |--------------------------------------------------------------------------
+    * | Save new event catalogue
+    */
+    public function save(array $data)
+    {
+        try {
+
+            $event = $this->event_repository->save($data);
+
+            return $event;
+
+        } catch (\Exception $e) {
+
+            throw $e;
+        }
+    }
+
+    /*
+    * |--------------------------------------------------------------------------
+    * | update event catalogue
+    */
+    public function update(int $id, array $data)
+    {
+        try {
+
+            $serie = $this->event_repository->update($id, $data);
+
+            return $serie;
+
+        } catch (\Exception $e) {
+
+            throw $e;
+        }
+    }
+
+    /*
+    * |--------------------------------------------------------------------------
+    * | delete event catalogue
+    */
+    public function delete(int $id)
+    {
+        try {
+
+            $event = $this->event_repository->delete($id);
+
+            return $event;
+
+        } catch (\Exception $e) {
+
+            throw $e;
+        }
+    }
+
 }

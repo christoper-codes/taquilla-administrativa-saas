@@ -44,6 +44,17 @@ class TicketOfficeController extends Controller
         }
     }
 
+    public function check()
+    {
+        try {
+
+            return Inertia::render('Pos/CheckTickets');
+
+        } catch (\Exception $e) {
+            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar las taquillas');
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      */
