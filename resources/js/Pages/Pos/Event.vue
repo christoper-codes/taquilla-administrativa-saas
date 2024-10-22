@@ -1,9 +1,9 @@
 <script setup>
 import NavigationDrawer from '@/Components/NavigationDrawer.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, useForm as useFormInertia, usePage } from '@inertiajs/vue3';
 import Footer from '@/Components/Footer.vue';
-import { nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import StadiumSVG from '@/Components/SectionsHdx/StadiumSVG.vue';
 import FZona from '@/Components/SectionsHdx/FZona.vue';
 import usePriceFormat from '@/composables/priceFormat';
@@ -13,10 +13,18 @@ import panzoom from 'panzoom';
 import ErrorSession from '@/Components/ErrorSession.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { drawerPaymentState } from '@/composables/drawersStates';
+import SuccessSession from '@/Components/SuccessSession.vue';
+import CountdownTimer from '@/Components/CountdownTimer.vue';
+import useDateFormat from '@/composables/dateFormat';
+import useTicketOfficeState from '@/composables/TicketOfficeState';
 
+const { dateFormat } = useDateFormat();
+const { cashRegisterDataId } = useTicketOfficeState();
+const snackbar = ref(false);
 
 /*
-*  declare properties
+* |--------------------------------------
+* | declare properties
 */
 const { formatPrice } = usePriceFormat();
 const { viewVendorTopics } = useUserPolicy();
@@ -49,12 +57,6 @@ function loadSvg(id) {
         }
     },300);
 }
-
-onMounted(() => {
-  nextTick(() => {
-    loadSvg('zones_hdx');
-  });
-});
 
 const getCenterCoordinates = (id) => {
   const svgElement = document.querySelector(`#${id}`);
@@ -94,7 +96,7 @@ const total = ref(0);
 function priceRegular(seat) {
     return seat.seat_catalogue.price_types.reduce((acc, priceType) => {
         if(priceType.name === 'regular'){
-            return acc + priceType.price;
+            return acc + parseFloat(priceType.price);
         }
 
         return acc;
@@ -103,68 +105,63 @@ function priceRegular(seat) {
 
 const addSeat = (seat) => {
     const seatExist = seatsSelected.value.find((s) => s.seat_catalogue.code === seat.seat_catalogue.code);
+    priceTypeId.value = seat.seat_catalogue.price_types[0].id;
     if (!seatExist) {
         seat.quantity = 1;
+        seat.final_price = priceRegular(seat);
         seatsSelected.value.push(seat);
+        snackbar.value = true;
+
         if(viewVendorTopics(props.user_roles)) {
-            const regularPrice = priceRegular(seat);
+           // vendedor
+           const regularPrice = priceRegular(seat);
             total.value = (parseFloat(total.value || 0) + parseFloat(regularPrice));
         } else {
             const regularPrice = priceRegular(seat);
             total.value = (parseFloat(total.value || 0) + parseFloat(regularPrice));
+            amountReceived.value = total.value;
         }
     } else {
         seatsSelected.value = seatsSelected.value.filter((s) => s.seat_catalogue.code !== seat.seat_catalogue.code);
+        if(seatsSelected.value.length == 0) {
+            snackbar.value = false;
+        }
 
         if(viewVendorTopics(props.user_roles)) {
+            // vendedor
             const regularPrice = priceRegular(seat);
-            total.value = (parseFloat(total.value || 0) - parseFloat(regularPrice));
+           total.value = (parseFloat(total.value || 0) - parseFloat(regularPrice));
         } else {
            const regularPrice = priceRegular(seat);
            total.value = (parseFloat(total.value || 0) - parseFloat(regularPrice));
+           amountReceived.value = total.value;
         }
     }
 }
 
+/*
+* handle global payment types
+*/
+const globalPaymentTypes = ref([
+    {
+        id: 1,
+        global_card_payment_type_id: 1,
+        amount: 0,
+    }
+]);
+const purchageOnline = ref(true);
+const priceTypeId = ref(1);
+const amountReceived = ref(0);
+const amountReturned = ref(0);
 const panel = ref([0,1]);
 const radios = ref('one');
 const paymentTypeSelected = ref(null);
 const cardPaymentTypeSelected = ref(null);
+const sellerUserId = ref(1);
 
-/*
-* declare props
-*/
-const props = defineProps({
-    event: {
-        type: Object,
-        required: true,
-    },
-    a_zone: {
-        type: Array,
-        required: true,
-    },
-    b_zone: {
-        type: Array,
-        required: true,
-    },
-    c_zone: {
-        type: Array,
-        required: true,
-    },
-    user_roles: {
-        type: Array,
-        required: false,
-    },
-    global_payment_types: {
-        type: Array,
-        required: true,
-    },
-    global_card_payment_types: {
-        type: Array,
-        required: true,
-    }
+const handleAmountReturned = computed(() => {
+    return parseFloat(amountReceived.value) - parseFloat(total.value);
 });
-
 
 const globalPayementTypeProps = (item) => {
   return {
@@ -209,9 +206,106 @@ const selectZones = () => {
     stadiumHdxImg.classList.add('tw-rotate-0');
 };
 
+/*
+* declare props
+*/
+const props = defineProps({
+    event: {
+        type: Object,
+        required: true,
+    },
+    a_zone: {
+        type: Array,
+        required: true,
+    },
+    b_zone: {
+        type: Array,
+        required: true,
+    },
+    c_zone: {
+        type: Array,
+        required: true,
+    },
+    user: {
+        type: Object,
+        required: true,
+    },
+    user_roles: {
+        type: Array,
+        required: false,
+    },
+    global_payment_types: {
+        type: Array,
+        required: true,
+    },
+    global_card_payment_types: {
+        type: Array,
+        required: true,
+    }
+});
+
+/*
+* |--------------------------------------
+* | declare OnMounted
+*/
+onMounted(() => {
+    nextTick(() => {
+        loadSvg('zones_hdx');
+    });
+});
+
+/*
+* |--------------------------------------
+* | Reserve selected seats and complete purchase
+*/
+
+const loading = ref(false);
+
 function completePurchase(isActive) {
-  isActive.value = false;
-  drawerPaymentState.value = !drawerPaymentState.value;
+
+    if(viewVendorTopics(props.user_roles)) {
+           // vendedor
+        purchageOnline.value = false;
+        sellerUserId.value = props.user.id;
+
+    } else {
+        globalPaymentTypes.value = globalPaymentTypes.value.map((item) => {
+            return {
+            ...item,
+            amount: total.value,
+            }
+        })
+    }
+
+    const seatsSelectedData = useFormInertia({
+        event_id: props.event.id,
+        cash_register_id: cashRegisterDataId.value,
+        member_user_id: props.user.id,
+        seller_user_id: sellerUserId.value,
+        price_type_id: priceTypeId.value,
+        seats: seatsSelected.value,
+        amount_received: amountReceived.value,
+        total_amount: total.value,
+        total_returned: amountReturned.value,
+        global_payment_types: globalPaymentTypes.value,
+        is_online: purchageOnline.value,
+    });
+
+    loading.value = true;
+
+    seatsSelectedData.post(route('events.reserve-seats-to-buy'), {
+        onSuccess: (response) => {
+            if(!response.props.flash.error) {
+                drawerPaymentState.value = true;
+            }
+        },
+        onFinish: () => {
+            isActive.value = false;
+            loading.value = false;
+        }
+    });
+
+
 }
 
 </script>
@@ -220,12 +314,15 @@ function completePurchase(isActive) {
     <Head title="Evento" />
     <GuestLayout />
     <NavigationDrawer />
+    <SuccessSession />
 
-    <Breadcrumb>
+    <div class="tw-hidden lg:tw-block">
+        <Breadcrumb>
             <template #title>
-                <span>Partido actual</span>
+                <span>{{ event.name }}</span>
             </template>
-    </Breadcrumb>
+        </Breadcrumb>
+    </div>
 
     <div v-if="seatsSelected.length > 0" @click="scrollTopaymentSection" class="tw-fixed tw-bottom-20 tw-right-3 tw-z-[60]">
         <div class="tw-flex tw-items-center tw-justify-center tw-cursor-pointer hover:tw-scale-110 tw-transition-transform tw-duration-700">
@@ -237,14 +334,14 @@ function completePurchase(isActive) {
         </div>
     </div>
 
-    <section class="tw-overflow-hidden tw-mt-6 lg:tw-mt-0">
+    <section class="tw-overflow-hidden tw-mt-0">
        <div class="lg:tw-hidden">
             <img class="tw-w-full" :src="`/storage/${event.global_image.file_path}`" alt="">
         </div>
     </section>
 
     <section class="tw-w-full tw-min-h-screen tw-bg-white tw-mt-[-37px] lg:tw-mt-0 tw-rounded-[35px] lg:tw-rounded-[0px] tw-relative tw-mb-20">
-        <div class="max-w-full md:tw-max-w-[90%] tw-mx-auto tw-py-1 lg:tw-py-7 tw-px-4 lg:tw-px-0">
+        <div class="max-w-full md:tw-max-w-[90%] tw-mx-auto tw-py-1 lg:tw-pb-7 tw-px-4 lg:tw-px-0">
             <main class="">
 
                 <div class="tw-mt-10 tw-w-full tw-flex tw-flex-col lg:tw-flex-row tw-items-start tw-justify-between tw-gap-7 lg:tw-gap-10">
@@ -257,14 +354,14 @@ function completePurchase(isActive) {
                                 </div>
                             </Link >
 
-                            <h2 class="tw-text-3xl tw-font-bold lg:tw-text-5xl">{{ event.name }}</h2>
+                            <h2 class="tw-text-3xl tw-font-bold lg:tw-text-4xl">{{ dateFormat(event.start_date) }}</h2>
 
                             <div class="tw-flex tw-items-center tw-gap-x-5">
                                 <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
                                     <span class="material-symbols-outlined tw-text-xl">location_on</span>El nido del halcon
                                 </div>
                                 <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
-                                    <span class="material-symbols-outlined tw-text-xl">calendar_today</span>{{ event.start_date }}
+                                    <span class="material-symbols-outlined tw-text-xl">calendar_today</span>{{ event.name }}
                                 </div>
                             </div>
                         </div>
@@ -273,11 +370,12 @@ function completePurchase(isActive) {
                                 <div>
                                     <p class="tw-font-bold tw-text-xl">Mapa de disponibilidad</p>
                                     <ErrorSession />
-                                    <PaymentDrawer v-bind:seatsSelected="seatsSelected" v-bind:total="total" />
 
-                                    <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-5 tw-items-center tw-gap-3 tw-mt-7">
+                                    <PaymentDrawer v-bind:eventId="event.id" v-bind:cashRegisterId="cashRegisterDataId"  v-bind:memberUserId="user.id" v-bind:sellerUserId="sellerUserId" v-bind:priceTypeId="priceTypeId" v-bind:seats="seatsSelected" v-bind:amountReceived="amountReceived" v-bind:totalAmount="total" v-bind:amountReturned="amountReturned" v-bind:globalPaymentTypes="globalPaymentTypes" v-bind:isOnline="purchageOnline" />
+
+                                    <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-6 tw-items-center tw-gap-3 tw-mt-7">
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
-                                            <div @click="drawerPaymentState = !drawerPaymentState" class="tw-h-9 tw-w-full tw-bg-yellow-500 tw-flex tw-items-center tw-justify-center tw-rounded-full">
+                                            <div class="tw-h-9 tw-w-full tw-bg-yellow-500 tw-flex tw-items-center tw-justify-center tw-rounded-full">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">done_outline</span>
                                             </div>
                                             <p>Disponible</p>
@@ -287,6 +385,12 @@ function completePurchase(isActive) {
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">star</span>
                                             </div>
                                             <p>Vendido</p>
+                                        </div>
+                                        <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
+                                            <div class="tw-h-9 tw-w-full tw-bg-green-500 tw-flex tw-items-center tw-justify-center tw-rounded-full">
+                                                <span class="material-symbols-outlined tw-text-sm tw-text-white">web_traffic</span>
+                                            </div>
+                                            <p>Seleccionado</p>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                             <div class="tw-h-9 tw-w-full tw-bg-pink-600 tw-flex tw-items-center tw-justify-center tw-rounded-full">
@@ -300,11 +404,11 @@ function completePurchase(isActive) {
                                             </div>
                                             <p>Inhabilitado</p>
                                         </div>
-                                        <div class="tw-flex tw-items-center tw-flex-col tw-gap-2 tw-col-span-2 lg:tw-col-span-1">
-                                            <div class="tw-h-9 tw-w-full tw-bg-green-500 tw-flex tw-items-center tw-justify-center tw-rounded-full">
-                                                <span class="material-symbols-outlined tw-text-sm tw-text-white">web_traffic</span>
+                                        <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
+                                            <div class="tw-h-9 tw-w-full tw-bg-cyan-500 tw-flex tw-items-center tw-justify-center tw-rounded-full">
+                                                <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
-                                            <p>Seleccionado</p>
+                                            <p>En transito</p>
                                         </div>
                                      </div>
                                 </div>
@@ -347,8 +451,7 @@ function completePurchase(isActive) {
 
                     </div>
 
-
-                    <div class="tw-w-full lg:tw-w-[30%] tw-sticky tw-top-20 ">
+                    <div class="tw-w-full lg:tw-w-[30%] tw-sticky tw-top-20 tw-mt-[-100px]">
                         <h3 class="tw-text-2xl tw-font-bold">Asientos seleccionados</h3>
                         <h4 class="tw-text-sm mt-1">📍 El nido del halcon | Xalapa Ver.</h4>
                         <div class="tw-min-h-[570px] tw-w-full mt-3 tw-shadow-xl tw-rounded-2xl tw-overflow-hidden">
@@ -499,7 +602,85 @@ function completePurchase(isActive) {
                                         <div class="tw-my-5">
                                             <p class="tw-opacity-50 tw-text-right tw-mb-3">Subtotal (precio regular): {{ formatPrice(total) }}</p>
                                             <p class="tw-font-semibold tw-text-right tw-mb-3">Total: {{ formatPrice(total) }}</p>
-                                            <v-dialog max-width="500">
+
+                                            <div class="text-center">
+                                                <v-snackbar
+                                                    v-model="snackbar"
+                                                    variant="elevated"
+                                                    color="white"
+                                                    multi-line
+                                                    timeout="-1"
+                                                    location="top"
+                                                    class="!tw-w-full !tw-m-0 !tw-rounded-none"
+                                                    min-width="100%"
+                                                    min-height="90px"
+                                                    rounded="0"
+                                                >
+                                                <div class="tw-flex tw-items-center tw-justify-center tw-gap-5 tw-max-w-5xl tw-w-full tw-h-full tw-mx-auto">
+                                                    <v-text-field
+                                                        label="Monto total"
+                                                        variant="outlined"
+                                                        color="purple"
+                                                        clearable
+                                                        hint="Monto total a pagar"
+                                                        persistent-hint=""
+                                                        rounded="lg"
+                                                        v-model.number="total"
+                                                        readonly
+                                                    ></v-text-field>
+                                                    <v-text-field
+                                                        label="Monto recibido"
+                                                        variant="outlined"
+                                                        color="purple"
+                                                        clearable
+                                                        hint="Monto recibido por el cliente"
+                                                        persistent-hint=""
+                                                        rounded="lg"
+                                                        v-model.number="amountReceived"
+                                                    ></v-text-field>
+                                                    <v-text-field
+                                                        label="Cambio"
+                                                        variant="outlined"
+                                                        color="purple"
+                                                        clearable
+                                                        hint="Cambio a devolver al cliente"
+                                                        persistent-hint=""
+                                                        rounded="lg"
+                                                        v-model.number="handleAmountReturned"
+                                                        readonly
+                                                    ></v-text-field>
+                                                </div>
+
+                                                <template v-slot:actions>
+                                                    <v-btn
+                                                    color="red"
+                                                    variant="tonal"
+                                                    @click="snackbar = false"
+                                                    >
+                                                    Cerrar
+                                                    </v-btn>
+                                                </template>
+                                                </v-snackbar>
+                                            </div>
+
+                                            <v-dialog max-width="700" v-if="viewVendorTopics(user_roles)">
+                                                <template v-slot:activator="{ props: activatorProps }">
+                                                    <v-btn v-bind="activatorProps" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                                </template>
+                                                <template v-slot:default="{ isActive }">
+                                                    <v-card title="¿Estas seguro de realizar la compra?">
+                                                    <v-card-text>
+                                                        <iframe src="http://127.0.0.1:8000/img/ticket_test.pdf" width="100%" height="400"></iframe>
+                                                    </v-card-text>
+
+                                                    <v-card-actions>
+                                                        <v-spacer></v-spacer>
+                                                        <v-btn color="red" rounded="xl" variant="tonal" class="text-none" text="Cancelar" @click="isActive.value = false"></v-btn>
+                                                    </v-card-actions>
+                                                    </v-card>
+                                                </template>
+                                            </v-dialog>
+                                            <v-dialog max-width="500" v-else>
                                                 <template v-slot:activator="{ props: activatorProps }">
                                                     <v-btn v-bind="activatorProps" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
                                                 </template>
@@ -513,7 +694,7 @@ function completePurchase(isActive) {
                                                     <v-card-actions>
                                                         <v-spacer></v-spacer>
                                                         <v-btn color="red" rounded="xl" variant="tonal" class="text-none" text="Cancelar" @click="isActive.value = false"></v-btn>
-                                                        <v-btn rounded="xl" variant="elevated" class="text-none !tw-bg-green-500 !tw-text-white tw-mb-2" text="Completar compra" @click="completePurchase(isActive)"></v-btn>
+                                                        <v-btn :loading="loading" rounded="xl" variant="elevated" class="text-none !tw-bg-green-500 !tw-text-white tw-mb-2 !tw-px-4" text="Reservar y comprar" @click="completePurchase(isActive)"></v-btn>
                                                     </v-card-actions>
 
                                                     </v-card>

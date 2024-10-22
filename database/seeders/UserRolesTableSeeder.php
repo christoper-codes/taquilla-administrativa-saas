@@ -26,6 +26,12 @@ class UserRolesTableSeeder extends Seeder
         ]);
 
         UserRole::create([
+            'name' => 'verificador',
+            'description' => 'rol de verificador',
+            'is_active' => true,
+        ]);
+
+        UserRole::create([
             'name' => 'administrador',
             'description' => 'rol de administrador',
             'is_active' => true,

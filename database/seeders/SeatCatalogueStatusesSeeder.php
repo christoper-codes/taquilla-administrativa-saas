@@ -36,5 +36,11 @@ class SeatCatalogueStatusesSeeder extends Seeder
             'description' => 'Asiento inhabilitado',
             'is_active' => true
         ]);
+
+        SeatCatalogueStatus::create([
+            'name' => 'transito',
+            'description' => 'Asiento en transito',
+            'is_active' => true
+        ]);
     }
 }

@@ -25,8 +25,8 @@ const clubSelected = ref(true);
     <v-layout >
       <v-navigation-drawer v-model="drawerClubState" temporary>
         <div>
-            <div class="tw-flex tw-justify-between tw-items-center tw-py-3 tw-px-4 tw-border-b tw-bg-gradient-to-r tw-from-tw-primary-500 tw-to-tw-secondary-300">
-                <h3 id="hs-offcanvas-example-label" class="tw-font-bold tw-text-white">
+            <div class="tw-flex tw-justify-between tw-items-center tw-py-3 tw-px-4 tw-border-b tw-bg-gradient-to-r tw-from-slate-950 tw-to-purple-900">
+                <h3 id="hs-offcanvas-example-label" class="tw-text-white">
                 Clubs disponibles
                 </h3>
             </div>

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SaleTicketCancelations extends Model
+class SaleTicketCancelation extends Model
 {
     use HasFactory;
 }

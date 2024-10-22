@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignId('cash_register_movement_type_id')->constrained('cash_register_movement_types');
             $table->foreignId('sale_ticket_id')->nullable()->constrained('sale_tickets');
             $table->foreignId('sale_ticket_cancelation_id')->nullable()->constrained('sale_ticket_cancelations');
-            $table->foreignId('event_seat_catalog_id')->nullable()->constrained('event_seat_catalog');
             $table->decimal('previous_balance', 14, 4)->default('0.0000');
             $table->decimal('movement_amount', 14, 4)->default('0.0000');
             $table->decimal('new_balance', 14, 4)->default('0.0000');

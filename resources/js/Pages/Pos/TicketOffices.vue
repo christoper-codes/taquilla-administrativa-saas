@@ -54,7 +54,7 @@ const props =  defineProps({
                     <!-- End Title -->
                     <ErrorSession />
 
-                    <div v-if="ticket_offices" class="tw-w-full tw-flex-col lg:tw-flex-row tw-flex tw-justify-between tw-gap-6 tw-mt-7">
+                    <div v-if="ticket_offices" class="tw-w-full tw-flex-col lg:tw-flex-row tw-flex tw-items-start tw-justify-between tw-gap-6 tw-mt-7">
                         <!-- Grid -->
                         <div class="tw-grid sm:tw-grid-cols-2 tw-gap-6 tw-w-full lg:tw-w-2/3">
                             <!-- Card -->
@@ -87,7 +87,7 @@ const props =  defineProps({
                             <div class="tw-absolute tw-left-1/2 tw-top-[80%] tw-h-[1280px] tw-w-[800px] tw--translate-x-1/2 tw-rounded-full tw-bg-gradient-to-t tw-blur-[250px] tw-from-tw-primary-800 tw-to-tw-primary-600">
                             </div>
                             <div class="tw-flex-auto tw-p-4 md:tw-p-6 tw-relative tw-z-20">
-                                <h3 class="tw-text-xl tw-text-white/90 tw-group-hover:tw-text-white tw-bg-white/10 tw-p-3 tw-rounded-md"><span class="tw-font-bold">Taquillas</span> de el club halcones de xalapa para administrar puntos de venta y usuarios</h3>
+                                <h3 class="tw-text-lg tw-text-white/90 tw-group-hover:tw-text-white tw-bg-white/10 tw-p-3 tw-rounded-md"><span class="tw-font-bold">Taquillas</span> de el club halcones de xalapa para administrar puntos de venta y usuarios</h3>
                             </div>
                             <div class="tw-pt-0 tw-p-4 md:tw-p-6 tw-relative tw-z-20">
                                 <div class="tw-inline-flex tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-white tw-group-hover:tw-text-white/70 tw-group-focus:tw-text-white/70">

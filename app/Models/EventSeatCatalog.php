@@ -21,6 +21,7 @@ class EventSeatCatalog extends Model
         'user_id',
         'season_ticket_id',
         'seat_catalogue_status_id',
+        'qr',
         'sale_ticket_id',
         'price',
         'is_verified',
