@@ -121,4 +121,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(EventSeatCatalog::class);
     }
+
+    public function eventSeatCatalogSaleTickets()
+    {
+        return $this->hasMany(EventSeatCatalogSaleTicket::class);
+    }
 }

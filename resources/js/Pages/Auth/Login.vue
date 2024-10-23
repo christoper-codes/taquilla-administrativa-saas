@@ -110,7 +110,7 @@ const props = defineProps({
                             <div class="lg:tw-hidden tw-mt-5">
                                 ¿Aun no tienes cuenta?
                                 <Link :href="route('register', { slug: slug, id: id})">
-                                    <span class="tw-text-blue-600 tw-underline">Registrarte ahora</span>
+                                    <span class="tw-text-purple-600 tw-underline">Registrarte ahora</span>
                                 </Link>
                             </div>
                         </div>

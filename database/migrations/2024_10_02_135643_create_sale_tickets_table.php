@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('seller_user_id')->constrained('users');
             $table->foreignId('cash_register_id')->constrained('cash_registers');
             $table->foreignId('sale_ticket_status_id')->constrained('sale_ticket_statuses');
-            $table->foreignId('price_type_id')->constrained('price_types');
+            $table->foreignId('price_type_id')->nullable()->constrained('price_types');
             $table->decimal('amount_received', 14, 4)->default('0.0000');
             $table->decimal('total_amount', 14, 4)->default('0.0000');
             $table->decimal('total_returned', 14, 4)->default('0.0000');

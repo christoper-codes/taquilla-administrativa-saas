@@ -62,4 +62,11 @@ class SaleTicket extends Model
     {
         return $this->hasOne(CashRegisterMovement::class);
     }
+
+    public function eventSeatCatalogs()
+    {
+        return $this->belongsToMany(EventSeatCatalog::class, 'event_seat_catalog_sale_ticket', 'sale_ticket_id', 'event_seat_catalog_id')
+            ->withPivot('user_id', 'promotion_id', 'agreement_promotion_id', 'is_active')
+            ->withTimestamps();
+    }
 }
