@@ -81,6 +81,22 @@
 html {
     touch-action: manipulation !important;
 }
+::-webkit-scrollbar {
+    width: 12px !important;
+}
+
+::-webkit-scrollbar-track {
+    background: #cbd5e1 !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155 !important;
+    border-radius: 0px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #1e293b !important;
+}
 
 /* |----------------------------------------------------------------------------
    | Custom Utilities | Toastify

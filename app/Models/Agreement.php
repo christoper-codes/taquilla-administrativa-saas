@@ -34,4 +34,11 @@ class Agreement extends Model
     {
         return $this->belongsTo(GlobalSeason::class);
     }
+
+    public function promotions()
+    {
+        return $this->belongsToMany(Promotion::class, 'agreement_promotion', 'agreement_id', 'promotion_id')
+                    ->withPivot('is_active')
+                    ->withTimestamps();
+    }
 }

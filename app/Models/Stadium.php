@@ -85,4 +85,9 @@ class Stadium extends Model
     {
         return $this->hasMany(TicketOffice::class);
     }
+
+    public function promotions()
+    {
+        return $this->hasMany(Promotion::class);
+    }
 }
