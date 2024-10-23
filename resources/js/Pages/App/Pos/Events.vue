@@ -70,23 +70,23 @@ onMounted(() => {
                                         </div>
                                     </Link >
 
-                                    <h2 class="tw-text-3xl tw-font-bold lg:tw-text-5xl">{{ event.name }}</h2>
+                                    <h2 class="tw-text-2xl tw-font-bold lg:tw-text-5xl">{{ event.name }}</h2>
 
-                                    <div class="tw-flex tw-items-center tw-gap-x-5">
-                                        <a class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200" href="#">
+                                    <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-start lg:tw-items-center tw-gap-2 lg:tw-gap-5">
+                                        <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
                                             📍 | Evento deportivo
-                                        </a>
-                                        <p class="tw-text-xs sm:tw-text-sm tw-text-gray-800">📅 | {{ dateFormat(event.start_date) }} </p>
+                                        </div>
+                                        <p class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-text-gray-800 tw-bg-gray-100 hover:tw-bg-gray-200">📅 | {{ dateFormat(event.start_date) }} </p>
                                     </div>
 
                                     <p class="tw-text-lg tw-text-gray-800 tw-hidden lg:tw-block">Xalapa, Veracruz - En un inicio de temporada emocionante, los Halcones de Xalapa han demostrado ser uno de los equipos más competitivos de la liga profesional de baloncesto en México</p>
 
-                                    <p class="tw-text-lg tw-text-gray-800">{{ event.description }}</p>
+                                    <p class="lg:tw-text-lg tw-text-gray-800">{{ event.description }}</p>
 
                                     <div class="">
-                                        <div class="tw-relative tw-h-44 lg:tw-h-96 tw-w-full tw-block tw-shadow-xl tw-overflow-hidden tw-rounded-3xl hover:tw-scale-105 tw-transition-transform tw-duration-500"
+                                        <div class="tw-relative tw-h-44 lg:tw-h-96 tw-w-full tw-block tw-shadow-xl tw-overflow-hidden tw-rounded-2xl lg:tw-rounded-3xl hover:tw-scale-105 tw-transition-transform tw-duration-500"
                                             :style="{ backgroundImage: `url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
-                                            <div class="tw-absolute tw-bottom-0 tw-w-[100%] tw-rounded-b-3xl tw-bg-black/10 tw-p-2 lg:tw-p-5 tw-backdrop-blur-md tw-backdrop-brightness-150 tw-text-white tw-font-bold tw-text-center">
+                                            <div class="tw-absolute tw-bottom-0 tw-w-[100%] tw-rounded-b-2xl lg:tw-rounded-b-3xl tw-bg-black/10 tw-p-2 lg:tw-p-5 tw-backdrop-blur-md tw-backdrop-brightness-150 tw-text-white tw-font-bold tw-text-center">
                                                 {{ dateFormat(event.start_date) }}
                                             </div>
                                         </div>
@@ -98,13 +98,15 @@ onMounted(() => {
                                                 v-if="$page.props.auth.user"
                                                 :href="route('events.show', { slug: event.slug, id: event.id } )"
                                                 >
-                                                <v-btn variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="x-large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                                <v-btn variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400 lg:!tw-hidden" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                                <v-btn variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400 !tw-hidden lg:!tw-flex" rounded="xl" size="x-large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
                                             </Link>
                                             <Link
                                                 v-else
                                                 :href="route('login', { slug: event.slug, id: event.id})"
                                             >
-                                            <v-btn variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="x-large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                                <v-btn variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400 lg:!tw-hidden" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                                <v-btn variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400 !tw-hidden lg:!tw-flex" rounded="xl" size="x-large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
                                         </Link>
                                         </div>
                                     </div>

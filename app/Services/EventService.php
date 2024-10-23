@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Interfaces\EventRepositoryInterface;
 use App\Models\CashRegisterMovement;
 use App\Models\CashRegisterMovementType;
+use App\Models\EventSeatCatalogPriceType;
 use App\Models\PriceTypeSeatCatalogue;
 use App\Models\SaleTicket;
 use App\Models\SaleTicketStatus;
@@ -68,8 +69,17 @@ class EventService
                 /*
                 * access the price of each seat
                 */
-                $item->seatCatalogue->priceTypes->each(function ($priceType) {
+                /* $item->seatCatalogue->priceTypes->each(function ($priceType) {
                     $priceCatalogue = PriceTypeSeatCatalogue::where('seat_catalogue_id', $priceType->pivot->seat_catalogue_id)
+                    ->where('price_type_id', $priceType->pivot->price_type_id)
+                    ->first()
+                    ->priceCatalogue;
+
+                    $priceType->price = $priceCatalogue->price;
+                }); */
+
+                $item->priceTypes->each(function ($priceType) {
+                    $priceCatalogue = EventSeatCatalogPriceType::where('event_seat_catalog_id', $priceType->pivot->event_seat_catalog_id)
                     ->where('price_type_id', $priceType->pivot->price_type_id)
                     ->first()
                     ->priceCatalogue;

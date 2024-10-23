@@ -265,6 +265,7 @@ const props = defineProps({
 
 
 <style scoped>
+
 .bg-profile{
     border-radius: 100px 55px 55px 90px/80px 82px 75px 79px !important;
 }
