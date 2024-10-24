@@ -110,15 +110,31 @@ const tab = ref('tab-0');
 
             <div class="tw-mt-10 tw-gap-5 tw-w-full tw-flex tw-flex-col-reverse lg:tw-flex-row tw-items-start tw-justify-between">
                 <div class="tw-w-full tw-shadow-lg tw-bg-gray-200 tw-px-5 tw-py-7 tw-overflow-x-scroll tw-rounded-2xl tw-border tw-flex tw-flex-col tw-items-center tw-justify-center tw-text-center">
-                    <span class="tw-text-sm tw-font-bold tw-text-gray-500 tw-text-center tw-inline-flex tw-bg-white tw-px-5 tw-py-2 tw-rounded-full">Seleciona un partido para ver tus boletos</span>
+                    <span class="tw-text-sm tw-font-bold tw-text-gray-500 tw-text-center tw-inline-flex tw-bg-white tw-px-5 tw-py-2 tw-rounded-full">Desliza y seleciona un partido para ver tus boletos</span>
 
-                    <div class="tw-mt-5">
+                    <div class="tw-mt-5 tw-hidden lg:tw-block">
                         <v-tabs v-model="tab" align-tabs="center" color="deep-purple-accent-4">
                             <v-tab v-for="(event, index) in eventsWithTickets" :key="event.event.id" :value="`tab-${index}`">
                                 {{ event.event.name }}
                             </v-tab>
                         </v-tabs>
                     </div>
+                </div>
+            </div>
+
+            <div class="lg:tw-hidden tw-w-full tw-mt-5">
+                <v-tabs v-model="tab" align-tabs="center" class="tw-relative" color="deep-purple-accent-4">
+                    <v-tab v-for="(event, index) in eventsWithTickets" :key="event.event.id" :value="`tab-${index}`">
+                        <span class="!tw-text-xs">{{ event.event.name }}</span>
+                    </v-tab>
+                    <span class="material-symbols-outlined tw-text-3xl tw-text-gray-600 tw-absolute tw-top-1 -tw-left-2">chevron_right</span>
+                </v-tabs>
+                <div class="tw-flex tw-w-full tw-items-center tw-justify-center tw-flex-col tw-mt-2">
+                    <div class="tw-flex tw-items-center tw-justify-center tw-relative">
+                        <div class="tw-animate-ping tw-absolute -tw-right-1 tw-top-5 tw-inline-flex tw-h-4 tw-w-4 tw-rounded-full tw-bg-purple-500 tw-opacity-80"></div>
+                        <span class="material-symbols-outlined tw-rotate-90 tw-text-6xl tw-text-gray-500 tw-relative tw-z-10">swipe_down</span>
+                    </div>
+                    <p class="tw-text-xs">Desliza hacia la izquierda para ver y selecionar los partidos</p>
                 </div>
             </div>
 

@@ -20,16 +20,23 @@ class PriceType extends Model
         return $this->hasMany(Agreement::class);
     }
 
-    public function seatCatalogues()
+    /* public function seatCatalogues()
     {
         return $this->belongsToMany(SeatCatalogue::class, 'price_type_seat_catalogue', 'price_type_id', 'seat_catalogue_id')
                 ->withPivot('price_catalogue_id', 'is_active')
                 ->withTimestamps();
-    }
+    } */
 
     public function saleTickets()
     {
         return $this->hasMany(SaleTicket::class);
+    }
+
+    public function eventSeatCatalogs()
+    {
+        return $this->belongsToMany(EventSeatCatalog::class, 'event_seat_catalog_price_type', 'price_type_id', 'event_seat_catalog_id')
+                ->withPivot('price_catalogue_id', 'is_active')
+                ->withTimestamps();
     }
 
 }
