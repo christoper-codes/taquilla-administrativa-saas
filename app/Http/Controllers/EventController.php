@@ -142,7 +142,7 @@ class EventController extends Controller
                 $event->save();
             }
 
-            $this->event_seat_catalogue_service->saveInBulk($event->serie->globalSeason->stadium_id);
+            $this->event_seat_catalogue_service->saveInBulk($event->id);
 
             return WebResponseHelper::sendResponse($event, "Evento guardada con éxito", null, false);
 
@@ -158,6 +158,7 @@ class EventController extends Controller
      */
     public function show($slug, $id)
     {
+
         try {
             $response = $this->event_service->getById($id);
             $user = Auth::user();
@@ -167,10 +168,12 @@ class EventController extends Controller
                 'a_zone' => $response['a_zone'],
                 'b_zone' => $response['b_zone'],
                 'c_zone' => $response['c_zone'],
+                'f_zone' => $response['f_zone'],
                 'user' => $user,
                 'user_roles' => $response['user_roles'],
                 'global_payment_types' => $response['global_payment_types'],
                 'global_card_payment_types' => $response['global_card_payment_types'],
+                'purchase_types' => $response['purchase_types'],
             ]);
         } catch (\Exception $e) {
             WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar el evento');
