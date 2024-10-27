@@ -141,7 +141,7 @@ const tab = ref('tab-0');
             <div class="tw-mt-10 tw-bg-white">
                 <v-tabs-window v-model="tab">
                     <v-tabs-window-item v-for="(event, index) in eventsWithTickets" :key="event.event.id" :value="`tab-${index}`">
-                        <div v-if="event.tickets.length > 0" class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
+                        <div v-if="event.tickets.length > 0" class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto tw-pb-5">
                             <SaleTicket v-for="ticket in event.tickets" :key="ticket.id" v-bind:ticket="ticket" />
                         </div>
                         <div v-else class="tw-flex tw-items-center tw-flex-col tw-gap-5">

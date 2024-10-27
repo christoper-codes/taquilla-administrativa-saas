@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Interfaces\EventSeatCatalogueRepositoryInterface;
+use App\Models\EventSeatCatalog;
 use App\Models\SeatCatalogue;
 
 class EventSeatCatalogueService
@@ -35,7 +36,7 @@ class EventSeatCatalogueService
     {
         try {
 
-            $get_all_seats_for_stadium = $this->seat_catalogue_service->getAllSeatsForStadium($event_id);
+            $get_all_seats_for_stadium = $this->seat_catalogue_service->getAllSeatsForStadium(1);
 
             $event_seat_catalogue = collect([]);
 
@@ -57,7 +58,28 @@ class EventSeatCatalogueService
                 ]);
             });
 
-            return  $this->event_seat_catalogue_repository_interface->saveInBulk( $event_seat_catalogue->toArray() );
+            /*
+            * save the event seat catalogue in bulk
+            */
+            $newEventSeatCatalogs =  $this->event_seat_catalogue_repository_interface->saveInBulk($event_seat_catalogue->toArray());
+
+            /*
+            * Get all event seat catalogue where event_id
+            */
+            $eventSeatCatalogs = EventSeatCatalog::where('event_id', $event_id)->get();
+
+            /*
+            * Attach the price types to the event seat catalogue
+            */
+            $eventSeatCatalogs->each(function (EventSeatCatalog $eventSeatCatalog) {
+
+                $eventSeatCatalog->priceTypes()->attach([
+                    1 => ['price_catalogue_id' => 1, 'is_active' => true],
+                    2 => ['price_catalogue_id' => 2, 'is_active' => true],
+                ]);
+            });
+
+            return $newEventSeatCatalogs;
 
         } catch (\Exception $e) {
 
