@@ -580,4 +580,7 @@ function handleImageError() {
         background: rgb(247, 249, 250) !important;
         padding: 23px 30px !important;
     }
+    /* .v-theme--light {
+        backdrop-filter: blur(0px) !important;
+    } */
 </style>

@@ -73,6 +73,15 @@
 .v-navigation-drawer__scrim {
     position: fixed !important;
 }
+/* @media (min-width: 1264px) {
+    .v-theme--light {
+        backdrop-filter: blur(3px) !important;
+    }
+}
+ */
+.v-dialog > .v-overlay__content > .v-card, .v-dialog > .v-overlay__content > .v-sheet, .v-dialog > .v-overlay__content > form > .v-card, .v-dialog > .v-overlay__content > form > .v-sheet {
+    border-radius: 20px !important;
+}
 
 /* |----------------------------------------------------------------------------
    | Custom Utilities | Tailwind
@@ -87,6 +96,7 @@ html {
 
 ::-webkit-scrollbar-track {
     background: #cbd5e1 !important;
+    border-radius: 0px !important;
 }
 
 ::-webkit-scrollbar-thumb {

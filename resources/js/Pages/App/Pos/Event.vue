@@ -6,6 +6,10 @@ import Footer from '@/Components/Footer.vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import StadiumSVG from '@/Components/SectionsHdx/StadiumSVG.vue';
 import FZona from '@/Components/SectionsHdx/FZona.vue';
+import EstadioHdx from '@/Components/SectionsHdx/EstadioHdx.vue';
+import ZonaA from '@/Components/SectionsHdx/ZonaA.vue';
+import ZonaC from '@/Components/SectionsHdx/ZonaC.vue';
+import ZonaF from '@/Components/SectionsHdx/ZonaF.vue';
 import usePriceFormat from '@/composables/priceFormat';
 import PaymentDrawer from '@/Components/PaymentDrawer.vue';
 import useUserPolicy from '@/composables/UserPolicy';
@@ -17,10 +21,30 @@ import SuccessSession from '@/Components/SuccessSession.vue';
 import CountdownTimer from '@/Components/CountdownTimer.vue';
 import useDateFormat from '@/composables/dateFormat';
 import useTicketOfficeState from '@/composables/TicketOfficeState';
+import { saleTicketSchema } from '@/validation/pos/sale-ticket-schema';
+import { useField, useForm } from 'vee-validate';
 
 const { dateFormat } = useDateFormat();
 const { cashRegisterDataId } = useTicketOfficeState();
 const snackbar = ref(false);
+const { handleSubmit } = useForm({
+    validationSchema: saleTicketSchema,
+    initialValues: {
+        total: 0,
+        amount_received: 0,
+        amount_returned: 0,
+    }
+});
+
+const paymentFileds = {
+    'total': useField('total'),
+    'amount_received': useField('amount_received', 0),
+    'amount_returned': useField('amount_returned', 0),
+}
+
+const totalAmount = ref(0);
+const amountReceived = ref(0);
+const amountReturned = ref(0);
 
 /*
 * |--------------------------------------
@@ -91,11 +115,11 @@ const zoomOut = () => {
 * Handle POS section
 */
 const seatsSelected = ref([]);
-const total = ref(0);
+/* const paymentFileds.total value.= ref(0); */
 
-function priceRegular(seat) {
+function priceFinal(seat, priceTypeName) {
     return seat.price_types.reduce((acc, priceType) => {
-        if(priceType.name === 'regular'){
+        if(priceType.name === priceTypeName){
             return acc + parseFloat(priceType.price);
         }
 
@@ -103,24 +127,28 @@ function priceRegular(seat) {
     }, 0);
 }
 
+
 const addSeat = (seat) => {
     const seatExist = seatsSelected.value.find((s) => s.seat_catalogue.code === seat.seat_catalogue.code);
     priceTypeId.value = seat.price_types[0].id;
+    const priceFinalType = paymentTypesSelected.value.some(type => type.name == 'cortesia') ? 'cortesia' : 'regular';
+   if(paymentTypesSelected.value.length == 0) {
+        paymentTypesSelected.value.push(props.global_payment_types.find((item) => item.name === 'tarjeta'));
+    }
     if (!seatExist) {
         seat.quantity = 1;
-        seat.final_price = priceRegular(seat);
+        seat.final_price = priceFinal(seat, priceFinalType);
         seatsSelected.value.push(seat);
         snackbar.value = true;
 
         if(viewVendorTopics(props.user_roles)) {
            // vendedor
-           const regularPrice = priceRegular(seat);
-            total.value = (parseFloat(total.value || 0) + parseFloat(regularPrice));
+
         } else {
-            const regularPrice = priceRegular(seat);
-            total.value = (parseFloat(total.value || 0) + parseFloat(regularPrice));
-            amountReceived.value = total.value;
+            /* amountReceived.value = totalAmount.value; */
         }
+        const regularPrice = priceFinal(seat, priceFinalType);
+        totalAmount.value = (parseFloat(totalAmount.value || 0) + parseFloat(regularPrice));
     } else {
         seatsSelected.value = seatsSelected.value.filter((s) => s.seat_catalogue.code !== seat.seat_catalogue.code);
         if(seatsSelected.value.length == 0) {
@@ -129,39 +157,78 @@ const addSeat = (seat) => {
 
         if(viewVendorTopics(props.user_roles)) {
             // vendedor
-            const regularPrice = priceRegular(seat);
-           total.value = (parseFloat(total.value || 0) - parseFloat(regularPrice));
         } else {
-           const regularPrice = priceRegular(seat);
-           total.value = (parseFloat(total.value || 0) - parseFloat(regularPrice));
-           amountReceived.value = total.value;
+           /* amountReceived.value = totalAmount.value; */
         }
+        const regularPrice = priceFinal(seat, priceFinalType);
+        totalAmount.value = (parseFloat(totalAmount.value || 0) - parseFloat(regularPrice));
     }
+
+    if (paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
+        //amountReceived.value = totalAmount.value;
+    }
+    amountToPayCash.value = totalAmount.value;
+    amountToPayCard.value = totalAmount.value;
+    updateTotal();
 }
+
+
 
 /*
 * handle global payment types
 */
-const globalPaymentTypes = ref([
-    {
-        id: 1,
-        global_card_payment_type_id: 1,
-        amount: 0,
-    }
-]);
+const globalPaymentTypes = ref([]);
 const purchageOnline = ref(true);
 const priceTypeId = ref(1);
-const amountReceived = ref(0);
-const amountReturned = ref(0);
+
 const panel = ref([0,1]);
-const radios = ref('one');
-const paymentTypeSelected = ref(null);
-const cardPaymentTypeSelected = ref(null);
+const purchageType = ref('partido');
+const paymentTypesSelected = ref([]); //
 const sellerUserId = ref(1);
 
-const handleAmountReturned = computed(() => {
-    return parseFloat(amountReceived.value) - parseFloat(total.value);
+const filteredPaymentTypes = computed(() => {
+    if (paymentTypesSelected.value.some(type => type.name === 'cortesia')) {
+        const newPaymentTypesSelected = paymentTypesSelected.value.filter(type => type.name === 'cortesia');
+        paymentTypesSelected.value = newPaymentTypesSelected;
+        return paymentTypesSelected.value;
+    }
+
+    return paymentTypesSelected.value;
 });
+
+watch(filteredPaymentTypes, updateTotal);
+
+function updateTotal() {
+    if (paymentTypesSelected.value.length >= 2) {
+        amountReceivedCash.value = 0;
+        amountToPayCash.value = 0;
+        amountToPayCard.value = 0;
+    }
+
+    totalAmount.value = 0;
+
+    // Usamos un set para asegurar que cada asiento se procese una sola vez.
+    const processedSeats = new Set();
+
+    filteredPaymentTypes.value.forEach(paymentType => {
+        seatsSelected.value.forEach((seat) => {
+            if (!processedSeats.has(seat.seat_catalogue.code)) {
+                let price;
+                if (paymentType.name === 'cortesia') {
+                    price = priceFinal(seat, 'cortesia');
+                } else {
+                    price = priceFinal(seat, 'regular');
+                }
+                totalAmount.value = (parseFloat(totalAmount.value || 0) + parseFloat(price));
+                processedSeats.add(seat.seat_catalogue.code);
+                amountReceived.value = totalAmount.value;
+            }
+        });
+    });
+
+}
+
+
 
 const globalPayementTypeProps = (item) => {
   return {
@@ -185,8 +252,24 @@ const handleSectionClick = (section) => {
     selectedSection.value = section;
     isSvgVisible.value = false;
 
-    if(section == 'fzone'){
-        loadSvg('fzone');
+    if(section == 'zonaA'){
+        loadSvg('zonaA');
+        viewSelectedSection.value = 'Zona A';
+        const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
+        stadiumHdxImg.classList.remove('tw-rotate-0');
+        stadiumHdxImg.classList.add('tw-rotate-90');
+    }
+
+    if(section == 'zonaC'){
+        loadSvg('zonaC');
+        viewSelectedSection.value = 'Zona C';
+        const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
+        stadiumHdxImg.classList.remove('tw-rotate-0');
+        stadiumHdxImg.classList.add('tw-rotate-90');
+    }
+
+    if(section == 'zonaF'){
+        loadSvg('zonaF');
         viewSelectedSection.value = 'Zona F';
         const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
         stadiumHdxImg.classList.remove('tw-rotate-0');
@@ -199,6 +282,13 @@ const selectZones = () => {
     loadSvg('zones_hdx');
     isSvgVisible.value = true;
     selectedSection.value = '';
+    totalAmount.value = 0;
+    amountReceived.value = 0;
+    amountReturned.value = 0;
+    amountReceivedCash.value = 0;
+    amountToPayCard.value = 0;
+    amountToPayCash.value = 0;
+    paymentTypesSelected.value = [];
     viewSelectedSection.value = 'Zonas HDX';
     seatsSelected.value = [];
     const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
@@ -226,6 +316,10 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    f_zone: {
+        type: Array,
+        required: true,
+    },
     user: {
         type: Object,
         required: true,
@@ -241,10 +335,12 @@ const props = defineProps({
     global_card_payment_types: {
         type: Array,
         required: true,
-    }
+    },
+    purchase_types: {
+        type: Array,
+        required: true,
+    },
 });
-
-console.log(props);
 
 /*
 * |--------------------------------------
@@ -274,7 +370,7 @@ function completePurchase(isActive) {
         globalPaymentTypes.value = globalPaymentTypes.value.map((item) => {
             return {
             ...item,
-            amount: total.value,
+            amount: totalAmount.value,
             }
         })
     }
@@ -287,7 +383,7 @@ function completePurchase(isActive) {
         price_type_id: priceTypeId.value,
         seats: seatsSelected.value,
         amount_received: amountReceived.value,
-        total_amount: total.value,
+        total_amount: totalAmount.value,
         total_returned: amountReturned.value,
         global_payment_types: globalPaymentTypes.value,
         is_online: purchageOnline.value,
@@ -306,9 +402,100 @@ function completePurchase(isActive) {
             loading.value = false;
         }
     });
-
-
 }
+
+const form = ref(false);
+const loadingg = ref(false);
+const valid = ref(true);
+const error = ref('');
+const amountToPayCard = ref(0);
+const cardPaymentTypesSelected = ref(0);
+const amountToPayCash = ref(0);
+const amountReceivedCash = ref(0);
+
+watch(() => amountReceived.value, (newValue) => {
+    amountReturned.value = parseFloat(amountReceived.value) - parseFloat(totalAmount.value)
+});
+
+watch(() => amountToPayCard.value, (newValue) => {
+     amountReceived.value = parseFloat(amountToPayCard.value) + parseFloat(amountReceivedCash.value);
+});
+
+watch(() => amountReceivedCash.value, (newValue) => {
+     amountReceived.value = parseFloat(amountToPayCard.value) + parseFloat(amountReceivedCash.value);
+});
+
+const onSubmit = () => {
+    if(!form.value) return
+
+    if(paymentTypesSelected.value.length == 0) {
+        valid.value = false;
+        error.value = 'Debe seleccionar al menos un tipo de pago';
+        return;
+    }
+
+    globalPaymentTypes.value = paymentTypesSelected.value.map((item) => {
+        if(item.name === 'tarjeta') {
+            return {
+                id: item.id,
+                global_card_payment_type_id: cardPaymentTypesSelected.value.id,
+                amount: amountToPayCard.value,
+            }
+        }
+        if(item.name === 'efectivo') {
+            return {
+                id: item.id,
+                global_card_payment_type_id: null,
+                amount: amountToPayCash.value,
+            }
+        }
+        if(item.name === 'cortesia') {
+            return {
+                id: item.id,
+                global_card_payment_type_id: null,
+                amount: 0,
+            }
+        }
+    });
+    // validar que al recorrer globalPaymentTypes.amount sea igual al totalamount
+    let totalFinal = 0;
+    globalPaymentTypes.value.forEach((item) => {
+        totalFinal += parseFloat(item.amount);
+    });
+
+    if(totalFinal != totalAmount.value) {
+        valid.value = false;
+        error.value = 'El monto total no coincide con el monto a pagar de los tipos de pago seleccionados';
+        return;
+    }
+
+    loadingg.value = true;
+
+    console.log(purchageType.value);
+}
+
+const rules = {
+    required: value => !!value || 'Campo requerido',
+    isNumber: value => !isNaN(value) || 'Debe ser un número',
+    //validar si en el array de pagos selecionados solo existe un tipo de pago ya sea efectivo o tarjeta y validar que el monto sea igual al total
+    isAmountToPay: value => {
+        if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
+            return parseFloat(value) == parseFloat(totalAmount.value) || 'El monto debe ser igual al total';
+        }
+        if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'efectivo')) {
+            return parseFloat(value) == parseFloat(totalAmount.value) || 'El monto debe ser igual al total';
+        }
+        return true;
+    }
+};
+
+const submitForm = () => {
+  if (form.value.validate()) {
+    console.log('Formulario válido');
+  } else {
+    console.log('Formulario no válido');
+  }
+};
 
 </script>
 
@@ -427,9 +614,9 @@ function completePurchase(isActive) {
                                 <div>
                                     <p class="tw-font-bold tw-text-xl">Mapa de disponibilidad</p>
                                     <ErrorSession />
-
-                                    <PaymentDrawer v-bind:eventId="event.id" v-bind:cashRegisterId="cashRegisterDataId"  v-bind:memberUserId="user.id" v-bind:sellerUserId="sellerUserId" v-bind:priceTypeId="priceTypeId" v-bind:seats="seatsSelected" v-bind:amountReceived="amountReceived" v-bind:totalAmount="total" v-bind:amountReturned="amountReturned" v-bind:globalPaymentTypes="globalPaymentTypes" v-bind:isOnline="purchageOnline" />
-
+<!--
+                                    <PaymentDrawer v-bind:eventId="event.id" v-bind:cashRegisterId="cashRegisterDataId"  v-bind:memberUserId="user.id" v-bind:sellerUserId="sellerUserId" v-bind:priceTypeId="priceTypeId" v-bind:seats="seatsSelected" v-bind:amountReceived="paymentFileds.amount_received" v-bind:totalAmount="total" v-bind:amountReturned="amountReturned" v-bind:globalPaymentTypes="globalPaymentTypes" v-bind:isOnline="purchageOnline" />
+ -->
                                     <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-6 tw-items-center tw-gap-3 tw-mt-7">
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                             <div class="tw-h-9 tw-w-full tw-bg-yellow-500 tw-flex tw-items-center tw-justify-center tw-rounded-full">
@@ -476,8 +663,27 @@ function completePurchase(isActive) {
                                             <v-btn @click="zoomOut" color="purple" variant="tonal" class="text-none" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-2xl">remove</span>zoom</v-btn>
                                         </div>
                                     </div>
-                                    <div class="tw-font-bold tw-text-3xl tw-text-center tw-hidden lg:tw-block">
-                                        {{ viewSelectedSection}}
+                                    <div class="tw-items-center tw-gap-2 tw-hidden lg:tw-flex ">
+                                        <div class="tw-font-bold tw-text-3xl tw-text-center">
+                                            {{ viewSelectedSection}}
+                                        </div>
+                                        <v-dialog max-width="800">
+                                            <template v-slot:activator="{ props: activatorProps }">
+                                                <v-btn v-bind="activatorProps" color="purple" variant="tonal" class="text-none" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-2xl">photo_library</span></v-btn>
+                                            </template>
+                                            <template v-slot:default="{ isActive }">
+                                                <v-card :title="'Imagen de referencia para la ' + viewSelectedSection">
+                                                <v-card-text>
+                                                    <img class="tw-w-full tw-h-auto tw-rounded-xl" src="../../../../../public/img/zonashdx/zona-a-img.jpg" alt="zona hdx">
+                                                </v-card-text>
+
+                                                <v-card-actions>
+                                                    <v-spacer></v-spacer>
+                                                    <v-btn color="purple" rounded="xl" variant="tonal" class="text-none !tw-px-6" text="Cerrar" @click="isActive.value = false"></v-btn>
+                                                </v-card-actions>
+                                                </v-card>
+                                            </template>
+                                        </v-dialog>
                                     </div>
                                     <div class="tw-flex tw-items-center tw-gap-3">
                                         <v-btn @click="resetZoom" color="purple" variant="tonal" class="text-none" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-2xl">my_location</span>reset</v-btn>
@@ -486,8 +692,27 @@ function completePurchase(isActive) {
                                     </div>
                                 </div>
 
-                                <div class="tw-font-bold tw-text-2xl tw-text-center lg:tw-hidden">
-                                    {{ viewSelectedSection}}
+                                <div class="tw-flex tw-items-center tw-gap-2 lg:tw-hidden tw-justify-center">
+                                    <div class="tw-font-bold tw-text-2xl tw-text-center">
+                                        {{ viewSelectedSection}}
+                                    </div>
+                                    <v-dialog max-width="800">
+                                        <template v-slot:activator="{ props: activatorProps }">
+                                            <v-btn v-bind="activatorProps" color="purple" variant="tonal" class="text-none" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-2xl">photo_library</span></v-btn>
+                                        </template>
+                                        <template v-slot:default="{ isActive }">
+                                            <v-card :title="'Imagen de referencia para la ' + viewSelectedSection">
+                                            <v-card-text>
+                                                <img class="tw-w-full tw-h-auto tw-rounded-xl" src="../../../../../public/img/zonashdx/zona-a-img.jpg" alt="zona hdx">
+                                            </v-card-text>
+
+                                            <v-card-actions>
+                                                <v-spacer></v-spacer>
+                                                <v-btn color="purple" rounded="xl" variant="tonal" class="text-none !tw-px-6" text="Cerrar" @click="isActive.value = false"></v-btn>
+                                            </v-card-actions>
+                                            </v-card>
+                                        </template>
+                                    </v-dialog>
                                 </div>
 
                                 <div class="tw-flex tw-h-[400px] tw-cursor-grab lg:tw-h-[500px] tw-items-center tw-justify-center tw-overflow-hidden tw-bordertw-mt-5 tw-gap-3 tw-relative">
@@ -495,11 +720,20 @@ function completePurchase(isActive) {
                                         <img id="stadium-hdx-img" class="tw-size-20 lg:tw-size-32 tw-rotate-0 tw-transition-all tw-duration-1000" src="../../../../../public/img/stadium-hdx-img.svg" alt="">
                                     </div>
                                     <div v-if="isSvgVisible">
-                                        <StadiumSVG @handle-section-click="handleSectionClick" />
+                                        <!-- <StadiumSVG @handle-section-click="handleSectionClick" /> -->
+                                        <EstadioHdx  @handle-section-click="handleSectionClick"/>
                                     </div>
-                                    <div v-if="selectedSection == 'fzone'" class="">
+                                   <!--  <div v-if="selectedSection == 'zonaF'" class="">
                                         <FZona @add-seat="addSeat" v-bind:seats="props.a_zone" v-bind:seatsSelected="seatsSelected" />
-                                        <!-- <ZoneTest @add-seat="addSeat" v-bind:seats="props.a_zone" v-bind:seatsSelected="seatsSelected" /> -->
+                                    </div> -->
+                                    <div v-if="selectedSection == 'zonaA'" class="">
+                                        <ZonaA @add-seat="addSeat" v-bind:seats="props.a_zone" v-bind:seatsSelected="seatsSelected" />
+                                    </div>
+                                    <div v-if="selectedSection == 'zonaC'" class="">
+                                        <ZonaC @add-seat="addSeat" v-bind:seats="props.c_zone" v-bind:seatsSelected="seatsSelected" />
+                                    </div>
+                                    <div v-if="selectedSection == 'zonaF'" class="">
+                                        <ZonaF @add-seat="addSeat" v-bind:seats="props.f_zone" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                 </div>
                             </div>
@@ -511,9 +745,9 @@ function completePurchase(isActive) {
                     <div class="tw-w-full lg:tw-w-[30%] tw-sticky tw-top-20 lg:tw-mt-[-100px]">
                         <h3 class="tw-text-2xl tw-font-bold">Asientos seleccionados</h3>
                         <h4 class="tw-text-sm mt-1">📍 El nido del halcon | Xalapa Ver.</h4>
-                        <div class="tw-min-h-[570px] tw-w-full mt-3 tw-shadow-xl tw-rounded-2xl tw-overflow-hidden">
+                        <div class="tw-h-auto lg:tw-h-[570px] tw-w-full mt-3  tw-rounded-2xl lg:tw-overflow-y-scroll tw-shadow-lg">
                             <div class="tw-relative tw-flex tw-flex-col tw-bg-white tw-rounded-xl tw-pointer-events-auto">
-                                <div class="tw-relative tw-overflow-hidden tw-min-h-32 tw-bg-gray-800 tw-text-center tw-rounded-t-xl">
+                                <div class="tw-relative tw-overflow-hidden tw-min-h-32 tw-bg-gray-800 tw-text-center tw-rounded-xl lg:tw-rounded-tr-none">
                                     <!-- SVG Background Element -->
                                     <figure class="tw-absolute tw-inset-x-0 tw-bottom-0 -tw-mb-px">
                                     <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 1920 100.1">
@@ -541,13 +775,8 @@ function completePurchase(isActive) {
                                 </div>
                                 <div v-if="seatsSelected.length > 0" class="">
                                     <div ref="paymentSection" class="tw-w-full ">
-                                        <v-radio-group inline label="Tipo de venta a realizar" v-model="radios">
-                                            <v-radio color="purple" label="partido" value="one"></v-radio>
-                                            <v-radio color="purple" label="serie" value="two" disabled></v-radio>
-                                            <v-radio color="purple" label="abono" value="three" disabled></v-radio>
-                                        </v-radio-group>
-
-                                        <v-expansion-panels v-model="panel" class="">
+                                        <h3 class="tw-font-bold tw-text-lg tw-text-center tw-my-3">Resumen de compra</h3>
+                                        <v-expansion-panels v-model="panel" class="" multiple>
                                             <v-expansion-panel>
                                                 <v-expansion-panel-title expand-icon="mdi-menu-down">
                                                   asientos seleccionados
@@ -627,39 +856,141 @@ function completePurchase(isActive) {
                                                 <v-expansion-panel-title expand-icon="mdi-menu-down">
                                                    Tipos de pago
                                                 </v-expansion-panel-title>
-                                                <v-expansion-panel-text>
+                                                <v-form v-model="form" @submit.prevent="onSubmit" lazy-validation>
+                                                    <v-expansion-panel-text>
                                                     <v-select
                                                         v-if="viewVendorTopics(user_roles)"
-                                                        color="primary"
-                                                        clearable
-                                                        label="seleciona el tipo de pago"
+                                                        color="purple"
+                                                        label="selecciona el tipo de pago"
                                                         hint="Selecciona el tipo de pago"
                                                         :item-props="globalPayementTypeProps"
                                                         :items="global_payment_types"
-                                                        v-model="paymentTypeSelected"
+                                                        chips
+                                                        multiple
+                                                        v-model="paymentTypesSelected"
+                                                        :rules="[rules.required]"
                                                     ></v-select>
-                                                    <v-radio-group v-else inline label="Tipo de pago" v-model="radios">
-                                                        <v-radio color="purple" label="tajeta" value="one"></v-radio>
-                                                        <v-radio color="purple" label="efectivo" value="efectivo" disabled></v-radio>
-                                                    </v-radio-group>
-                                                    <v-select
-                                                        v-if="paymentTypeSelected && paymentTypeSelected.name === 'tarjeta'"
-                                                        color="primary"
+
+                                                    <div v-if="paymentTypesSelected.some(type => type.name === 'tarjeta')">
+                                                        <h4 class="tw-text-xs tw-px-4 tw-py-1 tw-rounded-full tw-bg-purple-200 tw-text-purple-600 tw-text-center tw-mb-2">
+                                                        Complemento para pago con tarjeta
+                                                        </h4>
+                                                        <v-select
+                                                        color="purple"
                                                         clearable
-                                                        label="seleciona el tipo de pago"
-                                                        hint="Selecciona el tipo de pago"
+                                                        label="seleciona el tipo de tarjeta"
+                                                        hint="Selecciona el tipo de tarjeta"
                                                         :item-props="globalCardPayementTypeProps"
                                                         :items="global_card_payment_types"
-                                                        v-model="cardPaymentTypeSelected"
-                                                    ></v-select>
+                                                        v-model="cardPaymentTypesSelected"
+                                                        :rules="[rules.required]"
+                                                        ></v-select>
+                                                        <v-text-field
+                                                        label="Monto a pagar para tarjeta"
+                                                        color="purple"
+                                                        clearable
+                                                        hint="Monto recibido por el cliente"
+                                                        v-model="amountToPayCard"
+                                                        :rules="[rules.required, rules.isNumber, rules.isAmountToPay]"
+                                                        ></v-text-field>
+                                                    </div>
+
+                                                    <div v-if="paymentTypesSelected.some(type => type.name === 'efectivo')">
+                                                        <h4 class="tw-text-xs tw-px-4 tw-py-1 tw-rounded-full tw-bg-green-200 tw-text-green-600 tw-text-center tw-mb-2">
+                                                        Complemento para pago con efectivo
+                                                        </h4>
+                                                        <v-text-field
+                                                        label="Monto recibido para efectivo"
+                                                        color="purple"
+                                                        clearable
+                                                        hint="Monto recibido por el cliente"
+                                                        v-model="amountReceivedCash"
+                                                        :rules="[rules.required, rules.isNumber]"
+                                                        ></v-text-field>
+
+                                                        <v-text-field
+                                                        label="Monto a pagar para efectivo"
+                                                        color="purple"
+                                                        clearable
+                                                        hint="Monto a pagar por el cliente"
+                                                        v-model="amountToPayCash"
+                                                        :rules="[rules.required, rules.isNumber, rules.isAmountToPay]"
+                                                        ></v-text-field>
+                                                    </div>
+
+                                                    <p v-if="!valid" class="tw-py-2 tw-px-4 tw-bg-red-100 tw-border-l-4 tw-border-l-red-500 tw-text-red-500 tw-text-xs tw-my-4">{{ error }}</p>
+
+                                                    <div class="tw-my-5">
+                                                        <v-radio-group :disabled="!form" inline label="Tipo de compra a realizar" v-model="purchageType">
+                                                            <v-radio
+                                                            v-for="(type, index) in purchase_types"
+                                                            :key="index"
+                                                            :color="'purple'"
+                                                            :label="type"
+                                                            :value="type"
+                                                            ></v-radio>
+                                                        </v-radio-group>
+
+                                                        <p class="tw-opacity-50 tw-text-right tw-mb-3 tw-text-xs">Subtotal (tipos de precios selecionados): {{ formatPrice(totalAmount) }}</p>
+                                                        <p class="tw-font-semibold tw-text-right tw-mb-3">Total: {{ formatPrice(totalAmount) }}</p>
+                                                        <v-btn
+                                                            :disabled="!form"
+                                                            :loading="loadingg"
+                                                            color="primary"
+                                                            type="submit"
+                                                            rounded="xl" size="large" block
+                                                            class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400"
+                                                        >
+                                                            <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos
+                                                        </v-btn>
+
+                                                        <v-dialog max-width="700" v-if="viewVendorTopics(user_roles)">
+                                                           <!--  <template v-slot:activator="{ props: activatorProps }">
+                                                                <v-btn :disabled="!form" type="submit" :loading="loadingg" v-bind="activatorProps" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                                            </template> -->
+                                                            <template v-slot:default="{ isActive }">
+                                                                <v-card title="¿Estas seguro de realizar la compra?">
+                                                                <v-card-text>
+                                                                    <iframe src="http://127.0.0.1:8000/img/ticket_test.pdf" width="100%" height="400"></iframe>
+                                                                </v-card-text>
+
+                                                                <v-card-actions>
+                                                                    <v-spacer></v-spacer>
+                                                                    <v-btn color="red" rounded="xl" variant="tonal" class="text-none" text="Cancelar" @click="isActive.value = false"></v-btn>
+                                                                </v-card-actions>
+                                                                </v-card>
+                                                            </template>
+                                                        </v-dialog>
+                                                        <v-dialog max-width="500" v-else>
+                                                            <template v-slot:activator="{ props: activatorProps }">
+                                                                <v-btn v-bind="activatorProps" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                                            </template>
+                                                            <template v-slot:default="{ isActive }">
+                                                                <v-card title="¿Estas seguro de realizar la compra?">
+                                                                <v-card-text>
+                                                                    <p class="tw-opacity-50 tw-mt-3">Subtotal (precio regular): {{ formatPrice(totalAmount) }}</p>
+                                                                    <p class="tw-font-semibold">Total: {{ formatPrice(totalAmount) }}</p>
+                                                                </v-card-text>
+
+                                                                <v-card-actions>
+                                                                    <v-spacer></v-spacer>
+                                                                    <v-btn color="red" rounded="xl" variant="tonal" class="text-none" text="Cancelar" @click="isActive.value = false"></v-btn>
+                                                                    <v-btn :loading="loading" rounded="xl" variant="elevated" class="text-none !tw-bg-green-500 !tw-text-white tw-mb-2 !tw-px-4" text="Reservar y comprar" @click="completePurchase(isActive)"></v-btn>
+                                                                </v-card-actions>
+
+                                                                </v-card>
+                                                            </template>
+                                                        </v-dialog>
+
+                                                    </div>
                                                 </v-expansion-panel-text>
+
+
+                                                </v-form>
                                             </v-expansion-panel>
                                         </v-expansion-panels>
 
                                         <div class="tw-my-5">
-                                            <p class="tw-opacity-50 tw-text-right tw-mb-3">Subtotal (precio regular): {{ formatPrice(total) }}</p>
-                                            <p class="tw-font-semibold tw-text-right tw-mb-3">Total: {{ formatPrice(total) }}</p>
-
                                             <div v-if="viewVendorTopics(user_roles)" class="text-center">
                                                 <v-snackbar
                                                     v-model="snackbar"
@@ -682,7 +1013,8 @@ function completePurchase(isActive) {
                                                         hint="Monto total a pagar"
                                                         persistent-hint=""
                                                         rounded="lg"
-                                                        v-model.number="total"
+                                                        v-model.number="totalAmount"
+                                                        :error-messages="paymentFileds.total.errorMessage.value"
                                                         readonly
                                                     ></v-text-field>
                                                     <v-text-field
@@ -693,7 +1025,9 @@ function completePurchase(isActive) {
                                                         hint="Monto recibido por el cliente"
                                                         persistent-hint=""
                                                         rounded="lg"
-                                                        v-model.number="amountReceived"
+                                                        v-model="amountReceived"
+                                                        :error-messages="paymentFileds.amount_received.errorMessage.value"
+                                                        readonly
                                                     ></v-text-field>
                                                     <v-text-field
                                                         label="Cambio"
@@ -703,7 +1037,8 @@ function completePurchase(isActive) {
                                                         hint="Cambio a devolver al cliente"
                                                         persistent-hint=""
                                                         rounded="lg"
-                                                        v-model.number="handleAmountReturned"
+                                                        v-model.number="amountReturned"
+                                                        :error-messages="paymentFileds.amount_returned.errorMessage.value"
                                                         readonly
                                                     ></v-text-field>
                                                 </div>
@@ -719,46 +1054,7 @@ function completePurchase(isActive) {
                                                 </template>
                                                 </v-snackbar>
                                             </div>
-
-                                            <v-dialog max-width="700" v-if="viewVendorTopics(user_roles)">
-                                                <template v-slot:activator="{ props: activatorProps }">
-                                                    <v-btn v-bind="activatorProps" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
-                                                </template>
-                                                <template v-slot:default="{ isActive }">
-                                                    <v-card title="¿Estas seguro de realizar la compra?">
-                                                    <v-card-text>
-                                                        <iframe src="http://127.0.0.1:8000/img/ticket_test.pdf" width="100%" height="400"></iframe>
-                                                    </v-card-text>
-
-                                                    <v-card-actions>
-                                                        <v-spacer></v-spacer>
-                                                        <v-btn color="red" rounded="xl" variant="tonal" class="text-none" text="Cancelar" @click="isActive.value = false"></v-btn>
-                                                    </v-card-actions>
-                                                    </v-card>
-                                                </template>
-                                            </v-dialog>
-                                            <v-dialog max-width="500" v-else>
-                                                <template v-slot:activator="{ props: activatorProps }">
-                                                    <v-btn v-bind="activatorProps" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
-                                                </template>
-                                                <template v-slot:default="{ isActive }">
-                                                    <v-card title="¿Estas seguro de realizar la compra?">
-                                                    <v-card-text>
-                                                        <p class="tw-opacity-50 tw-mt-3">Subtotal (precio regular): {{ formatPrice(total) }}</p>
-                                                        <p class="tw-font-semibold">Total: {{ formatPrice(total) }}</p>
-                                                    </v-card-text>
-
-                                                    <v-card-actions>
-                                                        <v-spacer></v-spacer>
-                                                        <v-btn color="red" rounded="xl" variant="tonal" class="text-none" text="Cancelar" @click="isActive.value = false"></v-btn>
-                                                        <v-btn :loading="loading" rounded="xl" variant="elevated" class="text-none !tw-bg-green-500 !tw-text-white tw-mb-2 !tw-px-4" text="Reservar y comprar" @click="completePurchase(isActive)"></v-btn>
-                                                    </v-card-actions>
-
-                                                    </v-card>
-                                                </template>
-                                            </v-dialog>
                                         </div>
-
                                     </div>
                                 </div>
                             </div>

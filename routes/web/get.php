@@ -35,6 +35,7 @@ Route::get('/eventos-gestion', [EventController::class, 'indexManagement'])->nam
 */
 Route::get('/blog/{id}', [BlogController::class, 'index'])->name('blogs.show');
 Route::get('/taquillas/check-ticket', [TicketOfficeController::class, 'check'])->name('ticket-offices.check');
+Route::get('/taquillas/share-ticket', [TicketOfficeController::class, 'share'])->name('ticket-offices.share');
 /*
 * |--------------------------------------------------------------------------
 * | Web Routes
