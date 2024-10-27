@@ -51,7 +51,43 @@ class TicketOfficeController extends Controller
             return Inertia::render('App/Pos/CheckTickets');
 
         } catch (\Exception $e) {
-            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar las taquillas');
+            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar');
+        }
+    }
+
+    public function share()
+    {
+        try {
+
+            $user = Auth::user()->load('globalImages');
+            $users = User::all();
+
+            $tickets = $user->EventSeatCatalogues()
+                ->with('event', 'seatCatalogue', 'seatCatalogueStatus')
+                ->whereHas('seatCatalogueStatus', function ($query) {
+                    $query->where('name', 'vendido');
+                })
+                ->get();
+            $events = $this->event_service->getAll();
+            $eventsWithTickets = [];
+
+            foreach ($events as $event) {
+                $eventsWithTickets[$event->id] = [
+                    'event' => $event,
+                    'tickets' => $tickets->filter(function($ticket) use ($event) {
+                        return $ticket->event_id == $event->id;
+                    })->values()
+                ];
+            }
+
+            return Inertia::render('App/Pos/ShareTickets', [
+                'user' => $user,
+                'users' => $users,
+                'events_with_tickets' => $eventsWithTickets,
+            ]);
+
+        } catch (\Exception $e) {
+            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar');
         }
     }
 

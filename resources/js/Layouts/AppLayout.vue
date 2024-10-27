@@ -16,7 +16,6 @@ const toggleFav = () => {
 
 const user = usePage().props.auth.user;
 
-
 </script>
 
 <template>

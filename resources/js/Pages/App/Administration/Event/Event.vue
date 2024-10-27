@@ -5,7 +5,7 @@ import ErrorSession from '@/Components/ErrorSession.vue';
 import { computed, ref, watch } from 'vue';
 import { eventSchema } from '@/validation/Administration/Event/event-schema';
 import { useForm, useField } from 'vee-validate'
-import { Head, useForm as useFormInertia } from '@inertiajs/vue3';
+import { Head, useForm as useFormInertia, usePage } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import BreadcrumbAppSecondary from '@/Components/BreadcrumbAppSecondary.vue';
 
