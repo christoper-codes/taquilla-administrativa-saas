@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
             GlobalPaymentTypesSeeder::class,
             GlobalCardPaymentTypesSeeder::class,
             PriceCataloguesSeeder::class,
-            SeatCataloguesSeeder::class,
+            //SeatCataloguesSeeder::class,
         ]);
     }
 }

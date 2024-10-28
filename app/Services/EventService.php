@@ -60,24 +60,27 @@ class EventService
         try {
 
             $event = $this->event_repository->getById($id);
-
+            /*
+            * Group seats by zone
+            */
             $a_zone = [];
             $b_zone = [];
             $c_zone = [];
+            $f_zone = [];
+
+            /*
+            * purchase types available
+            */
+            $purchase_types = ['partido'];
+            $events_by_serie = $this->event_repository->getEventsBySerie($event->serie_id);
+            if ($events_by_serie->count() > 1) {
+                $purchase_types[] = 'serie';
+            }
 
             $event->eventSeatCatalogues->groupBy(function ($item) {
                 /*
                 * access the price of each seat
                 */
-                /* $item->seatCatalogue->priceTypes->each(function ($priceType) {
-                    $priceCatalogue = PriceTypeSeatCatalogue::where('seat_catalogue_id', $priceType->pivot->seat_catalogue_id)
-                    ->where('price_type_id', $priceType->pivot->price_type_id)
-                    ->first()
-                    ->priceCatalogue;
-
-                    $priceType->price = $priceCatalogue->price;
-                }); */
-
                 $item->priceTypes->each(function ($priceType) {
                     $priceCatalogue = EventSeatCatalogPriceType::where('event_seat_catalog_id', $priceType->pivot->event_seat_catalog_id)
                     ->where('price_type_id', $priceType->pivot->price_type_id)
@@ -88,13 +91,15 @@ class EventService
                 });
 
                 return $item->seatCatalogue->zone;
-            })->each(function ($item, $key) use (&$a_zone, &$b_zone, &$c_zone) {
+            })->each(function ($item, $key) use (&$a_zone, &$b_zone, &$c_zone, &$f_zone) {
                 if ($key === 'A') {
                     $a_zone = $item;
                 } elseif ($key === 'B') {
                     $b_zone = $item;
                 } elseif ($key === 'C') {
                     $c_zone = $item;
+                } elseif ($key === 'F') {
+                    $f_zone = $item;
                 }
             });
 
@@ -114,9 +119,11 @@ class EventService
                 'a_zone' => $a_zone,
                 'b_zone' => $b_zone,
                 'c_zone' => $c_zone,
+                'f_zone' => $f_zone,
                 'user_roles' => $user_roles,
                 'global_payment_types' => $global_payment_types,
                 'global_card_payment_types' => $global_card_payment_types,
+                'purchase_types' => $purchase_types,
             ];
 
             return $reponse;
@@ -222,6 +229,16 @@ class EventService
                 * Confirm seat purchase
                 */
                 $this->event_repository->confirmSeatsPurchase($data['event_id'], $seat['seat_catalogue_id'], $data['member_user_id'], $saleTicket->id, $qr, $seat['final_price']);
+
+                /*
+                * Create relationship between sale ticket and eventSeatCatalogs
+                */
+                $saleTicket->eventSeatCatalogs()->attach( $event_seat_catalogue->id, [
+                    'user_id' => $data['member_user_id'],
+                    'promotion_id' => null,
+                    'agreement_promotion_id' => null,
+                    'is_active' => true,
+                ]);
             }
 
             /*

@@ -90,4 +90,11 @@ class EventRepository implements EventRepositoryInterface
 
         return $event;
     }
+
+    public function getEventsBySerie($serie_id)
+    {
+        return Event::where('serie_id', $serie_id)
+            ->where('is_active', true)
+            ->get();
+    }
 }

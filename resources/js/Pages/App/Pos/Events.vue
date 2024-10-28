@@ -3,13 +3,16 @@ import NavigationDrawer from '@/Components/NavigationDrawer.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import Footer from '@/Components/Footer.vue';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import ErrorSession from '@/Components/ErrorSession.vue';
 import useDateFormat from '@/composables/dateFormat';
 
 const { dateFormat } = useDateFormat();
+const loading = ref(false);
 
-
+const showEvent = () => {
+    loading.value = true;
+};
 const props = defineProps({
     events: {
         type: Array,
@@ -98,8 +101,8 @@ onMounted(() => {
                                                 v-if="$page.props.auth.user"
                                                 :href="route('events.show', { slug: event.slug, id: event.id } )"
                                                 >
-                                                <v-btn variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400 lg:!tw-hidden" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
-                                                <v-btn variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400 !tw-hidden lg:!tw-flex" rounded="xl" size="x-large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                                <v-btn @click="showEvent" :loading="loading" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400 lg:!tw-hidden" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                                <v-btn @click="showEvent" :loading="loading" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400 !tw-hidden lg:!tw-flex" rounded="xl" size="x-large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
                                             </Link>
                                             <Link
                                                 v-else
