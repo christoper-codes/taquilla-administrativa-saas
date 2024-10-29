@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('sale_tickets', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('event_id')->constrained('events');
             $table->foreignId('seller_user_id')->constrained('users');
             $table->foreignId('cash_register_id')->constrained('cash_registers');
             $table->foreignId('sale_ticket_status_id')->constrained('sale_ticket_statuses');
@@ -21,6 +20,7 @@ return new class extends Migration
             $table->decimal('amount_received', 14, 4)->default('0.0000');
             $table->decimal('total_amount', 14, 4)->default('0.0000');
             $table->decimal('total_returned', 14, 4)->default('0.0000');
+            $table->boolean('is_transfer')->default(false);
             $table->boolean('is_online')->default(false);
             $table->timestamps();
         });

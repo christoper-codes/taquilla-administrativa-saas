@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Interfaces\EventSeatCatalogueRepositoryInterface;
 use App\Models\EventSeatCatalog;
+use App\Models\PriceCatalogue;
 use App\Models\SeatCatalogue;
 
 class EventSeatCatalogueService
@@ -74,9 +75,18 @@ class EventSeatCatalogueService
             $eventSeatCatalogs->each(function (EventSeatCatalog $eventSeatCatalog) {
 
                 $eventSeatCatalog->priceTypes()->attach([
-                    1 => ['price_catalogue_id' => 1, 'is_active' => true],
-                    2 => ['price_catalogue_id' => 2, 'is_active' => true],
+                    1 => [
+                        'price_catalogue_id' => 1,
+                        'price' => PriceCatalogue::where('id', 1)->first()->price,
+                        'is_active' => true
+                    ],
+                    2 => [
+                        'price_catalogue_id' => 2,
+                        'price' => PriceCatalogue::where('id', 2)->first()->price,
+                        'is_active' => true
+                    ],
                 ]);
+
             });
 
             return $newEventSeatCatalogs;

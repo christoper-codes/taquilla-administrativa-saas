@@ -8,6 +8,7 @@ use App\Models\GlobalCardPaymentType;
 use App\Models\GlobalPaymentType;
 use App\Models\PriceCatalogue;
 use App\Models\PriceTypeSeatCatalogue;
+use App\Models\User;
 use App\Services\EventSeatCatalogueService;
 use App\Services\EventService;
 use App\Services\EventTypeService;
@@ -162,6 +163,7 @@ class EventController extends Controller
         try {
             $response = $this->event_service->getById($id);
             $user = Auth::user();
+            $users = User::all();
 
             return Inertia::render('App/Pos/Event', [
                 'event' => $response['event'],
@@ -170,6 +172,7 @@ class EventController extends Controller
                 'c_zone' => $response['c_zone'],
                 'f_zone' => $response['f_zone'],
                 'user' => $user,
+                'users' => $users,
                 'user_roles' => $response['user_roles'],
                 'global_payment_types' => $response['global_payment_types'],
                 'global_card_payment_types' => $response['global_card_payment_types'],
@@ -193,23 +196,59 @@ class EventController extends Controller
     */
     public function reserveSeatsToBuy(Request $request)
     {
+
         $request->validate([
-            'seats' => 'required',
             'event_id' => 'required',
-            'member_user_id' => 'required',
+            'cash_register_id' => 'nullable',
+            'member_user_id' => 'nullable',
+            'seller_user_id' => 'required',
+            'price_type_id' => 'nullable',
+            'seats' => 'required',
+            'amount_received' => 'nullable',
+            'total_amount' => 'nullable',
+            'total_returned' => 'nullable',
+            'global_payment_types' => 'nullable|array',
+            'is_online' => 'nullable|boolean',
+            'purchase_type' => 'nullable|string',
+            'serie_id' => 'nullable',
+            'is_transfer' => 'nullable|boolean',
+            'user_to_transfer' => 'nullable',
         ]);
+
 
         DB::beginTransaction();
         try {
             $response = $this->event_service->reserveSeatsToBuy($request->all());
 
+
             DB::commit();
 
-            return WebResponseHelper::sendResponse($response, 'Asientos reservados correctamente', null, false);
+            if($request->is_online) {
+                 return response()->json([
+                    'data' => $response,
+                    'message' => 'Asientos reservados correctamente',
+                    'success' => true
+                ], 200);
+            }
+
+            //return WebResponseHelper::sendResponse($response, 'Asientos reservados y comprados correctamente', null, false);
+
+            return response()->json([
+                'data' => $response,
+                'message' => 'Asientos reservados y comprados correctamente',
+                'success' => true
+            ], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return WebResponseHelper::rollback($e, 'Opps! Algo salió mal al reservar los asientos');
+
+            return response()->json([
+                'data' => null,
+                'message' => $e->getMessage() ?? 'Opps! Algo salió mal al reservar los asientos',
+                'success' => false
+            ], 500);
+
+            //return WebResponseHelper::rollback($e, 'Opps! Algo salió mal al reservar los asientos');
         }
     }
 
@@ -219,7 +258,7 @@ class EventController extends Controller
     public function confirmSeatsPurchase(Request $request)
     {
 
-        $request->validate([
+        /* $request->validate([
             'event_id' => 'required',
             'cash_register_id' => 'required',
             'member_user_id' => 'nullable',
@@ -231,6 +270,24 @@ class EventController extends Controller
             'total_returned' => 'required',
             'global_payment_types' => 'required|array',
             'is_online' => 'required|boolean',
+        ]); */
+
+        $request->validate([
+            'event_id' => 'required',
+            'cash_register_id' => 'nullable',
+            'member_user_id' => 'nullable',
+            'seller_user_id' => 'required',
+            'price_type_id' => 'nullable',
+            'seats' => 'required',
+            'amount_received' => 'nullable',
+            'total_amount' => 'nullable',
+            'total_returned' => 'nullable',
+            'global_payment_types' => 'nullable|array',
+            'is_online' => 'nullable|boolean',
+            'purchase_type' => 'nullable|string',
+            'serie_id' => 'nullable',
+            'is_transfer' => 'nullable|boolean',
+            'user_to_transfer' => 'nullable',
         ]);
 
         DB::beginTransaction();
@@ -241,7 +298,15 @@ class EventController extends Controller
 
             DB::commit();
 
-            return WebResponseHelper::sendResponse($response, 'Compra de asientos confirmada correctamente', null, false);
+            if($request->is_online) {
+                return response()->json([
+                    'data' => $response,
+                    'message' => 'Compra de asientos confirmada correctamente',
+                    'success' => true
+                ], 200);
+            }
+
+            //return WebResponseHelper::sendResponse($response, 'Compra de asientos confirmada correctamente', null, false);
 
         } catch (\Exception $e) {
             DB::rollBack();

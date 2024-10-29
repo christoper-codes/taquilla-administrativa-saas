@@ -54,14 +54,14 @@ defineProps({
                         <div class="tw-grid lg:tw-grid-cols-2 tw-gap-3">
                         <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-1 tw-gap-3">
                             <figure class="tw-relative tw-w-full tw-h-60">
-                            <img class="tw-size-full tw-absolute tw-top-0 tw-start-0 tw-object-cover tw-rounded-xl" src="https://scontent.fver1-1.fna.fbcdn.net/v/t39.30808-6/462803798_875575674671561_6338584069118770320_n.jpg?stp=cp6_dst-jpg&_nc_cat=101&ccb=1-7&_nc_sid=127cfc&_nc_ohc=ENPL-Sec5NIQ7kNvgGsxey_&_nc_ht=scontent.fver1-1.fna&_nc_gid=AcEKbLt5jw30eTCt-hZDweY&oh=00_AYCtDIwHBfGi9LSb_UHCNA5P4lVrLynW0XOxqRxSh4zMEA&oe=671BD96D" alt="Blog Image">
+                            <img class="tw-size-full tw-absolute tw-top-0 tw-start-0 tw-object-cover tw-rounded-xl" src="../../../../../public/img/blog/blog1.jpg" alt="Blog Image">
                             </figure>
                             <figure class="tw-relative tw-w-full tw-h-60">
-                            <img class="tw-size-full tw-absolute tw-top-0 tw-start-0 tw-object-cover tw-rounded-xl" src="https://scontent.fver1-1.fna.fbcdn.net/v/t39.30808-6/462597651_18023125940582807_6608384078502731014_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=WFe88X6wSBAQ7kNvgFKm1hi&_nc_ht=scontent.fver1-1.fna&_nc_gid=AvH25F2smOjEpt8_vMBnR_J&oh=00_AYDqcDJ2cabFPFIGRvIutLK4EuWdt3u6sloPzYTXpOdC6w&oe=671BDE9C" alt="Blog Image">
+                            <img class="tw-size-full tw-absolute tw-top-0 tw-start-0 tw-object-cover tw-rounded-xl" src="../../../../../public/img/blog/blog2.jpg" alt="Blog Image">
                             </figure>
                         </div>
                         <figure class="tw-relative tw-w-full tw-h-72 sm:tw-h-96 lg:tw-h-full">
-                            <img class="tw-size-full tw-absolute tw-top-0 tw-start-0 tw-object-cover tw-rounded-xl" src="https://scontent.fver1-1.fna.fbcdn.net/v/t39.30808-6/462597651_18023125940582807_6608384078502731014_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=WFe88X6wSBAQ7kNvgFKm1hi&_nc_ht=scontent.fver1-1.fna&_nc_gid=AvH25F2smOjEpt8_vMBnR_J&oh=00_AYDqcDJ2cabFPFIGRvIutLK4EuWdt3u6sloPzYTXpOdC6w&oe=671BDE9C" alt="Blog Image">
+                            <img class="tw-size-full tw-absolute tw-top-0 tw-start-0 tw-object-cover tw-rounded-xl" src="../../../../../public/img/blog/blog3.jpg" alt="Blog Image">
                         </figure>
                         </div>
 
