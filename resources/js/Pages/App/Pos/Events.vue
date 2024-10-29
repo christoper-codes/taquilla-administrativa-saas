@@ -103,6 +103,10 @@ onMounted(() => {
                                                 >
                                                 <v-btn @click="showEvent" :loading="loading" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400 lg:!tw-hidden" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
                                                 <v-btn @click="showEvent" :loading="loading" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400 !tw-hidden lg:!tw-flex" rounded="xl" size="x-large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                                <div v-if="loading" class="tw-flex tw-flex-col tw-items-center tw-justify-center tw-mt-5 tw-animate-pulse">
+                                                    <p class="tw-font-bold tw-text-xs lg:tw-text-base">Preparando las zonas para el evento...</p>
+                                                    <iframe class="tw-size-20 lg:tw-size-40 tw-rotate-45" src="https://lottie.host/embed/bf6d5e1b-537a-436b-8464-3d074f070d76/SAdIq1oqT7.json"></iframe>
+                                                </div>
                                             </Link>
                                             <Link
                                                 v-else

@@ -248,6 +248,10 @@ const props = defineProps({
                             <v-btn block @click="submit" :loading="loading" :class="{ 'tw-opacity-25': data.processing }" :disabled="data.processing" variant="elevated" class="lg:!tw-hidden text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">person</span>Registrase ahora</v-btn>
                             <v-btn @click="submit" :loading="loading" :class="{ 'tw-opacity-25': data.processing }" :disabled="data.processing" variant="elevated" class="!tw-hidden lg:!tw-block text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">person</span>Registrase ahora</v-btn>
                         </div>
+                        <div v-if="slug && loading" class="tw-flex tw-flex-col tw-items-center tw-justify-center tw-mt-4 lg:tw-mt-5 tw-animate-pulse">
+                            <p class="tw-font-bold tw-text-xs">Preparando las zonas para el evento...</p>
+                            <iframe class="tw-size-20  tw-rotate-45" src="https://lottie.host/embed/bf6d5e1b-537a-436b-8464-3d074f070d76/SAdIq1oqT7.json"></iframe>
+                        </div>
                     </v-form>
 
                 </div>

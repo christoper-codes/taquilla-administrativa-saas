@@ -23,9 +23,11 @@ import useDateFormat from '@/composables/dateFormat';
 import useTicketOfficeState from '@/composables/TicketOfficeState';
 import { saleTicketSchema } from '@/validation/pos/sale-ticket-schema';
 import { useField, useForm } from 'vee-validate';
+import axios from 'axios';
+import { toast } from 'vue3-toastify'
 
 const { dateFormat } = useDateFormat();
-const { cashRegisterDataId } = useTicketOfficeState();
+const { cashRegisterDataId, sellerUserId } = useTicketOfficeState();
 const snackbar = ref(false);
 const { handleSubmit } = useForm({
     validationSchema: saleTicketSchema,
@@ -120,7 +122,7 @@ const seatsSelected = ref([]);
 function priceFinal(seat, priceTypeName) {
     return seat.price_types.reduce((acc, priceType) => {
         if(priceType.name === priceTypeName){
-            return acc + parseFloat(priceType.price);
+            return acc + parseFloat(priceType.pivot.price);
         }
 
         return acc;
@@ -129,6 +131,10 @@ function priceFinal(seat, priceTypeName) {
 
 
 const addSeat = (seat) => {
+    if(purchaseStatus.value == 'final' || purchaseStatus.value == 'retry') {
+        purchaseStatus.value = 'retry';
+        return;
+    }
     const seatExist = seatsSelected.value.find((s) => s.seat_catalogue.code === seat.seat_catalogue.code);
     priceTypeId.value = seat.price_types[0].id;
     const priceFinalType = paymentTypesSelected.value.some(type => type.name == 'cortesia') ? 'cortesia' : 'regular';
@@ -178,13 +184,12 @@ const addSeat = (seat) => {
 * handle global payment types
 */
 const globalPaymentTypes = ref([]);
-const purchageOnline = ref(true);
+const purchaseOnline = ref(true);
 const priceTypeId = ref(1);
 
 const panel = ref([0,1]);
-const purchageType = ref('partido');
+const purchaseType = ref('partido');
 const paymentTypesSelected = ref([]); //
-const sellerUserId = ref(1);
 
 const filteredPaymentTypes = computed(() => {
     if (paymentTypesSelected.value.some(type => type.name === 'cortesia')) {
@@ -192,21 +197,19 @@ const filteredPaymentTypes = computed(() => {
         paymentTypesSelected.value = newPaymentTypesSelected;
         return paymentTypesSelected.value;
     }
-
     return paymentTypesSelected.value;
 });
 
 watch(filteredPaymentTypes, updateTotal);
 
 function updateTotal() {
+    amountReceived.value = 0;
     if (paymentTypesSelected.value.length >= 2) {
         amountReceivedCash.value = 0;
         amountToPayCash.value = 0;
         amountToPayCard.value = 0;
     }
-
     totalAmount.value = 0;
-
     // Usamos un set para asegurar que cada asiento se procese una sola vez.
     const processedSeats = new Set();
 
@@ -221,10 +224,17 @@ function updateTotal() {
                 }
                 totalAmount.value = (parseFloat(totalAmount.value || 0) + parseFloat(price));
                 processedSeats.add(seat.seat_catalogue.code);
-                amountReceived.value = totalAmount.value;
             }
         });
     });
+
+    if (purchaseType.value === 'serie') {
+        totalAmount.value = totalAmount.value * 2;
+    }
+
+    if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
+        amountReceived.value = totalAmount.value;
+    }
 
 }
 
@@ -289,7 +299,14 @@ const selectZones = () => {
     amountToPayCard.value = 0;
     amountToPayCash.value = 0;
     paymentTypesSelected.value = [];
+    cardPaymentTypesSelected.value = 0;
+    valid.value = true;
+    purchaseStatus.value = 'process';
     viewSelectedSection.value = 'Zonas HDX';
+    purchaseType.value = 'partido';
+    loadingg.value = false;
+    loading.value = false;
+    userToTransfer.value = null;
     seatsSelected.value = [];
     const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
     stadiumHdxImg.classList.remove('tw-rotate-90');
@@ -324,6 +341,10 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    users: {
+        type: Array,
+        required: true,
+    },
     user_roles: {
         type: Array,
         required: false,
@@ -342,6 +363,18 @@ const props = defineProps({
     },
 });
 
+const users_list = [];
+const userToTransfer = ref(null);
+
+props.users.forEach(element => {
+    users_list.push(
+        {
+            name: `${element['first_name']} ${element['last_name']} (${element['email']})`,
+            value: element['id']
+        }
+    )
+});
+
 /*
 * |--------------------------------------
 * | declare OnMounted
@@ -350,6 +383,13 @@ onMounted(() => {
     nextTick(() => {
         loadSvg('zones_hdx');
     });
+
+    const sellerDialog = document.getElementById('seller-dialog');
+    if(viewVendorTopics(props.user_roles)) {
+        if(sellerUserId.value != props.user.id) {
+            sellerDialog.click();
+        }
+    }
 });
 
 /*
@@ -358,12 +398,55 @@ onMounted(() => {
 */
 
 const loading = ref(false);
+const form = ref(false);
+const loadingg = ref(false);
+const valid = ref(true);
+const error = ref('');
+const amountToPayCard = ref(0);
+const cardPaymentTypesSelected = ref(0);
+const amountToPayCash = ref(0);
+const amountReceivedCash = ref(0);
+const purchaseStatus = ref('process');
+const originalTotalAmount = ref(0);
+const totalAttempts = ref(0);
+const memberUserId = ref(1);
+
+watch(() => amountReceived.value, (newValue) => {
+    amountReturned.value = parseFloat(amountReceived.value) - parseFloat(totalAmount.value)
+});
+
+watch(() => amountToPayCard.value, (newValue) => {
+     amountReceived.value = parseFloat(amountToPayCard.value) + parseFloat(amountReceivedCash.value);
+});
+
+watch(() => amountReceivedCash.value, (newValue) => {
+     amountReceived.value = parseFloat(amountToPayCard.value) + parseFloat(amountReceivedCash.value);
+});
+
+watch(() => purchaseType.value, (newValue) => {
+    purchaseStatus.value = 'final';
+    if(totalAttempts.value == 0) {
+        originalTotalAmount.value = totalAmount.value;
+        totalAttempts.value = 1;
+    }
+    if(newValue == 'serie') {
+        totalAmount.value = totalAmount.value * 2;
+    } else if(newValue == 'partido') {
+        totalAmount.value = originalTotalAmount.value;
+    }
+    if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
+        amountToPayCard.value = totalAmount.value;
+    }
+    if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'efectivo')) {
+        amountToPayCash.value = totalAmount.value;
+    }
+});
 
 function completePurchase(isActive) {
 
     if(viewVendorTopics(props.user_roles)) {
-           // vendedor
-        purchageOnline.value = false;
+        // vendedor
+        purchaseOnline.value = false;
         sellerUserId.value = props.user.id;
 
     } else {
@@ -386,7 +469,7 @@ function completePurchase(isActive) {
         total_amount: totalAmount.value,
         total_returned: amountReturned.value,
         global_payment_types: globalPaymentTypes.value,
-        is_online: purchageOnline.value,
+        is_online: purchaseOnline.value,
     });
 
     loading.value = true;
@@ -404,27 +487,6 @@ function completePurchase(isActive) {
     });
 }
 
-const form = ref(false);
-const loadingg = ref(false);
-const valid = ref(true);
-const error = ref('');
-const amountToPayCard = ref(0);
-const cardPaymentTypesSelected = ref(0);
-const amountToPayCash = ref(0);
-const amountReceivedCash = ref(0);
-
-watch(() => amountReceived.value, (newValue) => {
-    amountReturned.value = parseFloat(amountReceived.value) - parseFloat(totalAmount.value)
-});
-
-watch(() => amountToPayCard.value, (newValue) => {
-     amountReceived.value = parseFloat(amountToPayCard.value) + parseFloat(amountReceivedCash.value);
-});
-
-watch(() => amountReceivedCash.value, (newValue) => {
-     amountReceived.value = parseFloat(amountToPayCard.value) + parseFloat(amountReceivedCash.value);
-});
-
 const onSubmit = () => {
     if(!form.value) return
 
@@ -432,6 +494,28 @@ const onSubmit = () => {
         valid.value = false;
         error.value = 'Debe seleccionar al menos un tipo de pago';
         return;
+    }
+
+    if(viewVendorTopics(props.user_roles)) {
+        purchaseOnline.value = false;
+        if(sellerUserId.value != props.user.id) {
+            valid.value = false;
+            error.value = 'El vendedor seleccionado no coincide con el usuario logueado, por favor abra una caja. ';
+            return;
+        }
+    }
+
+    if(paymentTypesSelected.value.some(type => type.name === 'efectivo' )){
+        //validar que el monto recibido para efectivo sea igual o mayor al monto a pagar para efectivo
+        if(parseFloat(amountReceivedCash.value) < parseFloat(amountToPayCash.value)) {
+            valid.value = false;
+            error.value = 'El monto recibido en efectivo debe ser igual o mayor al monto a pagar en efectivo';
+            return;
+        }
+    }
+
+    if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
+        amountToPayCard.value = totalAmount.value;
     }
 
     globalPaymentTypes.value = paymentTypesSelected.value.map((item) => {
@@ -469,9 +553,107 @@ const onSubmit = () => {
         return;
     }
 
-    loadingg.value = true;
+    if(purchaseStatus.value == 'retry') {
+        valid.value = false;
+        error.value = 'Estas en el proceso final de compra, si se require agregar otro asiento cancele la seleccion actual y reintente.';
+        return;
+    }
 
-    console.log(purchageType.value);
+    const onSubmitConfirmDialog = document.getElementById('on-submit-confirm');
+    onSubmitConfirmDialog.click();
+
+}
+
+const onSubmitConfirm = (isActive) => {
+
+    loadingg.value = true;
+    loading.value = true;
+    const isTransfer = userToTransfer.value ? true : false;
+
+    /* const seatsSelectedData = useFormInertia({
+        purchase_type: purchaseType.value,
+        event_id: props.event.id,
+        cash_register_id: cashRegisterDataId.value,
+        member_user_id: purchaseOnline.value ? props.user.id : (isTransfer ? userToTransfer.value : null),
+        seller_user_id: sellerUserId.value,
+        price_type_id: priceTypeId.value,
+        seats: seatsSelected.value,
+        amount_received: amountReceived.value,
+        total_amount: totalAmount.value,
+        total_returned: amountReturned.value,
+        global_payment_types: globalPaymentTypes.value,
+        is_online: purchaseOnline.value,
+        serie_id: props.event.serie_id,
+        is_transfer: isTransfer,
+        user_to_transfer: userToTransfer.value,
+    });
+
+    seatsSelectedData.post(route('events.reserve-seats-to-buy'), {
+        onSuccess: (response) => {
+            if(!response.props.flash.error && purchaseOnline.value) {
+                drawerPaymentState.value = true;
+            }
+
+            // crear el pdf como ticket de compra
+            console.log('success');
+
+        },
+        onFinish: () => {
+            isActive.value = false;
+            loading.value = false;
+            loadingg.value = false;
+        }
+    }); */
+
+    const seatsSelectedData = {
+    purchase_type: purchaseType.value,
+    event_id: props.event.id,
+    cash_register_id: cashRegisterDataId.value,
+    member_user_id: purchaseOnline.value ? props.user.id : (isTransfer ? userToTransfer.value : null),
+    seller_user_id: sellerUserId.value,
+    price_type_id: priceTypeId.value,
+    seats: seatsSelected.value,
+    amount_received: amountReceived.value,
+    total_amount: totalAmount.value,
+    total_returned: amountReturned.value,
+    global_payment_types: globalPaymentTypes.value,
+    is_online: purchaseOnline.value,
+    serie_id: props.event.serie_id,
+    is_transfer: isTransfer,
+    user_to_transfer: userToTransfer.value,
+};
+
+axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
+    .then(response => {
+        if (response.data.success && purchaseOnline.value) {
+            drawerPaymentState.value = true;
+        }
+        toast(response.data.message, {
+            "theme": "auto",
+            "type": "default",
+            "dangerouslyHTMLString": true
+        })
+
+        console.log('success');
+        console.log(response);
+    })
+    .catch(error => {
+        console.error('Error: upps');
+        console.error('Error:', error);
+        toast(error.response.data.message, {
+            "theme": "auto",
+            "type": "error",
+            "autoClose": 10000,
+            "dangerouslyHTMLString": true
+        })
+    })
+    .finally(() => {
+        isActive.value = false;
+        loading.value = false;
+        loadingg.value = false;
+    });
+
+
 }
 
 const rules = {
@@ -489,14 +671,6 @@ const rules = {
     }
 };
 
-const submitForm = () => {
-  if (form.value.validate()) {
-    console.log('Formulario válido');
-  } else {
-    console.log('Formulario no válido');
-  }
-};
-
 </script>
 
 <template>
@@ -504,6 +678,27 @@ const submitForm = () => {
     <GuestLayout />
     <NavigationDrawer />
     <SuccessSession />
+    <v-dialog max-width="700" max-height="300">
+        <template v-slot:activator="{ props: activatorProps }">
+            <v-btn id="seller-dialog" v-bind="activatorProps" variant="elevated" class="!tw-hidden" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+        </template>
+        <template v-slot:default="{ isActive }">
+            <v-card>
+            <v-card-text class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-text-center">
+                <h2 class="tw-bg-gray-100 tw-rounded-full tw-px-4 tw-py-1 tw-inline">Taquilla activa</h2>
+                <h1 class="tw-font-bold tw-text-xl lg:tw-text-2xl tw-mt-3 tw-text-gray-600">Se debe abrir una caja para usar esta seccion como taquilla.</h1>
+            </v-card-text>
+
+            <v-card-actions>
+                <Link
+                    :href="route('ticket-offices.index')"
+                    >
+                    <v-btn variant="tonal" class="text-none !tw-bg-tw-primary-100 !tw-text-tw-primary-600 !tw-px-7 tw-mb-2 tw-mr-2" size="large" rounded="xl" @click="isActive.value = false">Abrir caja</v-btn>
+                </Link>
+            </v-card-actions>
+            </v-card>
+        </template>
+    </v-dialog>
 
     <div class="tw-hidden lg:tw-block">
         <section class="tw-h-[250px]">
@@ -614,9 +809,23 @@ const submitForm = () => {
                                 <div>
                                     <p class="tw-font-bold tw-text-xl">Mapa de disponibilidad</p>
                                     <ErrorSession />
-<!--
-                                    <PaymentDrawer v-bind:eventId="event.id" v-bind:cashRegisterId="cashRegisterDataId"  v-bind:memberUserId="user.id" v-bind:sellerUserId="sellerUserId" v-bind:priceTypeId="priceTypeId" v-bind:seats="seatsSelected" v-bind:amountReceived="paymentFileds.amount_received" v-bind:totalAmount="total" v-bind:amountReturned="amountReturned" v-bind:globalPaymentTypes="globalPaymentTypes" v-bind:isOnline="purchageOnline" />
- -->
+
+                                    <PaymentDrawer
+                                        v-bind:purchaseType="purchaseType"
+                                        v-bind:eventId="event.id"
+                                        v-bind:cashRegisterId="cashRegisterDataId"
+                                        v-bind:memberUserId="user.id"
+                                        v-bind:sellerUserId="sellerUserId"
+                                        v-bind:priceTypeId="priceTypeId"
+                                        v-bind:seats="seatsSelected"
+                                        v-bind:amountReceived="amountReceived"
+                                        v-bind:totalAmount="totalAmount"
+                                        v-bind:amountReturned="amountReturned"
+                                        v-bind:globalPaymentTypes="globalPaymentTypes"
+                                        v-bind:isOnline="purchaseOnline"
+                                        v-bind:serieId="event.serie_id"
+                                    />
+
                                     <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-6 tw-items-center tw-gap-3 tw-mt-7">
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                             <div class="tw-h-9 tw-w-full tw-bg-yellow-500 tw-flex tw-items-center tw-justify-center tw-rounded-full">
@@ -663,13 +872,16 @@ const submitForm = () => {
                                             <v-btn @click="zoomOut" color="purple" variant="tonal" class="text-none" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-2xl">remove</span>zoom</v-btn>
                                         </div>
                                     </div>
-                                    <div class="tw-items-center tw-gap-2 tw-hidden lg:tw-flex ">
+                                    <div class="tw-items-center tw-gap-2 tw-hidden lg:tw-flex tw-relative">
                                         <div class="tw-font-bold tw-text-3xl tw-text-center">
                                             {{ viewSelectedSection}}
                                         </div>
                                         <v-dialog max-width="800">
                                             <template v-slot:activator="{ props: activatorProps }">
-                                                <v-btn v-bind="activatorProps" color="purple" variant="tonal" class="text-none" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-2xl">photo_library</span></v-btn>
+                                                <div v-bind="activatorProps" class="!tw-absolute -tw-top-4 -tw-right-6 ">
+                                                    <div class="tw-animate-ping tw-absolute tw-right-[2px] tw-top-[5px] tw-inline-flex tw-h-5 tw-w-5 tw-rounded-full tw-bg-purple-500 tw-opacity-80"></div>
+                                                    <span class="material-symbols-outlined tw-text-2xl tw-text-purple-600">photo_library</span>
+                                                </div>
                                             </template>
                                             <template v-slot:default="{ isActive }">
                                                 <v-card :title="'Imagen de referencia para la ' + viewSelectedSection">
@@ -692,13 +904,14 @@ const submitForm = () => {
                                     </div>
                                 </div>
 
-                                <div class="tw-flex tw-items-center tw-gap-2 lg:tw-hidden tw-justify-center">
-                                    <div class="tw-font-bold tw-text-2xl tw-text-center">
+                                <div class="tw-inline-flex tw-items-center tw-gap-2 lg:tw-hidden tw-justify-center">
+                                    <div class="tw-font-bold tw-text-2xl tw-text-center tw-inline-flex tw-relative">
                                         {{ viewSelectedSection}}
-                                    </div>
-                                    <v-dialog max-width="800">
+                                        <v-dialog max-width="800">
                                         <template v-slot:activator="{ props: activatorProps }">
-                                            <v-btn v-bind="activatorProps" color="purple" variant="tonal" class="text-none" rounded="xl" size="large"><span class="material-symbols-outlined tw-text-2xl">photo_library</span></v-btn>
+                                            <div v-bind="activatorProps" class="!tw-absolute -tw-top-4 -tw-right-5 ">
+                                                <span class="material-symbols-outlined tw-text-2xl tw-text-purple-600">photo_library</span>
+                                            </div>
                                         </template>
                                         <template v-slot:default="{ isActive }">
                                             <v-card :title="'Imagen de referencia para la ' + viewSelectedSection">
@@ -713,6 +926,7 @@ const submitForm = () => {
                                             </v-card>
                                         </template>
                                     </v-dialog>
+                                    </div>
                                 </div>
 
                                 <div class="tw-flex tw-h-[400px] tw-cursor-grab lg:tw-h-[500px] tw-items-center tw-justify-center tw-overflow-hidden tw-bordertw-mt-5 tw-gap-3 tw-relative">
@@ -745,7 +959,7 @@ const submitForm = () => {
                     <div class="tw-w-full lg:tw-w-[30%] tw-sticky tw-top-20 lg:tw-mt-[-100px]">
                         <h3 class="tw-text-2xl tw-font-bold">Asientos seleccionados</h3>
                         <h4 class="tw-text-sm mt-1">📍 El nido del halcon | Xalapa Ver.</h4>
-                        <div class="tw-h-auto lg:tw-h-[570px] tw-w-full mt-3  tw-rounded-2xl lg:tw-overflow-y-scroll tw-shadow-lg">
+                        <div class="tw-h-auto lg:tw-h-[650px] tw-w-full mt-3  tw-rounded-2xl lg:tw-overflow-y-scroll tw-shadow-lg">
                             <div class="tw-relative tw-flex tw-flex-col tw-bg-white tw-rounded-xl tw-pointer-events-auto">
                                 <div class="tw-relative tw-overflow-hidden tw-min-h-32 tw-bg-gray-800 tw-text-center tw-rounded-xl lg:tw-rounded-tr-none">
                                     <!-- SVG Background Element -->
@@ -832,11 +1046,11 @@ const submitForm = () => {
                                                                     <span class="tw-text-sm tw-text-green-600">
                                                                         <div v-for="priceType in seat.price_types" :key="priceType.id">
                                                                             <div v-if="viewVendorTopics(user_roles)">
-                                                                                {{ priceType.name }}: {{ formatPrice(priceType.price) }}
+                                                                                {{ priceType.name }}: {{ formatPrice(priceType.pivot.price) }}
                                                                             </div>
                                                                             <div v-else>
                                                                                 <span v-if="priceType.name === 'regular'">
-                                                                                    {{ formatPrice(priceType.price) }}
+                                                                                    {{ formatPrice(priceType.pivot.price) }}
                                                                                 </span>
                                                                             </div>
                                                                         </div>
@@ -886,12 +1100,22 @@ const submitForm = () => {
                                                         :rules="[rules.required]"
                                                         ></v-select>
                                                         <v-text-field
-                                                        label="Monto a pagar para tarjeta"
-                                                        color="purple"
-                                                        clearable
-                                                        hint="Monto recibido por el cliente"
-                                                        v-model="amountToPayCard"
-                                                        :rules="[rules.required, rules.isNumber, rules.isAmountToPay]"
+                                                            v-if="viewVendorTopics(user_roles)"
+                                                            label="Monto a pagar para tarjeta"
+                                                            color="purple"
+                                                            clearable
+                                                            hint="Monto recibido por el cliente"
+                                                            v-model="amountToPayCard"
+                                                            :rules="[rules.required, rules.isNumber, rules.isAmountToPay]"
+                                                        ></v-text-field>
+                                                        <v-text-field
+                                                            v-else
+                                                            label="Monto a pagar para tarjeta"
+                                                            color="purple"
+                                                            hint="Monto recibido por el cliente"
+                                                            readonly
+                                                            v-model="amountToPayCard"
+                                                            :rules="[rules.required, rules.isNumber, rules.isAmountToPay]"
                                                         ></v-text-field>
                                                     </div>
 
@@ -921,7 +1145,7 @@ const submitForm = () => {
                                                     <p v-if="!valid" class="tw-py-2 tw-px-4 tw-bg-red-100 tw-border-l-4 tw-border-l-red-500 tw-text-red-500 tw-text-xs tw-my-4">{{ error }}</p>
 
                                                     <div class="tw-my-5">
-                                                        <v-radio-group :disabled="!form" inline label="Tipo de compra a realizar" v-model="purchageType">
+                                                        <v-radio-group :disabled="!form" inline label="Tipo de compra a realizar" v-model="purchaseType">
                                                             <v-radio
                                                             v-for="(type, index) in purchase_types"
                                                             :key="index"
@@ -931,23 +1155,39 @@ const submitForm = () => {
                                                             ></v-radio>
                                                         </v-radio-group>
 
+                                                        <div v-if="purchaseStatus == 'retry'">
+                                                            <p class="tw-py-2 tw-px-4 tw-bg-red-100 tw-border-l-4 tw-border-l-red-500 tw-text-red-500 tw-text-xs tw-my-4">Estas en el proceso final de compra, si se require agregar otro asiento cancele la seleccion actual y reintente.</p>
+                                                        </div>
+                                                        <div v-if="purchaseType == 'partido'">
+                                                            <p class="tw-py-2 tw-px-4 tw-bg-green-100 tw-border-l-4 tw-border-l-green-500 tw-text-green-500 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para un partido.</p>
+                                                        </div>
+                                                        <div v-else-if="purchaseType == 'serie'">
+                                                            <p class="tw-py-2 tw-px-4 tw-bg-purple-100 tw-border-l-4 tw-border-l-purple-500 tw-text-purple-500 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para dos partidos del mismo evento.</p>
+                                                        </div>
+
                                                         <p class="tw-opacity-50 tw-text-right tw-mb-3 tw-text-xs">Subtotal (tipos de precios selecionados): {{ formatPrice(totalAmount) }}</p>
                                                         <p class="tw-font-semibold tw-text-right tw-mb-3">Total: {{ formatPrice(totalAmount) }}</p>
                                                         <v-btn
                                                             :disabled="!form"
                                                             :loading="loadingg"
-                                                            color="primary"
                                                             type="submit"
                                                             rounded="xl" size="large" block
                                                             class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400"
                                                         >
                                                             <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos
                                                         </v-btn>
+                                                        <v-btn
+                                                            @click="selectZones"
+                                                            rounded="xl" size="large" block
+                                                            class="text-none !tw-text-white !tw-bg-gradient-to-b !tw-from-red-600 !tw-to-red-400 tw-mt-5"
+                                                        >
+                                                            <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">delete</span>Cancelar seleccion
+                                                        </v-btn>
 
-                                                        <v-dialog max-width="700" v-if="viewVendorTopics(user_roles)">
-                                                           <!--  <template v-slot:activator="{ props: activatorProps }">
+                                                        <!-- <v-dialog max-width="700" v-if="viewVendorTopics(user_roles)">
+                                                            <template v-slot:activator="{ props: activatorProps }">
                                                                 <v-btn :disabled="!form" type="submit" :loading="loadingg" v-bind="activatorProps" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
-                                                            </template> -->
+                                                            </template>
                                                             <template v-slot:default="{ isActive }">
                                                                 <v-card title="¿Estas seguro de realizar la compra?">
                                                                 <v-card-text>
@@ -960,22 +1200,42 @@ const submitForm = () => {
                                                                 </v-card-actions>
                                                                 </v-card>
                                                             </template>
-                                                        </v-dialog>
-                                                        <v-dialog max-width="500" v-else>
+                                                        </v-dialog> -->
+                                                        <v-dialog max-width="600">
                                                             <template v-slot:activator="{ props: activatorProps }">
-                                                                <v-btn v-bind="activatorProps" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                                                <v-btn id="on-submit-confirm" v-bind="activatorProps" variant="elevated" class="!tw-hidden text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
                                                             </template>
                                                             <template v-slot:default="{ isActive }">
-                                                                <v-card title="¿Estas seguro de realizar la compra?">
+                                                                <v-card>
                                                                 <v-card-text>
-                                                                    <p class="tw-opacity-50 tw-mt-3">Subtotal (precio regular): {{ formatPrice(totalAmount) }}</p>
-                                                                    <p class="tw-font-semibold">Total: {{ formatPrice(totalAmount) }}</p>
+                                                                    <p class="tw-font-bold tw-text-sm lg:tw-text-xl tw-text-gray-700">¿Estas seguro de realizar la compra?</p>
+                                                                    <v-container v-if="viewVendorTopics(user_roles)">
+                                                                        <v-row>
+                                                                            <v-col xs12 sm6 md4>
+                                                                                <v-autocomplete
+                                                                                    v-model="userToTransfer"
+                                                                                    clearable
+                                                                                    color="purple"
+                                                                                    chips
+                                                                                    label="Buscar usuario para asignar la compra"
+                                                                                    hint="El usuario que se seleccione tendra sus boletos en su applicacion."
+                                                                                    persistent-hint=""
+                                                                                    :items="users_list"
+                                                                                    variant="solo-filled"
+                                                                                    item-title="name"
+                                                                                    item-value="value"
+                                                                                ></v-autocomplete>
+                                                                            </v-col>
+                                                                        </v-row>
+                                                                    </v-container>
+                                                                    <p class="tw-opacity-50 tw-mt-3 tw-text-xs lg:tw-text-base">Subtotal (precio en compra): {{ formatPrice(totalAmount) }}</p>
+                                                                    <p class="tw-font-semibold tw-text-gray-700">Total: {{ formatPrice(totalAmount) }}</p>
                                                                 </v-card-text>
 
-                                                                <v-card-actions>
+                                                                <v-card-actions class="tw-mb-2 tw-mr-2">
                                                                     <v-spacer></v-spacer>
                                                                     <v-btn color="red" rounded="xl" variant="tonal" class="text-none" text="Cancelar" @click="isActive.value = false"></v-btn>
-                                                                    <v-btn :loading="loading" rounded="xl" variant="elevated" class="text-none !tw-bg-green-500 !tw-text-white tw-mb-2 !tw-px-4" text="Reservar y comprar" @click="completePurchase(isActive)"></v-btn>
+                                                                    <v-btn :loading="loading" rounded="xl" variant="elevated" class="text-none !tw-bg-green-500 !tw-text-white tw-mb-2 !tw-px-4" text="Reservar y comprar" @click="onSubmitConfirm(isActive)"></v-btn>
                                                                 </v-card-actions>
 
                                                                 </v-card>

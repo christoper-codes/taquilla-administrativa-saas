@@ -10,7 +10,6 @@ class SaleTicket extends Model
     use HasFactory;
 
     protected $fillable = [
-        'event_id',
         'seller_user_id',
         'cash_register_id',
         'sale_ticket_status_id',
@@ -18,12 +17,15 @@ class SaleTicket extends Model
         'amount_received',
         'total_amount',
         'total_returned',
+        'is_transfer',
         'is_online',
     ];
 
-    public function event()
+    public function events()
     {
-        return $this->belongsTo(Event::class);
+        return $this->belongsToMany(Event::class, 'event_sale_ticket', 'sale_ticket_id', 'event_id')
+            ->withPivot('is_active')
+            ->withTimestamps();
     }
 
     public function sellerUser()

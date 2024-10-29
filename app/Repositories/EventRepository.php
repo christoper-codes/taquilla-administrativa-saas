@@ -26,18 +26,6 @@ class EventRepository implements EventRepositoryInterface
             'eventSeatCatalogues.seatCatalogueStatus',
         ])->findOrFail($id);
 
-       /*  $event = Event::with([
-            'globalImage',
-            'eventSeatCatalogues.seatCatalogue.seatType',
-            'eventSeatCatalogues.seatCatalogueStatus',
-            'eventSeatCatalogues.priceTypes' => function ($query) {
-                $query->withPivot('price_catalogue_id', 'is_active');
-            },
-            'eventSeatCatalogues.priceTypes.pivot' => function ($query) {
-                $query->with('priceCatalogue');
-            }
-        ])->findOrFail($id); */
-
         return $event;
     }
 
