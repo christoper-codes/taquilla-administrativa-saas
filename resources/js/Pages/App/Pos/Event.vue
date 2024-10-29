@@ -884,16 +884,15 @@ const rules = {
                                                 </div>
                                             </template>
                                             <template v-slot:default="{ isActive }">
-                                                <v-card :title="'Imagen de referencia para la ' + viewSelectedSection">
+                                                <v-card>
                                                 <v-card-text>
+                                                    <p class="lg:tw-font-bold tw-text-center tw-text-sm lg:tw-text-xl tw-text-gray-600 tw-mb-5">Imagen de referencia para la zona {{ viewSelectedSection }}</p>
                                                     <img class="tw-w-full tw-h-auto tw-rounded-xl" src="../../../../../public/img/zonashdx/zona-a-img.jpg" alt="zona hdx">
                                                 </v-card-text>
 
-                                                <v-card-actions>
-                                                    <v-spacer></v-spacer>
-                                                    <v-btn color="purple" rounded="xl" variant="tonal" class="text-none !tw-px-6" text="Cerrar" @click="isActive.value = false"></v-btn>
-                                                </v-card-actions>
-                                                </v-card>
+                                                <v-btn color="purple" rounded="none" variant="tonal" class="text-none !tw-px-6 !tw-py-4" block text="Cerrar" @click="isActive.value = false"></v-btn>
+
+                                            </v-card>
                                             </template>
                                         </v-dialog>
                                     </div>
