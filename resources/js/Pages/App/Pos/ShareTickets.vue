@@ -135,28 +135,30 @@ props.users.forEach(element => {
 
         <v-dialog
             v-model="alertDialong"
-            width="auto"
+            max-width="600"
         >
             <v-card
             >
 
                 <div class="tw-p-5">
-                    <h1 style="color: black; font-weight: bold;">Términos y condiciones</h1>
+                    <h1 class="tw-font-bold">Términos y condiciones</h1>
                     <br/>
-                    <p>
-                        <b style="color: red;">SOLO SE PUEDEN TRANSFERIR BOLETOS ENTRE USUARIOS DE OTRA APLICACIÓN (este boleto no llega al correo).</b>
+                    <p class="tw-bg-red-100 tw-py-2 tw-px-4 tw-rounded-xl ">
+                        <b class="tw-text-xs tw-text-red-500 tw-uppercase">SOLO SE PUEDEN TRANSFERIR BOLETOS ENTRE USUARIOS DE OTRA APLICACIÓN (este boleto no llega al correo).</b>
                     </p>
                     <br/>
-                    <p style="color: red">
+                    <p class="tw-text-xs tw-text-red-500">
                      EL BOLETO NO ESTÁ SUJETO A REEMBOLSO, CAMBIO O REPOSICIÓN. EL BOLETO TE DA DERECHO A UN ACCESO AL INMUEBLE. El boleto te da derecho a un lugar específico dentro del inmueble. No está permitido el reingreso. Este boleto es válido solo para el evento y asiento descrito en pantalla. Queda prohibido mostrar capturas de pantalla del boleto en la entrada. El poseedor del boleto asume cualquier riesgo o peligro accidental proveniente del evento. La admisión está sujeta a que el espectador permita que se practique la revisión correspondiente para evitar el acceso a alimentos y bebidas alcohólicas, drogas, armas, mochilas, maletas, productos de tabaco, vapeadores, grabadoras, cámaras de cualquier tipo o cualquier otro artículo o sustancia no autorizada. El titular del inmueble del evento o sus representantes se reservan el derecho de admisión o, en su caso, se retirará del inmueble a cualquier persona cuya conducta se considere ofensiva, que induzca al desorden, y en general aquellas conductas que pudieran constituir una infracción o delito, no estando obligado a reembolsar cantidad alguna. El espectador se obliga a cumplir con las reglas del inmueble.
                     </p>
                 </div>
 
                 <template v-slot:actions>
                     <v-btn
-                        class="ms-auto"
-                        color="green"
-                        text="Aceptar"
+                        class="ms-auto tw-mb-2 tw-mr-2 text-none"
+                        color="purple"
+                        variant="tonal"
+                        rounded="lg"
+                        text="Transferir ahora"
                         @click="send_tickets"
                     ></v-btn>
                 </template>
@@ -166,35 +168,32 @@ props.users.forEach(element => {
 
         <div class="tw-px-4 tw-py-10 lg:tw-p-10">
 
-            <v-container>
-                <v-row class="tw-w-full">
-                    <v-col>
-                        <v-autocomplete
-                            v-model="selected_value"
-                            clearable
-                            chips
-                            label="Busca a tu amigo..."
-                            :items="users_list"
-                            variant="solo-filled"
-                            item-title="name"
-                            item-value="value"
-                        ></v-autocomplete>
-                    </v-col>
-                    <div v-if="selection.length > 0">
-                        <v-col>
-                            <v-btn @click="alert"  text="Enviar" color="green" height="65" ></v-btn>
-                        </v-col>
-                    </div>
-                </v-row>
-                <div v-if="dialog === true">
-                    <InputError class="" :message="messageErrorreceiverUserName" />
+            <div class="tw-w-full !tw-flex tw-flex-col lg:tw-flex-row tw-mb-10 lg:tw-mb-0 lg:tw-gap-7">
+                <div class="tw-w-full">
+                    <v-autocomplete
+                        v-model="selected_value"
+                        clearable
+                        chips
+                        label="Busca a tu amigo..."
+                        :items="users_list"
+                        variant="solo-filled"
+                        item-title="name"
+                        item-value="value"
+                    ></v-autocomplete>
                 </div>
+                <div>
+                    <v-btn @click="alert" variant="tonal" rounded="lg" text="Transferir" class="text-none lg:!tw-h-[70px]" color="purple" size="large"></v-btn>
+                </div>
+            </div>
+            <div v-if="dialog === true">
+                <p class="tw-text-red-500 tw-bg-red-100 tw-inline-flex tw-rounded-md tw-py-1 tw-px-4 tw-text-center tw-text-xs">{{ messageErrorreceiverUserName }}</p>
+            </div>
 
-            </v-container>
+            <div class="tw-mt-10 tw-gap-5 tw-w-full tw-flex tw-flex-col-reverse lg:tw-flex-row tw-items-start tw-justify-between">
+                <div class="tw-w-full tw-shadow-lg tw-bg-gray-200 tw-px-5 tw-py-7 tw-overflow-x-scroll tw-rounded-2xl tw-border tw-flex tw-flex-col tw-items-center tw-justify-center tw-text-center">
+                    <span class="tw-text-sm tw-font-bold tw-text-gray-500 tw-text-center tw-inline-flex tw-bg-white tw-px-5 tw-py-2 tw-rounded-full">Desliza y seleciona un partido para ver tus boletos</span>
 
-            <div class="tw-mt-1 tw-gap-5 tw-w-full tw-flex tw-flex-col-reverse lg:tw-flex-row tw-items-start tw-justify-betwee">
-                <div class="tw-w-full tw-shadow-lg tw-bg-gray-200 tw-px-5 tw-overflow-x-scroll tw-rounded-2xl tw-border tw-flex tw-flex-col tw-items-center tw-justify-center tw-text-center">
-                    <div class="tw-mt-5">
+                    <div class="tw-mt-5 tw-hidden lg:tw-block">
                         <v-tabs v-model="tab" align-tabs="center" color="deep-purple-accent-4">
                             <v-tab v-for="(event, index) in eventsWithTickets" :key="event.event.id" :value="`tab-${index}`">
                                 {{ event.event.name }}
@@ -203,6 +202,22 @@ props.users.forEach(element => {
                     </div>
                 </div>
             </div>
+
+            <div class="lg:tw-hidden tw-w-full tw-mt-5">
+                <v-tabs v-model="tab" align-tabs="center" class="tw-relative" color="deep-purple-accent-4">
+                    <v-tab v-for="(event, index) in eventsWithTickets" :key="event.event.id" :value="`tab-${index}`">
+                        <span class="!tw-text-xs">{{ event.event.name }}</span>
+                    </v-tab>
+                </v-tabs>
+                <div class="tw-flex tw-w-full tw-items-center tw-justify-center tw-flex-col tw-mt-2">
+                    <div class="tw-flex tw-items-center tw-justify-center tw-relative">
+                        <div class="tw-animate-ping tw-absolute -tw-right-1 tw-top-5 tw-inline-flex tw-h-4 tw-w-4 tw-rounded-full tw-bg-purple-500 tw-opacity-80"></div>
+                        <span class="material-symbols-outlined tw-rotate-90 tw-text-6xl tw-text-gray-500 tw-relative tw-z-10">swipe_down</span>
+                    </div>
+                    <p class="tw-text-xs tw-mt-2">Desliza hacia la izquierda para ver y selecionar los partidos</p>
+                </div>
+            </div>
+
             <div class="tw-mt-10 tw-bg-white">
                 <InputError class="" :message="data.errors.receiverUserName" />
                 <v-tabs-window v-model="tab">

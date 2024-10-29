@@ -125,16 +125,15 @@ const tab = ref('tab-0');
             <div class="lg:tw-hidden tw-w-full tw-mt-5">
                 <v-tabs v-model="tab" align-tabs="center" class="tw-relative" color="deep-purple-accent-4">
                     <v-tab v-for="(event, index) in eventsWithTickets" :key="event.event.id" :value="`tab-${index}`">
-                        <span class="!tw-text-xs">{{ event.event.name }}</span>
+                        <span class="!tw-text-xs !tw-block tw-relative">{{ event.event.name }}</span>
                     </v-tab>
-                    <span class="material-symbols-outlined tw-text-3xl tw-text-gray-600 tw-absolute tw-top-1 -tw-left-2">chevron_right</span>
                 </v-tabs>
                 <div class="tw-flex tw-w-full tw-items-center tw-justify-center tw-flex-col tw-mt-2">
                     <div class="tw-flex tw-items-center tw-justify-center tw-relative">
                         <div class="tw-animate-ping tw-absolute -tw-right-1 tw-top-5 tw-inline-flex tw-h-4 tw-w-4 tw-rounded-full tw-bg-purple-500 tw-opacity-80"></div>
                         <span class="material-symbols-outlined tw-rotate-90 tw-text-6xl tw-text-gray-500 tw-relative tw-z-10">swipe_down</span>
                     </div>
-                    <p class="tw-text-xs">Desliza hacia la izquierda para ver y selecionar los partidos</p>
+                    <p class="tw-text-xs tw-mt-2">Desliza hacia la izquierda para ver y selecionar los partidos</p>
                 </div>
             </div>
 
