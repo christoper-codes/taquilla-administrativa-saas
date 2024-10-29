@@ -1,3 +1,4 @@
+
 <?php
 
 use App\Http\Controllers\BlogController;
@@ -50,3 +51,10 @@ Route::post('/series', [SerieController::class, 'store'])->name('series.store');
 * |Events | ROUTES
 */
 Route::post('/eventos', [EventController::class, 'store'])->name('event.management.store');
+
+
+
+
+
+Route::post('/taquillas/share-ticket', [TicketOfficeController::class, 'change'])->name('ticket-offices.change');
+
