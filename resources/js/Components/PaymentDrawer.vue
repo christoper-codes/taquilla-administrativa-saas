@@ -1,16 +1,25 @@
 <script setup>
 import { drawerPaymentState } from '@/composables/drawersStates';
 import { loadScript } from '@paypal/paypal-js';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import CountdownTimer from '@/Components/CountdownTimer.vue';
 import { useForm as useFormInertia} from '@inertiajs/vue3';
+import axios from 'axios';
+import { toast } from 'vue3-toastify'
+
 
 const CLIENT_ID = 'AVvNWWNci4r1r8VQUZ919IvcgLmDbPHCSktDNXcwQMaNHNdfqMCDKWdsR4SDs93oNYJQYw6q87Z4mHql';
 const SECRET_kEY = 'EAzjdcBn2Vp2CtTTYZtQfyiQuTLzZf4tQ2OQT_TmOytyz_m3uGW-DH9gYYduccLwHUxeLfgU_p-LPZrd';
 const currency = 'MXN';
 
+const loading  = ref(false);
+
 const props = defineProps({
+    purchaseType: {
+        type: String,
+        required: true,
+    },
     eventId: {
         type: Number,
         required: true,
@@ -21,7 +30,7 @@ const props = defineProps({
     },
     memberUserId: {
         type: Number,
-        required: true,
+        required: false,
     },
     sellerUserId: {
         type: Number,
@@ -55,6 +64,10 @@ const props = defineProps({
         type: Boolean,
         required: true,
     },
+    serieId: {
+        type: Number,
+        required: true,
+    },
 })
 
 onMounted(async () => {
@@ -85,7 +98,10 @@ onMounted(async () => {
         onApprove: async (data, actions) => {
             return actions.order.capture().then(details => {
 
-                const seatsSelectedData = useFormInertia({
+                loading.value = true;
+
+                const seatsSelectedData = {
+                    purchase_type: props.purchaseType,
                     event_id: props.eventId,
                     cash_register_id: props.cashRegisterId,
                     member_user_id: props.memberUserId,
@@ -97,9 +113,37 @@ onMounted(async () => {
                     total_returned: props.amountReturned,
                     global_payment_types: props.globalPaymentTypes,
                     is_online: props.isOnline,
-                });
+                    serie_id: props.serieId,
+                }
 
-                seatsSelectedData.post(route('events.confirm-seats-purchase'), {
+                axios.post(route('events.confirm-seats-purchase'), seatsSelectedData)
+                    .then((response) => {
+                        if(response.data.success) {
+                            toast(response.data.message, {
+                                "theme": "auto",
+                                "type": "default",
+                                "dangerouslyHTMLString": true
+                            })
+
+                            document.getElementById('result-message').innerText = `Transaction completed by ${details.payer.name.given_name}`;
+                            console.log('Transaction details:', details);
+                            router.visit('/pago-exitoso');
+                        }
+                    })
+                    .catch((error) => {
+                        toast(error.response.data.message, {
+                            "theme": "auto",
+                            "type": "error",
+                            "autoClose": 10000,
+                            "dangerouslyHTMLString": true
+                        })
+                    })
+                    .finally(() => {
+                        loading.value = false;
+                        drawerPaymentState.value = false;
+                    });
+
+               /*  seatsSelectedData.post(route('events.confirm-seats-purchase'), {
                     onSuccess: (response) => {
                         if(!response.props.flash.error) {
                             document.getElementById('result-message').innerText = `Transaction completed by ${details.payer.name.given_name}`;
@@ -110,7 +154,7 @@ onMounted(async () => {
                     onFinish: () => {
                         drawerPaymentState.value = false;
                     }
-                });
+                }); */
 
 
             });
@@ -166,6 +210,11 @@ onMounted(async () => {
                 <p id="result-message"></p>
                 <div class="tw-mt-10">
                     <CountdownTimer :initialMinutes="10" />
+
+                    <div v-if="loading" class="tw-flex tw-flex-col tw-items-center tw-justify-center tw-mt-5 tw-animate-pulse">
+                        <p class="tw-font-bold tw-text-xs lg:tw-text-base">Completando compra en el sistema...</p>
+                        <iframe class="tw-size-40 lg:tw-size-52 tw-rotate-45" src="https://lottie.host/embed/bf6d5e1b-537a-436b-8464-3d074f070d76/SAdIq1oqT7.json"></iframe>
+                    </div>
                 </div>
             </div>
         </div>
@@ -177,7 +226,7 @@ onMounted(async () => {
 <style scoped>
 
     .v-navigation-drawer--temporary.v-navigation-drawer--active {
-        width: 75% !important;
+        width: 85% !important;
     }
 
     @media (min-width: 768px) {

@@ -33,6 +33,10 @@ const cashRegisterData = useFormInertia({
 
 onMounted(() => {
     selectedEvents.value = props.events.map((event) => event);
+    if(props.active_cash_register) {
+        localStorage.setItem('cashRegisterData', JSON.stringify(props.active_cash_register));
+        cashRegisterPresent.value = props.active_cash_register.cash_register_type_id;
+    }
 })
 
 const cashRegisterSubmit = handleSubmit((values, isActive) => {

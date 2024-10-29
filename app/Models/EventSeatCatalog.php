@@ -61,7 +61,7 @@ class EventSeatCatalog extends Model
     public function priceTypes()
     {
         return $this->belongsToMany(PriceType::class, 'event_seat_catalog_price_type', 'event_seat_catalog_id', 'price_type_id')
-                ->withPivot('price_catalogue_id', 'is_active')
+                ->withPivot('price_catalogue_id', 'price', 'is_active')
                 ->withTimestamps();
     }
 

@@ -2,6 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 import confetti from 'canvas-confetti';
+import SuccessSession from '@/Components/SuccessSession.vue';
 
 const count = 200;
 const defaults = {
@@ -56,6 +57,8 @@ onMounted(() => {
 
 <template>
     <Head title="success" />
+    <SuccessSession />
+
     <div>
         <!-- Hero -->
         <div class="tw-relative tw-overflow-hidden before:tw-absolute before:tw-top-0 before:tw-start-1/2 before:tw-bg-[url('https://preline.co/assets/svg/examples/squared-bg-element.svg')] before:tw-bg-no-repeat before:tw-bg-top before:tw-size-full before:-tw-z-[1] before:tw-transform before:-tw-translate-x-1/2">

@@ -30,6 +30,7 @@
         "vue-qr": "^4.0.9",
         "vue-qrcode-reader": "^5.5.11",
         "vue-svg-pan-zoom": "^2.1.0",
+        "vue3-toastify": "^0.2.4",
         "vuetify": "^3.7.2"
     }
 }

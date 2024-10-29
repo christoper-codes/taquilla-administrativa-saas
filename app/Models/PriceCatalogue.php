@@ -27,4 +27,9 @@ class PriceCatalogue extends Model
                 ->withPivot('seat_catalogue_id', 'is_active')
                 ->withTimestamps();
     }
+
+    public function eventSeatCatalogPriceTypes()
+    {
+        return $this->hasMany(EventSeatCatalogPriceType::class);
+    }
 }

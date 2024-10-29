@@ -50,7 +50,9 @@ class Event extends Model
 
     public function saleTickets()
     {
-        return $this->hasMany(SaleTicket::class);
+        return $this->belongsToMany(SaleTicket::class, 'event_sale_ticket', 'event_id', 'sale_ticket_id')
+                    ->withPivot('is_active')
+                    ->withTimestamps();
     }
 
     public function EventSeatCatalogues()
