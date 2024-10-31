@@ -12,6 +12,8 @@ import { createVuetify } from 'vuetify';
 import { VDateInput } from 'vuetify/labs/VDateInput';
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
+import Toast from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -26,6 +28,11 @@ const vuetify = createVuetify({
     },
 });
 
+const toastOptions = {
+    position: 'top-right',
+    autoClose: 5000,
+};
+
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
@@ -34,10 +41,11 @@ createInertiaApp({
             .use(plugin)
             .use(ZiggyVue)
             .use(vuetify)
+            .use(Toast, toastOptions)
             .mount(el);
     },
     progress: {
-        color: '#4B5563',
+        color: '#a855f7',
     },
 });
 

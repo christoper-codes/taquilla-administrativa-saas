@@ -114,6 +114,10 @@ const props = defineProps({
                                 </Link>
                             </div>
                         </div>
+                        <div v-if="slug && loading" class="tw-flex tw-flex-col tw-items-center tw-justify-center tw-mt-4 lg:tw-mt-0 tw-animate-pulse">
+                            <p class="tw-font-bold tw-text-xs">Preparando las zonas para el evento...</p>
+                            <iframe class="tw-size-20  tw-rotate-45" src="https://lottie.host/embed/bf6d5e1b-537a-436b-8464-3d074f070d76/SAdIq1oqT7.json"></iframe>
+                        </div>
                         <div class="tw-hidden lg:tw-block tw-mt-5">
                             ¿Aun no tienes cuenta?
                             <Link :href="route('register', { slug: slug, id: id})">

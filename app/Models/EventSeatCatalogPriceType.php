@@ -15,6 +15,7 @@ class EventSeatCatalogPriceType extends Model
         'event_seat_catalog_id',
         'price_type_id',
         'price_catalogue_id',
+        'price',
         'is_active',
     ];
 
