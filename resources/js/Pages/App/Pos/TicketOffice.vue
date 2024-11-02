@@ -12,6 +12,7 @@ import { useForm, useField } from 'vee-validate'
 import useTicketOfficeState from '@/composables/TicketOfficeState';
 import usePriceFormat from '@/composables/priceFormat';
 import useDateFormat from '@/composables/dateFormat';
+import axios from 'axios';
 
 const { formatPrice } = usePriceFormat();
 const { dateFormat } = useDateFormat();
@@ -102,6 +103,28 @@ const widgets = ref(false);
 console.log(props.ticket_office);
 console.log(props.active_cash_register);
 
+const pdf = () => {
+    axios.post(route('pdf-test'), {}, { responseType: 'blob' })
+        .then(response => {
+            const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = window.URL.createObjectURL(pdfBlob);
+            printInKioskMode(pdfUrl);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+};
+
+function printInKioskMode(url) {
+    const ventana = window.open(url, '_blank', 'fullscreen=yes,kiosk=yes');
+    ventana.onload = () => {
+        ventana.print();
+       /*  setTimeout(() => {
+            ventana.close();
+        }, 4000); */
+
+    };
+}
 
 </script>
 
@@ -127,6 +150,7 @@ console.log(props.active_cash_register);
                                 Regresar al inicio
                             </div>
                         </Link >
+                        <v-btn @click="pdf">Pdf</v-btn>
 
                         <h2 class="lg:tw-text-4xl tw-text-3xl tw-font-bold">{{ ticket_office.name }}. Administracion para el club halcones de xalapa</h2>
 
@@ -272,105 +296,6 @@ console.log(props.active_cash_register);
                                         <div class="tw-text-4xl tw-font-bold">{{ formatPrice(0) }}</div>
                                     </div>
                                 </div>
-                                <div class="tw-max-w-7xl tw-py-10 tw-lg:py-14 tw-mx-auto">
-  <!-- Card -->
-  <div class="tw-flex tw-flex-col">
-    <div class="tw--m-1.5 tw-overflow-x-auto">
-      <div class="tw-p-1.5 tw-min-w-full tw-inline-block tw-align-middle">
-        <div class="tw-bg-white tw-border tw-border-gray-200 tw-rounded-xl tw-shadow-sm tw-overflow-hidden tw-dark:bg-neutral-800 tw-dark:border-neutral-700">
-          <!-- Header -->
-          <div class="tw-px-6 tw-py-4 tw-grid tw-gap-3 tw-md:flex tw-md:justify-between tw-md:items-center tw-border-b tw-border-gray-200 tw-dark:border-neutral-700">
-            <div>
-              <h2 class="tw-text-xl tw-font-semibold tw-text-gray-800 tw-dark:text-neutral-200">
-                Tickets de venta
-              </h2>
-              <p class="tw-text-sm tw-text-gray-600 tw-dark:text-neutral-400">
-                Listado de tickets vendidos en la caja registradora
-              </p>
-            </div>
-
-            <div>
-              <div class="tw-inline-flex tw-gap-x-2">
-                <a class="tw-py-2 tw-px-3 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-medium tw-rounded-lg tw-border tw-border-gray-200 tw-bg-white tw-text-gray-800 tw-shadow-sm tw-hover:bg-gray-50 tw-disabled:opacity-50 tw-disabled:pointer-events-none tw-focus:outline-none tw-focus:bg-gray-50 tw-dark:bg-transparent tw-dark:border-neutral-700 tw-dark:text-neutral-300 tw-dark:hover:bg-neutral-800 tw-dark:focus:bg-neutral-800" href="#">
-                  Ver todos
-                </a>
-
-                <a class="tw-py-2 tw-px-3 tw-inline-flex tw-items-center tw-gap-x-2 tw-text-sm tw-font-medium tw-rounded-lg tw-border tw-border-transparent tw-bg-purple-600 tw-text-white tw-hover:bg-blue-700 tw-focus:outline-none tw-focus:bg-blue-700 tw-disabled:opacity-50 tw-disabled:pointer-events-none" href="#">
-                   Regresar
-                </a>
-              </div>
-            </div>
-          </div>
-          <!-- End Header -->
-
-          <!-- Table -->
-          <table class="tw-min-w-full tw-divide-y tw-divide-gray-200 tw-dark:divide-neutral-700">
-            <thead class="tw-bg-gray-50 tw-dark:bg-neutral-800">
-              <tr>
-                <th scope="col" class="tw-ps-6 tw-py-3 tw-text-start">
-                  <label for="hs-at-with-checkboxes-main" class="tw-flex">
-                    <input type="checkbox" class="tw-shrink-0 tw-border-gray-300 tw-rounded tw-text-blue-600 tw-focus:ring-blue-500 tw-disabled:opacity-50 tw-disabled:pointer-events-none tw-dark:bg-neutral-800 tw-dark:border-neutral-600 tw-dark:checked:bg-blue-500 tw-dark:checked:border-blue-500 tw-dark:focus:ring-offset-gray-800" id="hs-at-with-checkboxes-main">
-                    <span class="tw-sr-only">Checkbox</span>
-                  </label>
-                </th>
-
-                <th scope="col" class="tw-ps-6 tw-lg:ps-3 tw-xl:ps-0 tw-pe-6 tw-py-3 tw-text-start">
-                  <div class="tw-flex tw-items-center tw-gap-x-2">
-                    <span class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-gray-800 tw-dark:text-neutral-200">
-                      codigo
-                    </span>
-                  </div>
-                </th>
-
-                <th scope="col" class="tw-px-6 tw-py-3 tw-text-start">
-                  <div class="tw-flex tw-items-center tw-gap-x-2">
-                    <span class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-gray-800 tw-dark:text-neutral-200">
-                       precio
-                    </span>
-                  </div>
-                </th>
-
-                <th scope="col" class="tw-px-6 tw-py-3 tw-text-start">
-                  <div class="tw-flex tw-items-center tw-gap-x-2">
-                    <span class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-gray-800 tw-dark:text-neutral-200">
-                      Status
-                    </span>
-                  </div>
-                </th>
-
-                <th scope="col" class="tw-px-6 tw-py-3 tw-text-start">
-                  <div class="tw-flex tw-items-center tw-gap-x-2">
-                    <span class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-gray-800 tw-dark:text-neutral-200">
-                      Fecha
-                    </span>
-                  </div>
-                </th>
-
-                <th scope="col" class="tw-px-6 tw-py-3 tw-text-start">
-                  <div class="tw-flex tw-items-center tw-gap-x-2">
-                    <span class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-gray-800 tw-dark:text-neutral-200">
-                      Acciones
-                    </span>
-                  </div>
-                </th>
-
-                <th scope="col" class="tw-px-6 tw-py-3 tw-text-end"></th>
-              </tr>
-            </thead>
-
-            <tbody class="tw-divide-y tw-divide-gray-200 tw-dark:divide-neutral-700">
-              <tr>
-                <!-- Contenido de las filas -->
-              </tr>
-            </tbody>
-          </table>
-          <!-- End Table -->
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
                             </div>
                             <div v-else class="tw-flex tw-items-center tw-justify-center tw-mt-20 tw-flex-col tw-gap-10">
                                 <div class="tw-font-bold tw-text-center tw-bg-gray-200 tw-rounded-full tw-inline-flex tw-px-7 tw-py-3 tw-text-gray-600">
@@ -403,5 +328,7 @@ console.log(props.active_cash_register);
 </template>
 
 <style scoped>
-
+.v-dialog > .v-overlay__content > .v-card, .v-dialog > .v-overlay__content > .v-sheet, .v-dialog > .v-overlay__content > form > .v-card, .v-dialog > .v-overlay__content > form > .v-sheet {
+    border-radius: 0px !important;
+}
 </style>
