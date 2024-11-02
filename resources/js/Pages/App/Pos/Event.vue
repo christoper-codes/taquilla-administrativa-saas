@@ -290,6 +290,7 @@ const handleSectionClick = (section) => {
 
 const selectZones = () => {
     loadSvg('zones_hdx');
+    showButtonPayment.value = false;
     isSvgVisible.value = true;
     selectedSection.value = '';
     totalAmount.value = 0;
@@ -317,6 +318,10 @@ const selectZones = () => {
 * declare props
 */
 const props = defineProps({
+    isEventsShow: {
+        type: Boolean,
+        required: false,
+    },
     event: {
         type: Object,
         required: true,
@@ -564,46 +569,64 @@ const onSubmit = () => {
 
 }
 
+// Crear referencias reactivas para las zonas
+const aZone = ref([...props.a_zone]);
+const bZone = ref([...props.b_zone]);
+const cZone = ref([...props.c_zone]);
+
+// Watcher para actualizar las referencias reactivas cuando los props cambian
+watch(() => props.a_zone, (newVal) => {
+    aZone.value = [...newVal];
+});
+watch(() => props.b_zone, (newVal) => {
+    bZone.value = [...newVal];
+});
+watch(() => props.c_zone, (newVal) => {
+    cZone.value = [...newVal];
+});
+
+// Función para actualizar los estados de los asientos
+const updateZones = (seatsSelectedData) => {
+
+    seatsSelectedData.seats.forEach(seat => {
+        const zone = seat.seat_catalogue.zone;
+        const seatCatalogueId = seat.seat_catalogue_id;
+
+        if (zone === 'A') {
+            const seatToUpdate = aZone.value.find(s => s.seat_catalogue_id === seatCatalogueId);
+            if (seatToUpdate) {
+                seatToUpdate.seat_catalogue_status.name = 'vendido';
+            }
+        } else if (zone === 'B') {
+            const seatToUpdate = bZone.value.find(s => s.seat_catalogue_id === seatCatalogueId);
+            if (seatToUpdate) {
+                seatToUpdate.seat_catalogue_status.name = 'vendido';
+            }
+        } else if (zone === 'C') {
+            const seatToUpdate = cZone.value.find(s => s.seat_catalogue_id === seatCatalogueId);
+            if (seatToUpdate) {
+                seatToUpdate.seat_catalogue_status.name = 'vendido';
+            }
+        }
+    });
+
+    // Actualizar las referencias reactivas
+    aZone.value = [...aZone.value];
+    bZone.value = [...bZone.value];
+    cZone.value = [...cZone.value];
+};
+
+const showButtonPayment = ref(false);
+
+const showPaymentDrawer = () => {
+    drawerPaymentState.value = true;
+};
+
 const onSubmitConfirm = (isActive) => {
 
     loadingg.value = true;
     loading.value = true;
     const isTransfer = userToTransfer.value ? true : false;
-
-    /* const seatsSelectedData = useFormInertia({
-        purchase_type: purchaseType.value,
-        event_id: props.event.id,
-        cash_register_id: cashRegisterDataId.value,
-        member_user_id: purchaseOnline.value ? props.user.id : (isTransfer ? userToTransfer.value : null),
-        seller_user_id: sellerUserId.value,
-        price_type_id: priceTypeId.value,
-        seats: seatsSelected.value,
-        amount_received: amountReceived.value,
-        total_amount: totalAmount.value,
-        total_returned: amountReturned.value,
-        global_payment_types: globalPaymentTypes.value,
-        is_online: purchaseOnline.value,
-        serie_id: props.event.serie_id,
-        is_transfer: isTransfer,
-        user_to_transfer: userToTransfer.value,
-    });
-
-    seatsSelectedData.post(route('events.reserve-seats-to-buy'), {
-        onSuccess: (response) => {
-            if(!response.props.flash.error && purchaseOnline.value) {
-                drawerPaymentState.value = true;
-            }
-
-            // crear el pdf como ticket de compra
-            console.log('success');
-
-        },
-        onFinish: () => {
-            isActive.value = false;
-            loading.value = false;
-            loadingg.value = false;
-        }
-    }); */
 
     const seatsSelectedData = {
     purchase_type: purchaseType.value,
@@ -626,6 +649,7 @@ const onSubmitConfirm = (isActive) => {
 axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
     .then(response => {
         if (response.data.success && purchaseOnline.value) {
+            showButtonPayment.value = true;
             drawerPaymentState.value = true;
         }
         toast(response.data.message, {
@@ -634,8 +658,17 @@ axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
             "dangerouslyHTMLString": true
         })
 
-        console.log('success');
-        console.log(response);
+        // Actualiza el estado de los asientos comprados
+        updateZones(seatsSelectedData);
+
+        if(response.data.pdf) {
+            const pdfContent = atob(response.data.pdf);
+            const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
+            const pdfUrl = window.URL.createObjectURL(pdfBlob);
+            printInKioskMode(pdfUrl);
+            selectZones();
+        }
+
     })
     .catch(error => {
         console.error('Error: upps');
@@ -671,11 +704,21 @@ const rules = {
     }
 };
 
+function printInKioskMode(url) {
+    const ventana = window.open(url, '_blank', 'fullscreen=yes,kiosk=yes');
+    ventana.onload = () => {
+        ventana.print();
+        setTimeout(() => {
+            ventana.close();
+        }, 4000);
+
+    };
+}
 </script>
 
 <template>
     <Head title="Evento" />
-    <GuestLayout />
+    <GuestLayout v-bind:isEventsShow="isEventsShow"/>
     <NavigationDrawer />
     <SuccessSession />
     <v-dialog max-width="700" max-height="300">
@@ -700,70 +743,6 @@ const rules = {
         </template>
     </v-dialog>
 
-    <div class="tw-hidden lg:tw-block">
-        <section class="tw-h-[250px]">
-            <div class="tw-rounded-none tw-h-[300px] tw-relative tw-bg-white">
-                <img class="tw-w-[1300px] tw-h-auto tw-absolute tw-right-0 tw-top-0 lg:tw-mt-[-80px]" src="../../../../../public/img/hero.svg" alt="">
-                <div class="d-flex flex-column fill-height justify-center align-center text-white tw-relative tw-px-4 lg:tw-px-0">
-                    <div class="tw-max-w-[90%] tw-mx-auto tw-flex tw-flex-col tw-w-full tw-gap-10">
-                        <div class="tw-flex tw-items-end tw-gap-0 lg:tw-gap-3">
-                            <h2 class="tw-font-bold tw-text-3xl lg:tw-text-5xl tw-text-gray-600 tw-max-w-2xl">
-                                {{ event.name }}
-                                <span>
-                                    <svg class="tw-shrink-0 tw-size-10 tw-text-gray-500 tw-inline" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
-                                </span>
-                            </h2>
-                        </div>
-                        <div class="tw-flex tw-items-center">
-                            <ol class="tw-flex tw-items-center tw-whitespace-nowrap">
-                                <li class="tw-inline-flex tw-items-center tw-py-1.5 tw-px-2">
-                                    <a class="tw-flex tw-items-center tw-text-sm tw-text-gray-600 hover:tw-text-purple-600" href="/">
-                                        Comienzo
-                                    </a>
-                                    <svg class="tw-shrink-0 tw-ms-2 tw-size-4 tw-text-gray-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m9 18 6-6-6-6"></path>
-                                    </svg>
-                                </li>
-                                <li class="tw-inline-flex tw-items-center tw-text-sm">
-                                    <div class="[--placement:top-left] tw-relative tw-inline-flex">
-                                    <div class="tw-flex tw-items-center gap-2 tw-bg-gray-200 tw-py-2 tw-px-4 tw-rounded-full tw-cursor-pointer tw-text-gray-600">
-                                        <svg class="tw-shrink-0 tw-size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="1"></circle>
-                                        <circle cx="12" cy="5" r="1"></circle>
-                                        <circle cx="12" cy="19" r="1"></circle>
-                                        </svg>
-                                        <p>Pagina actual</p>
-                                    </div>
-                                    <div class="hs-dropdown-menu hs-dropdown-open:opacity-100 tw-w-48 tw-hidden tw-z-10 tw-transition-[margin,opacity] tw-opacity-0 tw-duration-300 tw-mb-2 tw-bg-white tw-shadow-md tw-rounded-lg tw-p-1 tw-space-y-0.5" role="menu">
-                                        <a class="tw-flex tw-items-center tw-gap-x-3.5 tw-py-2 tw-px-3 tw-rounded-lg tw-text-sm tw-text-gray-800 hover:tw-bg-gray-100 focus:tw-outline-none focus:tw-bg-gray-100 disabled:tw-opacity-50 disabled:tw-pointer-events-none" href="#">
-                                        Projects
-                                        </a>
-                                        <a class="tw-flex tw-items-center tw-gap-x-3.5 tw-py-2 tw-px-3 tw-rounded-lg tw-text-sm tw-text-gray-800 hover:tw-bg-gray-100 focus:tw-outline-none focus:tw-bg-gray-100 disabled:tw-opacity-50 disabled:tw-pointer-events-none" href="#">
-                                        Preline
-                                        </a>
-                                    </div>
-                                    </div>
-                                    <svg class="tw-shrink-0 tw-ms-2 tw-size-4 tw-text-gray-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m9 18 6-6-6-6"></path>
-                                    </svg>
-                                </li>
-                                <li class="tw-inline-flex tw-items-center tw-py-1.5 tw-px-2">
-                                    <a class="tw-flex tw-items-center tw-text-sm tw-text-gray-600 hover:tw-text-purple-600" href="/">
-                                        Dashboard
-                                    </a>
-                                    <svg class="tw-shrink-0 tw-ms-2 tw-size-4 tw-text-gray-500 tw-hidden lg:tw-block" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m9 18 6-6-6-6"></path>
-                                    </svg>
-                                </li>
-                            </ol>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-
     <div v-if="seatsSelected.length > 0" @click="scrollTopaymentSection" class="tw-fixed tw-bottom-20 tw-right-3 tw-z-[60]">
         <div class="tw-flex tw-items-center tw-justify-center tw-cursor-pointer hover:tw-scale-110 tw-transition-transform tw-duration-700">
             <div class="tw-relative">
@@ -779,8 +758,23 @@ const rules = {
             <img class="tw-w-full" :src="`/storage/${event.global_image.file_path}`" alt="">
         </div>
     </section>
+    <div class="tw-hidden lg:tw-block tw-w-[72%] tw-h-72 tw-overflow-hidden tw-bg-center tw-bg-cover" :style="{ backgroundImage: `linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(255,255,255,1) 100%), url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
+    </div>
 
-    <section class="tw-w-full tw-min-h-screen tw-bg-white tw-mt-[-37px] lg:tw-mt-0 tw-rounded-[35px] lg:tw-rounded-[0px] tw-relative tw-mb-20">
+   <!--  <div class="tw-w-[72%] tw-h-60 tw-overflow-hidden tw-bg-center tw-bg-cover" :style="{ backgroundImage: `url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
+        <div class="tw-h-full tw-w-full tw-bg-black/30 tw-backdrop-blur-md tw-flex tw-items-center tw-justify-center">
+            <h1 class="tw-text-white tw-text-center tw-text-5xl tw-font-bold">{{ event.name }}</h1>
+        </div>
+    </div> -->
+
+    <!-- <div class="tw-relative tw-h-44 lg:tw-h-96 tw-w-full tw-block tw-shadow-xl tw-overflow-hidden tw-rounded-2xl lg:tw-rounded-3xl hover:tw-scale-105 tw-transition-transform tw-duration-500"
+        :style="{ backgroundImage: `url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
+        <div class="tw-absolute tw-bottom-0 tw-w-[100%] tw-rounded-b-2xl lg:tw-rounded-b-3xl tw-bg-black/10 tw-p-2 lg:tw-p-5 tw-backdrop-blur-md tw-backdrop-brightness-150 tw-text-white tw-font-bold tw-text-center">
+            {{ dateFormat(event.start_date) }}
+        </div>
+    </div> -->
+
+    <section class="tw-w-full tw-min-h-screen tw-bg-white tw-mt-[-37px] lg:tw-mt-0 tw-rounded-[35px] lg:tw-rounded-[0px] tw-relative tw-mb-20 lg:tw-mb-0">
         <div class="max-w-full md:tw-max-w-[90%] tw-mx-auto tw-py-1 lg:tw-pb-7 tw-px-4 lg:tw-px-0">
             <main class="">
 
@@ -788,15 +782,20 @@ const rules = {
                     <div class="tw-w-full lg:tw-w-[70%] tw-relative lg:tw-min-h-[1000pxx]">
                         <div class="tw-space-y-5 lg:tw-space-y-8">
                             <Link :href="route('welcome')">
-                                <div class="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-x-1.5 tw-text-sm tw-text-gray-600 tw-decoration-2 hover:tw-underline focus:tw-outline-none focus:tw-underline">
+                                <div class="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-x-1.5 tw-text-sm tw-text-gray-600 tw-bg-gray-100 tw-px-3 tw-py-1.5 tw-rounded-full tw-decoration-2 hover:tw-underline focus:tw-outline-none focus:tw-underline">
                                     <svg class="tw-shrink-0 tw-size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                                     Regresar al inicio
                                 </div>
                             </Link >
 
-                            <h2 class="tw-text-3xl tw-font-bold lg:tw-text-4xl tw-hidden lg:tw-block">{{ dateFormat(event.start_date) }}</h2>
-                            <h2 class="tw-text-2xl tw-font-bold lg:tw-hidden">{{ event.name }}</h2>
+                           <!--  <h2 class="tw-relative tw-font-bold tw-text-sm lg:tw-text-3xl tw-block tw-py-[2px] tw-px-[2px] tw-text-center tw-bg-purple-100 tw-border-transparent tw-rounded-full tw-bg-clip-border">
+                                <span class="tw-absolute tw-inset-0 tw-bg-gradient-to-r tw-from-blue-300 tw-to-purple-400 tw-rounded-full"></span>
+                                <span class="tw-relative tw-bg-purple-50 tw-rounded-full tw-p-3 tw-block tw-w-full">{{ event.name }}</span>
+                            </h2> -->
 
+                            <h2 class="tw-font-bold tw-text-3xl lg:tw-text-5xl">
+                                {{ event.name }}
+                            </h2>
                             <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-start lg:tw-items-center tw-gap-2 lg:tw-gap-5">
                                 <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
                                     <span class="material-symbols-outlined tw-text-xl">location_on</span>El nido del halcon
@@ -826,42 +825,42 @@ const rules = {
                                         v-bind:serieId="event.serie_id"
                                     />
 
-                                    <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-6 tw-items-center tw-gap-3 tw-mt-7">
+                                    <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-6 tw-items-center tw-gap-2 tw-mt-7">
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
-                                            <div class="tw-h-9 tw-w-full tw-bg-yellow-500 tw-flex tw-items-center tw-justify-center tw-rounded-full">
+                                            <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-yellow-500 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">done_outline</span>
                                             </div>
-                                            <p>Disponible</p>
+                                            <p class="tw-text-xs lg:tw-text-base">Disponible</p>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
-                                            <div class="tw-h-9 tw-w-full tw-bg-purple-500 tw-flex tw-items-center tw-justify-center tw-rounded-full">
+                                            <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-purple-500 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">star</span>
                                             </div>
-                                            <p>Vendido</p>
+                                            <p class="tw-text-xs lg:tw-text-base">Vendido</p>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
-                                            <div class="tw-h-9 tw-w-full tw-bg-green-500 tw-flex tw-items-center tw-justify-center tw-rounded-full">
+                                            <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-green-500 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">web_traffic</span>
                                             </div>
-                                            <p>Seleccionado</p>
+                                            <p class="tw-text-xs lg:tw-text-base">Seleccionado</p>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
-                                            <div class="tw-h-9 tw-w-full tw-bg-pink-600 tw-flex tw-items-center tw-justify-center tw-rounded-full">
+                                            <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-pink-600 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
-                                            <p>No vendible</p>
+                                            <p class="tw-text-xs lg:tw-text-base">No vendible</p>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
-                                            <div class="tw-h-9 tw-w-full tw-bg-gray-600 tw-flex tw-items-center tw-justify-center tw-rounded-full">
+                                            <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-gray-600 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
-                                            <p>Inhabilitado</p>
+                                            <p class="tw-text-xs lg:tw-text-base">Inhabilitado</p>
                                         </div>
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
-                                            <div class="tw-h-9 tw-w-full tw-bg-cyan-500 tw-flex tw-items-center tw-justify-center tw-rounded-full">
+                                            <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-cyan-500 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
-                                            <p>En transito</p>
+                                            <p class="tw-text-xs lg:tw-text-base">En transito</p>
                                         </div>
                                      </div>
                                 </div>
@@ -879,8 +878,8 @@ const rules = {
                                         <v-dialog max-width="800">
                                             <template v-slot:activator="{ props: activatorProps }">
                                                 <div v-bind="activatorProps" class="!tw-absolute -tw-top-4 -tw-right-6 ">
-                                                    <div class="tw-animate-ping tw-absolute tw-right-[2px] tw-top-[5px] tw-inline-flex tw-h-5 tw-w-5 tw-rounded-full tw-bg-purple-500 tw-opacity-80"></div>
-                                                    <span class="material-symbols-outlined tw-text-2xl tw-text-purple-600">photo_library</span>
+                                                    <!-- <div class="tw-animate-ping tw-absolute tw-right-[2px] tw-top-[5px] tw-inline-flex tw-h-5 tw-w-5 tw-rounded-full tw-bg-purple-500 tw-opacity-80"></div> -->
+                                                    <span class="material-symbols-outlined tw-text-2xl tw-text-purple-600 tw-animate-bounce tw-cursor-pointer">photo_library</span>
                                                 </div>
                                             </template>
                                             <template v-slot:default="{ isActive }">
@@ -910,7 +909,7 @@ const rules = {
                                         <v-dialog max-width="800">
                                         <template v-slot:activator="{ props: activatorProps }">
                                             <div v-bind="activatorProps" class="!tw-absolute -tw-top-4 -tw-right-5 ">
-                                                <span class="material-symbols-outlined tw-text-2xl tw-text-purple-600">photo_library</span>
+                                                <span class="material-symbols-outlined tw-text-xl tw-text-purple-600">photo_library</span>
                                             </div>
                                         </template>
                                         <template v-slot:default="{ isActive }">
@@ -954,14 +953,17 @@ const rules = {
 
                         </div>
 
+                        <div class="tw-p-5 tw-bg-purple-50 tw-text-center tw-rounded-xl tw-mt-10">
+                            <p>Zonas disponibles en el estadio.</p>
+                        </div>
                     </div>
 
-                    <div class="tw-w-full lg:tw-w-[30%] tw-sticky tw-top-20 lg:tw-mt-[-100px]">
-                        <h3 class="tw-text-2xl tw-font-bold">Asientos seleccionados</h3>
-                        <h4 class="tw-text-sm mt-1">📍 El nido del halcon | Xalapa Ver.</h4>
-                        <div class="tw-h-auto lg:tw-h-[650px] tw-w-full mt-3  tw-rounded-2xl lg:tw-overflow-y-scroll tw-shadow-lg">
-                            <div class="tw-relative tw-flex tw-flex-col tw-bg-white tw-rounded-xl tw-pointer-events-auto">
-                                <div class="tw-relative tw-overflow-hidden tw-min-h-32 tw-bg-gray-800 tw-text-center tw-rounded-xl lg:tw-rounded-tr-none">
+                    <div class="tw-w-full lg:tw-w-[28%] lg:tw-fixed tw-top-[83px] tw-right-0 tw-bg-white lg:tw-z-40">
+                        <div class="tw-w-full tw-pb-5 lg:tw-h-[calc(100vh-83px)] lg:tw-overflow-y-auto tw-shadow-lg [&::-webkit-scrollbar]:!tw-w-2 [&::-webkit-scrollbar-thumb]:!tw-rounded-full [&::-webkit-scrollbar-track]:!tw-bg-white [&::-webkit-scrollbar-thumb]:!tw-bg-neutral-300">
+                            <div class="tw-relative tw-flex tw-flex-col tw-bg-white tw-pointer-events-auto">
+                                <div class="tw-relative tw-overflow-hidden tw-min-h-[123px] tw-bg-slate-950 tw-text-center tw-rounded-2xl lg:tw-rounded-none">
+                                    <div class="tw-hidden lg:tw-block tw-absolute tw-left-1/2 tw-bottom-0 tw-h-[100px] tw-w-[300px] tw--translate-x-1/2 tw-rounded-full tw-bg-gradient-to-t tw-blur-[90px] tw-from-tw-primary-800 tw-to-tw-primary-600">
+                                    </div>
                                     <!-- SVG Background Element -->
                                     <figure class="tw-absolute tw-inset-x-0 tw-bottom-0 -tw-mb-px">
                                     <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 1920 100.1">
@@ -985,6 +987,8 @@ const rules = {
                             <div class="tw-px-5 tw-relative tw-flex tw-flex-col-reverse">
                                 <div v-if="seatsSelected.length == 0" class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-7">
                                     <p class="tw-w-full tw-text-center tw-text-xs tw-p-3 tw-rounded-full tw-bg-gray-100 tw-mt-5">No se han selecionado asientos</p>
+                                    <h3 class="tw-text-2xl tw-font-bold">Asientos seleccionados</h3>
+                                    <h4 class="tw-text-sm mt-1">📍 El nido del halcon | Xalapa Ver.</h4>
                                     <img class="tw-w-60 tw-h-auto" src="../../../../../public/img/seats-no-selected-img.svg" alt="">
                                 </div>
                                 <div v-if="seatsSelected.length > 0" class="">
@@ -1144,7 +1148,7 @@ const rules = {
 
                                                     <p v-if="!valid" class="tw-py-2 tw-px-4 tw-bg-red-100 tw-border-l-4 tw-border-l-red-500 tw-text-red-500 tw-text-xs tw-my-4">{{ error }}</p>
 
-                                                    <div class="tw-my-5">
+                                                    <div class="tw-mt-5">
                                                         <v-radio-group :disabled="!form" inline label="Tipo de compra a realizar" v-model="purchaseType">
                                                             <v-radio
                                                             v-for="(type, index) in purchase_types"
@@ -1168,6 +1172,15 @@ const rules = {
                                                         <p class="tw-opacity-50 tw-text-right tw-mb-3 tw-text-xs">Subtotal (tipos de precios selecionados): {{ formatPrice(totalAmount) }}</p>
                                                         <p class="tw-font-semibold tw-text-right tw-mb-3">Total: {{ formatPrice(totalAmount) }}</p>
                                                         <v-btn
+                                                            v-if="showButtonPayment"
+                                                            @click="showPaymentDrawer"
+                                                            rounded="xl" size="large" block
+                                                            class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400"
+                                                        >
+                                                            <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir bolsetos
+                                                        </v-btn>
+                                                        <v-btn
+                                                            v-else
                                                             :disabled="!form"
                                                             :loading="loadingg"
                                                             type="submit"
@@ -1324,11 +1337,9 @@ const rules = {
                 </div>
 
             </main>
-
         </div>
     </section>
 
-    <Footer />
 </template>
 
 <style scoped>
@@ -1356,7 +1367,12 @@ const rules = {
 }
 
 .tw-animate-bounce {
-  animation: tw-bounce 1s infinite;
+  animation: tw-bounce 1.5s infinite;
+}
+@media (min-width: 1024px) {
+    .tw-animate-bounce {
+    animation: tw-bounce 1s infinite;
+    }
 }
 
 </style>

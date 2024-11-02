@@ -9,7 +9,15 @@ use App\Models\EventSeatCatalogPriceType;
 use App\Models\PriceTypeSeatCatalogue;
 use App\Models\SaleTicket;
 use App\Models\SaleTicketStatus;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\Label\LabelAlignment;
+use Endroid\QrCode\Label\Font\OpenSans;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Writer\PngWriter;
 
 class EventService
 {
@@ -165,7 +173,9 @@ class EventService
             }
 
             if(!$data['is_online']){
-                $this->confirmSeatsPurchase($data);
+                $pdf_data = $this->confirmSeatsPurchase($data);
+
+                return $pdf_data;
             }
 
             return true;
@@ -219,7 +229,7 @@ class EventService
             /*
             * Get events by serie if purchase type is serie
             */
-            $events = [];
+            /* $events = [];
             if ($data['purchase_type'] === 'serie') {
                 $events = $this->event_repository->getEventsBySerie($data['serie_id']);
                 if ($events->count() === 1) {
@@ -227,6 +237,13 @@ class EventService
                 }
             } else {
                 $events = collect([$this->event_repository->getById($data['event_id'])]);
+            } */
+            $events = ($data['purchase_type'] === 'serie')
+                ? $this->event_repository->getEventsBySerie($data['serie_id'])
+                : collect([$this->event_repository->getById($data['event_id'])]);
+
+            if ($events->count() === 1 && $data['purchase_type'] === 'serie') {
+                throw new \Exception('No se puede realizar la compra de una serie de eventos con un solo evento');
             }
 
             /*
@@ -238,6 +255,9 @@ class EventService
                     $seat_qrs[$seat['seat_catalogue']['code']] = 'qr_serie_' . $data['serie_id'] . '_asiento_' . $seat['seat_catalogue']['code'] . '_ticket_' . $saleTicket->id . '_key_' . uniqid();
                 }
             }
+
+            $event_seat_catalogues = [];
+            $pdf_data = [];
 
             /*
             * Assign seats to the sale ticket for each event
@@ -257,6 +277,8 @@ class EventService
                     * Verify if the seat is available to buy
                     */
                     $event_seat_catalogue = $event->eventSeatCatalogues->where('seat_catalogue_id', $seat['seat_catalogue_id'])->first();
+                    $event_seat_catalogues[] = $event_seat_catalogue;
+
                     if ($event_seat_catalogue->seatCatalogueStatus->name !== 'transito') {
                         throw new \Exception('El asiento ' . $event_seat_catalogue->seatCatalogue->code . ' no está disponible para comprar ya que no se encuentra en tránsito');
                     }
@@ -279,6 +301,43 @@ class EventService
                         'agreement_promotion_id' => null,
                         'is_active' => true,
                     ]);
+
+                    /*
+                    * create qr
+                    */
+                    $builder = new Builder(
+                        writer: new PngWriter(),
+                        writerOptions: [],
+                        validateResult: false,
+                        data: $qr,
+                        encoding: new Encoding('UTF-8'),
+                        errorCorrectionLevel: ErrorCorrectionLevel::High,
+                        size: 300,
+                        margin: 10,
+                        roundBlockSizeMode: RoundBlockSizeMode::Margin,
+                        labelText: 'Asiento ' . $event_seat_catalogue->seatCatalogue->code,
+                        labelFont: new OpenSans(20),
+                        labelAlignment: LabelAlignment::Center
+                    );
+
+                    $result = $builder->build();
+
+                    $qr_img = $result->getDataUri();
+
+                    /*
+                    * pdf structure
+                    */
+                    $pdf_data[] = [
+                        'event_name' => $event->name,
+                        'event_start_date' => $event->start_date,
+                        'seat_code' => $event_seat_catalogue->seatCatalogue->code,
+                        'qr_img' => $qr_img,
+                        'qr' => $qr,
+                        'final_price' => $seat['final_price'],
+                        'ticket_id' => $saleTicket->id,
+                        'ticket_created_at' => $saleTicket->created_at,
+                        'cash_register_type' => $cash_register->cash_register_type_id,
+                    ];
                 }
             }
 
@@ -299,6 +358,10 @@ class EventService
             */
             $cash_register->current_balance = $cash_register_movement->new_balance;
             $cash_register->save();
+
+            if(!$data['is_online']){
+                return $pdf_data;
+            }
 
             return true;
 

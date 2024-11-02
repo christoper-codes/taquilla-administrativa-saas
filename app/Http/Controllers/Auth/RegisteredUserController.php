@@ -62,21 +62,19 @@ class RegisteredUserController extends Controller
 
         $user_gender = UserGender::where('name', $request->user_gender)->first();
 
-        if($existUser) {
-
-            if($existUser->stadiums->contains($request->stadium_id)){
-                WebResponseHelper::sendResponse($existUser, 'Opps! Ya existe un registro con este email o username para este club', null, 200, false);
-            } else {
-                $request->merge([
-                    'is_new_user' => false,
-                ]);
-            }
-        }
-
-
-
         DB::beginTransaction();
         try {
+
+            if($existUser) {
+
+                if($existUser->stadiums->contains($request->stadium_id)){
+                    throw new \Exception('Opps! Ya existe un registro con este email o username para este club');
+                } else {
+                    $request->merge([
+                        'is_new_user' => false,
+                    ]);
+                }
+            }
 
             if($request->is_new_user){
 

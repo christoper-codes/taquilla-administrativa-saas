@@ -76,7 +76,7 @@ const user = usePage().props.auth.user;
             </div>
         </main>
         <div class="tw-p-10 tw-bg-slate-200 tw-text-center">
-            <h3 class="tw-font-bold">Halocones<span class="tw-font-light">Xalapa | 2024</span></h3>
+            <h3 class="tw-font-bold">Halcones<span class="tw-font-light">Xalapa | 2024</span></h3>
         </div>
    </div>
 

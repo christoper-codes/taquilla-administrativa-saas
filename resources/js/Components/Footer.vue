@@ -99,7 +99,7 @@
 
         <div class="tw-flex tw-justify-between tw-items-end md:tw-items-center">
           <div class="tw-mt-3 sm:tw-hidden">
-            <a class="tw-flex-none tw-text-xl tw-font-semibold tw-text-gray-50" href="#" aria-label="Brand">Halcones de Xalpa</a>
+            <a class="tw-flex-none tw-text-xl tw-font-semibold tw-text-gray-50" href="#" aria-label="Brand">Halcones de Xalapa</a>
             <p class="tw-mt-1 tw-text-xs sm:tw-text-sm tw-text-gray-50">© 2024 Xalapa Mexico.</p>
           </div>
         </div>
