@@ -15,11 +15,21 @@ use App\Services\EventTypeService;
 use App\Services\GlobalImageService;
 use App\Services\GlobalSeasonService;
 use App\Services\SerieService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\Label\LabelAlignment;
+use Endroid\QrCode\Label\Font\OpenSans;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Writer\PngWriter;
+
 
 class EventController extends Controller
 {
@@ -166,6 +176,7 @@ class EventController extends Controller
             $users = User::all();
 
             return Inertia::render('App/Pos/Event', [
+                'isEventsShow' => true,
                 'event' => $response['event'],
                 'a_zone' => $response['a_zone'],
                 'b_zone' => $response['b_zone'],
@@ -231,12 +242,14 @@ class EventController extends Controller
                 ], 200);
             }
 
-            //return WebResponseHelper::sendResponse($response, 'Asientos reservados y comprados correctamente', null, false);
+            $pdf_response = Pdf::loadView('pdfs.hdx.saleTicketPaper', ['pdf_data' => $response]);
+            $pdfContent = $pdf_response->output();
 
             return response()->json([
                 'data' => $response,
                 'message' => 'Asientos reservados y comprados correctamente',
-                'success' => true
+                'success' => true,
+                'pdf' => base64_encode($pdfContent)
             ], 200);
 
         } catch (\Exception $e) {
@@ -247,8 +260,6 @@ class EventController extends Controller
                 'message' => $e->getMessage() ?? 'Opps! Algo salió mal al reservar los asientos',
                 'success' => false
             ], 500);
-
-            //return WebResponseHelper::rollback($e, 'Opps! Algo salió mal al reservar los asientos');
         }
     }
 
@@ -313,9 +324,6 @@ class EventController extends Controller
             return WebResponseHelper::rollback($e, 'Opps! Algo salió mal al confirmar la compra de los asientos');
         }
     }
-
-
-
 
     /**
      * Show the form for editing the specified resource.
@@ -387,4 +395,40 @@ class EventController extends Controller
 
         }
     }
+
+    /**
+     * Test PDF
+     */
+    public function testPdf()
+    {
+        try {
+
+            $builder = new Builder(
+                writer: new PngWriter(),
+                writerOptions: [],
+                validateResult: false,
+                data: 'Custom QR code contents',
+                encoding: new Encoding('UTF-8'),
+                errorCorrectionLevel: ErrorCorrectionLevel::High,
+                size: 300,
+                margin: 10,
+                roundBlockSizeMode: RoundBlockSizeMode::Margin,
+                labelText: 'qr code',
+                labelFont: new OpenSans(20),
+                labelAlignment: LabelAlignment::Center
+            );
+
+            $result = $builder->build();
+
+            $img = $result->getDataUri();
+
+            $pdf = PDF::loadView('pdfs.hdx.saleTicket', compact('img'));
+
+            return $pdf->stream();
+
+        } catch (\Exception $e) {
+            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar el pdf');
+        }
+    }
+
 }
