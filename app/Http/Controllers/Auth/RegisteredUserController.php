@@ -56,9 +56,10 @@ class RegisteredUserController extends Controller
             'is_new_user' => true,
         ]);
 
-        $existUser = User::where('email', $request->email)
+        /* $existUser = User::where('email', $request->email)
                         ->orWhere('username', $request->username)
-                        ->first();
+                        ->first(); */
+        $existUser = User::where('email', $request->email)->first();
 
         $user_gender = UserGender::where('name', $request->user_gender)->first();
 
