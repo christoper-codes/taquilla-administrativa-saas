@@ -99,4 +99,5 @@ Route::middleware('auth')->group(function () {
 * |--------------------------------------------------------------------------
 * |Events | ROUTES
 */
+Route::get('/promociones-asientos', [EventSeatCatalogPromotionController::class, 'index'])->name('event.seat.catalog.promotion.index');
 Route::get('/saveAllSeatsForStadium', [SeatCatalogueController::class, 'saveAllSeatsForStadium'])->name('saveAllSeatsForStadium');
