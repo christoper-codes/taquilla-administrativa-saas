@@ -15,8 +15,9 @@ class EventSeatCatalogueRepository implements EventSeatCatalogueRepositoryInterf
     {
         return EventSeatCatalog::insert($data);
     }
-     /*
-    * |--------------------------------------------------------------------------
-    * | Custom methods for the repository interface
-    */
+
+    public function getByEvent(int $id)
+    {
+        return EventSeatCatalog::with('seatCatalogue')->where('event_id', $id)->get();
+    }
 }

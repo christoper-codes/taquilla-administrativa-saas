@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('agreements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('institution_id')->constrained('institutions');
-            $table->foreignId('price_type_id')->constrained('price_types');
             $table->foreignId('global_season_id')->constrained('global_seasons');
             $table->string('name');
             $table->string('description')->nullable();

@@ -128,8 +128,8 @@ const editSerie = (selectedSerie) => {
     serie.global_season_id.setValue(selectedSerie.global_season_id);
     serie.name.setValue(selectedSerie.name);
     serie.description.setValue(selectedSerie.description);
-    serie.start_date.setValue(selectedSerie.start_date);
-    serie.end_date.setValue(selectedSerie.end_date);
+    serie.start_date.setValue(new Date(selectedSerie.start_date));
+    serie.end_date.setValue(new Date(selectedSerie.end_date));
     serie.is_active.setValue(selectedSerie.is_active ? true : false );
 
     editedSerieIndex.value = props.series.indexOf(selectedSerie);
@@ -145,7 +145,7 @@ const editSerie = (selectedSerie) => {
     <AppLayout>
         <ErrorSession />
         <BreadcrumbAppSecondary>
-            <span>Aministración de series</span>
+            <span>Administración de series</span>
         </BreadcrumbAppSecondary>
         <div class="tw-px-4 tw-py-10 lg:tw-p-10">
             <v-data-table :headers="headersSerie" :items="series">

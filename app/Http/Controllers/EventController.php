@@ -180,6 +180,34 @@ class EventController extends Controller
         }
     }
 
+    /**
+     * Display the specified resource.
+     */
+    public function showManagement($id)
+    {
+        try {
+
+            $response  = $this->event_service->getById($id);
+
+            $data = [
+                'event' => $response['event'],
+                'a_zone' => $response['a_zone'],
+                'b_zone' => $response['b_zone'],
+                'c_zone' => $response['c_zone'],
+                'f_zone' => $response['f_zone']
+            ];
+
+            return response()->json($data, 200);
+
+        } catch (\Exception $e) {
+
+            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar el evento');
+
+        }
+    }
+
+
+
     /* *
     * Show the complete purchase
     */
@@ -283,18 +311,16 @@ class EventController extends Controller
                 'end_date' => Carbon::parse($request->end_date)->format('Y-m-d')
             ]);
 
-            $data = $request->only(['event_type_id','serie_id','name','slug','description','start_date', 'end_date','is_active']);
-
-            $event = $this->event_service->update($request->id, $data );
-
             if($request->global_image){
 
-                $global_image = $this->global_image_service->save($request->all(), 'event_images');
+                $global_image = $this->global_image_service->save($request->only('global_image'), 'event_images');
 
-                $event->global_image_id = $global_image->id;
-
-                $event->save();
+                $request->merge([ 'global_image_id' => $global_image->id ]);
             }
+
+            $data = $request->only(['event_type_id','serie_id', 'global_image_id','name','slug','description','start_date', 'end_date','is_active']);
+
+            $event = $this->event_service->update($request->id, $data );
 
             return WebResponseHelper::sendResponse($event, "Evento actualizada con éxito", null, false);
 

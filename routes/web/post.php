@@ -1,8 +1,13 @@
 <?php
 
+use App\Http\Controllers\AgreementController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventSeatCatalogController;
+use App\Http\Controllers\EventSeatCatalogPromotionController;
+use App\Http\Controllers\InstitutionController;
+use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SeatCatalogueController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\TicketOfficeController;
@@ -31,8 +36,6 @@ Route::middleware('auth')->group(function() {
     Route::post('/eventos/confirmar-compra-de-asientos', [EventController::class, 'confirmSeatsPurchase'])->name('events.confirm-seats-purchase');
 });
 
-
-
 /*
 * |--------------------------------------------------------------------------
 * | Web Routes
@@ -41,7 +44,37 @@ Route::middleware('auth')->group(function() {
 */
 Route::post('/series', [SerieController::class, 'store'])->name('series.store');
 
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Promociones | ROUTES
+*/
+Route::post('/promociones', [PromotionController::class, 'store'])->name('promotions.store');
 
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Promociones | ROUTES
+*/
+Route::post('/catalogo-de-asientos-para-evento', [EventSeatCatalogPromotionController::class, 'store'])->name('event.seat.catalog.store');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Agreements | ROUTES
+*/
+Route::post('/convenios', [AgreementController::class, 'store'])->name('agreements.store');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Institutions | ROUTES
+*/
+Route::post('/instituciones', [InstitutionController::class, 'store'])->name('institutions.store');
 
 /*
 * |--------------------------------------------------------------------------
