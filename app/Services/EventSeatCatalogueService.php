@@ -98,6 +98,23 @@ class EventSeatCatalogueService
     }
 
 
+    /*
+    * |--------------------------------------------------------------------------
+    * | Get event seat catalog by event
+    */
+    public function getByEvent(int $id)
+    {
+        try {
+            $event_seat_catalogue = $this->event_seat_catalogue_repository_interface->getByEvent($id);
+
+            return $event_seat_catalogue;
+
+        } catch (\Exception $e) {
+
+            throw $e;
+        }
+    }
+
 
 
 }
