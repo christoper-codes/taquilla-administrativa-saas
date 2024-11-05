@@ -77,9 +77,9 @@ const props = defineProps({
         </div>
     </div>
    <div class="tw-bg-white/60 tw-sticky tw-w-full tw-z-40 tw-top-0 tw-left-0 tw-overflow-hidden tw-backdrop-filter tw-backdrop-blur-md tw-shadow-xl">
-    <div class="tw-w-full tw-h-1 tw-bg-gradient-to-r tw-from-tw-primary-600 tw-via-purple-400 tw-to-tw-secondary-400">
-    </div>
-    <div class="tw-px-4 lg:tw-px-0 tw-py-2 lg:tw-py-0">
+        <div class="tw-w-full tw-h-1 tw-bg-gradient-to-r tw-from-tw-primary-600 tw-via-purple-400 tw-to-tw-secondary-400">
+        </div>
+        <div class="tw-px-4 lg:tw-px-0 tw-py-2 lg:tw-py-0">
             <div class="tw-flex tw-items-center tw-justify-between tw-max-w-7xl tw-mx-auto ">
                 <div class="lg:tw-flex tw-items-center tw-gap-10 tw-hidden tw-justify-between tw-w-full">
                     <div class="tw-flex tw-items-center tw-gap-3">
