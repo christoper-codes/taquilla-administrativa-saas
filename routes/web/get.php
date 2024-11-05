@@ -1,7 +1,11 @@
 <?php
 
+use App\Http\Controllers\AgreementController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventSeatCatalogPromotionController;
+use App\Http\Controllers\InstitutionController;
+use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\SeatCatalogueController;
 use App\Http\Controllers\TicketOfficeController;
@@ -16,6 +20,32 @@ use Illuminate\Support\Facades\Route;
 */
 Route::get('/series', [SerieController::class, 'index'])->name('series.index');
 
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Promotion | ROUTES
+*/
+Route::get('/promociones', [PromotionController::class, 'index'])->name('promotions.index');
+Route::get('/promociones-por-estadio/{id}', [PromotionController::class, 'getAllByStadium'])->name('promotion.all.by.stadium');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Agreements | ROUTES
+*/
+Route::get('/convenios', [AgreementController::class, 'index'])->name('agreements.index');
+
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Institution | ROUTES
+*/
+Route::get('/instituciones', [InstitutionController::class, 'index'])->name('institutions.index');
+
 
 /*
 * |--------------------------------------------------------------------------
@@ -25,6 +55,7 @@ Route::get('/series', [SerieController::class, 'index'])->name('series.index');
 */
 Route::get('/eventos', [EventController::class, 'index'])->name('events.index');
 Route::get('/eventos-gestion', [EventController::class, 'indexManagement'])->name('event.management.indexManagement');
+Route::get('/eventos-gestion/{id}', [EventController::class, 'showManagement'])->name('event.management.showManagement');
 
 
 /*
@@ -62,4 +93,11 @@ Route::middleware('auth')->group(function () {
 
 });
 
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Events | ROUTES
+*/
+Route::get('/promociones-asientos', [EventSeatCatalogPromotionController::class, 'index'])->name('event.seat.catalog.promotion.index');
 Route::get('/saveAllSeatsForStadium', [SeatCatalogueController::class, 'saveAllSeatsForStadium'])->name('saveAllSeatsForStadium');

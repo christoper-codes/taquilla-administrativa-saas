@@ -2,12 +2,11 @@
 
 namespace App\Interfaces;
 
-interface EventSeatCatalogueRepositoryInterface
+interface EventSeatCatalogPromotionRepositoryInterface
 {
     /*
     * |--------------------------------------------------------------------------
     * | Primaries methods for the repository interface
     */
-    public function saveInBulk(array $data);
-    public function getByEvent(int $id);
+    public function addPromotionToSeat(int $id, array $promotions);
 }

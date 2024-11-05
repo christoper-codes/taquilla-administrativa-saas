@@ -11,7 +11,6 @@ class Agreement extends Model
 
     protected $fillable = [
         'institution_id',
-        'price_type_id',
         'global_season_id',
         'name',
         'description',
@@ -23,11 +22,6 @@ class Agreement extends Model
     public function institution()
     {
         return $this->belongsTo(Institution::class);
-    }
-
-    public function priceType()
-    {
-        return $this->belongsTo(PriceType::class);
     }
 
     public function globalSeason()

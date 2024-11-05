@@ -17,7 +17,9 @@ class Promotion extends Model
         'generic_seats_allowed',
         'promotional_seats_allowed',
         'maximun_promotions_allowed',
-        'is_active'
+        'percent_allow',
+        'is_active',
+        'is_active_online'
     ];
 
     public function promotionType()
