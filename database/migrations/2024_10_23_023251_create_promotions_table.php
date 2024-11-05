@@ -17,10 +17,12 @@ return new class extends Migration
             $table->foreignId('stadium_id')->constrained('stadiums');
             $table->string('name');
             $table->string('description')->nullable();
-            $table->integer('generic_seats_allowed');
-            $table->integer('promotional_seats_allowed');
+            $table->integer('generic_seats_allowed')->nullable();
+            $table->integer('promotional_seats_allowed')->nullable();
             $table->integer('maximun_promotions_allowed')->nullable();
+            $table->integer('percent_allow')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->boolean('is_active_online')->nullable();
             $table->timestamps();
         });
     }

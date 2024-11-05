@@ -7,7 +7,6 @@ use App\Models\Serie;
 use App\Services\GlobalSeasonService;
 use App\Services\SerieService;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
