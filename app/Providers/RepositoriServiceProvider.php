@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Interfaces\AgreementRepositoryInterface;
 use App\Interfaces\CashRegisterRepositoryInterface;
 use App\Interfaces\EventRepositoryInterface;
 use App\Interfaces\GlobalCardPaymentTypeRepositoryInterface;
@@ -12,10 +13,19 @@ use App\Interfaces\SeatCatalogueRepositoryInterface;
 use App\Interfaces\TicketOfficeRepositoryInterface;
 use App\Repositories\CashRegisterRepository;
 use App\Interfaces\CardPaymentDetailRepositoryInterface;
+use App\Interfaces\EventSeatCatalogPromotionRepositoryInterface;
 use App\Interfaces\EventSeatCatalogueRepositoryInterface;
 use App\Interfaces\EventTypeRepositoryInterface;
+use App\Interfaces\InstitutionRepositoryInterface;
+use App\Interfaces\PromotionRepositoryInterface;
+use App\Interfaces\PromotionTypeRepositoryInterface;
 use App\Interfaces\SeatCatalogueStatusesRepositoryInterface;
 use App\Interfaces\SerieRepositoryInterface;
+use App\Interfaces\StadiumRepositoryInterface;
+use App\Models\Agreement;
+use App\Models\Institution;
+use App\Models\PromotionType;
+use App\Repositories\AgreementRepository;
 use App\Repositories\EventRepository;
 use App\Repositories\GlobalCardPaymentTypeRepository;
 use App\Repositories\GlobalImageRepository;
@@ -24,10 +34,15 @@ use App\Repositories\GlobalSeasonRepository;
 use App\Repositories\SeatCatalogueRepository;
 use App\Repositories\TicketOfficeRepository;
 use App\Repositories\CardPaymentDetailRepository;
+use App\Repositories\EventSeatCatalogPromotionRepository;
 use App\Repositories\EventSeatCatalogueRepository;
 use App\Repositories\EventTypeRepository;
+use App\Repositories\InstitutionRepository;
+use App\Repositories\PromotionRepository;
+use App\Repositories\PromotionTypeRepository;
 use App\Repositories\SeatCatalogueStatusesRepository;
 use App\Repositories\SerieRepository;
+use App\Repositories\StadiumRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoriServiceProvider extends ServiceProvider
@@ -57,6 +72,12 @@ class RepositoriServiceProvider extends ServiceProvider
         $this->app->bind(EventTypeRepositoryInterface::class, EventTypeRepository::class);
         $this->app->bind(EventSeatCatalogueRepositoryInterface::class, EventSeatCatalogueRepository::class);
         $this->app->bind(SeatCatalogueStatusesRepositoryInterface::class, SeatCatalogueStatusesRepository::class);
+        $this->app->bind(InstitutionRepositoryInterface::class, InstitutionRepository::class);
+        $this->app->bind(StadiumRepositoryInterface::class, StadiumRepository::class);
+        $this->app->bind(AgreementRepositoryInterface::class, AgreementRepository::class);
+        $this->app->bind(PromotionTypeRepositoryInterface::class, PromotionTypeRepository::class);
+        $this->app->bind(PromotionRepositoryInterface::class, PromotionRepository::class);
+        $this->app->bind(EventSeatCatalogPromotionRepositoryInterface::class, EventSeatCatalogPromotionRepository::class);
     }
 
     /**
