@@ -395,128 +395,83 @@ const savePromotionSeat = () => {
             <div class="tw-flex tw-justify-start tw-items-start 2xl:tw-w-[70%] lg:tw-w-[70%] md:tw-w-full">
                 <div class="tw-grid tw-gap-10 md:tw-gap-8 lg:tw-gap-5 tw-w-full tw-p-4">
                     <div class="tw-h-[2vh] tw-flex tw-justify-start tw-items-center">
-                        Mapa
+                        <p class="tw-font-bold tw-text-xl">Mapa de promociones</p>
                     </div>
-                    <div class="tw-h-[6vh] tw-flex tw-justify-center tw-items-center">
-                        <div class="tw-grid tw-grid-cols-3 tw-gap-8">
-                            <div>
+                    <div class="tw-h-[10vh] tw-flex tw-justify-start tw-items-center">
+                        <div
+                            class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-6 tw-items-center tw-w-full tw-gap-2 tw-mt-7">
+                            <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                 <div
-                                    class=" tw-bg-yellow-500 tw-flex tw-items-center tw-h-8  tw-justify-center tw-rounded-full">
+                                    class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-yellow-500 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                     <span class="material-symbols-outlined tw-text-sm tw-text-white">done_outline</span>
                                 </div>
-                                <p>Sin promoción</p>
+                                <p class="tw-text-xs lg:tw-text-base">Disponible</p>
                             </div>
-                            <div>
+                            <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                 <div
-                                    class=" tw-bg-purple-500 tw-flex tw-items-center tw-h-8  tw-justify-center tw-rounded-full">
+                                    class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-purple-500 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                     <span class="material-symbols-outlined tw-text-sm tw-text-white">star</span>
                                 </div>
-                                <p>Con promoción</p>
+                                <p class="tw-text-xs lg:tw-text-base">Vendido</p>
                             </div>
-                            <div>
+                            <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                 <div
-                                    class="tw-bg-green-500 tw-flex tw-items-center tw-h-8  tw-justify-center tw-rounded-full">
+                                    class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-green-500 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                     <span class="material-symbols-outlined tw-text-sm tw-text-white">web_traffic</span>
                                 </div>
-                                <p>Seleccionado</p>
+                                <p class="tw-text-xs lg:tw-text-base">Seleccionado</p>
                             </div>
                         </div>
                     </div>
-                    <div v-if="1150 >= windowScreenWidth" class="tw-h-[6vh] tw-flex tw-justify-center tw-items-center">
-                        <div class="tw-flex tw-items-center tw-space-x-4">
-                            <div class="tw-col-auto">
-                                <div class="tw-font-bold tw-text-3xl tw-text-center ">
-                                    {{ viewSelectedSection }}
-                                </div>
-                            </div>
-                            <div class="tw-col-auto">
-                                <v-dialog max-width="800">
-                                    <template v-slot:activator="{ props: activatorProps }">
-                                        <v-btn v-bind="activatorProps" color="purple" variant="tonal" class="text-none"
-                                            rounded="xl">
-                                            <span class="material-symbols-outlined tw-text-2xl">preview</span>
-                                        </v-btn>
-                                    </template>
-                                    <template v-slot:default="{ isActive }">
-                                        <v-card :title="'Imagen de referencia para la ' + viewSelectedSection">
-                                            <v-card-text>
-                                                <img class="tw-w-full tw-h-auto tw-rounded-xl"
-                                                    src="../../../../../../public/img/zonashdx/zona-a-img.jpg"
-                                                    alt="zona hdx">
-                                            </v-card-text>
-                                            <v-card-actions>
-                                                <v-spacer></v-spacer>
-                                                <v-btn color="purple" rounded="xl" variant="tonal"
-                                                    class="text-none !tw-px-6" text="Cerrar"
-                                                    @click="isActive.value = false"></v-btn>
-                                            </v-card-actions>
-                                        </v-card>
-                                    </template>
-                                </v-dialog>
+
+                    <div
+                        class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-w-full tw-gap-3 tw-my-3">
+                        <div class="tw-flex tw-items-center tw-gap-3 tw-flex-col md:tw-flex-row">
+                            <div class="tw-flex tw-items-center tw-gap-3">
+                                <v-btn @click="zoomIn" color="purple" variant="tonal" class="text-none" rounded="xl"
+                                    size="large"><span
+                                        class="material-symbols-outlined tw-text-2xl">add</span>zoom</v-btn>
+                                <v-btn @click="zoomOut" color="purple" variant="tonal" class="text-none" rounded="xl"
+                                    size="large"><span
+                                        class="material-symbols-outlined tw-text-2xl">remove</span>zoom</v-btn>
                             </div>
                         </div>
-                    </div>
-                    <div class="tw-h-[6vh] tw-flex tw-justify-between tw-items-center">
-                        <div class="tw-grid tw-grid-cols-3 tw-gap-4 tw-w-full">
-                            <div class="tw-flex tw-justify-center tw-items-center">
-                                <v-btn @click="zoomIn" color="purple" variant="tonal" class="text-none tw-mx-2"
-                                    rounded="xl">
-                                    <span class="material-symbols-outlined tw-text-2xl">zoom_in</span>
-                                </v-btn>
-                                <v-btn @click="zoomOut" color="purple" variant="tonal" class="text-none tw-mx-2"
-                                    rounded="xl">
-                                    <span class="material-symbols-outlined tw-text-2xl">zoom_out</span>
-                                </v-btn>
+                        <div class="tw-items-center tw-gap-2 tw-hidden lg:tw-flex tw-relative">
+                            <div class="tw-font-bold tw-text-3xl tw-text-center">
+                                {{ viewSelectedSection }}
                             </div>
-                            <div class="tw-flex tw-justify-center tw-items-center">
-                                <div v-if="windowScreenWidth > 1150"
-                                    class=" tw-h-[6vh] tw-flex tw-justify-between tw-items-center">
-                                    <div class="tw-flex tw-items-center tw-space-x-4">
-                                        <div class="tw-col-auto">
-                                            <div class="tw-font-bold tw-text-3xl tw-text-center ">
-                                                {{ viewSelectedSection }}
-                                            </div>
-                                        </div>
-                                        <div class="tw-col-auto">
-                                            <v-dialog max-width="800">
-                                                <template v-slot:activator="{ props: activatorProps }">
-                                                    <v-btn v-bind="activatorProps" color="purple" variant="tonal"
-                                                        class="text-none" rounded="xl">
-                                                        <span
-                                                            class="material-symbols-outlined tw-text-2xl">preview</span>
-                                                    </v-btn>
-                                                </template>
-                                                <template v-slot:default="{ isActive }">
-                                                    <v-card
-                                                        :title="'Imagen de referencia para la ' + viewSelectedSection">
-                                                        <v-card-text>
-                                                            <img class="tw-w-full tw-h-auto tw-rounded-xl"
-                                                                src="../../../../../../public/img/zonashdx/zona-a-img.jpg"
-                                                                alt="zona hdx">
-                                                        </v-card-text>
-                                                        <v-card-actions>
-                                                            <v-spacer></v-spacer>
-                                                            <v-btn color="purple" rounded="xl" variant="tonal"
-                                                                class="text-none !tw-px-6" text="Cerrar"
-                                                                @click="isActive.value = false"></v-btn>
-                                                        </v-card-actions>
-                                                    </v-card>
-                                                </template>
-                                            </v-dialog>
-                                        </div>
+                            <v-dialog max-width="800">
+                                <template v-slot:activator="{ props: activatorProps }">
+                                    <div v-bind="activatorProps" class="!tw-absolute -tw-top-4 -tw-right-6 ">
+                                        <span
+                                            class="material-symbols-outlined tw-text-2xl tw-text-purple-600 tw-animate-bounce tw-cursor-pointer">photo_library</span>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="tw-flex tw-justify-center tw-items-center">
-                                <v-btn @click="resetZoom" color="purple" variant="tonal" class="text-none tw-mx-2"
-                                    rounded="xl">
-                                    <span class="material-symbols-outlined tw-text-2xl">reset_image</span>
-                                </v-btn>
-                                <v-btn @click="selectZones" color="purple" variant="tonal" class="text-nonetw-mx-2"
-                                    rounded="xl">
-                                    <span class="material-symbols-outlined tw-text-2xl">assignment_return</span>
-                                </v-btn>
-                            </div>
+                                </template>
+                                <template v-slot:default="{ isActive }">
+                                    <v-card :title="'Imagen de referencia para la ' + viewSelectedSection">
+                                        <v-card-text>
+                                            <img class="tw-w-full tw-h-auto tw-rounded-xl"
+                                                src="../../../../../../public/img/zonashdx/zona-a-img.jpg"
+                                                alt="zona hdx">
+                                        </v-card-text>
+                                        <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn color="purple" rounded="xl" variant="tonal"
+                                                class="text-none !tw-px-6" text="Cerrar"
+                                                @click="isActive.value = false"></v-btn>
+                                        </v-card-actions>
+                                    </v-card>
+                                </template>
+                            </v-dialog>
+                        </div>
+                        <div class="tw-flex tw-items-center tw-gap-3">
+                            <v-btn @click="resetZoom" color="purple" variant="tonal" class="text-none" rounded="xl"
+                                size="large"><span
+                                    class="material-symbols-outlined tw-text-2xl">my_location</span>reset</v-btn>
+
+                            <v-btn @click="selectZones" color="purple" variant="tonal" class="text-none" rounded="xl"
+                                size="large"><span
+                                    class="material-symbols-outlined tw-text-2xl">location_on</span>zonas</v-btn>
                         </div>
                     </div>
                     <div
@@ -546,14 +501,15 @@ const savePromotionSeat = () => {
                 </div>
             </div>
             <div class="tw-flex tw-justify-start tw-items-start tw-shadow-lg 2xl:tw-w-[30%] lg:tw-w-[30%] md:tw-w-full">
-                <div class="tw-grid tw-gap-1 tw-w-full tw-p-10">
-                    <div class="tw-h-[15vh]">
-                        <div class="tw-mb-4">
+                <div class="tw-grid tw-gap-1 tw-w-full tw-py-10 tw-px-3">
+                    <div class="">
+                        <div class="tw-py-2">
                             <h2 class="tw-text-2xl tw-font-bold lg:tw-block">{{
                                 formatFirstLetterUppercase(event.name) }}
                             </h2>
                         </div>
-                        <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-start lg:tw-items-center tw-gap-2">
+                        <div
+                            class="tw-flex tw-flex-col lg:tw-flex-row tw-items-start lg:tw-items-center tw-gap-2 tw-py-6">
                             <div
                                 class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
                                 <span class="material-symbols-outlined tw-text-xl">location_on</span>
@@ -598,7 +554,7 @@ const savePromotionSeat = () => {
                             </div>
 
                             <div v-if="!isSvgVisible" class="tw-w-full">
-                                <v-select v-model="selectedRows" item-value="id" :items="rows"
+                                <v-select v-model="selectedRows" item-value="id" :items="rows" density="compact"
                                     :item-title="(item) => formatFirstLetterUppercase(item)"
                                     label="Selecciona las filas" chips multiple></v-select>
                             </div>
@@ -625,7 +581,7 @@ const savePromotionSeat = () => {
                                 <div class="tw-w-full ">
 
                                     <v-select v-model="promotionForSelectedSeats" item-value="id" :items="promotions"
-                                        :item-title="(item) => formatFirstLetterUppercase(item.name)"
+                                        density="compact" :item-title="(item) => formatFirstLetterUppercase(item.name)"
                                         label="Promoción aplicada a los asientos seleccionados" chips
                                         multiple></v-select>
 
@@ -695,7 +651,8 @@ const savePromotionSeat = () => {
 
                                                             <td class="tw-size-px tw-whitespace-nowrap  tw-p-2">
                                                                 <v-select v-model="seat.select_promotion"
-                                                                    item-value="id" :items="promotions"
+                                                                    density="compact" item-value="id"
+                                                                    :items="promotions"
                                                                     :item-title="(item) => formatFirstLetterUppercase(item.name)"
                                                                     label="Promoción" chips multiple></v-select>
                                                             </td>

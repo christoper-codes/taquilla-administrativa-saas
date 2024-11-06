@@ -10,10 +10,9 @@ export const eventSchema = {
         return true;
     },
     serie_id(value) {
-        if (!value) {
-          return 'Este campo es obligatorio';
-        }
-
+        return true;
+    },
+    global_season_id(value) {
         return true;
     },
     global_image(value) {
@@ -26,17 +25,6 @@ export const eventSchema = {
 
         if (value.length < 3) {
           return 'El nombre debe tener al menos 3 caracteres';
-        }
-
-        return true;
-    },
-    slug(value) {
-        if (!value) {
-          return 'Este campo es obligatorio';
-        }
-
-        if (value.length < 3) {
-          return 'El slug debe tener al menos 3 caracteres';
         }
 
         return true;
@@ -59,7 +47,21 @@ export const eventSchema = {
 
         return true;
     },
+    start_time(value) {
+        if (!value) {
+          return 'Este campo es obligatorio';
+        }
+
+        return true;
+    },
     end_date(value) {
+        if (!value) {
+          return 'Este campo es obligatorio';
+        }
+
+        return true;
+    },
+    end_time(value) {
         if (!value) {
           return 'Este campo es obligatorio';
         }
