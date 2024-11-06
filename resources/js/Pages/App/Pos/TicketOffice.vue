@@ -78,6 +78,10 @@ const props = defineProps({
         type: Object,
         required: false,
     },
+    'cash_register_general_history': {
+        type: Object,
+        required: false,
+    },
 })
 
 const eventProps = (item) => {
@@ -101,7 +105,24 @@ const sound = ref(true);
 const widgets = ref(false);
 
 console.log(props.ticket_office);
-console.log(props.active_cash_register);
+console.log(props.cash_register_general_history);
+
+/*
+* Data table items
+*/
+const items = ref([]);
+
+props.cash_register_general_history.cash_register.sale_tickets.forEach((saleTicket) => {
+    items.value.push({
+        'Folio': saleTicket.id,
+        'Estatus': saleTicket.sale_ticket_status.name,
+        'Fecha de venta': dateFormat(saleTicket.created_at),
+        'Fue transferido': saleTicket.is_transfer ? 'Si' : 'No',
+        'Monto recibido': formatPrice(saleTicket.amount_received),
+        'Monto total': formatPrice(saleTicket.total_amount),
+        'Monto de vuelto': formatPrice(saleTicket.total_returned),
+    });
+});
 
 const pdf = () => {
     axios.post(route('pdf-test'), {}, { responseType: 'blob' })
@@ -150,7 +171,7 @@ function printInKioskMode(url) {
                                 Regresar al inicio
                             </div>
                         </Link >
-                        <v-btn @click="pdf">Pdf</v-btn>
+                        <!-- <v-btn @click="pdf">Pdf</v-btn> -->
 
                         <h2 class="lg:tw-text-4xl tw-text-3xl tw-font-bold">{{ ticket_office.name }}. Administracion para el club halcones de xalapa</h2>
 
@@ -289,12 +310,16 @@ function printInKioskMode(url) {
                                     </div>
                                     <div class="tw-p-5 tw-rounded-xl tw-bg-gray-200 tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-3">
                                         <div class="tw-bg-white tw-py-2 tw-px-4 tw-rounded-full tw-text-sm">Ventas con tarjeta</div>
-                                        <div class="tw-text-4xl tw-font-bold">{{ formatPrice(0) }}</div>
+                                        <div class="tw-text-4xl tw-font-bold">{{ formatPrice(cash_register_general_history.type_payments.tarjeta.amount) }}</div>
                                     </div>
                                     <div class="tw-p-5 tw-rounded-xl tw-bg-gray-200 tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-3">
                                         <div class="tw-bg-white tw-py-2 tw-px-4 tw-rounded-full tw-text-sm">Ventas con efectivo</div>
-                                        <div class="tw-text-4xl tw-font-bold">{{ formatPrice(0) }}</div>
+                                        <div class="tw-text-4xl tw-font-bold">{{ formatPrice(cash_register_general_history.type_payments.efectivo.amount) }}</div>
                                     </div>
+                                </div>
+
+                                <div class="mt-10">
+                                    <v-data-table :items="items"></v-data-table>
                                 </div>
                             </div>
                             <div v-else class="tw-flex tw-items-center tw-justify-center tw-mt-20 tw-flex-col tw-gap-10">
