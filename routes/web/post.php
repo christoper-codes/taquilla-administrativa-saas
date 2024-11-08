@@ -9,6 +9,7 @@ use App\Http\Controllers\EventSeatCatalogPromotionController;
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SeatCatalogueController;
+use App\Http\Controllers\SeatCatalogueStatusController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\TicketOfficeController;
 use Illuminate\Support\Facades\Route;
@@ -86,3 +87,11 @@ Route::post('/instituciones', [InstitutionController::class, 'store'])->name('in
 * |Events | ROUTES
 */
 Route::post('/eventos', [EventController::class, 'store'])->name('event.management.store');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Seat Catalog Status | ROUTES
+*/
+Route::post('/catalogo-de-status-para-asientos', [SeatCatalogueStatusController::class, 'store'])->name('seat.catalog.status.store');

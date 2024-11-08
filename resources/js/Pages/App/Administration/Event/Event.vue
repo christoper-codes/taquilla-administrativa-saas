@@ -9,6 +9,7 @@ import { Head, useForm as useFormInertia } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import BreadcrumbAppSecondary from '@/Components/BreadcrumbAppSecondary.vue';
 import EventSeatCatalogPromotion from '@/Components/../Pages/App/Administration/Offer/EventSeatCatalogPromotion.vue';
+import EventSeatCatalogStatus from '@/Components/../Pages/App/Administration/Offer/EventSeatCatalogStatus.vue';
 import useStringFormat from '@/composables/stringFormat';
 import { VTimePicker } from 'vuetify/labs/VTimePicker';
 import useDateFormat from '@/composables/dateFormat';
@@ -33,6 +34,7 @@ const headersEvent = [
     { title: 'Fecha/Hora Finalización', align: 'start', sortable: true, key: 'end_date' },
     { title: 'Estatus', align: 'start', sortable: true, key: 'is_active' },
     { title: 'Promociones', key: 'promotion', sortable: false },
+    { title: 'Bloqueo/Reserva', key: 'block_reserve', sortable: false },
     { title: 'Acciones', key: 'actions', sortable: false }
 ];
 
@@ -216,6 +218,13 @@ const openDialogPromotion = (event, open) => {
 
     eventSelected.value = event;
     dialogPromotion.value = open;
+}
+
+const dialogBlockAndReserve = ref(false);
+const openDialogBlockAndReserve = (event, open) => {
+
+    eventSelected.value = event;
+    dialogBlockAndReserve.value = open;
 }
 
 </script>
@@ -503,6 +512,11 @@ const openDialogPromotion = (event, open) => {
                                 <span class="material-symbols-outlined tw-text-lg">featured_seasonal_and_gifts</span>
                             </v-btn>
                         </template>
+                        <template v-slot:item.block_reserve="{ item }">
+                            <v-btn @click="openDialogBlockAndReserve(item, true)">
+                                <span class="material-symbols-outlined tw-text-lg">detector_status</span>
+                            </v-btn>
+                        </template>
                         <template v-slot:item.actions="{ item }">
                             <v-icon class="me-2 !tw-text-purple-500" size="small" @click="editEvent(item)">
                                 mdi-pencil
@@ -533,6 +547,22 @@ const openDialogPromotion = (event, open) => {
                     <EventSeatCatalogPromotion :event="eventSelected" />
                 </div>
 
+            </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="dialogBlockAndReserve" transition="dialog-bottom-transition" fullscreen>
+            <v-card>
+                <v-toolbar>
+                    <v-toolbar-title class="tw-w-full">Asignación de Estus de Asientos</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                    <v-toolbar-items>
+                        <v-btn icon="mdi-close" @click="openDialogBlockAndReserve(eventSelected, false)">
+                        </v-btn>
+                    </v-toolbar-items>
+                </v-toolbar>
+                <div class="tw-overflow-y-auto tw-w-full tw-h-full">
+                    <EventSeatCatalogStatus :event="eventSelected" />
+                </div>
             </v-card>
         </v-dialog>
 

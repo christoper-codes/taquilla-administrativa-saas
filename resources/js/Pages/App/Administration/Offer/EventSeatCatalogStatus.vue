@@ -33,8 +33,8 @@ const dataEvent = ref({
     f_rows: null,
 });
 
-const promotions = ref([]);
-const promotionForSelectedSeats = ref([]);
+const statuses = ref([]);
+const statusForSelectedSeats = ref(null);
 
 let panZoomInstance;
 
@@ -98,23 +98,12 @@ const addSeat = (seat) => {
 
     if (!seatExist) {
 
-        seat.select_promotion = seat.promotions.map((promotion) => promotion.id);
-
-        if (promotionForSelectedSeats.value.length) {
-
-            let promotion = promotionForSelectedSeats.value.filter((promotion) => !seat.select_promotion.includes(promotion));
-
-            seat.select_promotion = seat.select_promotion.concat(promotion);
-        }
+        seat.modified_status_id = null;
 
         seatsSelected.value.push(seat);
 
     } else {
         seatsSelected.value = seatsSelected.value.filter((s) => s.seat_catalogue.code !== seat.seat_catalogue.code);
-
-        const uniqueRows = [...new Set(seatsSelected.value.map((s) => s.seat_catalogue.row))];
-
-        clearRowsSelected(uniqueRows);
     }
 }
 
@@ -129,15 +118,14 @@ const updateSeats = (zones) => {
             let seatTemp = receivedZone.find((receivedSeat) => receivedSeat.seat_catalogue.code === seat.seat_catalogue.code);
 
             if (seatTemp) {
-                seat.promotions = seatTemp.promotions;
-                seat.select_promotion = seat.promotions.map((promotion) => promotion.id);
+                seat.seat_catalogue_status = seatTemp.seat_catalogue_status;
+                seat.modified_status_id = null;
 
                 seatsModified.push(seat);
             }
 
             return seat;
         });
-
 
         return {
             newData: newData,
@@ -155,7 +143,7 @@ const updateSeats = (zones) => {
 
             noReset.value = false;
             selectedRows.value = [];
-            promotionForSelectedSeats.value = [];
+            statusForSelectedSeats.value = null;
 
             setTimeout(() => {
                 noReset.value = true;
@@ -252,56 +240,29 @@ const loadEvent = () => {
         });
 }
 
-const loadPromotions = () => {
+const loadStatuses = () => {
 
-    axios.get(route('promotion.all.by.stadium', props.event.serie.global_season.stadium_id)).then((response) => {
+    axios.get(route('block.and.reservation.statuses')).then((response) => {
 
-        promotions.value = response.data;
+        statuses.value = response.data;
     })
-        .catch((error) => {
-            console.error('Error:', error);
-        })
-        .finally(() => {
-        });
+    .catch((error) => {
+        console.error('Error:', error);
+    })
+    .finally(() => {
+    });
 }
 
-watch(promotionForSelectedSeats, (newPromotions, oldPromotions) => {
+watch(statusForSelectedSeats, (newStatus) => {
 
     if (noReset.value) {
 
-        if (newPromotions.length > oldPromotions.length) {
+        seatsSelected.value = seatsSelected.value.map((seat) => {
 
-            seatsSelected.value = seatsSelected.value.map((seat) => {
+            seat.modified_status_id = newStatus;
 
-                if (seat.select_promotion !== null) {
-
-                    const newPromotionsTemp = newPromotions.filter((value) => !seat.select_promotion.includes(value));
-
-                    seat.select_promotion = seat.select_promotion.concat(newPromotionsTemp);
-
-                } else {
-
-                    seat.select_promotion = newPromotions;
-
-                }
-
-                return seat;
-            });
-
-        } else if (oldPromotions.length > newPromotions.length) {
-
-            seatsSelected.value = seatsSelected.value.map((seat) => {
-
-                if (seat.select_promotion !== null) {
-
-                    const promotionsDelete = oldPromotions.filter((value) => !newPromotions.includes(value));
-
-                    seat.select_promotion = seat.select_promotion.filter((value) => !promotionsDelete.includes(value));
-                }
-
-                return seat;
-            });
-        }
+            return seat;
+        });
     }
 })
 
@@ -344,18 +305,7 @@ watch(selectedRows, (newPromotions = [], oldPromotions = []) => {
 
         listOfSeatsToSelect(selectedSection.value, rows);
     }
-});
-
-const clearRowsSelected =  (rowsDelete) => {
-
-    noReset.value = false;
-
-    selectedRows.value = selectedRows.value.filter((value) => rowsDelete.includes(value))
-
-    setTimeout(() => {
-        noReset.value = true;
-    }, 1000);
-}
+})
 
 onMounted(() => {
     nextTick(() => {
@@ -367,7 +317,7 @@ onMounted(() => {
 
 onBeforeMount(() => {
     loadEvent();
-    loadPromotions();
+    loadStatuses();
 });
 
 const windowScreenWidth = ref(window.innerWidth);
@@ -382,19 +332,35 @@ const savePromotionSeat = () => {
 
     loadingSavePromotion.value = true;
 
-    axios.post(route('event.seat.catalog.store'), {
+    axios.post(route('seat.catalog.status.store'), {
         seats: seatsSelected.value
     }).then((response) => {
         updateSeats(response.data);
     })
-        .catch((error) => {
-            console.error('Error:', error);
-        })
-        .finally(() => {
+    .catch((error) => {
+        console.error('Error:', error);
+    })
+    .finally(() => {
 
-            loadingSavePromotion.value = false;
-        });
+        loadingSavePromotion.value = false;
+    });
 };
+
+const getStatus = (status) => {
+
+    if (status.toLowerCase() === "disponible") {
+        return "orange";
+    }
+
+    if (status.toLowerCase() === "reservado") {
+        return "red";
+    }
+
+    if (status.toLowerCase() === "inhabilitado") {
+        return "black";
+    }
+
+}
 
 </script>
 
@@ -410,7 +376,7 @@ const savePromotionSeat = () => {
             <div class="tw-flex tw-justify-start tw-items-start 2xl:tw-w-[70%] lg:tw-w-[70%] md:tw-w-full">
                 <div class="tw-grid tw-gap-10 md:tw-gap-8 lg:tw-gap-5 tw-w-full tw-p-4">
                     <div class="tw-h-[2vh] tw-flex tw-justify-start tw-items-center">
-                        <p class="tw-font-bold tw-text-xl">Mapa de asignación de promociones</p>
+                        <p class="tw-font-bold tw-text-xl">Mapa de asignación de status</p>
                     </div>
                     <div class="tw-h-[10vh] tw-flex tw-justify-start tw-items-center">
                         <div
@@ -423,18 +389,16 @@ const savePromotionSeat = () => {
                                 <p class="tw-text-xs lg:tw-text-base">Disponible</p>
                             </div>
                             <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
-                                <div
-                                    class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-purple-500 tw-flex tw-items-center tw-justify-center tw-rounded-md">
-                                    <span class="material-symbols-outlined tw-text-sm tw-text-white">star</span>
+                                <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-pink-600 tw-flex tw-items-center tw-justify-center tw-rounded-md">
+                                    <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                 </div>
-                                <p class="tw-text-xs lg:tw-text-base">Vendido</p>
+                                <p class="tw-text-xs lg:tw-text-base">Reservado</p>
                             </div>
                             <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
-                                <div
-                                    class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-green-500 tw-flex tw-items-center tw-justify-center tw-rounded-md">
-                                    <span class="material-symbols-outlined tw-text-sm tw-text-white">web_traffic</span>
+                                <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-gray-600 tw-flex tw-items-center tw-justify-center tw-rounded-md">
+                                    <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                 </div>
-                                <p class="tw-text-xs lg:tw-text-base">Seleccionado</p>
+                                <p class="tw-text-xs lg:tw-text-base">Inhabilitado</p>
                             </div>
                         </div>
                     </div>
@@ -501,15 +465,15 @@ const savePromotionSeat = () => {
                             <EstadioHdx @handle-section-click="handleSectionClick" />
                         </div>
                         <div v-if="selectedSection == 'zonaA'" class="">
-                            <ZonaA @add-seat="addSeat" v-bind:action="'promotion'" v-bind:seats="dataEvent.a_zone"
+                            <ZonaA @add-seat="addSeat" v-bind:action="'status'" v-bind:seats="dataEvent.a_zone"
                                 v-bind:seatsSelected="seatsSelected" v-bind:seatsAutoClic="seatsAutoClic" />
                         </div>
                         <div v-if="selectedSection == 'zonaC'" class="">
-                            <ZonaC @add-seat="addSeat" v-bind:action="'promotion'" v-bind:seats="dataEvent.c_zone"
+                            <ZonaC @add-seat="addSeat" v-bind:action="'status'" v-bind:seats="dataEvent.c_zone"
                                 v-bind:seatsSelected="seatsSelected" />
                         </div>
                         <div v-if="selectedSection == 'zonaF'" class="">
-                            <ZonaF @add-seat="addSeat" v-bind:action="'promotion'" v-bind:seats="dataEvent.f_zone"
+                            <ZonaF @add-seat="addSeat" v-bind:action="'status'" v-bind:seats="dataEvent.f_zone"
                                 v-bind:seatsSelected="seatsSelected" />
                         </div>
                     </div>
@@ -595,10 +559,9 @@ const savePromotionSeat = () => {
                             <div v-if="seatsSelected.length > 0" class="">
                                 <div class="tw-w-full ">
 
-                                    <v-select v-model="promotionForSelectedSeats" item-value="id" :items="promotions"
+                                    <v-select v-model="statusForSelectedSeats" item-value="id" :items="statuses"
                                         density="compact" :item-title="(item) => formatFirstLetterUppercase(item.name)"
-                                        label="Promoción aplicada a los asientos seleccionados" chips
-                                        multiple></v-select>
+                                        label="Estatus aplicado a los asientos seleccionados"></v-select>
 
                                     <v-expansion-panels v-model="panel" class="" multiple>
                                         <v-expansion-panel>
@@ -635,7 +598,7 @@ const savePromotionSeat = () => {
                                                                 class=" tw-p-2 tw-text-start tw-whitespace-nowrap">
                                                                 <span
                                                                     class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-gray-800">
-                                                                    Promos.
+                                                                    Estatus
                                                                 </span>
                                                             </th>
                                                             <th scope="col"
@@ -664,12 +627,10 @@ const savePromotionSeat = () => {
                                                                     seat.seat_catalogue.seat }}</span>
                                                             </td>
 
-                                                            <td class="tw-size-px tw-whitespace-nowrap  tw-p-2">
-                                                                <v-select v-model="seat.select_promotion"
-                                                                    density="compact" item-value="id"
-                                                                    :items="promotions"
-                                                                    :item-title="(item) => formatFirstLetterUppercase(item.name)"
-                                                                    label="Promoción" chips multiple></v-select>
+                                                            <td class="tw-size-px tw-whitespace-nowrap">
+                                                                    <v-chip :color="getStatus(seat.seat_catalogue_status.name)" variant="flat">
+                                                                        {{ formatFirstLetterUppercase(seat.seat_catalogue_status.name) }}
+                                                                    </v-chip>
                                                             </td>
                                                             <td class="tw-size-px tw-whitespace-nowrap  tw-p-2">
                                                                 <span @click="addSeat(seat)"
