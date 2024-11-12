@@ -8,6 +8,7 @@ use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\SeatCatalogueController;
+use App\Http\Controllers\SeatCatalogueStatusController;
 use App\Http\Controllers\TicketOfficeController;
 use Illuminate\Support\Facades\Route;
 
@@ -97,7 +98,15 @@ Route::middleware('auth')->group(function () {
 * |--------------------------------------------------------------------------
 * | Web Routes
 * |--------------------------------------------------------------------------
+* | Seat Catalog Statuses | ROUTES
+*/
+Route::get('/block-and-reservation-statuses', [SeatCatalogueStatusController::class, 'blockAndReservationStatuses'])->name('block.and.reservation.statuses');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
 * |Events | ROUTES
 */
 Route::get('/promociones-asientos', [EventSeatCatalogPromotionController::class, 'index'])->name('event.seat.catalog.promotion.index');
-Route::get('/saveAllSeatsForStadium', [SeatCatalogueController::class, 'saveAllSeatsForStadium'])->name('saveAllSeatsForStadium');
+Route::get('/save-all-seats-for-stadium', [SeatCatalogueController::class, 'saveAllSeatsForStadium'])->name('save.all.seats.for.stadium');
