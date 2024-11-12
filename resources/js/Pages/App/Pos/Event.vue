@@ -654,7 +654,7 @@ axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
         }
         toast(response.data.message, {
             "theme": "auto",
-            "type": "default",
+            "type": "success",
             "dangerouslyHTMLString": true
         })
 

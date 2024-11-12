@@ -104,25 +104,37 @@ const notifications = ref(false);
 const sound = ref(true);
 const widgets = ref(false);
 
-console.log(props.ticket_office);
 console.log(props.cash_register_general_history);
 
 /*
 * Data table items
 */
 const items = ref([]);
-
-props.cash_register_general_history.cash_register.sale_tickets.forEach((saleTicket) => {
-    items.value.push({
-        'Folio': saleTicket.id,
-        'Estatus': saleTicket.sale_ticket_status.name,
-        'Fecha de venta': dateFormat(saleTicket.created_at),
-        'Fue transferido': saleTicket.is_transfer ? 'Si' : 'No',
-        'Monto recibido': formatPrice(saleTicket.amount_received),
-        'Monto total': formatPrice(saleTicket.total_amount),
-        'Monto de vuelto': formatPrice(saleTicket.total_returned),
+if(props.cash_register_general_history && props.cash_register_general_history.sale_tickets) {
+    props.cash_register_general_history.cash_register.sale_tickets.forEach((saleTicket) => {
+        items.value.push({
+            'Folio': saleTicket.id,
+            'Estatus': saleTicket.sale_ticket_status.name,
+            'Fecha de venta': dateFormat(saleTicket.created_at),
+            'Fue transferido': saleTicket.is_transfer ? 'Si' : 'No',
+            'Monto recibido': formatPrice(saleTicket.amount_received),
+            'Monto total': formatPrice(saleTicket.total_amount),
+            'Monto de vuelto': formatPrice(saleTicket.total_returned),
+        });
     });
-});
+
+} else {
+    items.value.push({
+        'Folio': 'No hay ventas',
+        'Estatus': 'No hay ventas',
+        'Fecha de venta': 'No hay ventas',
+        'Fue transferido': 'No hay ventas',
+        'Monto recibido': 'No hay ventas',
+        'Monto total': 'No hay ventas',
+        'Monto de vuelto': 'No hay ventas',
+    });
+}
+
 
 const pdf = () => {
     axios.post(route('pdf-test'), {}, { responseType: 'blob' })
@@ -308,14 +320,20 @@ function printInKioskMode(url) {
                                         <div class="tw-bg-white tw-py-2 tw-px-4 tw-rounded-full tw-text-sm">Saldo actual</div>
                                         <div class="tw-text-4xl tw-font-bold">{{ formatPrice(active_cash_register.current_balance) }}</div>
                                     </div>
-                                    <div class="tw-p-5 tw-rounded-xl tw-bg-gray-200 tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-3">
+                                    <div v-for="(amount, type) in cash_register_general_history.type_payments" :key="type">
+                                        <div class="tw-p-5 tw-rounded-xl tw-bg-gray-200 tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-3">
+                                            <div class="tw-bg-white tw-py-2 tw-px-4 tw-rounded-full tw-text-sm">Ventas con {{ type }}</div>
+                                            <div class="tw-text-4xl tw-font-bold">{{ formatPrice(amount.amount) }}</div>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="tw-p-5 tw-rounded-xl tw-bg-gray-200 tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-3">
                                         <div class="tw-bg-white tw-py-2 tw-px-4 tw-rounded-full tw-text-sm">Ventas con tarjeta</div>
                                         <div class="tw-text-4xl tw-font-bold">{{ formatPrice(cash_register_general_history.type_payments.tarjeta.amount) }}</div>
                                     </div>
                                     <div class="tw-p-5 tw-rounded-xl tw-bg-gray-200 tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-3">
                                         <div class="tw-bg-white tw-py-2 tw-px-4 tw-rounded-full tw-text-sm">Ventas con efectivo</div>
                                         <div class="tw-text-4xl tw-font-bold">{{ formatPrice(cash_register_general_history.type_payments.efectivo.amount) }}</div>
-                                    </div>
+                                    </div> -->
                                 </div>
 
                                 <div class="mt-10">
