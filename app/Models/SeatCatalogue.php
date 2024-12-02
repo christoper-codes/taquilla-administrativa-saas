@@ -42,13 +42,6 @@ class SeatCatalogue extends Model
         return $this->belongsTo(RowType::class);
     }
 
-    /* public function priceTypes()
-    {
-        return $this->belongsToMany(PriceType::class, 'price_type_seat_catalogue', 'seat_catalogue_id', 'price_type_id')
-                ->withPivot('price_catalogue_id', 'is_active')
-                ->withTimestamps();
-    } */
-
     public function events()
     {
         return $this->belongsToMany(Event::class, 'event_seat_catalog', 'seat_catalogue_id', 'event_id')

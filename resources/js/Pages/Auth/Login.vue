@@ -75,6 +75,7 @@ const props = defineProps({
                                 color="primary"
                                 label="E-mail"
                                 placeholder="user@gmail.com"
+                                autocomplete="email"
                                 hint="Ingresa tu correo electronico"
                                 v-model="email.value.value"
                                 :error-messages="email.errorMessage.value"

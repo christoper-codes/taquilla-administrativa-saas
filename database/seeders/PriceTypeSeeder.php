@@ -15,19 +15,19 @@ class PriceTypeSeeder extends Seeder
     {
         PriceType::create([
             'name' => 'regular',
-            'description' => 'venta regular al publico',
+            'description' => 'venta regular parae el publico',
             'is_active' => true
         ]);
 
         PriceType::create([
             'name' => 'cortesia',
-            'description' => 'venta regular al publico',
+            'description' => 'venta de cortesia para el publico',
             'is_active' => true
         ]);
 
         PriceType::create([
-            'name' => 'promocion',
-            'description' => 'venta regular al publico',
+            'name' => 'abonado',
+            'description' => 'venta de abonado para al publico',
             'is_active' => true
         ]);
     }

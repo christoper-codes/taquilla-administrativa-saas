@@ -18,7 +18,7 @@ class GlobalPaymentType extends Model
     public function saleTickets()
     {
         return $this->belongsToMany(SaleTicket::class, 'global_payment_type_sale_ticket', 'global_payment_type_id', 'sale_ticket_id')
-            ->withPivot('global_card_payment_type_id', 'amount', 'is_active')
+            ->withPivot('global_card_payment_type_id', 'amount', 'original_amount', 'is_active')
             ->withTimestamps();
     }
 }

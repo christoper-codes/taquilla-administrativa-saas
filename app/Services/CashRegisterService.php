@@ -62,11 +62,14 @@ class CashRegisterService
             /*
             * Get all sale tickets associated with the cash register
             */
-            $sale_tickets = $cash_register->saleTickets;
+            $sale_tickets = $cash_register->saleTickets()->orderBy('created_at', 'desc')->get();
 
             $sale_tickets->each(function ($sale_ticket) use (&$type_payments) {
                 $sale_ticket->saleTicketStatus;
                 $sale_ticket->globalPaymentTypes;
+                $sale_ticket->EventSeatCatalogues->map(function ($event_seat_catalogue) {
+                    $event_seat_catalogue->seatCatalogue;
+                });
                 /*
                 * Get all global payment types associated with the sale ticket
                 */

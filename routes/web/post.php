@@ -35,6 +35,7 @@ Route::middleware('auth')->group(function() {
 Route::middleware('auth')->group(function() {
     Route::post('/eventos/reservar-asientos-para-compra', [EventController::class, 'reserveSeatsToBuy'])->name('events.reserve-seats-to-buy');
     Route::post('/eventos/confirmar-compra-de-asientos', [EventController::class, 'confirmSeatsPurchase'])->name('events.confirm-seats-purchase');
+    Route::post('/eventos/imprimir-ticket-venta', [EventController::class, 'printSaleTicket'])->name('events.print-sale-ticket');
 
     Route::post('/pdf-test', [EventController::class, 'testPdf'])->name('pdf-test');
 

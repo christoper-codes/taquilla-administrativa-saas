@@ -85,6 +85,11 @@ class EventSeatCatalogueService
                         'price' => PriceCatalogue::where('id', 2)->first()->price,
                         'is_active' => true
                     ],
+                    3 => [
+                        'price_catalogue_id' => 3,
+                        'price' => PriceCatalogue::where('id', 3)->first()->price,
+                        'is_active' => true
+                    ],
                 ]);
 
             });

@@ -57,6 +57,7 @@ Route::get('/instituciones', [InstitutionController::class, 'index'])->name('ins
 Route::get('/eventos', [EventController::class, 'index'])->name('events.index');
 Route::get('/eventos-gestion', [EventController::class, 'indexManagement'])->name('event.management.indexManagement');
 Route::get('/eventos-gestion/{id}', [EventController::class, 'showManagement'])->name('event.management.showManagement');
+Route::post('/asientos-por-zona', [EventController::class, 'getEventSeatCatalogues'])->name('event.get.seat-catalogues');
 
 
 /*

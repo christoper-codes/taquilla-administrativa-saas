@@ -571,4 +571,8 @@ const openDialogBlockAndReserve = (event, open) => {
     </AppLayout>
 
 </template>
-<style scoped></style>
+<style scoped>
+.v-dialog > .v-overlay__content > .v-card, .v-dialog > .v-overlay__content > .v-sheet, .v-dialog > .v-overlay__content > form > .v-card, .v-dialog > .v-overlay__content > form > .v-sheet {
+    border-radius: 0px !important;
+}
+</style>

@@ -211,11 +211,6 @@ const filteredPaymentTypes = computed(() => {
 
 watch(filteredPaymentTypes, updateTotal);
 
-/* 
-* handle promotions
-*/
-const promotionTypes = ref([]);
-
 function updateTotal() {
     amountReceived.value = 0;
     amountReturned.value = 0;
@@ -230,21 +225,6 @@ function updateTotal() {
 
     filteredPaymentTypes.value.forEach(paymentType => {
         seatsSelected.value.forEach((seat) => {
-
-            if(seat.promotions.length > 0) { 
-                seat.promotions.forEach(promotion => {
-                   const actualPromotionExist = promotionTypes.value.find(promo => promo.type === actualPromotionExist);
-                   if(actualPromotionExist) {
-                    promotionTypes.value.map();
-                   } else {
-                        promotionTypes.value.push({
-                            'type': actualPromotionExist,
-                            'quantity': 1
-                        });
-                   }
-                });
-            }
-
             if (!processedSeats.has(seat.seat_catalogue.code)) {
                 let price;
                 if (paymentType.name === 'cortesia') {
@@ -291,58 +271,38 @@ const globalCardPayementTypeProps = (item) => {
 const isSvgVisible = ref(true);
 const selectedSection = ref('');
 const viewSelectedSection = ref('Zonas HDX');
-const seatsASection = ref([]);
-const seatsCSection = ref([]);
-const seatsFSection = ref([]);
-const loadingSectionDialog = ref(false);
 
 const handleSectionClick = (section) => {
-    const actualSection = section.split('');
+    console.log(section);
+    
+    return
 
-    const data = {
-        zone: actualSection[actualSection.length -1],
-        event_id: props.event.id
+    selectedSection.value = section;
+    isSvgVisible.value = false;
+
+    if(section == 'zonaA'){
+        loadSvg('zonaA');
+        viewSelectedSection.value = 'Zona A';
+        const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
+        stadiumHdxImg.classList.remove('tw-rotate-0');
+        stadiumHdxImg.classList.add('tw-rotate-90');
     }
 
-    loadingSectionDialog.value = true;
+    if(section == 'zonaC'){
+        loadSvg('zonaC');
+        viewSelectedSection.value = 'Zona C';
+        const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
+        stadiumHdxImg.classList.remove('tw-rotate-0');
+        stadiumHdxImg.classList.add('tw-rotate-90');
+    }
 
-    axios.post(route('event.get.seat-catalogues'), data)
-        .then(success => {
-            loadingSectionDialog.value = false;
-            selectedSection.value = section;
-            isSvgVisible.value = false;
-
-            if(section == 'zonaC'){
-                seatsCSection.value = success.data.data;
-                loadSvg('zonaC');
-                viewSelectedSection.value = 'Zona C';
-                const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
-                stadiumHdxImg.classList.remove('tw-rotate-0');
-                stadiumHdxImg.classList.add('tw-rotate-90');
-            }
-            if(section == 'zonaA'){
-                seatsASection.value = success.data.data;
-                loadSvg('zonaA');
-                viewSelectedSection.value = 'Zona A';
-                const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
-                stadiumHdxImg.classList.remove('tw-rotate-0');
-                stadiumHdxImg.classList.add('tw-rotate-90');
-            }
-            if(section == 'zonaF'){
-                seatsFSection.value = success.data.data;
-                loadSvg('zonaF');
-                viewSelectedSection.value = 'Zona F';
-                const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
-                stadiumHdxImg.classList.remove('tw-rotate-0');
-                stadiumHdxImg.classList.add('tw-rotate-90');
-            }
-            console.log(success.data.data)
-        })
-        .catch(error => {
-            console.log(error)
-        })
-
-    return
+    if(section == 'zonaF'){
+        loadSvg('zonaF');
+        viewSelectedSection.value = 'Zona F';
+        const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
+        stadiumHdxImg.classList.remove('tw-rotate-0');
+        stadiumHdxImg.classList.add('tw-rotate-90');
+    }
 
 };
 
@@ -1051,41 +1011,17 @@ const seasonTicktesDataConfirm = () => {
                                         <EstadioHdx  @handle-section-click="handleSectionClick"/>
                                     </div>
                                     <div v-if="selectedSection == 'zonaA'" class="">
-                                        <ZonaA @add-seat="addSeat" v-bind:seats="seatsASection" v-bind:seatsSelected="seatsSelected" />
+                                        <ZonaA @add-seat="addSeat" v-bind:seats="props.a_zone" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                     <div v-if="selectedSection == 'zonaC'" class="">
-                                        <ZonaC @add-seat="addSeat" v-bind:seats="seatsCSection" v-bind:seatsSelected="seatsSelected" />
+                                        <ZonaC @add-seat="addSeat" v-bind:seats="props.c_zone" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                     <div v-if="selectedSection == 'zonaF'" class="">
-                                        <ZonaF @add-seat="addSeat" v-bind:seats="seatsFSection" v-bind:seatsSelected="seatsSelected" />
+                                        <ZonaF @add-seat="addSeat" v-bind:seats="props.f_zone" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                 </div>
                             </div>
 
-                        </div>
-
-                        <div class="loading-section-dialog">
-                            <v-dialog fullscreen v-model="loadingSectionDialog" transition="dialog-bottom-transition">
-                                <template v-slot:activator="{ props: activatorProps }">
-                                    <v-btn v-bind="activatorProps" variant="elevated" class="!tw-hidden text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
-                                </template>
-                                <template v-slot:default="{ isActive }">
-                                    <div class="tw-w-full tw-h-full">
-                                        <div class="tw-h-screen tw-flex tw-items-center tw-justify-center tw-w-full">
-                                            <div class="tw-p-3 tw-animate-spin tw-drop-shadow-2xl tw-bg-gradient-to-bl tw-from-pink-400 tw-via-purple-400 tw-to-indigo-600 tw-md:w-48 tw-md:h-48 tw-h-32 tw-w-32 tw-aspect-square tw-rounded-full">
-                                                <div class="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-h-full tw-w-full tw-bg-white tw-dark:bg-zinc-900 tw-background-blur-md">
-                                                    <img class="tw-w-14 tw-h-auto" src="https://halconesdexalapa.com.mx/wp-content/uploads/2024/01/cropped-SIMBOLO-HDX-2023-e1705427673690-1.png" alt="img logo">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <v-card>
-                                        <v-card-actions>
-                                                <v-btn @click="isActive.value = false"></v-btn>
-                                        </v-card-actions>
-                                    </v-card>
-                                </template>
-                            </v-dialog>
                         </div>
 
                         <div class="tw-p-5 tw-bg-purple-50 tw-text-center tw-rounded-xl tw-mt-10">
