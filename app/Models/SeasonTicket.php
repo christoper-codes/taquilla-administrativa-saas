@@ -15,10 +15,14 @@ class SeasonTicket extends Model
         'global_season_id',
         'serie_id',
         'holder_name',
-        'holder_surname',
+        'holder_last_name',
+        'holder_middle_name',
         'holder_email',
         'holder_phone',
         'holder_zip_code',
+        'description',
+        'is_owner',
+        'is_active',
     ];
 
     public function user()

@@ -18,10 +18,14 @@ return new class extends Migration
             $table->foreignId('global_season_id')->nullable()->constrained('global_seasons');
             $table->foreignId('serie_id')->nullable()->constrained('series');
             $table->string('holder_name');
-            $table->string('holder_surname');
-            $table->string('holder_email');
-            $table->string('holder_phone');
-            $table->string('holder_zip_code');
+            $table->string('holder_last_name');
+            $table->string('holder_middle_name');
+            $table->string('holder_email')->nullable();
+            $table->string('holder_phone')->nullable();
+            $table->string('holder_zip_code')->nullable();
+            $table->text('description')->nullable();
+            $table->boolean('is_owner');
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

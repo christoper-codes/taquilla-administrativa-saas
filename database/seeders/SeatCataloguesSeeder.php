@@ -14,7 +14,7 @@ class SeatCataloguesSeeder extends Seeder
      */
     public function run(): void
     {
-        $seatCatalogues = [
+        /* $seatCatalogues = [
             ['stadium_id' => 1, 'zone' => 'A', 'row' => 'A', 'seat' => '1', 'code' => 'AA1', 'seat_type_id' => 1],
             ['stadium_id' => 1, 'zone' => 'A', 'row' => 'A', 'seat' => '2', 'code' => 'AA2', 'seat_type_id' => 1],
             ['stadium_id' => 1, 'zone' => 'A', 'row' => 'A', 'seat' => '3', 'code' => 'AA3', 'seat_type_id' => 1],
@@ -55,6 +55,6 @@ class SeatCataloguesSeeder extends Seeder
                 1 => ['price_catalogue_id' => 1, 'is_active' => true],
                 2 => ['price_catalogue_id' => 2, 'is_active' => true],
             ]);
-        }
+        } */
     }
 }

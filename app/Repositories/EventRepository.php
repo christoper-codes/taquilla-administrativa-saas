@@ -25,6 +25,7 @@ class EventRepository implements EventRepositoryInterface
             'eventSeatCatalogues.priceTypes',
             'eventSeatCatalogues.seatCatalogueStatus',
             'eventSeatCatalogues.promotions',
+            'eventSeatCatalogues.promotions.promotionType',
         ])->findOrFail($id);
 
         return $event;

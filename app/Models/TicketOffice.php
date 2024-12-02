@@ -60,4 +60,9 @@ class TicketOffice extends Model
         return $cash_register_types_no_actives;
     }
 
+    public function saleTicketCancellationCodes()
+    {
+        return $this->hasMany(SalesTicketCancellationCode::class);
+    }
+
 }

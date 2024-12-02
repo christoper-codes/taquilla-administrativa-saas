@@ -39,8 +39,9 @@ class DatabaseSeeder extends Seeder
             GlobalCardPaymentTypesSeeder::class,
             PriceCataloguesSeeder::class,
             SeatCataloguesSeeder::class,
-            PromotionTypesSeeder::class
+            PromotionTypesSeeder::class,
             //SeatCataloguesSeeder::class,
+            SalesTicketCancellationCodesSeeder::class
         ]);
     }
 }

@@ -51,6 +51,20 @@ function applyClassesAndEvents(){
             if (seat.seat_catalogue_status.name === 'disponible') {
                 elemento.classList.add('tw-cursor-pointer', 'tw-fill-yellow-500');
                 elemento.classList.remove('tw-cursor-not-allowed', 'tw-fill-purple-500', 'tw-fill-red-500');
+
+                if(seat.promotions.length > 0){
+                    const bbox = elemento.getBBox();
+                    const cx = bbox.x + bbox.width - 4; 
+                    const cy = bbox.y - 5; 
+
+                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    circle.setAttribute("cx", cx);
+                    circle.setAttribute("cy", cy);
+                    circle.setAttribute("r", "1.5");
+                    circle.classList.add('tw-fill-purple-500');
+                    elemento.parentNode.appendChild(circle);
+                }
+            
                 const handleClick = () => {
                 const existSeat = props.seatsSelected.find(s => s.seat_catalogue.code === seat.seat_catalogue.code);
                 if (existSeat) {
@@ -1780,5 +1794,8 @@ fill: #fdba4d;
 }
 .cls-2 {
 fill: url(#Degradado_sin_nombre_205);
+}
+.promo {
+fill: red;
 }
 </style>

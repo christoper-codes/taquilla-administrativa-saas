@@ -17,6 +17,7 @@ class SaleTicket extends Model
         'amount_received',
         'total_amount',
         'total_returned',
+        'payment_in_installments',
         'is_transfer',
         'is_online',
     ];
@@ -46,7 +47,7 @@ class SaleTicket extends Model
     public function globalPaymentTypes()
     {
         return $this->belongsToMany(GlobalPaymentType::class, 'global_payment_type_sale_ticket', 'sale_ticket_id', 'global_payment_type_id')
-            ->withPivot('global_card_payment_type_id', 'amount', 'is_active')
+            ->withPivot('global_card_payment_type_id', 'amount', 'original_amount', 'is_active')
             ->withTimestamps();
     }
 

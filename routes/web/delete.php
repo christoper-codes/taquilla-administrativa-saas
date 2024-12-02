@@ -4,6 +4,7 @@ use App\Http\Controllers\AgreementController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\SaleTicketController;
 use App\Http\Controllers\SerieController;
 use Illuminate\Support\Facades\Route;
 
@@ -47,3 +48,11 @@ Route::delete('/instituciones/{id}', [InstitutionController::class, 'destroy'])-
 * |Events | ROUTES
 */
 Route::delete('/eventos-gestion/{id}', [EventController::class, 'destroy'])->name('event.management.destroy');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Sale tickets | ROUTES
+*/
+Route::delete('/cancelacion-tickte-venta', [SaleTicketController::class, 'cancellationSaleTickets'])->name('sale-ticket.cancelation-sale-ticket');

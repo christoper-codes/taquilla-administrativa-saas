@@ -18,7 +18,8 @@ class GlobalSeason extends Model
         'start_date',
         'end_date',
         'description',
-        'is_active'
+        'enabled_for_season_tickets',
+        'is_active',
     ];
 
 
