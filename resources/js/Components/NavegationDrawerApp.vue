@@ -140,12 +140,12 @@ const props = defineProps({
                             </div>
                             <div class=" tw-w-full">
                                 <AppNavLink :href="route('series.index')" :active="route().current('series.index')">
-                                    <span class="material-symbols-outlined tw-text-lg">signpost</span>series
+                                    <span class="material-symbols-outlined tw-text-lg">signpost</span>Series
                                 </AppNavLink>
                             </div>
                             <div class=" tw-w-full">
                                 <AppNavLink :href="route('event.management.indexManagement')" :active="route().current('event.management.indexManagement')">
-                                    <span class="material-symbols-outlined tw-text-lg">note_stack</span>eventos
+                                    <span class="material-symbols-outlined tw-text-lg">note_stack</span>Eventos
                                 </AppNavLink>
                             </div>
                             <div class=" tw-w-full">

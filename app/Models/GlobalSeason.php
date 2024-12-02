@@ -48,6 +48,11 @@ class GlobalSeason extends Model
         return $this->hasMany(Serie::class);
     }
 
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
+
     public function agreements()
     {
         return $this->hasMany(Agreement::class);

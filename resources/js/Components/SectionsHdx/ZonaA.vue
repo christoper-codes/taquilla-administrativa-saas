@@ -25,7 +25,31 @@ function applyClassesAndEvents(){
     const elemento = document.getElementById(seat.seat_catalogue.code);
     if (elemento) {
 
-        if (props.action === "promotion") {
+        if (props.action === "status") {
+
+            if (seat.seat_catalogue_status.name === 'disponible') {
+                elemento.classList.add('tw-fill-yellow-500');
+            } else if (seat.seat_catalogue_status.name === 'reservado') {
+                elemento.classList.add('tw-fill-pink-600');
+            } else if (seat.seat_catalogue_status.name === 'inhabilitado') {
+                elemento.classList.add('tw-fill-gray-600');
+            }
+
+            const handleClick = () => {
+
+                const existSeat = props.seatsSelected.find(s => s.seat_catalogue.code === seat.seat_catalogue.code);
+
+                if (!existSeat) {
+                    elemento.classList.remove('tw-fill-yellow-500', 'tw-fill-pink-600', 'tw-fill-gray-600');
+                    elemento.classList.add('tw-fill-green-500');
+                }
+                emit('add-seat', seat);
+            };
+
+            elemento.classList.add('tw-cursor-pointer');
+            elemento.addEventListener('click', handleClick);
+
+        }else if (props.action === "promotion") {
 
             if (seat.promotions.length === 0) {
                 elemento.classList.add('tw-fill-yellow-500');
@@ -106,7 +130,16 @@ watch(() => props.seatsSelected, (newSeatsSelected, oldSeatsSelected) => {
     if (!newSeatsSelected.find(s => s.seat_catalogue.code === seat.seat_catalogue.code)) {
         const elemento = document.getElementById(seat.seat_catalogue.code);
         if (elemento) {
-            if (props.action === "promotion") {
+            if (props.action === "status") {
+                elemento.classList.remove('tw-fill-green-500');
+                if (seat.seat_catalogue_status.name === 'disponible') {
+                    elemento.classList.add('tw-fill-yellow-500');
+                } else if (seat.seat_catalogue_status.name === 'reservado') {
+                    elemento.classList.add('tw-fill-pink-600');
+                } else if (seat.seat_catalogue_status.name === 'inhabilitado') {
+                    elemento.classList.add('tw-fill-gray-600');
+                }
+            }else if (props.action === "promotion") {
                 elemento.classList.remove('tw-fill-green-500');
                 if (seat.promotions.length === 0) {
                     elemento.classList.add('tw-fill-yellow-500');

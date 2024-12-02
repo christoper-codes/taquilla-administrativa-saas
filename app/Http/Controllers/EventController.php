@@ -33,6 +33,7 @@ use Endroid\QrCode\Label\LabelAlignment;
 use Endroid\QrCode\Label\Font\OpenSans;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Support\Str;
 
 
 class EventController extends Controller
@@ -133,21 +134,18 @@ class EventController extends Controller
 
             $request->validate([
                 'event_type_id' => 'required|exists:event_types,id',
-                'serie_id' => 'required|exists:series,id',
+                'global_season_id' => 'nullable|exists:events,id',
+                'serie_id' => 'nullable|exists:series,id',
                 'name' => 'required|string|max:255',
-                'slug' => 'required|string|max:255',
                 'description' => 'required|string|max:255',
-                'start_date' => 'required|date',
-                'end_date' => 'required|date',
+                'start_date' => 'required',
+                'end_date' => 'required',
                 'is_active' => 'required|boolean'
             ]);
 
-            $request->merge([
-                'start_date' => Carbon::parse($request->start_date)->format('Y-m-d'),
-                'end_date' => Carbon::parse($request->end_date)->format('Y-m-d')
-            ]);
+            $request->merge(['slug' => Str::slug($request->name, '-')]);
 
-            $data = $request->only(['event_type_id','serie_id','name','slug','description','start_date', 'end_date','is_active']);
+            $data = $request->only(['global_season_id','event_type_id','serie_id','name','slug','description','start_date', 'end_date','is_active']);
 
             $event = $this->event_service->save( $data );
 
