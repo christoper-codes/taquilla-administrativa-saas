@@ -8,6 +8,8 @@ use App\Http\Controllers\SeatCatalogueController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\TicketOfficeController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PaymentController;
+
 
 /*
 * |--------------------------------------------------------------------------
@@ -52,7 +54,7 @@ Route::post('/series', [SerieController::class, 'store'])->name('series.store');
 */
 Route::post('/eventos', [EventController::class, 'store'])->name('event.management.store');
 
-
+Route::post('/payment', [PaymentController::class, 'paymentFlexApi'])->name('payment.flex');
 
 
 

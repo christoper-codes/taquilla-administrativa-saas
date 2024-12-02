@@ -5,6 +5,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\SeatCatalogueController;
 use App\Http\Controllers\TicketOfficeController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -61,5 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [SeatCatalogueController::class, 'index'])->name('dashboard');
 
 });
+
+Route::get('/capture-context', [PaymentController::class, 'getCaptureContext'])->name('capture.context');
 
 Route::get('/saveAllSeatsForStadium', [SeatCatalogueController::class, 'saveAllSeatsForStadium'])->name('saveAllSeatsForStadium');
