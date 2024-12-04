@@ -140,7 +140,7 @@ const props = defineProps({
                             </div>
                             <div class=" tw-w-full">
                                 <AppNavLink :href="route('series.index')" :active="route().current('series.index')">
-                                    <span class="material-symbols-outlined tw-text-lg">signpost</span>series
+                                    <span class="material-symbols-outlined tw-text-lg">signpost</span>Series
                                 </AppNavLink>
                             </div>
                             <div class=" tw-w-full">
@@ -148,38 +148,20 @@ const props = defineProps({
                                     <span class="material-symbols-outlined tw-text-lg">note_stack</span>Eventos
                                 </AppNavLink>
                             </div>
-                            <div class="tw-w-full ">
-                                <v-menu
-                                v-model="menu1"
-                                :close-on-content-click="false"
-                                location="bottom start" origin="top center"
-                                >
-                                <template v-slot:activator="{ props }">
-                                    <v-btn v-bind="props" variant="text" class="text-none !tw-h-[40px] !tw-w-full !tw-text-gray-300 !tw-bg-transparent !tw-justify-start" rounded="xl" block><span class="material-symbols-outlined tw-text-xl">keyboard_arrow_down</span>Promociones</v-btn>
-                                </template>
-
-                                <v-card min-width="300" rounded="lg" class="">
-                                    <v-card-actions>
-                                        <v-spacer></v-spacer>
-                                        <v-btn
-                                            color="red"
-                                            variant="tonal"
-                                            class="text-none" rounded="lg"
-                                            @click="menu1 = false"
-                                        >
-                                            Cancel
-                                        </v-btn>
-                                        <v-btn
-                                            color="primary"
-                                            class="text-none" rounded="lg"
-                                            variant="tonal"
-                                            @click="menu1 = false"
-                                        >
-                                            Save
-                                        </v-btn>
-                                    </v-card-actions>
-                                </v-card>
-                                </v-menu>
+                            <div class=" tw-w-full">
+                                <AppNavLink :href="route('institutions.index')" :active="route().current('institutions.index')">
+                                    <span class="material-symbols-outlined tw-text-lg">note_stack</span>Instituciones
+                                </AppNavLink>
+                            </div>
+                            <div class=" tw-w-full">
+                                <AppNavLink :href="route('promotions.index')" :active="route().current('promotions.index')">
+                                    <span class="material-symbols-outlined tw-text-lg">Loyalty</span>Promociones
+                                </AppNavLink>
+                            </div>
+                            <div class=" tw-w-full">
+                                <AppNavLink :href="route('agreements.index')" :active="route().current('agreements.index')">
+                                    <span class="material-symbols-outlined tw-text-lg">Handshake</span>Convenios
+                                </AppNavLink>
                             </div>
                         </div>
                     </div>

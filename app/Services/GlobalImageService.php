@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Interfaces\GlobalImageRepositoryInterface;
+use Illuminate\Support\Facades\Storage;
 
 class GlobalImageService
 {
@@ -39,19 +40,40 @@ class GlobalImageService
             /*
             * Manage the image upload
             */
-            $unique_file_name = uniqid() . '.' . $data['global_image']->extension();
+            if( $data['global_image']->getSize() !== false){
+
+                $extension = $data['global_image']->extension();
+                $getMimeType = $data['global_image']->getMimeType();
+                $getSize = $data['global_image']->getSize();
+                $unique_file_name = uniqid() . '.' .$extension;
+                $file_path = $data['global_image']->storeAs($folder_name, $unique_file_name, 'public');
+
+
+            }else{
+
+                $svgPath = public_path('img/user-img.svg');
+
+                $extension = 'svg';
+                $getMimeType = 'image/svg+xml';
+                $getSize = filesize($svgPath);
+                $unique_file_name = uniqid() . '.' .$extension;
+                $file_path = Storage::disk('public')->putFileAs($folder_name, new \Illuminate\Http\File($svgPath), $unique_file_name);
+
+            }
+
             $data_global_image = [
                 'file_name' => $unique_file_name,
-                'file_path' => $data['global_image']->storeAs($folder_name, $unique_file_name, 'public'),
-                'file_extension' => $data['global_image']->extension(),
-                'file_size' => $data['global_image']->getSize(),
-                'file_type' => $data['global_image']->getMimeType(),
+                'file_path' => $file_path,
+                'file_extension' => $extension,
+                'file_size' => $getSize,
+                'file_type' => $getMimeType,
                 'is_active' => true,
             ];
 
             $global_image = $this->global_image_repository->save($data_global_image);
 
             return $global_image;
+
 
         } catch (\Exception $e) {
 

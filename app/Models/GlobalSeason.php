@@ -18,7 +18,8 @@ class GlobalSeason extends Model
         'start_date',
         'end_date',
         'description',
-        'is_active'
+        'enabled_for_season_tickets',
+        'is_active',
     ];
 
 
@@ -45,6 +46,11 @@ class GlobalSeason extends Model
     public function series()
     {
         return $this->hasMany(Serie::class);
+    }
+
+    public function events()
+    {
+        return $this->hasMany(Event::class);
     }
 
     public function agreements()

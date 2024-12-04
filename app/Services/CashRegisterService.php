@@ -57,8 +57,41 @@ class CashRegisterService
     {
         try {
             $cash_register = $this->cash_register_repository->getById($cash_register_id);
+            $type_payments = [];
 
-            return $cash_register;
+            /*
+            * Get all sale tickets associated with the cash register
+            */
+            $sale_tickets = $cash_register->saleTickets()->orderBy('created_at', 'desc')->get();
+
+            $sale_tickets->each(function ($sale_ticket) use (&$type_payments) {
+                $sale_ticket->saleTicketStatus;
+                $sale_ticket->globalPaymentTypes;
+                $sale_ticket->EventSeatCatalogues->map(function ($event_seat_catalogue) {
+                    $event_seat_catalogue->seatCatalogue;
+                });
+                /*
+                * Get all global payment types associated with the sale ticket
+                */
+                $sale_ticket->globalPaymentTypes->each(function ($global_payment_type) use (&$type_payments) {
+                    if (!isset($type_payments[$global_payment_type->name])) {
+                        $type_payments[$global_payment_type->name] = [
+                            'amount' => 0,
+                        ];
+                    }
+                    $type_payments[$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
+                });
+
+            });
+
+            $response = [
+                'cash_register' => $cash_register,
+                'sale_tickets' => $sale_tickets,
+                'type_payments' => $type_payments,
+            ];
+
+            return $response;
+
         } catch (\Exception $e) {
             throw $e;
         }

@@ -10,6 +10,7 @@ class Event extends Model
     use HasFactory;
 
     protected $fillable = [
+        'global_season_id',
         'event_type_id',
         'serie_id',
         'global_image_id',
@@ -20,6 +21,11 @@ class Event extends Model
         'end_date',
         'is_active',
     ];
+
+    public function globalSeason()
+    {
+        return $this->belongsTo(GlobalSeason::class);
+    }
 
     public function eventType()
     {

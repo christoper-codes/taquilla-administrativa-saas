@@ -3,13 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\WebResponseHelper;
-use App\Models\SeatCatalogue;
 use App\Models\ZoneType;
 use App\Models\RowType;
 use App\Models\SeatType;
 use App\Services\EventService;
 use App\Services\SeatCatalogueService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -64,22 +62,6 @@ class SeatCatalogueController extends Controller
         } catch (\Exception $e) {
             WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar el catálogo de asientos');
         }
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
     }
 
     /**
@@ -185,7 +167,7 @@ class SeatCatalogueController extends Controller
                    "description_seat" => "Asiento",
                    "seat_is_active" => true,
                    "zone_type_id" => 1,
-                   "seats_per_row" => [52, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49]
+                   "seats_per_row" => [53, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49]
                 ],
                 [
                    "stadium" => 1,
@@ -248,37 +230,5 @@ class SeatCatalogueController extends Controller
 
             WebResponseHelper::rollback($e, 'Opps! Algo salió mal al guardar los asientos');
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(SeatCatalogue $seatCatalogue)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(SeatCatalogue $seatCatalogue)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, SeatCatalogue $seatCatalogue)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(SeatCatalogue $seatCatalogue)
-    {
-        //
     }
 }

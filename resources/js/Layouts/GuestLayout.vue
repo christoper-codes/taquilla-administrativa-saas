@@ -16,10 +16,18 @@ const hints = ref(true);
 const toggleFav = () => {
   fav.value = !fav.value;
 };
+
+const props = defineProps({
+    isEventsShow: {
+        type: Boolean,
+        required: false,
+    }
+});
+
 </script>
 
 <template>
-    <div class="tw-bg-slate-950 tw-relative tw-overflow-hidden">
+    <div class="tw-bg-slate-950 tw-relative tw-overflow-hidden !tw-z-50">
         <div class="tw-hidden lg:tw-block tw-absolute tw-left-1/2 tw-top-0 tw-h-[280px] tw-w-[500px] tw--translate-x-1/2 tw-rounded-full tw-bg-gradient-to-t tw-blur-[150px] tw-from-tw-primary-800 tw-to-tw-primary-600">
         </div>
         <div class="tw-w-full tw-max-w-7xl tw-mx-auto tw-py-3 lg:tw-py-5 tw-px-4 lg:tw-px-0 tw-flex tw-items-center tw-justify-between tw-relative">
@@ -68,10 +76,10 @@ const toggleFav = () => {
         </div>
         </div>
     </div>
-   <div class="tw-bg-white/60 tw-sticky tw-w-full tw-z-50 tw-top-0 tw-left-0 tw-overflow-hidden tw-backdrop-filter tw-backdrop-blur-md tw-shadow-xl">
-    <div class="tw-w-full tw-h-1 tw-bg-gradient-to-r tw-from-tw-primary-600 tw-via-purple-400 tw-to-tw-secondary-400">
-    </div>
-    <div class="tw-px-4 lg:tw-px-0 tw-py-2 lg:tw-py-0">
+   <div class="tw-bg-white/60 tw-sticky tw-w-full tw-z-40 tw-top-0 tw-left-0 tw-overflow-hidden tw-backdrop-filter tw-backdrop-blur-md tw-shadow-xl">
+        <div class="tw-w-full tw-h-1 tw-bg-gradient-to-r tw-from-tw-primary-600 tw-via-purple-400 tw-to-tw-secondary-400">
+        </div>
+        <div class="tw-px-4 lg:tw-px-0 tw-py-2 lg:tw-py-0">
             <div class="tw-flex tw-items-center tw-justify-between tw-max-w-7xl tw-mx-auto ">
                 <div class="lg:tw-flex tw-items-center tw-gap-10 tw-hidden tw-justify-between tw-w-full">
                     <div class="tw-flex tw-items-center tw-gap-3">
@@ -159,7 +167,7 @@ const toggleFav = () => {
                         </GuestNavLink>
                     </div>
                     <ErrorSession />
-                    <div v-if="$page.props.auth.user" class="tw-flex tw-items-center tw-gap-3">
+                    <div v-if="$page.props.auth.user && !isEventsShow" class="tw-flex tw-items-center tw-gap-3">
                         <Link
                             :href="route('dashboard')"
                             >
@@ -171,7 +179,7 @@ const toggleFav = () => {
                             <v-btn variant="tonal" class="text-none !tw-bg-tw-primary-100 !tw-text-tw-primary-600 !tw-px-7" size="large" rounded="xl">Taquillas</v-btn>
                         </Link>
                     </div>
-                    <div v-else class="tw-flex tw-items-center tw-gap-3">
+                    <div v-else-if="!$page.props.auth.user" class="tw-flex tw-items-center tw-gap-3">
                         <Link
                             :href="route('register')"
                         >

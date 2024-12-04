@@ -1,13 +1,16 @@
 <script setup>
-    import { ref, computed } from 'vue'
-    import AppLayout from '@/Layouts/AppLayout.vue';
-    import { useForm, useField } from 'vee-validate'
-    import { serieSchema } from '@/validation/Administration/Event/serie-schema';
-    import { Head, useForm as useFormInertia } from '@inertiajs/vue3';
-    import InputError from '@/Components/InputError.vue';
-    import SuccessSession from '@/Components/SuccessSession.vue';
-    import ErrorSession from '@/Components/ErrorSession.vue';
+import { ref, computed } from 'vue'
+import AppLayout from '@/Layouts/AppLayout.vue';
+import { useForm, useField } from 'vee-validate'
+import { serieSchema } from '@/validation/Administration/Event/serie-schema';
+import { Head, useForm as useFormInertia } from '@inertiajs/vue3';
+import InputError from '@/Components/InputError.vue';
+import SuccessSession from '@/Components/SuccessSession.vue';
+import ErrorSession from '@/Components/ErrorSession.vue';
 import BreadcrumbAppSecondary from '@/Components/BreadcrumbAppSecondary.vue';
+import useStringFormat from '@/composables/stringFormat';
+
+const { formatFirstLetterUppercase } = useStringFormat();
 
 const props = defineProps({
     series: { type: Array, required: true },
@@ -15,24 +18,24 @@ const props = defineProps({
 })
 
 const headersSerie = [
-    { title: 'nombre', align: 'start', sortable: true, key: 'name' },
-    { title: 'descripción', align: 'start', sortable: true, key: 'description' },
-    { title: 'inicio', align: 'start', sortable: true, key: 'start_date' },
-    { title: 'fin', align: 'start', sortable: true, key: 'end_date' },
-    { title: 'estatus', align: 'start', sortable: true, key: 'is_active' },
-    { title: 'acciones', key: 'actions', sortable: false }
+    { title: 'Nombre', align: 'start', sortable: true, key: 'name' },
+    { title: 'Descripción', align: 'start', sortable: true, key: 'description' },
+    { title: 'Fecha Inicio', align: 'start', sortable: true, key: 'start_date' },
+    { title: 'Fecha Finalización', align: 'start', sortable: true, key: 'end_date' },
+    { title: 'Estatus', align: 'start', sortable: true, key: 'is_active' },
+    { title: 'Acciones', key: 'actions', sortable: false }
 ];
 
 const dialogFormSerie = ref(false);
 const editedSerieIndex = ref(-1);
 
-const formTitleSerie = computed(() => editedSerieIndex.value === -1 ? 'nueva serie' : 'editar serie');
+const formTitleSerie = computed(() => editedSerieIndex.value === -1 ? 'Nueva serie' : 'Editar serie');
 
 const { handleSubmit, resetForm } = useForm({
     validationSchema: serieSchema,
     initialValues: {
         id: null,
-        is_active: false
+        is_active: true
     },
 });
 
@@ -62,7 +65,7 @@ const saveDataSerie = handleSubmit((dataForm) => {
     dataFormSerie.global_season_id = dataForm.global_season_id;
     dataFormSerie.name = dataForm.name;
     dataFormSerie.description = dataForm.description;
-    dataFormSerie.start_date = dataForm.start_date;
+    dataFormSerie.start_date =  dataForm.start_date;
     dataFormSerie.end_date = dataForm.end_date;
     dataFormSerie.is_active = dataForm.is_active;
 
@@ -103,6 +106,8 @@ const dialogDeleteSerie = ref(false);
 const deleteSerie = (selectedSerie) => {
 
     serie.id.setValue(selectedSerie.id);
+    serie.name.setValue(selectedSerie.name);
+    serie.description.setValue(selectedSerie.description);
     dialogDeleteSerie.value = true;
 }
 
@@ -128,9 +133,9 @@ const editSerie = (selectedSerie) => {
     serie.global_season_id.setValue(selectedSerie.global_season_id);
     serie.name.setValue(selectedSerie.name);
     serie.description.setValue(selectedSerie.description);
-    serie.start_date.setValue(selectedSerie.start_date);
-    serie.end_date.setValue(selectedSerie.end_date);
-    serie.is_active.setValue(selectedSerie.is_active ? true : false );
+    serie.start_date.setValue(new Date(selectedSerie.start_date));
+    serie.end_date.setValue(new Date(selectedSerie.end_date));
+    serie.is_active.setValue(selectedSerie.is_active ? true : false);
 
     editedSerieIndex.value = props.series.indexOf(selectedSerie);
     dialogFormSerie.value = true;
@@ -139,25 +144,27 @@ const editSerie = (selectedSerie) => {
 </script>
 
 <template>
-    <Head title="Administracion" />
 
+    <Head title="Administracion" />
     <SuccessSession />
     <AppLayout>
         <ErrorSession />
         <BreadcrumbAppSecondary>
-            <span>Aministración de series</span>
+            <span>Administración de series</span>
         </BreadcrumbAppSecondary>
         <div class="tw-px-4 tw-py-10 lg:tw-p-10">
             <v-data-table :headers="headersSerie" :items="series">
                 <template v-slot:top>
                     <v-toolbar flat>
-                        <v-toolbar-title class="tw-uppercase">series</v-toolbar-title>
+
+                        <v-toolbar-title class="tw-uppercase">Series</v-toolbar-title>
                         <v-divider class="mx-4" inset vertical></v-divider>
                         <v-spacer></v-spacer>
                         <v-dialog v-model="dialogFormSerie" max-width="800px">
                             <template v-slot:activator="{ props }">
-                                <v-btn variant="tonal" class="mb-2 !tw-mr-5 text-none" color="purple" rounded="xl"  v-bind="props">
-                                    nueva serie
+                                <v-btn variant="tonal" class="mb-2 !tw-mr-5 text-none" color="purple" rounded="xl"
+                                    v-bind="props">
+                                    Nueva serie
                                 </v-btn>
                             </template>
                             <v-card>
@@ -176,8 +183,8 @@ const editSerie = (selectedSerie) => {
 
                                                     <div class="tw-w-full">
                                                         <p class="tw-font-medium tw-mb-1"><span
-                                                                class="tw-text-red-500">*</span> temporada</p>
-                                                        <v-select label="temporada" :items="global_seasons"
+                                                                class="tw-text-red-500">*</span> Temporada</p>
+                                                        <v-select label="Temporada" :items="global_seasons"
                                                             item-title="name" item-value="id"
                                                             v-model="serie.global_season_id.value.value"
                                                             :error-messages="serie.global_season_id.errorMessage.value"></v-select>
@@ -186,9 +193,9 @@ const editSerie = (selectedSerie) => {
 
                                                     <div class="tw-w-full">
                                                         <p class="tw-font-medium tw-mb-1"><span
-                                                                class="tw-text-red-500">*</span> nombre</p>
-                                                        <v-text-field color="primary" label="nombre" placeholder="serie 1"
-                                                            hint="ingresa el nombre de la serie"
+                                                                class="tw-text-red-500">*</span> Nombre</p>
+                                                        <v-text-field color="primary" label="Nombre"
+                                                            placeholder="serie 1" hint="Ingresa el nombre de la serie"
                                                             v-model="serie.name.value.value"
                                                             :error-messages="serie.name.errorMessage.value"></v-text-field>
                                                         <InputError :message="dataFormSerie.errors.name" />
@@ -198,61 +205,51 @@ const editSerie = (selectedSerie) => {
 
                                                 <div
                                                     class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-gap-5 tw-my-2">
-
                                                     <div class="tw-w-full">
                                                         <p class="tw-font-medium tw-mb-1"><span
-                                                                class="tw-text-red-500">*</span> descripción</p>
-                                                        <v-textarea color="primary" label="descripción" rows="3"
+                                                                class="tw-text-red-500">*</span> Descripción</p>
+                                                        <v-textarea color="primary" label="Descripción" rows="3"
                                                             variant="filled" auto-grow
                                                             v-model="serie.description.value.value"
                                                             :error-messages="serie.description.errorMessage.value"></v-textarea>
                                                         <InputError :message="dataFormSerie.errors.description" />
                                                     </div>
-
                                                 </div>
 
-                                                <div
-                                                    class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-gap-5 tw-my-2">
-
+                                                <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-gap-5 tw-mb-2">
                                                     <div class="tw-w-full">
-                                                        <p class="tw-font-medium tw-mb-1"><span
-                                                                class="tw-text-red-500">*</span> fecha de inicio
+                                                        <p class="tw-font-medium tw-mb-1">
+                                                            <span class="tw-text-red-500">*</span> Fecha de
+                                                            inicio
                                                         </p>
                                                         <v-date-input density="compact" color="primary" clearable
-                                                            label="fecha de inicio" hint="selecciona tu fecha de inicio"
+                                                            label="Fecha" hint="Selecciona la fecha"
                                                             v-model="serie.start_date.value.value"
                                                             :error-messages="serie.start_date.errorMessage.value"></v-date-input>
                                                         <InputError :message="dataFormSerie.errors.start_date" />
                                                     </div>
-
                                                     <div class="tw-w-full">
-                                                        <p class="tw-font-medium tw-mb-1"><span
-                                                                class="tw-text-red-500">*</span> fecha de
-                                                            terminación
+                                                        <p class="tw-font-medium tw-mb-1">
+                                                            <span class="tw-text-red-500">*</span> Fecha de
+                                                            finalización
                                                         </p>
                                                         <v-date-input density="compact" color="primary" clearable
-                                                            label="fecha de terminación"
-                                                            hint="selecciona tu fecha de terminación"
+                                                            label="Fecha" hint="Selecciona la fecha"
                                                             v-model="serie.end_date.value.value"
                                                             :error-messages="serie.end_date.errorMessage.value"></v-date-input>
                                                         <InputError :message="dataFormSerie.errors.end_date" />
                                                     </div>
-
                                                 </div>
-
-                                                <div
+                                                <div v-if="editedSerieIndex !== -1"
                                                     class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-gap-5 tw-my-2">
-
                                                     <div class="tw-w-full">
                                                         <p class="tw-font-medium tw-mb-1"><span
-                                                                class="tw-text-red-500">*</span> estatus
-                                                        </p>
+                                                                class="tw-text-red-500">*</span> Estatus </p>
                                                         <v-switch
-                                                            :label="`${serie.is_active.value.value ? 'activa' : 'inactiva'}`"
+                                                            :label="`${serie.is_active.value.value ? 'Activa' : 'Inactiva'}`"
                                                             color="indigo" inset
                                                             v-model="serie.is_active.value.value"></v-switch>
                                                     </div>
-
                                                 </div>
 
                                             </v-form>
@@ -261,24 +258,45 @@ const editSerie = (selectedSerie) => {
                                 </v-card-text>
                                 <v-card-actions class="!tw-mb-4">
                                     <v-spacer></v-spacer>
-                                    <v-btn color="red" variant="tonal" rounded="xl" class="!tw-px-4 text-none" @click="closeFormSerie">
-                                        cancelar
+                                    <v-btn color="red" variant="tonal" rounded="xl" class="!tw-px-4 text-none"
+                                        @click="closeFormSerie">
+                                        Cancelar
                                     </v-btn>
-                                    <v-btn color="purple" rounded="xl" class="!tw-px-4 text-none" variant="elevated" @click="saveDataSerie">
-                                        guardar
+                                    <v-btn color="purple" rounded="xl" class="!tw-px-4 text-none" variant="elevated"
+                                        @click="saveDataSerie">
+                                        Guardar
                                     </v-btn>
                                 </v-card-actions>
                             </v-card>
                         </v-dialog>
                         <v-dialog v-model="dialogDeleteSerie" max-width="500px">
                             <v-card>
-                                <v-card-title class="">¿esta seguro de eliminar esta serie?</v-card-title>
-                                <v-card-actions class="!tw-my-2">
+                                <v-card-title>
+                                    <div class="tw-grid tw-justify-items-center tw-gap-y-6">
+                                        <div class="tw-pt-6">
+                                            ¿Esta seguro de eliminar la serie?
+                                        </div>
+                                        <div>
+                                            <div class="tw-grid tw-justify-items-center tw-gap-y-2">
+                                                <div>
+                                                    {{ formatFirstLetterUppercase(serie.name.value.value) }}
+                                                </div>
+                                                <div>
+                                                    {{ formatFirstLetterUppercase(serie.description.value.value) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </v-card-title>
+                                <v-card-actions class="tw-my-4">
                                     <v-spacer></v-spacer>
-                                    <v-btn  @click="closeDeleteConfirmationSerie" color="red" rounded="xl" class="!tw-px-4 text-none" variant="tonal">
+                                    <v-btn @click="closeDeleteConfirmationSerie" color="red" rounded="xl"
+                                        class="!tw-px-4 text-none" variant="tonal">
                                         Cancelar
                                     </v-btn>
-                                    <v-btn  @click="deleteSerieConfirmation" color="purple" rounded="xl" class="!tw-px-4 text-none" variant="elevated">
+                                    <v-btn @click="deleteSerieConfirmation" color="purple" rounded="xl"
+                                        class="!tw-px-4 text-none" variant="elevated">
                                         Eliminar
                                     </v-btn>
                                     <v-spacer></v-spacer>

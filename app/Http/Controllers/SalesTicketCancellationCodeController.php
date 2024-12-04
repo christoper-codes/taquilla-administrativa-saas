@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\EventSeatCatalog;
+use App\Models\SalesTicketCancellationCode;
 use Illuminate\Http\Request;
 
-class EventSeatCatalogController extends Controller
+class SalesTicketCancellationCodeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class EventSeatCatalogController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(EventSeatCatalog $EventSeatCatalog)
+    public function show(SalesTicketCancellationCode $salesTicketCancellationCode)
     {
         //
     }
@@ -42,7 +42,7 @@ class EventSeatCatalogController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(EventSeatCatalog $EventSeatCatalog)
+    public function edit(SalesTicketCancellationCode $salesTicketCancellationCode)
     {
         //
     }
@@ -50,7 +50,7 @@ class EventSeatCatalogController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, EventSeatCatalog $EventSeatCatalog)
+    public function update(Request $request, SalesTicketCancellationCode $salesTicketCancellationCode)
     {
         //
     }
@@ -58,7 +58,7 @@ class EventSeatCatalogController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(EventSeatCatalog $EventSeatCatalog)
+    public function destroy(SalesTicketCancellationCode $salesTicketCancellationCode)
     {
         //
     }

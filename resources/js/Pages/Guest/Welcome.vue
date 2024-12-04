@@ -88,8 +88,8 @@ function handleImageError() {
             <template v-slot:default="{ isActive }">
                 <v-card>
                 <v-card-text class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-text-center">
-                    <h2 class="tw-bg-gray-100 tw-rounded-full tw-px-4 tw-py-1 tw-inline">Vienvenidos a</h2>
-                    <h1 class="tw-font-bold tw-text-xl lg:tw-text-2xl tw-mt-3 tw-text-gray-600">La nueva plataforma de Halcones de xalapa</h1>
+                    <h2 class="tw-bg-gray-100 tw-rounded-full tw-px-4 tw-py-1 tw-inline">Bienvenidos a</h2>
+                    <h1 class="tw-font-bold tw-text-xl lg:tw-text-2xl tw-mt-3 tw-text-gray-600">La nueva plataforma de Los Halcones de xalapa</h1>
                 </v-card-text>
 
                 <v-card-actions>
@@ -107,7 +107,7 @@ function handleImageError() {
                 </div>
                 <div class="tw-font-bold tw-text-4xl md:tw-text-6xl tw-max-w-2xl tw-leading-[50px] md:tw-leading-[70px]">Aplicacion web oficial del equipo Halcones de xalapa!</div>
 
-                <p class="tw-text-lg tw-text-gray-500 tw-max-w-2xl">Descubre las <span class="tw-font-bold">nuevas novedades en la plataforma oficial</span> del equipo de baloncesto, como comprar boletos con increibles promociones u ofertas especiales</p>
+                <p class="tw-text-lg tw-text-gray-500 tw-max-w-2xl">Descubre las <span class="tw-font-bold"> novedades de la plataforma oficial</span> del equipo de baloncesto, como comprar boletos con increibles promociones u ofertas especiales</p>
                 <ErrorSession />
                 <div class="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-gap-4 md:tw-gap-5">
                     <div class="tw-w-full lg:tw-w-auto">

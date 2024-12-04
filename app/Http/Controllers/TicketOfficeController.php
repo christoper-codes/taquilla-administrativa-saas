@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\WebResponseHelper;
 use App\Models\TicketOffice;
 use App\Models\User;
-use App\Models\EventSeatCatalogUser;
-use App\Models\EventSeatCatalog;
+use App\Services\CashRegisterService;
 use App\Services\EventService;
 use App\Services\TicketOfficeService;
 use Illuminate\Auth\Middleware\Authorize;
@@ -20,11 +19,13 @@ class TicketOfficeController extends Controller
 
     protected $ticket_office_service;
     protected $event_service;
+    protected $cash_register_service;
 
-    public function __construct(TicketOfficeService $ticket_office_service, EventService $event_service)
+    public function __construct(TicketOfficeService $ticket_office_service, EventService $event_service, CashRegisterService $cash_register_service)
     {
         $this->ticket_office_service = $ticket_office_service;
         $this->event_service = $event_service;
+        $this->cash_register_service = $cash_register_service;
     }
 
     /**
@@ -176,15 +177,22 @@ class TicketOfficeController extends Controller
         try {
 
             $ticket_office = $this->ticket_office_service->getById($ticketOffice->id);
+            $sale_tickets_cancellation_code = $ticket_office->saleTicketCancellationCodes()->where('is_active', true)->first();
             $events = $this->event_service->getAll();
             $auth_user = Auth::user();
             $active_cash_register = $auth_user->cashRegisterActive($ticketOffice->id);
+            $cash_register_general_history = [];
+            if($active_cash_register){
+                $cash_register_general_history = $this->cash_register_service->getCashRegisterGeneralHistory($active_cash_register->id);
+            }
 
             return Inertia::render('App/Pos/TicketOffice', [
                 'ticket_office' => $ticket_office,
                 'events' => $events,
                 'auth_user' => $auth_user,
-                'active_cash_register' => $active_cash_register
+                'active_cash_register' => $active_cash_register,
+                'cash_register_general_history' => $cash_register_general_history,
+                'sale_tickets_cancellation_code' => $sale_tickets_cancellation_code
             ]);
 
         } catch (\Exception $e) {

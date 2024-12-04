@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreign('global_card_payment_type_id', 'global_card_payment_type_id_foreign')->references('id')->on('global_card_payment_types');
 
             $table->decimal('amount', 14, 4)->default('0.0000');
+            $table->decimal('original_amount', 14, 4)->default('0.0000');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

@@ -556,7 +556,7 @@ onMounted(async () => {
 
                     <div v-if="loading" class="tw-flex tw-flex-col tw-items-center tw-justify-center tw-mt-5 tw-animate-pulse">
                         <p class="tw-font-bold tw-text-xs lg:tw-text-base">Completando compra en el sistema...</p>
-                        <iframe class="tw-size-40 lg:tw-size-52 tw-rotate-45" src="https://lottie.host/embed/bf6d5e1b-537a-436b-8464-3d074f070d76/SAdIq1oqT7.json"></iframe>
+                        <iframe class="tw-size-32 lg:tw-size-40 tw-rotate-45" src="https://lottie.host/embed/bf6d5e1b-537a-436b-8464-3d074f070d76/SAdIq1oqT7.json"></iframe>
                     </div>
                 </div>
             </div>

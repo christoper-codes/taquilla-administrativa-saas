@@ -14,7 +14,7 @@ class EventRepository implements EventRepositoryInterface
     */
     public function getAll()
     {
-        return Event::with('globalImage')->get();
+        return Event::with(['globalImage','serie.globalSeason.stadium.globalAddress', 'globalSeason'])->get();
     }
 
     public function getById($id)
@@ -24,6 +24,8 @@ class EventRepository implements EventRepositoryInterface
             'eventSeatCatalogues.seatCatalogue.seatType',
             'eventSeatCatalogues.priceTypes',
             'eventSeatCatalogues.seatCatalogueStatus',
+            'eventSeatCatalogues.promotions',
+            'eventSeatCatalogues.promotions.promotionType',
         ])->findOrFail($id);
 
         return $event;

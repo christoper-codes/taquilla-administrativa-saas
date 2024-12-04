@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\AgreementController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\InstitutionController;
+use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SerieController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,8 +16,30 @@ use Illuminate\Support\Facades\Route;
 */
 Route::put('/series/{id}', [SerieController::class, 'update'])->name('series.update');
 
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Series | ROUTES
+*/
+Route::put('/promociones/{id}', [PromotionController::class, 'update'])->name('promotions.update');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Agreements | ROUTES
+*/
+Route::put('/convenios/{id}', [AgreementController::class, 'update'])->name('agreements.update');
 
 
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Institution | ROUTES
+*/
+Route::post('/instituciones/{id}', [InstitutionController::class, 'update'])->name('institutions.update');
 
 /*
 * |--------------------------------------------------------------------------
@@ -22,4 +47,4 @@ Route::put('/series/{id}', [SerieController::class, 'update'])->name('series.upd
 * |--------------------------------------------------------------------------
 * |Events | ROUTES
 */
-Route::put('/eventos-gestion/{id}', [EventController::class, 'update'])->name('event.management.update');
+Route::post('/eventos-gestion/{id}', [EventController::class, 'update'])->name('event.management.update');

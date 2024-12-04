@@ -7,6 +7,8 @@
     "require": {
         "php": "^8.2",
         "cybersource/rest-client-php": "^0.0.55",
+        "barryvdh/laravel-dompdf": "^3.0",
+        "endroid/qr-code": "^6.0",
         "inertiajs/inertia-laravel": "^1.0",
         "laravel/framework": "^11.9",
         "laravel/sanctum": "^4.0",
@@ -32,7 +34,10 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
-        }
+        },
+        "files":[
+            "app/Helpers/StringHelper.php"
+        ]
     },
     "scripts": {
         "post-autoload-dump": [

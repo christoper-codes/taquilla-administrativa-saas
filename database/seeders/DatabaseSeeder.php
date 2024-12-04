@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
             EventTypesSeeder::class,
             GlobalSeasonsSeeder::class,
             SeriesSeeder::class,
-            //EventsSeeder::class,
+            EventsSeeder::class,
             SeatCatalogueStatusesSeeder::class,
             CashRegisterTypesSeeder::class,
             TicketOfficesSeeder::class,
@@ -38,7 +38,10 @@ class DatabaseSeeder extends Seeder
             GlobalPaymentTypesSeeder::class,
             GlobalCardPaymentTypesSeeder::class,
             PriceCataloguesSeeder::class,
-            //SeatCataloguesSeeder::class,
+            SeatCataloguesSeeder::class,
+            PromotionTypesSeeder::class,
+            SeatCataloguesSeeder::class,
+            SalesTicketCancellationCodesSeeder::class
         ]);
     }
 }
