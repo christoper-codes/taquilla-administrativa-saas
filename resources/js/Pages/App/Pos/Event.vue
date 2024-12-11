@@ -131,6 +131,16 @@ function priceFinal(seat, priceTypeName) {
 
 
 const addSeat = (seat) => {
+
+    if(selectedPromotion.value){
+        toast('Una vez selecionada una promocion ya no es posible agregar mas asientos a la compra.', {
+            "theme": "auto",
+            "type": "error",
+            "autoClose": 10000,
+            "dangerouslyHTMLString": true
+        })
+        return 
+    }
        
     if(purchaseStatus.value == 'final' || purchaseStatus.value == 'retry') {
         purchaseStatus.value = 'retry';
@@ -153,6 +163,9 @@ const addSeat = (seat) => {
         seat.holder_zip_code = '';
         seat.holder_phone = '';
         seat.holder_email = '';
+        seat.is_promotion = false;
+        seat.promotion_id = '';
+        seat.is_gift = false;
         seatsSelected.value.push(seat);
         snackbar.value = true;
 
@@ -215,6 +228,82 @@ watch(filteredPaymentTypes, updateTotal);
 * handle promotions
 */
 const promotionTypes = ref([]);
+const selectedPromotion = ref(null);
+const seatsSelectedCopy = ref([]);
+const showPromotionToast = ref(false);
+const finalPromotion = ref({id: null, quantity:null});
+
+watch(promotionTypes, () => {
+    if(!showPromotionToast.value){
+        promotionTypes.value.forEach(promotionType => {
+            if(promotionType.quantity > promotionType.generic_seats_allowed || promotionType.percent_allow > 0){
+                showPromotionToast.value = true;
+                toast('Tienes promociones que puedes aplicar!!', {
+                    "theme": "auto",
+                    "type": "deafult",
+                    "dangerouslyHTMLString": true
+                })
+            }
+        });                      
+    }                                              
+});
+
+watch(selectedPromotion, () => {
+
+    finalPromotion.value = {};
+    seatsSelected.value = JSON.parse(JSON.stringify(seatsSelectedCopy.value));
+    finalPromotion.value.id = selectedPromotion.value.id;
+    finalPromotion.value.quantity = 0;
+
+    if(selectedPromotion.value.type == 'descuento_por_compra_multiple') {
+        let seatsTopay = selectedPromotion.value.generic_seats_allowed;
+        let seatsToGift = selectedPromotion.value.promotional_seats_allowed;
+        let applicableIndex = 0;
+        
+        seatsSelected.value.forEach((seat) => {
+
+            if(seat.final_price == selectedPromotion.value.final_price){
+                if(applicableIndex % (seatsTopay + seatsToGift) < seatsTopay){
+                    seat.is_promotion = false;
+                } else {
+                    finalPromotion.value.quantity++;
+                    seat.is_promotion = true;
+                    seat.promotion_id = selectedPromotion.value.id;
+                    seat.is_gift = true;
+                    seat.price_types.forEach(priceType => {
+                        if(priceType.name == 'regular'){
+                            priceType.pivot.price = parseFloat(0);
+                        }
+                    })
+                }
+                applicableIndex++;
+            }
+        });
+                
+    } else if(selectedPromotion.value.type == 'descuento_por_porcentaje_por_boleto'){
+        seatsSelected.value.forEach((seat) => {
+            seat.price_types.forEach(priceType => {
+                if(seat.final_price == selectedPromotion.value.final_price){
+                    finalPromotion.value.quantity++;
+                    seat.promotion_id = selectedPromotion.value.id;
+                    if(priceType.name == 'regular'){
+                        const discount = priceType.pivot.price * (selectedPromotion.value.percent_allow / 100);
+                        priceType.pivot.price = priceType.pivot.price - discount;
+                    }
+                }
+            })
+        });
+    }
+
+    updateTotal();
+
+    toast('La promocion ha sido aplicada', {
+        "theme": "auto",
+        "type": "success",
+        "dangerouslyHTMLString": true
+    })
+
+});
 
 function updateTotal() {
     amountReceived.value = 0;
@@ -229,22 +318,7 @@ function updateTotal() {
     const processedSeats = new Set();
 
     filteredPaymentTypes.value.forEach(paymentType => {
-        seatsSelected.value.forEach((seat) => {
-
-            if(seat.promotions.length > 0) { 
-                seat.promotions.forEach(promotion => {
-                   const actualPromotionExist = promotionTypes.value.find(promo => promo.type === actualPromotionExist);
-                   if(actualPromotionExist) {
-                    promotionTypes.value.map();
-                   } else {
-                        promotionTypes.value.push({
-                            'type': actualPromotionExist,
-                            'quantity': 1
-                        });
-                   }
-                });
-            }
-
+        seatsSelected.value.forEach((seat) => {            
             if (!processedSeats.has(seat.seat_catalogue.code)) {
                 let price;
                 if (paymentType.name === 'cortesia') {
@@ -254,6 +328,7 @@ function updateTotal() {
                 } else {
                     price = priceFinal(seat, 'regular');
                 }
+                seat.final_price = price;
                 totalAmount.value = (parseFloat(totalAmount.value || 0) + parseFloat(price));
                 processedSeats.add(seat.seat_catalogue.code);
             }
@@ -270,6 +345,43 @@ function updateTotal() {
         amountReceivedCash.value = 0;
     } else if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'efectivo')){
         amountToPayCard.value = 0;
+    }
+
+    if(!selectedPromotion.value){
+        seatsSelectedCopy.value = JSON.parse(JSON.stringify(seatsSelected.value));
+    }
+
+    promotionTypes.value = [];
+
+    seatsSelectedCopy.value.forEach(seat => {
+        if(seat.promotions.length > 0) { 
+            seat.promotions.forEach(promotion => {
+                const actualPromotionExist = promotionTypes.value.find(promo => promo.type === promotion.promotion_type.name && promo.final_price === seat.final_price);
+                if(actualPromotionExist) {
+                    promotionTypes.value.forEach(promotionType => {
+                        if (promotionType.type === promotion.promotion_type.name && promotionType.final_price === seat.final_price) {
+                            promotionType.quantity++;
+                        }
+                    });
+                } else {
+                    promotionTypes.value.push({
+                        'id': promotion.id,
+                        'type': promotion.promotion_type.name,
+                        'quantity': 1,
+                        'final_price': seat.final_price,
+                        'description': promotion.description,
+                        'generic_seats_allowed': promotion.generic_seats_allowed,
+                        'maximun_promotions_allowed': promotion.maximun_promotions_allowed,
+                        'promotional_seats_allowed': promotion.promotional_seats_allowed,
+                        'percent_allow': promotion.percent_allow,
+                    });
+                }
+            });
+        }
+    });
+
+    if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
+        amountToPayCard.value = totalAmount.value;
     }
 
 }
@@ -295,6 +407,7 @@ const seatsASection = ref([]);
 const seatsCSection = ref([]);
 const seatsFSection = ref([]);
 const loadingSectionDialog = ref(false);
+const seatAvailability = ref([]);
 
 const handleSectionClick = (section) => {
     const actualSection = section.split('');
@@ -370,6 +483,13 @@ const selectZones = () => {
     const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
     stadiumHdxImg.classList.remove('tw-rotate-90');
     stadiumHdxImg.classList.add('tw-rotate-0');
+    selectedPromotion.value = null;
+    seatsSelectedCopy.value = [];
+    showPromotionToast.value = false;
+    seatAvailability.value = [];
+
+    getSeatAvailability();
+
 };
 
 /*
@@ -430,8 +550,6 @@ const props = defineProps({
     }
 });
 
-console.log(props.a_zone);
-
 const users_list = [];
 const userToTransfer = ref(null);
 
@@ -449,6 +567,7 @@ props.users.forEach(element => {
 * | declare OnMounted
 */
 onMounted(() => {
+
     nextTick(() => {
         loadSvg('zones_hdx');
     });
@@ -459,7 +578,22 @@ onMounted(() => {
             sellerDialog.click();
         }
     }
+    getSeatAvailability();
+
 });
+
+const getSeatAvailability = () => {
+    const data = {event_id: props.event.id};
+    
+    axios.get(route('events.availability'), { params: data })
+        .then(response => {
+            seatAvailability.value = response.data.data;
+            console.log(seatAvailability.value);
+        })
+        .catch(error => {
+            console.log(error)
+        })
+}
 
 /*
 * |--------------------------------------
@@ -493,6 +627,16 @@ watch(() => amountReceivedCash.value, (newValue) => {
 });
 
 watch(() => purchaseType.value, (newValue) => {
+
+    if(newValue == 'abonado' && selectedPromotion.value) {
+        toast('Una vez selecionada una promocion no sera posible la compra de abonos', {
+            "theme": "auto",
+            "type": "error",
+            "autoClose": 10000,
+            "dangerouslyHTMLString": true
+        })
+        return 
+    }
     purchaseStatus.value = 'final';
     if(totalAttempts.value == 0) {
         originalTotalAmount.value = totalAmount.value;
@@ -725,10 +869,11 @@ const onSubmitConfirm = (isActive) => {
     serie_id: props.event.serie_id,
     is_transfer: isTransfer,
     user_to_transfer: userToTransfer.value,
+    final_promotion: finalPromotion.value,
 };
 
-console.log(seatsSelectedData);
-return
+/* console.log(seatsSelectedData);
+return */
 
 axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
     .then(response => {
@@ -751,6 +896,9 @@ axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
             const pdfUrl = window.URL.createObjectURL(pdfBlob);
             printInKioskMode(pdfUrl);
             selectZones();
+            setTimeout(() => {
+                selectZones();
+            }, 100);
         }
 
     })
@@ -816,6 +964,9 @@ const updateHolder = (index) => {
 }
 
 watch(purchaseType, () => {
+    if(purchaseType.value == 'abonado' && selectedPromotion.value) {
+        return 
+    }
     if(purchaseType.value == 'abonado'){
         seasonTicketsDialog.value = true;
     }
@@ -843,6 +994,10 @@ const seasonTicktesDataConfirm = () => {
         "dangerouslyHTMLString": true
     })
 }
+
+const cardPaymentTypeError = computed(() => {
+    return rules.required(cardPaymentTypesSelected.value) !== true;
+});
 
 </script>
 
@@ -874,13 +1029,61 @@ const seasonTicktesDataConfirm = () => {
     </v-dialog>
 
     <div v-if="seatsSelected.length > 0" @click="scrollTopaymentSection" class="tw-fixed tw-bottom-20 tw-right-3 tw-z-[60]">
-        <div class="tw-flex tw-items-center tw-justify-center tw-cursor-pointer hover:tw-scale-110 tw-transition-transform tw-duration-700">
+        <div class="tw-flex tw-items-center tw-justify-center -tw-rotate-45 tw-cursor-pointer hover:tw-scale-105 tw-transition-transform tw-duration-700">
             <div class="tw-relative">
-                <div class="tw-bg-gradient-to-r tw-from-green-500 tw-to-green-300 lg:tw-to-green-400 tw-w-[50px] tw-h-[50px] tw-rounded-full tw-flex tw-items-center tw-justify-center">
-                    <span class="tw-animate-bounce material-symbols-outlined tw-z-20 tw-text-white tw-text-xl lg:tw-text-2xl">shopping_cart</span>
-                </div>
+            <div class="tw-bg-gradient-to-r tw-from-green-500 tw-to-green-400 tw-w-12 tw-h-12 tw-rounded-full tw-flex tw-items-center tw-justify-center">
+                <span class="material-symbols-outlined tw-z-20 tw-rotate-45 tw-text-white tw-text-xl lg:tw-text-2xl">shopping_cart</span>
+            </div>
+            <div class="tw-z-10 tw-absolute tw-bottom-0 tw-left-1/2 tw-transform -tw-translate-x-1/2 tw-translate-y-[20%] tw-w-6 tw-h-6 tw-bg-green-500 tw-rotate-45 tw-rounded-[4px]"></div>
             </div>
         </div>
+    </div>
+
+    <div v-if="showPromotionToast" class="tw-fixed tw-bottom-36 tw-right-3 tw-z-[60]">
+        <v-bottom-sheet>
+            <template v-slot:activator="{ props }">
+                <div v-bind="props" class="tw-relative">
+                    <div class="tw-flex tw-items-center tw-justify-center -tw-rotate-45 tw-cursor-pointer hover:tw-scale-105 tw-transition-transform tw-duration-700">
+                        <div class="tw-bg-gradient-to-r tw-from-purple-500 tw-to-purple-400 tw-w-12 tw-h-12 tw-rounded-full tw-flex tw-items-center tw-justify-center">
+                            <span class="material-symbols-outlined tw-z-20 tw-rotate-45 tw-text-white tw-text-xl lg:tw-text-2xl">featured_seasonal_and_gifts</span>
+                        </div>
+                        <div class="tw-z-10 tw-absolute tw-bottom-0 tw-left-1/2 tw-transform -tw-translate-x-1/2 tw-translate-y-[20%] tw-w-6 tw-h-6 tw-bg-purple-500 tw-rotate-45 tw-rounded-[4px]"></div>
+                    </div>
+                    <div class="tw-absolute tw-animate-bounce tw-bottom-full tw-right-0 tw-transform tw-w-[100px] tw-text-center -tw-translate-x-1/2 tw-mb-1 tw-px-2 tw-flex tw-items-center tw-justify-center tw-py-1 tw-shadow-xl tw-bg-gradient-to-r tw-from-purple-500 tw-to-yellow-500 tw-text-white tw-rounded-full">
+                        <span class="tw-text-[10px] tw-block">Abrir promociones</span>
+                        <div class="tw-absolute tw-bottom-[-5px] tw-left-1/2 tw-transform tw-border-l-[6px] tw-border-l-transparent tw-border-r-[6px] tw-border-r-transparent tw-border-t-[6px] tw-border-t-purple-500"></div>
+                    </div>
+                </div>
+            </template>
+
+            <v-card>
+                <v-col v-if="showPromotionToast" cols="12">
+                    <h3 class="tw-text-center tw-font-bold tw-text-lg tw-mb-3 tw-text-gray-700">Selecciona una promoción:</h3>
+                    <v-radio-group v-model="selectedPromotion" inline>
+                        <div v-for="(promotion, index) in promotionTypes" :key="index">
+                                <div v-if="promotion.percent_allow > 0">
+                                    <div class="tw-border-4 tw-border-yellow-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
+                                        <v-radio color="yellow" :key="index" :value="promotion">
+                                            <template v-slot:label>
+                                                <div>{{ promotion.description }}<strong class="tw-text-yellow-700">. Para asientos con precio de {{ formatPrice(promotion.final_price) }}</strong></div>
+                                            </template>
+                                        </v-radio>
+                                    </div>
+                                </div>
+                                <div v-else-if="promotion.quantity > promotion.generic_seats_allowed">
+                                    <div class="tw-border-4 tw-border-purple-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
+                                        <v-radio color="purple" :key="index" :value="promotion">
+                                            <template v-slot:label>
+                                                <div>{{ promotion.description }}<strong class="tw-text-purple-700">. Para asientos con precio de {{ formatPrice(promotion.final_price) }}</strong></div>
+                                            </template>
+                                        </v-radio>
+                                    </div>
+                                </div>
+                        </div>
+                    </v-radio-group>
+                </v-col>
+            </v-card>
+        </v-bottom-sheet>
     </div>
 
     <section class="tw-overflow-hidden tw-mt-0">
@@ -888,7 +1091,12 @@ const seasonTicktesDataConfirm = () => {
             <img class="tw-w-full" :src="`/storage/${event.global_image.file_path}`" alt="">
         </div>
     </section>
-    <div class="tw-hidden lg:tw-block tw-w-[72%] tw-h-72 tw-overflow-hidden tw-bg-center tw-bg-cover" :style="{ backgroundImage: `linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(255,255,255,1) 100%), url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
+    <div class="tw-relative tw-hidden lg:tw-block tw-w-[72%] tw-h-[470px] tw-overflow-hidden tw-bg-center tw-bg-cover" :style="{ backgroundImage: `url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
+        <div class="tw-w-full tw-bg-white/70 tw-flex tw-items-center tw-justify-center tw-backdrop-blur-md tw-p-5 tw-absolute tw-bottom-0 ">
+            <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-font-bold tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-white tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
+                <span class="material-symbols-outlined tw-text-xl tw-text-purple-500">featured_seasonal_and_gifts</span> {{ event.promotion_announcement }}
+            </div>  
+        </div>
     </div>
 
     <section class="tw-w-full tw-min-h-screen tw-bg-white tw-mt-[-37px] lg:tw-mt-0 tw-rounded-[35px] lg:tw-rounded-[0px] tw-relative tw-mb-20 lg:tw-mb-0">
@@ -909,13 +1117,18 @@ const seasonTicktesDataConfirm = () => {
                                 {{ event.name }}
                             </h2>
                             <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-start lg:tw-items-center tw-gap-2 lg:tw-gap-5">
+                                <div class="tw-inline-flex lg:tw-hidden tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-font-bold tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
+                                    <span class="material-symbols-outlined tw-text-xl tw-text-purple-500">featured_seasonal_and_gifts</span> {{ event.promotion_announcement }}
+                                </div>                                
                                 <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
                                     <span class="material-symbols-outlined tw-text-xl">calendar_today</span>{{ event.serie.global_season.name }}
                                 </div>
                                 <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
                                     <span class="material-symbols-outlined tw-text-xl">location_on</span>El nido del halcon
                                 </div>
-                                <p class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-text-gray-800 tw-bg-gray-100 hover:tw-bg-gray-200">📅 | {{ dateFormat(event.start_date) }} </p>
+                                <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
+                                    <span class="material-symbols-outlined tw-text-xl">calendar_clock</span>{{ dateFormat(event.start_date) }}
+                                </div>
                             </div>
                         </div>
                         <div class="tw-mt-7">
@@ -994,7 +1207,7 @@ const seasonTicktesDataConfirm = () => {
                                             <template v-slot:activator="{ props: activatorProps }">
                                                 <div v-bind="activatorProps" class="!tw-absolute -tw-top-4 -tw-right-6 ">
                                                     <!-- <div class="tw-animate-ping tw-absolute tw-right-[2px] tw-top-[5px] tw-inline-flex tw-h-5 tw-w-5 tw-rounded-full tw-bg-purple-500 tw-opacity-80"></div> -->
-                                                    <span class="material-symbols-outlined tw-text-2xl tw-text-purple-600 tw-animate-bounce tw-cursor-pointer">photo_library</span>
+                                                    <span class="material-symbols-outlined tw-text-2xl tw-text-purple-600 tw-cursor-pointer">photo_library</span>
                                                 </div>
                                             </template>
                                             <template v-slot:default="{ isActive }">
@@ -1088,7 +1301,7 @@ const seasonTicktesDataConfirm = () => {
                             </v-dialog>
                         </div>
 
-                        <div class="tw-p-5 tw-bg-purple-50 tw-text-center tw-rounded-xl tw-mt-10">
+                        <div class="tw-p-5 tw-bg-gray-200 tw-text-center tw-rounded-xl tw-mt-10">
                             <p>Zonas disponibles en el estadio.</p>
                         </div>
                     </div>
@@ -1096,9 +1309,7 @@ const seasonTicktesDataConfirm = () => {
                     <div class="tw-w-full lg:tw-w-[28%] lg:tw-fixed tw-top-[83px] tw-right-0 tw-bg-white lg:tw-z-40">
                         <div class="tw-w-full tw-pb-5 lg:tw-h-[calc(100vh-83px)] lg:tw-overflow-y-auto tw-shadow-lg [&::-webkit-scrollbar]:!tw-w-2 [&::-webkit-scrollbar-thumb]:!tw-rounded-full [&::-webkit-scrollbar-track]:!tw-bg-white [&::-webkit-scrollbar-thumb]:!tw-bg-neutral-300">
                             <div class="tw-relative tw-flex tw-flex-col tw-bg-white tw-pointer-events-auto">
-                                <div class="tw-relative tw-overflow-hidden tw-min-h-[123px] tw-bg-slate-950 tw-text-center tw-rounded-2xl lg:tw-rounded-none">
-                                    <div class="tw-hidden lg:tw-block tw-absolute tw-left-1/2 tw-bottom-0 tw-h-[100px] tw-w-[300px] tw--translate-x-1/2 tw-rounded-full tw-bg-gradient-to-t tw-blur-[90px] tw-from-tw-primary-800 tw-to-tw-primary-600">
-                                    </div>
+                                <div class="tw-relative tw-overflow-hidden tw-bg-gray-200 tw-min-h-[123px] tw-text-center tw-rounded-2xl lg:tw-rounded-none">                                   
                                     <!-- SVG Background Element -->
                                     <figure class="tw-absolute tw-inset-x-0 tw-bottom-0 -tw-mb-px">
                                     <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 1920 100.1">
@@ -1110,7 +1321,7 @@ const seasonTicktesDataConfirm = () => {
 
                                 <div class="tw-relative tw-z-10 -tw-mt-12">
                                     <!-- Icon -->
-                                    <span class="tw-mx-auto tw-flex tw-justify-center tw-items-center tw-size-[62px] tw-rounded-full tw-border tw-border-gray-200 tw-bg-white tw-text-gray-700 tw-shadow-sm">
+                                    <span class="tw-mx-auto tw-flex tw-justify-center tw-items-center tw-size-[62px] tw-rounded-full tw-border tw-border-gray-200 tw-bg-white tw-text-gray-700 tw-shadow-xl">
                                     <svg class="tw-shrink-0 tw-size-6" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                         <path d="M1.92.506a.5.5 0 0 1 .434.14L3 1.293l.646-.647a.5.5 0 0 1 .708 0L5 1.293l.646-.647a.5.5 0 0 1 .708 0L7 1.293l.646-.647a.5.5 0 0 1 .708 0L9 1.293l.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .801.13l.5 1A.5.5 0 0 1 15 2v12a.5.5 0 0 1-.053.224l-.5 1a.5.5 0 0 1-.8.13L13 14.707l-.646.647a.5.5 0 0 1-.708 0L11 14.707l-.646.647a.5.5 0 0 1-.708 0L9 14.707l-.646.647a.5.5 0 0 1-.708 0L7 14.707l-.646.647a.5.5 0 0 1-.708 0L5 14.707l-.646.647a.5.5 0 0 1-.708 0L3 14.707l-.646.647a.5.5 0 0 1-.801-.13l-.5-1A.5.5 0 0 1 1 14V2a.5.5 0 0 1 .053-.224l.5-1a.5.5 0 0 1 .367-.27zm.217 1.338L2 2.118v11.764l.137.274.51-.51a.5.5 0 0 1 .707 0l.646.647.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.509.509.137-.274V2.118l-.137-.274-.51.51a.5.5 0 0 1-.707 0L12 1.707l-.646.647a.5.5 0 0 1-.708 0L10 1.707l-.646.647a.5.5 0 0 1-.708 0L8 1.707l-.646.647a.5.5 0 0 1-.708 0L6 1.707l-.646.647a.5.5 0 0 1-.708 0L4 1.707l-.646.647a.5.5 0 0 1-.708 0l-.509-.51z"></path>
                                         <path d="M3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5zm8-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5z"></path>
@@ -1120,19 +1331,34 @@ const seasonTicktesDataConfirm = () => {
                                 </div>
                             </div>
                             <div class="tw-px-5 tw-relative tw-flex tw-flex-col-reverse">
-                                <div v-if="seatsSelected.length == 0" class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-7">
-                                    <p class="tw-w-full tw-text-center tw-text-xs tw-p-3 tw-rounded-full tw-bg-gray-100 tw-mt-5">No se han selecionado asientos</p>
-                                    <h3 class="tw-text-2xl tw-font-bold">Asientos seleccionados</h3>
-                                    <h4 class="tw-text-sm mt-1">📍 El nido del halcon | Xalapa Ver.</h4>
-                                    <img class="tw-w-60 tw-h-auto" src="../../../../../public/img/seats-no-selected-img.svg" alt="">
+                                <div v-if="seatsSelected.length == 0" class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-7 tw-w-full tw-mt-5">
+                                    <div v-if="seatAvailability.length > 0" class="tw-grid tw-grid-cols-2 tw-w-full tw-gap-2 tw-items-center tw-justify-center">
+                                        <div v-for="(availability, index) in seatAvailability" :key="index">
+                                            <div class="tw-shadow-lg tw-p-3 tw-border tw-border-gray-100 tw-rounded-lg">
+                                                <p class="tw-text-[10px] lg:tw-text-xs">Disponibilidad en zona {{ availability.zone }}</p>
+                                                <p class="tw-font-bold tw-text-lg lg:tw-text-2xl tw-mt-1">{{ availability.available_seats }} <span class="tw-text-[10px] lg:tw-text-xs tw-font-normal">asientos libres</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div v-else class="tw-w-full">
+                                        <v-skeleton-loader
+                                        class="mx-auto"
+                                        type="image, article"
+                                        ></v-skeleton-loader>
+                                        <v-skeleton-loader
+                                        class="mx-auto"
+                                        type="image"
+                                        ></v-skeleton-loader>
+                                    </div>
+                                    <img v-if="seatAvailability.length > 0" class="tw-w-48 tw-h-auto" src="../../../../../public/img/seats-no-selected-img.svg" alt="">
                                 </div>
                                 <div v-if="seatsSelected.length > 0" class="payment-secction">
-                                    <div ref="paymentSection" class="tw-w-full ">
+                                    <div class="tw-w-full ">
                                         <h3 class="tw-font-bold tw-text-lg tw-text-center tw-my-3">Resumen de compra</h3>
                                         <v-expansion-panels v-model="panel" class="" multiple>
                                             <v-expansion-panel>
                                                 <v-expansion-panel-title expand-icon="mdi-menu-down">
-                                                  asientos seleccionados
+                                                  Asientos seleccionados
                                                 </v-expansion-panel-title>
                                                 <v-expansion-panel-text>
                                                     <div>
@@ -1229,18 +1455,20 @@ const seasonTicktesDataConfirm = () => {
                                                         Complemento para pago con tarjeta
                                                         </h4>
                                                         <v-select
-                                                        color="purple"
-                                                        clearable
-                                                        label="seleciona el tipo de tarjeta"
-                                                        hint="Selecciona el tipo de tarjeta"
-                                                        :item-props="globalCardPayementTypeProps"
-                                                        :items="global_card_payment_types"
-                                                        v-model="cardPaymentTypesSelected"
-                                                        :rules="[rules.required]"
+                                                            color="purple"
+                                                            clearable
+                                                            label="Selecciona el tipo de tarjeta"
+                                                            hint="Selecciona el tipo de tarjeta"
+                                                            :item-props="globalCardPayementTypeProps"
+                                                            :items="global_card_payment_types"
+                                                            v-model="cardPaymentTypesSelected"
+                                                            :rules="[rules.required]"
+                                                            :error="cardPaymentTypeError"
+                                                            :error-messages="cardPaymentTypeError ? ['Este campo es obligatorio'] : []"
                                                         ></v-select>
                                                         <v-text-field
                                                             v-if="viewVendorTopics(user_roles)"
-                                                            label="Monto a pagar para tarjeta"
+                                                            label="Monto a pagar con tarjeta"
                                                             color="purple"
                                                             clearable
                                                             hint="Monto recibido por el cliente"
@@ -1249,7 +1477,7 @@ const seasonTicktesDataConfirm = () => {
                                                         ></v-text-field>
                                                         <v-text-field
                                                             v-else
-                                                            label="Monto a pagar para tarjeta"
+                                                            label="Monto a pagar con tarjeta"
                                                             color="purple"
                                                             hint="Monto recibido por el cliente"
                                                             readonly
@@ -1307,7 +1535,7 @@ const seasonTicktesDataConfirm = () => {
                                                             <p class="tw-py-2 tw-px-4 tw-bg-yellow-100 tw-border-l-4 tw-border-l-yellow-500 tw-text-yellow-500 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para la temporada a la que pertenece este eventos.</p>
                                                         </div>
 
-                                                        <p class="tw-opacity-50 tw-text-right tw-mb-3 tw-text-xs">Subtotal (tipos de precios selecionados): {{ formatPrice(totalAmount) }}</p>
+                                                        <p ref="paymentSection" class="tw-opacity-50 tw-text-right tw-mb-3 tw-text-xs">Subtotal (tipos de precios selecionados): {{ formatPrice(totalAmount) }}</p>
                                                         <p class="tw-font-semibold tw-text-right tw-mb-3">Total: {{ formatPrice(totalAmount) }}</p>
                                                         <v-btn
                                                             v-if="showButtonPayment"
@@ -1330,28 +1558,11 @@ const seasonTicktesDataConfirm = () => {
                                                         <v-btn
                                                             @click="selectZones"
                                                             rounded="xl" size="large" block
-                                                            class="text-none !tw-text-white !tw-bg-gradient-to-b !tw-from-red-600 !tw-to-red-400 tw-mt-5"
+                                                            class="text-none !tw-text-white !tw-bg-gradient-to-b !tw-from-red-600 !tw-to-red-400 tw-mt-5 tw-mb-20"
                                                         >
                                                             <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">delete</span>Cancelar seleccion
                                                         </v-btn>
 
-                                                        <!-- <v-dialog max-width="700" v-if="viewVendorTopics(user_roles)">
-                                                            <template v-slot:activator="{ props: activatorProps }">
-                                                                <v-btn :disabled="!form" type="submit" :loading="loadingg" v-bind="activatorProps" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
-                                                            </template>
-                                                            <template v-slot:default="{ isActive }">
-                                                                <v-card title="¿Estas seguro de realizar la compra?">
-                                                                <v-card-text>
-                                                                    <iframe src="http://127.0.0.1:8000/img/ticket_test.pdf" width="100%" height="400"></iframe>
-                                                                </v-card-text>
-
-                                                                <v-card-actions>
-                                                                    <v-spacer></v-spacer>
-                                                                    <v-btn color="red" rounded="xl" variant="tonal" class="text-none" text="Cancelar" @click="isActive.value = false"></v-btn>
-                                                                </v-card-actions>
-                                                                </v-card>
-                                                            </template>
-                                                        </v-dialog> -->
                                                         <v-dialog fullscreen v-model="seasonTicketsDialog" transition="dialog-bottom-transition">
                                                             <template v-slot:activator="{ props: activatorProps }">
                                                                 <v-btn v-bind="activatorProps" variant="elevated" class="!tw-hidden text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
@@ -1699,7 +1910,10 @@ const seasonTicktesDataConfirm = () => {
 }
 
 .tw-animate-spin {
-        animation: tw-spin 2s linear infinite;
+    animation: tw-spin 2s linear infinite;
+}
+.tw-animate-ping {
+    animation:  tw-ping 3s linear infinite;
 }
 @keyframes tw-bounce {
   0%, 100% {
@@ -1715,7 +1929,7 @@ const seasonTicktesDataConfirm = () => {
 }
 @media (min-width: 1024px) {
     .tw-animate-bounce {
-    animation: tw-bounce 1s infinite;
+    animation: tw-bounce 1.5s infinite;
     }
 }
 

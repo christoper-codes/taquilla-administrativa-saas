@@ -18,6 +18,8 @@ class SaleTicket extends Model
         'total_amount',
         'total_returned',
         'payment_in_installments',
+        'promotion_id',
+        'promotion_quantity',
         'is_transfer',
         'is_online',
     ];
@@ -71,5 +73,10 @@ class SaleTicket extends Model
         return $this->belongsToMany(EventSeatCatalog::class, 'event_seat_catalog_sale_ticket', 'sale_ticket_id', 'event_seat_catalog_id')
             ->withPivot('user_id', 'promotion_id', 'agreement_promotion_id', 'is_active')
             ->withTimestamps();
+    }
+
+    public function promotion()
+    {
+        return $this->belongsTo(Promotion::class);
     }
 }

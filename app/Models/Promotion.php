@@ -46,4 +46,9 @@ class Promotion extends Model
                     ->withTimestamps();
     }
 
+    public function saleTickets()
+    {
+        return $this->hasMany(SaleTicket::class);
+    }
+
 }

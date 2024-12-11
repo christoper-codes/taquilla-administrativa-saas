@@ -41,7 +41,8 @@ class DatabaseSeeder extends Seeder
             SeatCataloguesSeeder::class,
             PromotionTypesSeeder::class,
             //SeatCataloguesSeeder::class,
-            SalesTicketCancellationCodesSeeder::class
+            SalesTicketCancellationCodesSeeder::class,
+            CourtesyTypesSeeder::class,
         ]);
     }
 }

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreignId('sale_ticket_id')->nullable()->constrained('sale_tickets');
             $table->string('qr')->nullable();
             $table->decimal('price', 14, 4)->nullable();
+            $table->boolean('is_gift')->default(false);
             $table->boolean('is_verified')->default(false);
             $table->boolean('is_active')->default(true);
             $table->timestamps();

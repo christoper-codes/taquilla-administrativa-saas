@@ -77,6 +77,7 @@ Route::get('/taquillas/share-ticket', [TicketOfficeController::class, 'share'])-
 */
 Route::middleware('auth')->group(function() {
     Route::get('/eventos/{slug}/{id}', [EventController::class, 'show'])->name('events.show');
+    Route::get('/eventos/disponiblidad', [EventController::class, 'getSeatAvailabilityByZone'])->name('events.availability');
     Route::get('/pago-exitoso', [EventController::class, 'success'])->name('events.success');
     Route::get('/taquillas', [TicketOfficeController::class, 'index'])->name('ticket-offices.index');
     Route::get('/taquillas/{ticketOffice}', [TicketOfficeController::class, 'show'])->name('ticket-offices.show');

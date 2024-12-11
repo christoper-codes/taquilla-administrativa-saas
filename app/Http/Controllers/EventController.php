@@ -134,7 +134,7 @@ class EventController extends Controller
 
             $request->validate([
                 'event_type_id' => 'required|exists:event_types,id',
-                'global_season_id' => 'nullable|exists:events,id',
+                'global_season_id' => 'nullable',
                 'serie_id' => 'nullable|exists:series,id',
                 'name' => 'required|string|max:255',
                 'description' => 'required|string|max:255',
@@ -255,6 +255,34 @@ class EventController extends Controller
         }
     }
 
+    /* 
+    * Get seat availablility by zone
+    */
+    public function getSeatAvailabilityByZone(Request $request)
+    {
+        try {
+
+            $request->validate([
+                'event_id' => 'required'
+            ]);
+
+            $response = $this->event_service->getAvailability($request->all());
+
+            return response()->json([
+                'data' => $response,
+                'message' => 'Las disponibilidad de los asientos se a obtenido con exito!!',
+                'success' => true 
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'data' => null,
+                'message' => $e->getMessage(),
+                'success' => false
+            ], 500);
+        }
+    }
+
     public function getEventSeatCatalogues(Request $request)
     {
         try {
@@ -363,6 +391,7 @@ class EventController extends Controller
             'holder_zip_code' => 'nullable',
             'description' => 'nullable',
             'is_owner' => 'nullable',
+            'final_promotion' => 'nullable',
         ]);
 
 
@@ -425,6 +454,15 @@ class EventController extends Controller
             'serie_id' => 'nullable',
             'is_transfer' => 'nullable|boolean',
             'user_to_transfer' => 'nullable',
+            'holder_name' => 'nullable',
+            'holder_last_name' => 'nullable',
+            'holder_middle_name' => 'nullable',
+            'holder_email' => 'nullable',
+            'holder_phone' => 'nullable',
+            'holder_zip_code' => 'nullable',
+            'description' => 'nullable',
+            'is_owner' => 'nullable',
+            'final_promotion' => 'nullable',
         ]);
 
         DB::beginTransaction();

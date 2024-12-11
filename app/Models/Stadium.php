@@ -90,4 +90,9 @@ class Stadium extends Model
     {
         return $this->hasMany(Promotion::class);
     }
+
+    public function courtesyTypes()
+    {
+        return $this->hasMany(CourtesyType::class);
+    }
 }

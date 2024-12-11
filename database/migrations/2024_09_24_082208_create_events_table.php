@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug');
             $table->string('description');
+            $table->string('promotion_announcement')->default('Proximamente nuevas promociones!!');
             $table->dateTime('start_date')->nullable();
             $table->dateTime('end_date')->nullable();
             $table->boolean('is_active')->default(true);
