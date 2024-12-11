@@ -199,6 +199,35 @@ class EventService
 
     /*
     * |--------------------------------------------------------------------------
+    * | Get seat availablility by zone
+    */
+    public function getAvailability(array $data)
+    {
+        try {
+
+            $event = $this->event_repository->getOnlyEvent($data['event_id']);
+
+            $availability = $event->eventSeatCatalogues->filter(function ($item) {
+                return $item->seatCatalogueStatus->name === 'disponible';
+            })->groupBy(function ($item) {
+                return $item->seatCatalogue->zone;
+            })->map(function ($items, $zone) {
+                return [
+                    'zone' => $zone,
+                    'available_seats' => $items->count()
+                ];
+            })->values()->toArray();
+
+            return $availability;
+
+        } catch(\Exception $e){
+            throw $e;
+        }
+    }
+
+
+    /*
+    * |--------------------------------------------------------------------------
     * | Confirm seats purchase
     */
     public function confirmSeatsPurchase($data)
@@ -224,6 +253,8 @@ class EventService
             $saleTicket->total_amount = $data['total_amount'];
             $saleTicket->total_returned = $data['total_returned'];
             $saleTicket->payment_in_installments = $data['payment_in_installments'];
+            $saleTicket->promotion_id = $data['final_promotion']['id'] ?? null;
+            $saleTicket->promotion_quantity = $data['final_promotion']['quantity'] ?? null;
             $saleTicket->is_online = $data['is_online'];
             $saleTicket->is_transfer = $data['is_transfer'] ?? false;
             $saleTicket->save();
@@ -294,14 +325,14 @@ class EventService
                     /*
                     * Confirm seat purchase
                     */
-                    $this->event_repository->confirmSeatsPurchase($event->id, $seat['seat_catalogue_id'], $data['member_user_id'], $saleTicket->id, $qr, $seat['final_price']);
+                    $this->event_repository->confirmSeatsPurchase($event->id, $seat['seat_catalogue_id'], $data['member_user_id'], $saleTicket->id, $qr, $seat['final_price'], $seat['is_gift']);
 
                     /*
                     * Create relationship between sale ticket and eventSeatCatalogs
                     */
                     $saleTicket->eventSeatCatalogs()->attach($event_seat_catalogue->id, [
                         'user_id' => $data['member_user_id'],
-                        'promotion_id' => null,
+                        'promotion_id' => $seat['promotion_id'],
                         'agreement_promotion_id' => null,
                         'is_active' => true,
                     ]);
