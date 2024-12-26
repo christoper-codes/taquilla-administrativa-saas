@@ -10,7 +10,34 @@ use App\Http\Controllers\SerieController;
 use App\Http\Controllers\SeatCatalogueController;
 use App\Http\Controllers\SeatCatalogueStatusController;
 use App\Http\Controllers\TicketOfficeController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+
+
+
+Route::get('/migrate-fresh', function () {
+    
+    Artisan::call('migrate:fresh');
+    
+    return "migrate-fresh";
+    
+});
+
+Route::get('/db-seed', function () {
+    
+    Artisan::call('db:seed');
+    
+    return "db-seed";
+    
+});
+
+Route::get('/storage-link', function () {
+    
+    Artisan::call('storage:link');
+    
+    return "storage-link";
+    
+});
 
 
 /*
