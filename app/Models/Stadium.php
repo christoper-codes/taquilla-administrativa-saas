@@ -95,4 +95,10 @@ class Stadium extends Model
     {
         return $this->hasMany(CourtesyType::class);
     }
+
+    public function reasonAgreements()
+    {
+        return $this->hasMany(ReasonAgreement::class);
+    }
+
 }
