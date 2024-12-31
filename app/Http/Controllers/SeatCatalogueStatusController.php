@@ -2,25 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SeatCatalogueStatus;
+use App\Helpers\WebResponseHelper;
+use App\Services\SeatCatalogueStatusesService;
 use Illuminate\Http\Request;
 
 class SeatCatalogueStatusController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+    protected $seat_catalogue_statuses_service;
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function __construct(SeatCatalogueStatusesService $seat_catalogue_statuses_service)
     {
-        //
+        $this->seat_catalogue_statuses_service = $seat_catalogue_statuses_service;
     }
 
     /**
@@ -28,38 +20,46 @@ class SeatCatalogueStatusController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+
+            $request->validate([
+                'seats' => 'required|array',
+                'seats.*.id' => 'required|exists:event_seat_catalog,id',
+                'seats.*.modified_status_id' => 'required|exists:seat_catalogue_statuses,id'
+            ]);
+
+            $seats = $request->collect('seats')->map(function ($seat) {
+                return [
+                    "id" => $seat['id'],
+                    "modified_status_id" => $seat['modified_status_id']
+                ];
+            })->toArray();
+
+            $data =  $this->seat_catalogue_statuses_service->addStatusToSeat($seats);
+
+            return response()->json($data, 200);
+
+        } catch (\Exception $e) {
+
+            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al guardar las promociones para los asientos');
+
+        }
     }
 
     /**
-     * Display the specified resource.
+     * Display a listing of the resource.
      */
-    public function show(SeatCatalogueStatus $seatCatalogueStatus)
+    public function blockAndReservationStatuses()
     {
-        //
-    }
+        try {
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(SeatCatalogueStatus $seatCatalogueStatus)
-    {
-        //
-    }
+            $seat_catalogue_statuses = $this->seat_catalogue_statuses_service->getBlockAndReservationStatuses();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, SeatCatalogueStatus $seatCatalogueStatus)
-    {
-        //
-    }
+            return response()->json($seat_catalogue_statuses, 200);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(SeatCatalogueStatus $seatCatalogueStatus)
-    {
-        //
+      } catch (\Exception $e) {
+
+        WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar los status de asientos');
+      }
     }
 }

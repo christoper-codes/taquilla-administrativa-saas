@@ -21,6 +21,9 @@ class Stadium extends Model
         'is_active'
     ];
 
+    public function events(){
+        return $this->hasMany(Event::class);
+    }
 
     public function leadingCompany()
     {
@@ -90,4 +93,15 @@ class Stadium extends Model
     {
         return $this->hasMany(Promotion::class);
     }
+
+    public function courtesyTypes()
+    {
+        return $this->hasMany(CourtesyType::class);
+    }
+
+    public function reasonAgreements()
+    {
+        return $this->hasMany(ReasonAgreement::class);
+    }
+
 }

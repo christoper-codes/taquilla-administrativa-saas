@@ -17,6 +17,9 @@ class SaleTicket extends Model
         'amount_received',
         'total_amount',
         'total_returned',
+        'payment_in_installments',
+        'promotion_id',
+        'promotion_quantity',
         'is_transfer',
         'is_online',
     ];
@@ -46,7 +49,7 @@ class SaleTicket extends Model
     public function globalPaymentTypes()
     {
         return $this->belongsToMany(GlobalPaymentType::class, 'global_payment_type_sale_ticket', 'sale_ticket_id', 'global_payment_type_id')
-            ->withPivot('global_card_payment_type_id', 'amount', 'is_active')
+            ->withPivot('global_card_payment_type_id', 'reason_agreement_id', 'amount', 'original_amount', 'reason_courtesy', 'is_active')
             ->withTimestamps();
     }
 
@@ -70,5 +73,10 @@ class SaleTicket extends Model
         return $this->belongsToMany(EventSeatCatalog::class, 'event_seat_catalog_sale_ticket', 'sale_ticket_id', 'event_seat_catalog_id')
             ->withPivot('user_id', 'promotion_id', 'agreement_promotion_id', 'is_active')
             ->withTimestamps();
+    }
+
+    public function promotion()
+    {
+        return $this->belongsTo(Promotion::class);
     }
 }

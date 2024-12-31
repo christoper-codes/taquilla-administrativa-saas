@@ -14,7 +14,7 @@ class EventRepository implements EventRepositoryInterface
     */
     public function getAll()
     {
-        return Event::with(['globalImage','serie.globalSeason.stadium.globalAddress'])->get();
+        return Event::with(['globalImage','serie.globalSeason.stadium.globalAddress', 'globalSeason'])->get();
     }
 
     public function getById($id)
@@ -25,6 +25,7 @@ class EventRepository implements EventRepositoryInterface
             'eventSeatCatalogues.priceTypes',
             'eventSeatCatalogues.seatCatalogueStatus',
             'eventSeatCatalogues.promotions',
+            'eventSeatCatalogues.promotions.promotionType',
         ])->findOrFail($id);
 
         return $event;
@@ -63,7 +64,7 @@ class EventRepository implements EventRepositoryInterface
         return $event;
     }
 
-    public function confirmSeatsPurchase($event_id, $seat_catalogue_id, $member_user_id = null, $sale_ticket_id = null, $qr = null, $price = null)
+    public function confirmSeatsPurchase($event_id, $seat_catalogue_id, $member_user_id = null, $sale_ticket_id = null, $qr = null, $price = null, $is_gift = null)
     {
         $event = Event::findOrFail($event_id);
 
@@ -75,6 +76,7 @@ class EventRepository implements EventRepositoryInterface
             'sale_ticket_id' => $sale_ticket_id,
             'qr' => $qr,
             'price' => $price,
+            'is_gift' => $is_gift,
         ]);
 
         return $event;
@@ -86,4 +88,9 @@ class EventRepository implements EventRepositoryInterface
             ->where('is_active', true)
             ->get();
     }
+
+    public function getOnlyEvent($id)
+    {
+        return Event::findOrFail($id);
+    } 
 }

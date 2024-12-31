@@ -13,7 +13,7 @@ class EventsSeeder extends Seeder
      */
     public function run(): void
     {
-        Event::create([
+       /*  Event::create([
             'event_type_id' => 1,
             'serie_id' => 1,
             'global_image_id' => null,
@@ -35,6 +35,6 @@ class EventsSeeder extends Seeder
             'start_date' => '2024-09-24 20:00:00',
             'end_date' => '2024-09-24 22:00:00',
             'is_active' => true
-        ]);
+        ]); */
     }
 }

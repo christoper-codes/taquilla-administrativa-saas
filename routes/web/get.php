@@ -8,8 +8,36 @@ use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\SeatCatalogueController;
+use App\Http\Controllers\SeatCatalogueStatusController;
 use App\Http\Controllers\TicketOfficeController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+
+
+
+Route::get('/migrate-fresh', function () {
+    
+    Artisan::call('migrate:fresh');
+    
+    return "migrate-fresh";
+    
+});
+
+Route::get('/db-seed', function () {
+    
+    Artisan::call('db:seed');
+    
+    return "db-seed";
+    
+});
+
+Route::get('/storage-link', function () {
+    
+    Artisan::call('storage:link');
+    
+    return "storage-link";
+    
+});
 
 
 /*
@@ -56,6 +84,7 @@ Route::get('/instituciones', [InstitutionController::class, 'index'])->name('ins
 Route::get('/eventos', [EventController::class, 'index'])->name('events.index');
 Route::get('/eventos-gestion', [EventController::class, 'indexManagement'])->name('event.management.indexManagement');
 Route::get('/eventos-gestion/{id}', [EventController::class, 'showManagement'])->name('event.management.showManagement');
+Route::post('/asientos-por-zona', [EventController::class, 'getEventSeatCatalogues'])->name('event.get.seat-catalogues');
 
 
 /*
@@ -75,6 +104,7 @@ Route::get('/taquillas/share-ticket', [TicketOfficeController::class, 'share'])-
 */
 Route::middleware('auth')->group(function() {
     Route::get('/eventos/{slug}/{id}', [EventController::class, 'show'])->name('events.show');
+    Route::get('/eventos/disponiblidad', [EventController::class, 'getSeatAvailabilityByZone'])->name('events.availability');
     Route::get('/pago-exitoso', [EventController::class, 'success'])->name('events.success');
     Route::get('/taquillas', [TicketOfficeController::class, 'index'])->name('ticket-offices.index');
     Route::get('/taquillas/{ticketOffice}', [TicketOfficeController::class, 'show'])->name('ticket-offices.show');
@@ -97,7 +127,15 @@ Route::middleware('auth')->group(function () {
 * |--------------------------------------------------------------------------
 * | Web Routes
 * |--------------------------------------------------------------------------
+* | Seat Catalog Statuses | ROUTES
+*/
+Route::get('/block-and-reservation-statuses', [SeatCatalogueStatusController::class, 'blockAndReservationStatuses'])->name('block.and.reservation.statuses');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
 * |Events | ROUTES
 */
 Route::get('/promociones-asientos', [EventSeatCatalogPromotionController::class, 'index'])->name('event.seat.catalog.promotion.index');
-Route::get('/saveAllSeatsForStadium', [SeatCatalogueController::class, 'saveAllSeatsForStadium'])->name('saveAllSeatsForStadium');
+Route::get('/save-all-seats-for-stadium', [SeatCatalogueController::class, 'saveAllSeatsForStadium'])->name('save.all.seats.for.stadium');

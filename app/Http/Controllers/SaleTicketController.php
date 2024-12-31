@@ -3,10 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\SaleTicket;
+use App\Services\SaleTicketService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SaleTicketController extends Controller
 {
+    protected $sale_ticket_service;
+
+    public function __construct(SaleTicketService $sale_ticket_service)
+    {
+        $this->sale_ticket_service = $sale_ticket_service;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -62,4 +70,27 @@ class SaleTicketController extends Controller
     {
         //
     }
+
+    /**
+     * Cancellation of sale tickets
+     */
+    public function cancellationSaleTickets(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+
+            $response = $this->sale_ticket_service->cancellationSaleTickets($request->all());
+
+            DB::commit();
+
+            return redirect()->back()->with('success', $response);
+
+        } catch(\Exception $e){
+            DB::rollBack();
+            return redirect()->back()->with('error', $e->getMessage());
+
+        }
+    }
+
+
 }

@@ -24,6 +24,7 @@ class EventSeatCatalog extends Model
         'qr',
         'sale_ticket_id',
         'price',
+        'is_gift',
         'is_verified',
         'is_active'
     ];

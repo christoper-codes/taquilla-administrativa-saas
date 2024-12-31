@@ -9,6 +9,7 @@ use App\Http\Controllers\EventSeatCatalogPromotionController;
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SeatCatalogueController;
+use App\Http\Controllers\SeatCatalogueStatusController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\TicketOfficeController;
 use Illuminate\Support\Facades\Route;
@@ -34,6 +35,7 @@ Route::middleware('auth')->group(function() {
 Route::middleware('auth')->group(function() {
     Route::post('/eventos/reservar-asientos-para-compra', [EventController::class, 'reserveSeatsToBuy'])->name('events.reserve-seats-to-buy');
     Route::post('/eventos/confirmar-compra-de-asientos', [EventController::class, 'confirmSeatsPurchase'])->name('events.confirm-seats-purchase');
+    Route::post('/eventos/imprimir-ticket-venta', [EventController::class, 'printSaleTicket'])->name('events.print-sale-ticket');
 
     Route::post('/pdf-test', [EventController::class, 'testPdf'])->name('pdf-test');
 
@@ -86,3 +88,11 @@ Route::post('/instituciones', [InstitutionController::class, 'store'])->name('in
 * |Events | ROUTES
 */
 Route::post('/eventos', [EventController::class, 'store'])->name('event.management.store');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Seat Catalog Status | ROUTES
+*/
+Route::post('/catalogo-de-status-para-asientos', [SeatCatalogueStatusController::class, 'store'])->name('seat.catalog.status.store');

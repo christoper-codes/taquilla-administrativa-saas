@@ -131,6 +131,26 @@ function priceFinal(seat, priceTypeName) {
 
 
 const addSeat = (seat) => {
+
+    if(selectedPromotion.value){
+        toast('Una vez selecionada una promocion ya no es posible agregar mas asientos a la compra.', {
+            "theme": "auto",
+            "type": "error",
+            "autoClose": 10000,
+            "dangerouslyHTMLString": true
+        })
+        return
+    }
+    if(selectedAgreementPromotion.value){
+        toast('Una vez selecionada una promocion ya no es posible agregar mas asientos a la compra.', {
+            "theme": "auto",
+            "type": "error",
+            "autoClose": 10000,
+            "dangerouslyHTMLString": true
+        })
+        return
+    }
+
     if(purchaseStatus.value == 'final' || purchaseStatus.value == 'retry') {
         purchaseStatus.value = 'retry';
         return;
@@ -144,6 +164,17 @@ const addSeat = (seat) => {
     if (!seatExist) {
         seat.quantity = 1;
         seat.final_price = priceFinal(seat, priceFinalType);
+        seat.holder_name = '';
+        seat.holder_last_name = '';
+        seat.holder_middle_name = '';
+        seat.is_owner = 'No';
+        seat.description = '';
+        seat.holder_zip_code = '';
+        seat.holder_phone = '';
+        seat.holder_email = '';
+        seat.is_promotion = false;
+        seat.promotion_id = '';
+        seat.is_gift = false;
         seatsSelected.value.push(seat);
         snackbar.value = true;
 
@@ -202,8 +233,153 @@ const filteredPaymentTypes = computed(() => {
 
 watch(filteredPaymentTypes, updateTotal);
 
+/*
+* handle promotions
+*/
+const promotionTypes = ref([]);
+const selectedPromotion = ref(null);
+const selectedAgreementPromotion = ref(null);
+const seatsSelectedCopy = ref([]);
+const showPromotionToast = ref(false);
+const finalPromotion = ref({id: null, quantity:null});
+
+watch(promotionTypes, () => {
+    if(!showPromotionToast.value){
+        promotionTypes.value.forEach(promotionType => {
+            if(promotionType.quantity > promotionType.generic_seats_allowed || promotionType.percent_allow > 0){
+                showPromotionToast.value = true;
+                toast('Tienes promociones que puedes aplicar!!', {
+                    "theme": "auto",
+                    "type": "deafult",
+                    "dangerouslyHTMLString": true
+                })
+            }
+        });
+    }
+});
+
+watch(selectedPromotion, () => {
+
+    finalPromotion.value = {};
+    seatsSelected.value = JSON.parse(JSON.stringify(seatsSelectedCopy.value));
+    finalPromotion.value.id = selectedPromotion.value.id;
+    finalPromotion.value.quantity = 0;
+
+    if(selectedPromotion.value.type == 'descuento_por_compra_multiple') {
+        let seatsTopay = selectedPromotion.value.generic_seats_allowed;
+        let seatsToGift = selectedPromotion.value.promotional_seats_allowed;
+        let applicableIndex = 0;
+
+        seatsSelected.value.forEach((seat) => {
+
+            if(seat.final_price == selectedPromotion.value.final_price){
+                if(applicableIndex % (seatsTopay + seatsToGift) < seatsTopay){
+                    seat.is_promotion = false;
+                } else {
+                    finalPromotion.value.quantity++;
+                    seat.is_promotion = true;
+                    seat.promotion_id = selectedPromotion.value.id;
+                    seat.is_gift = true;
+                    seat.price_types.forEach(priceType => {
+                        if(priceType.name == 'regular'){
+                            priceType.pivot.price = parseFloat(0);
+                        }
+                    })
+                }
+                applicableIndex++;
+            }
+        });
+
+    } else if(selectedPromotion.value.type == 'descuento_por_porcentaje_por_boleto'){
+        seatsSelected.value.forEach((seat) => {
+            seat.price_types.forEach(priceType => {
+                if(seat.final_price == selectedPromotion.value.final_price){
+                    finalPromotion.value.quantity++;
+                    seat.promotion_id = selectedPromotion.value.id;
+                    if(priceType.name == 'regular'){
+                        const discount = priceType.pivot.price * (selectedPromotion.value.percent_allow / 100);
+                        priceType.pivot.price = priceType.pivot.price - discount;
+                    }
+                }
+            })
+        });
+    }
+
+    updateTotal();
+
+    toast('La promocion ha sido aplicada', {
+        "theme": "auto",
+        "type": "success",
+        "dangerouslyHTMLString": true
+    })
+
+});
+
+watch(selectedAgreementPromotion, () => {
+
+    finalPromotion.value = {};
+    seatsSelected.value = JSON.parse(JSON.stringify(seatsSelectedCopy.value));
+    console.log(seatsSelectedCopy.value);
+    finalPromotion.value.id = selectedAgreementPromotion.value.id;
+    finalPromotion.value.quantity = 0;
+
+    if(selectedAgreementPromotion.value.promotion_type.name == 'descuento_por_compra_multiple') {
+        let seatsTopay = selectedAgreementPromotion.value.generic_seats_allowed;
+        let seatsToGift = selectedAgreementPromotion.value.promotional_seats_allowed;
+        let applicableIndex = 0;
+
+        seatsSelected.value.forEach((seat) => {
+
+            if(applicableIndex % (seatsTopay + seatsToGift) < seatsTopay){
+                seat.is_promotion = false;
+            } else {
+                finalPromotion.value.quantity++;
+                seat.is_promotion = true;
+                seat.promotion_id = selectedAgreementPromotion.value.id;
+                seat.agreement_promotion_id = selectedAgreementPromotion.value.pivot.id;
+                seat.is_gift = true;
+                seat.price_types.forEach(priceType => {
+                    if(priceType.name == 'regular'){
+                        priceType.pivot.price = parseFloat(0);
+                    }
+                })
+            }
+            applicableIndex++;
+        });
+
+    } else if(selectedAgreementPromotion.value.promotion_type.name == 'descuento_por_porcentaje_por_compra'){
+
+        seatsSelected.value.forEach((seat) => {
+            seat.price_types.forEach(priceType => {
+                finalPromotion.value.quantity++;
+                seat.promotion_id = selectedAgreementPromotion.value.id;
+                seat.agreement_promotion_id = selectedAgreementPromotion.value.pivot.id;
+                if(priceType.name == 'regular'){
+                    const discount = priceType.pivot.price * (selectedAgreementPromotion.value.percent_allow / 100);
+                    priceType.pivot.price = priceType.pivot.price - discount;
+                }
+
+            })
+        });
+    }
+
+    console.log(selectedAgreementPromotion.value)
+    console.log(seatsSelected.value)
+
+    updateTotal();
+
+    toast('La promocion ha sido aplicada', {
+        "theme": "auto",
+        "type": "success",
+        "dangerouslyHTMLString": true
+    })
+
+});
+
 function updateTotal() {
+
     amountReceived.value = 0;
+    amountReturned.value = 0;
     if (paymentTypesSelected.value.length >= 2) {
         amountReceivedCash.value = 0;
         amountToPayCash.value = 0;
@@ -219,9 +395,12 @@ function updateTotal() {
                 let price;
                 if (paymentType.name === 'cortesia') {
                     price = priceFinal(seat, 'cortesia');
+                } else if(purchaseType.value == 'abonado'){
+                    price = priceFinal(seat, 'abonado');
                 } else {
                     price = priceFinal(seat, 'regular');
                 }
+                seat.final_price = price;
                 totalAmount.value = (parseFloat(totalAmount.value || 0) + parseFloat(price));
                 processedSeats.add(seat.seat_catalogue.code);
             }
@@ -233,12 +412,60 @@ function updateTotal() {
     }
 
     if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
+        amountToPayCash.value = 0;
         amountReceived.value = totalAmount.value;
+        amountReceivedCash.value = 0;
+    } else if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'efectivo')){
+        amountToPayCard.value = 0;
+    }
+
+    if(!selectedPromotion.value && !selectedAgreementPromotion.value){
+        seatsSelectedCopy.value = JSON.parse(JSON.stringify(seatsSelected.value));
+    }
+
+    promotionTypes.value = [];
+
+    seatsSelectedCopy.value.forEach(seat => {
+        if(seat.promotions.length > 0) {
+            seat.promotions.forEach(promotion => {
+                const actualPromotionExist = promotionTypes.value.find(promo => promo.type === promotion.promotion_type.name && promo.final_price === seat.final_price);
+                if(actualPromotionExist) {
+                    promotionTypes.value.forEach(promotionType => {
+                        if (promotionType.type === promotion.promotion_type.name && promotionType.final_price === seat.final_price) {
+                            promotionType.quantity++;
+                        }
+                    });
+                } else {
+                    promotionTypes.value.push({
+                        'id': promotion.id,
+                        'type': promotion.promotion_type.name,
+                        'quantity': 1,
+                        'final_price': seat.final_price,
+                        'description': promotion.description,
+                        'generic_seats_allowed': promotion.generic_seats_allowed,
+                        'maximun_promotions_allowed': promotion.maximun_promotions_allowed,
+                        'promotional_seats_allowed': promotion.promotional_seats_allowed,
+                        'percent_allow': promotion.percent_allow,
+                    });
+                }
+            });
+        }
+    });
+
+    if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
+        amountToPayCard.value = totalAmount.value;
+    }
+
+    /*
+    * reason agreement section
+    */
+    if(paymentTypesSelected.value.some(type => type.name != 'cortesia')){
+        reasonAgreementSelected.value = null;
+        reasonAgreementDescription.value = null;
+        agreementSection.value = {};
     }
 
 }
-
-
 
 const globalPayementTypeProps = (item) => {
   return {
@@ -246,6 +473,27 @@ const globalPayementTypeProps = (item) => {
     subtitle: item.description,
   };
 };
+
+const reasonAgreementsProps = (item) => {
+    return {
+        title: item.name,
+        subtitle: item.description,
+    }
+}
+
+const institutionsProps = (item) => {
+    return {
+        title: item.name,
+        subtitle: item.description,
+    }
+}
+
+const institutionAgreementsProps = (item) => {
+    return {
+        title: item.name,
+        subtitle: item.description,
+    }
+}
 
 const globalCardPayementTypeProps = (item) => {
   return {
@@ -257,34 +505,59 @@ const globalCardPayementTypeProps = (item) => {
 const isSvgVisible = ref(true);
 const selectedSection = ref('');
 const viewSelectedSection = ref('Zonas HDX');
+const seatsASection = ref([]);
+const seatsCSection = ref([]);
+const seatsFSection = ref([]);
+const loadingSectionDialog = ref(false);
+const seatAvailability = ref([]);
 
 const handleSectionClick = (section) => {
-    selectedSection.value = section;
-    isSvgVisible.value = false;
+    const actualSection = section.split('');
 
-    if(section == 'zonaA'){
-        loadSvg('zonaA');
-        viewSelectedSection.value = 'Zona A';
-        const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
-        stadiumHdxImg.classList.remove('tw-rotate-0');
-        stadiumHdxImg.classList.add('tw-rotate-90');
+    const data = {
+        zone: actualSection[actualSection.length -1],
+        event_id: props.event.id
     }
 
-    if(section == 'zonaC'){
-        loadSvg('zonaC');
-        viewSelectedSection.value = 'Zona C';
-        const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
-        stadiumHdxImg.classList.remove('tw-rotate-0');
-        stadiumHdxImg.classList.add('tw-rotate-90');
-    }
+    loadingSectionDialog.value = true;
 
-    if(section == 'zonaF'){
-        loadSvg('zonaF');
-        viewSelectedSection.value = 'Zona F';
-        const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
-        stadiumHdxImg.classList.remove('tw-rotate-0');
-        stadiumHdxImg.classList.add('tw-rotate-90');
-    }
+    axios.post(route('event.get.seat-catalogues'), data)
+        .then(success => {
+            loadingSectionDialog.value = false;
+            selectedSection.value = section;
+            isSvgVisible.value = false;
+
+            if(section == 'zonaC'){
+                seatsCSection.value = success.data.data;
+                loadSvg('zonaC');
+                viewSelectedSection.value = 'Zona C';
+                const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
+                stadiumHdxImg.classList.remove('tw-rotate-0');
+                stadiumHdxImg.classList.add('tw-rotate-90');
+            }
+            if(section == 'zonaA'){
+                seatsASection.value = success.data.data;
+                loadSvg('zonaA');
+                viewSelectedSection.value = 'Zona A';
+                const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
+                stadiumHdxImg.classList.remove('tw-rotate-0');
+                stadiumHdxImg.classList.add('tw-rotate-90');
+            }
+            if(section == 'zonaF'){
+                seatsFSection.value = success.data.data;
+                loadSvg('zonaF');
+                viewSelectedSection.value = 'Zona F';
+                const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
+                stadiumHdxImg.classList.remove('tw-rotate-0');
+                stadiumHdxImg.classList.add('tw-rotate-90');
+            }
+            console.log(success.data.data)
+        })
+        .catch(error => {
+            console.log(error)
+        })
+
+    return
 
 };
 
@@ -301,6 +574,12 @@ const selectZones = () => {
     amountToPayCash.value = 0;
     paymentTypesSelected.value = [];
     cardPaymentTypesSelected.value = 0;
+    reasonAgreementSelected.value = null;
+    institutionSelected.value = null;
+    agreementsByInstitutionSelected.value = null;
+    agreementSelected.value = null;
+    reasonAgreementDescription.value = null;
+    agreementSection.value = {};
     valid.value = true;
     purchaseStatus.value = 'process';
     viewSelectedSection.value = 'Zonas HDX';
@@ -312,6 +591,14 @@ const selectZones = () => {
     const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
     stadiumHdxImg.classList.remove('tw-rotate-90');
     stadiumHdxImg.classList.add('tw-rotate-0');
+    selectedPromotion.value = null;
+    selectedAgreementPromotion.value = null;
+    seatsSelectedCopy.value = [];
+    showPromotionToast.value = false;
+    seatAvailability.value = [];
+
+    getSeatAvailability();
+
 };
 
 /*
@@ -366,7 +653,22 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    payment_installments: {
+        type: Object,
+        required: false
+    },
+    reason_agreements: {
+        type: Array,
+        required: false
+    },
+    institutions: {
+        type: Array,
+        required: false
+    }
 });
+
+console.log(props.institutions);
+
 
 const users_list = [];
 const userToTransfer = ref(null);
@@ -385,6 +687,7 @@ props.users.forEach(element => {
 * | declare OnMounted
 */
 onMounted(() => {
+
     nextTick(() => {
         loadSvg('zones_hdx');
     });
@@ -395,7 +698,21 @@ onMounted(() => {
             sellerDialog.click();
         }
     }
+    getSeatAvailability();
+
 });
+
+const getSeatAvailability = () => {
+    const data = {event_id: props.event.id};
+
+    axios.get(route('events.availability'), { params: data })
+        .then(response => {
+            seatAvailability.value = response.data.data;
+        })
+        .catch(error => {
+            console.log(error)
+        })
+}
 
 /*
 * |--------------------------------------
@@ -409,12 +726,27 @@ const valid = ref(true);
 const error = ref('');
 const amountToPayCard = ref(0);
 const cardPaymentTypesSelected = ref(0);
+const reasonAgreementSelected = ref(null);
+const reasonAgreementDescription = ref(null);
+const agreementSection = ref({});
+const institutionSelected = ref(null);
+const agreementsByInstitutionSelected = ref(null);
+const agreementSelected = ref(null);
 const amountToPayCash = ref(0);
 const amountReceivedCash = ref(0);
 const purchaseStatus = ref('process');
 const originalTotalAmount = ref(0);
 const totalAttempts = ref(0);
 const memberUserId = ref(1);
+
+watch(() => institutionSelected.value, () => {
+    agreementsByInstitutionSelected.value = null;
+    agreementSelected.value = null;
+    selectedAgreementPromotion.value = null;
+    if(institutionSelected.value){
+        agreementsByInstitutionSelected.value = institutionSelected.value.agreements;
+    }
+});
 
 watch(() => amountReceived.value, (newValue) => {
     amountReturned.value = parseFloat(amountReceived.value) - parseFloat(totalAmount.value)
@@ -429,6 +761,16 @@ watch(() => amountReceivedCash.value, (newValue) => {
 });
 
 watch(() => purchaseType.value, (newValue) => {
+
+    if(newValue == 'abonado' && selectedPromotion.value) {
+        toast('Una vez selecionada una promocion no sera posible la compra de abonos', {
+            "theme": "auto",
+            "type": "error",
+            "autoClose": 10000,
+            "dangerouslyHTMLString": true
+        })
+        return
+    }
     purchaseStatus.value = 'final';
     if(totalAttempts.value == 0) {
         originalTotalAmount.value = totalAmount.value;
@@ -510,6 +852,12 @@ const onSubmit = () => {
         }
     }
 
+    if(purchaseType.value == 'abonado' && !seasonTicktesData.value){
+        valid.value = false;
+        error.value = 'Los datos de los abonado deben ser confirmados';
+        return;
+    }
+
     if(paymentTypesSelected.value.some(type => type.name === 'efectivo' )){
         //validar que el monto recibido para efectivo sea igual o mayor al monto a pagar para efectivo
         if(parseFloat(amountReceivedCash.value) < parseFloat(amountToPayCash.value)) {
@@ -539,10 +887,23 @@ const onSubmit = () => {
             }
         }
         if(item.name === 'cortesia') {
-            return {
-                id: item.id,
-                global_card_payment_type_id: null,
-                amount: 0,
+            if(reasonAgreementSelected.value){
+                if(reasonAgreementSelected.value.name != 'otro'){
+                    reasonAgreementDescription.value = reasonAgreementSelected.value.name;
+                }
+                return {
+                    id: item.id,
+                    global_card_payment_type_id: null,
+                    amount: 0,
+                    reason_agreement_id:  reasonAgreementSelected.value.id,
+                    reason_agreement: reasonAgreementDescription.value,
+                }
+            }else{
+                return {
+                    id: item.id,
+                    global_card_payment_type_id: null,
+                    amount: 0,
+                }
             }
         }
     });
@@ -562,6 +923,16 @@ const onSubmit = () => {
         valid.value = false;
         error.value = 'Estas en el proceso final de compra, si se require agregar otro asiento cancele la seleccion actual y reintente.';
         return;
+    }
+
+    if(purchaseType.value == 'abonado'){
+        const atLeastOneHolder = seatsSelected.value.filter(seat => seat.is_owner == 'Si').length;
+
+        if(atLeastOneHolder != 1){
+            valid.value = false;
+            error.value = 'Debe de haber un titular de compra en abonados';
+            return;
+        }
     }
 
     const onSubmitConfirmDialog = document.getElementById('on-submit-confirm');
@@ -629,22 +1000,27 @@ const onSubmitConfirm = (isActive) => {
     const isTransfer = userToTransfer.value ? true : false;
 
     const seatsSelectedData = {
-    purchase_type: purchaseType.value,
-    event_id: props.event.id,
-    cash_register_id: cashRegisterDataId.value,
-    member_user_id: purchaseOnline.value ? props.user.id : (isTransfer ? userToTransfer.value : null),
-    seller_user_id: sellerUserId.value,
-    price_type_id: priceTypeId.value,
-    seats: seatsSelected.value,
-    amount_received: amountReceived.value,
-    total_amount: totalAmount.value,
-    total_returned: amountReturned.value,
-    global_payment_types: globalPaymentTypes.value,
-    is_online: purchaseOnline.value,
-    serie_id: props.event.serie_id,
-    is_transfer: isTransfer,
-    user_to_transfer: userToTransfer.value,
-};
+        purchase_type: purchaseType.value,
+        event_id: props.event.id,
+        cash_register_id: cashRegisterDataId.value,
+        member_user_id: purchaseOnline.value ? props.user.id : (isTransfer ? userToTransfer.value : null),
+        seller_user_id: sellerUserId.value,
+        price_type_id: priceTypeId.value,
+        seats: seatsSelected.value,
+        amount_received: amountReceived.value,
+        total_amount: totalAmount.value,
+        total_returned: amountReturned.value,
+        payment_in_installments: paymentInstallmentSelected.value,
+        global_payment_types: globalPaymentTypes.value,
+        is_online: purchaseOnline.value,
+        serie_id: props.event.serie_id,
+        is_transfer: isTransfer,
+        user_to_transfer: userToTransfer.value,
+        final_promotion: finalPromotion.value,
+    };
+
+/* console.log(seatsSelectedData);
+return */
 
 axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
     .then(response => {
@@ -667,6 +1043,9 @@ axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
             const pdfUrl = window.URL.createObjectURL(pdfBlob);
             printInKioskMode(pdfUrl);
             selectZones();
+            setTimeout(() => {
+                selectZones();
+            }, 100);
         }
 
     })
@@ -692,6 +1071,7 @@ axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
 const rules = {
     required: value => !!value || 'Campo requerido',
     isNumber: value => !isNaN(value) || 'Debe ser un número',
+    minChar: value => value.length >= 3 || 'Debe tener un mínimo de 3 caracteres',
     //validar si en el array de pagos selecionados solo existe un tipo de pago ya sea efectivo o tarjeta y validar que el monto sea igual al total
     isAmountToPay: value => {
         if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
@@ -714,6 +1094,60 @@ function printInKioskMode(url) {
 
     };
 }
+
+/*
+* Season tickets
+*/
+const paymentInstallmentSelected = ref(null);
+const seasonTicketsDialog = ref(false);
+const seasonTicktesData = ref(false);
+const seasonTicketsForm = ref(false);
+
+const updateHolder = (index) => {
+    seatsSelected.value.forEach((seat, i) => {
+        if(i !== index){
+            seat.is_owner = 'No';
+        }
+    });
+}
+
+watch(purchaseType, () => {
+    if(purchaseType.value == 'abonado' && selectedPromotion.value) {
+        return
+    }
+    if(purchaseType.value == 'abonado'){
+        seasonTicketsDialog.value = true;
+    }
+    amountToPayCash.value = 0;
+    amountReceivedCash.value = 0;
+    amountToPayCard.value = 0;
+    updateTotal();
+
+})
+
+watch(seatsSelected, (newSeats) => {
+    newSeats.forEach((seat, index) => {
+        if(seat.is_owner === 'Si'){
+            updateHolder(index);
+        }
+    });
+}, { deep:true })
+
+const seasonTicktesDataConfirm = () => {
+    if(!seasonTicketsForm.value) return
+    seasonTicketsDialog.value = false;
+    seasonTicktesData.value = true;
+    toast('Los datos de los abonos han sido guardados', {
+        "theme": "auto",
+        "type": "success",
+        "dangerouslyHTMLString": true
+    })
+}
+
+const cardPaymentTypeError = computed(() => {
+    return rules.required(cardPaymentTypesSelected.value) !== true;
+});
+
 </script>
 
 <template>
@@ -744,13 +1178,61 @@ function printInKioskMode(url) {
     </v-dialog>
 
     <div v-if="seatsSelected.length > 0" @click="scrollTopaymentSection" class="tw-fixed tw-bottom-20 tw-right-3 tw-z-[60]">
-        <div class="tw-flex tw-items-center tw-justify-center tw-cursor-pointer hover:tw-scale-110 tw-transition-transform tw-duration-700">
+        <div class="tw-flex tw-items-center tw-justify-center -tw-rotate-45 tw-cursor-pointer hover:tw-scale-105 tw-transition-transform tw-duration-700">
             <div class="tw-relative">
-                <div class="tw-bg-gradient-to-r tw-from-green-500 tw-to-green-300 lg:tw-to-green-400 tw-w-[50px] tw-h-[50px] tw-rounded-full tw-flex tw-items-center tw-justify-center">
-                    <span class="tw-animate-bounce material-symbols-outlined tw-z-20 tw-text-white tw-text-xl lg:tw-text-2xl">shopping_cart</span>
-                </div>
+            <div class="tw-bg-gradient-to-r tw-from-green-500 tw-to-green-400 tw-w-12 tw-h-12 tw-rounded-full tw-flex tw-items-center tw-justify-center">
+                <span class="material-symbols-outlined tw-z-20 tw-rotate-45 tw-text-white tw-text-xl lg:tw-text-2xl">shopping_cart</span>
+            </div>
+            <div class="tw-z-10 tw-absolute tw-bottom-0 tw-left-1/2 tw-transform -tw-translate-x-1/2 tw-translate-y-[20%] tw-w-6 tw-h-6 tw-bg-green-500 tw-rotate-45 tw-rounded-[4px]"></div>
             </div>
         </div>
+    </div>
+
+    <div v-if="showPromotionToast" class="tw-fixed tw-bottom-36 tw-right-3 tw-z-[60]">
+        <v-bottom-sheet>
+            <template v-slot:activator="{ props }">
+                <div v-bind="props" class="tw-relative">
+                    <div class="tw-flex tw-items-center tw-justify-center -tw-rotate-45 tw-cursor-pointer hover:tw-scale-105 tw-transition-transform tw-duration-700">
+                        <div class="tw-bg-gradient-to-r tw-from-purple-500 tw-to-purple-400 tw-w-12 tw-h-12 tw-rounded-full tw-flex tw-items-center tw-justify-center">
+                            <span class="material-symbols-outlined tw-z-20 tw-rotate-45 tw-text-white tw-text-xl lg:tw-text-2xl">featured_seasonal_and_gifts</span>
+                        </div>
+                        <div class="tw-z-10 tw-absolute tw-bottom-0 tw-left-1/2 tw-transform -tw-translate-x-1/2 tw-translate-y-[20%] tw-w-6 tw-h-6 tw-bg-purple-500 tw-rotate-45 tw-rounded-[4px]"></div>
+                    </div>
+                    <div class="tw-absolute tw-animate-bounce tw-bottom-full tw-right-0 tw-transform tw-w-[100px] tw-text-center -tw-translate-x-1/2 tw-mb-1 tw-px-2 tw-flex tw-items-center tw-justify-center tw-py-1 tw-shadow-xl tw-bg-gradient-to-r tw-from-purple-500 tw-to-yellow-500 tw-text-white tw-rounded-full">
+                        <span class="tw-text-[10px] tw-block">Abrir promociones</span>
+                        <div class="tw-absolute tw-bottom-[-5px] tw-left-1/2 tw-transform tw-border-l-[6px] tw-border-l-transparent tw-border-r-[6px] tw-border-r-transparent tw-border-t-[6px] tw-border-t-purple-500"></div>
+                    </div>
+                </div>
+            </template>
+
+            <v-card>
+                <v-col v-if="showPromotionToast" cols="12">
+                    <h3 class="tw-text-center tw-font-bold tw-text-lg tw-mb-3 tw-text-gray-700">Selecciona una promoción:</h3>
+                    <v-radio-group v-model="selectedPromotion" inline>
+                        <div v-for="(promotion, index) in promotionTypes" :key="index">
+                                <div v-if="promotion.percent_allow > 0">
+                                    <div class="tw-border-4 tw-border-yellow-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
+                                        <v-radio color="yellow" :key="index" :value="promotion">
+                                            <template v-slot:label>
+                                                <div>{{ promotion.description }}<strong class="tw-text-yellow-700">. Para asientos con precio de {{ formatPrice(promotion.final_price) }}</strong></div>
+                                            </template>
+                                        </v-radio>
+                                    </div>
+                                </div>
+                                <div v-else-if="promotion.quantity > promotion.generic_seats_allowed">
+                                    <div class="tw-border-4 tw-border-purple-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
+                                        <v-radio color="purple" :key="index" :value="promotion">
+                                            <template v-slot:label>
+                                                <div>{{ promotion.description }}<strong class="tw-text-purple-700">. Para asientos con precio de {{ formatPrice(promotion.final_price) }}</strong></div>
+                                            </template>
+                                        </v-radio>
+                                    </div>
+                                </div>
+                        </div>
+                    </v-radio-group>
+                </v-col>
+            </v-card>
+        </v-bottom-sheet>
     </div>
 
     <section class="tw-overflow-hidden tw-mt-0">
@@ -758,21 +1240,13 @@ function printInKioskMode(url) {
             <img class="tw-w-full" :src="`/storage/${event.global_image.file_path}`" alt="">
         </div>
     </section>
-    <div class="tw-hidden lg:tw-block tw-w-[72%] tw-h-72 tw-overflow-hidden tw-bg-center tw-bg-cover" :style="{ backgroundImage: `linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(255,255,255,1) 100%), url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
+    <div class="tw-relative tw-hidden lg:tw-block tw-w-[72%] tw-h-[470px] tw-overflow-hidden tw-bg-center tw-bg-cover" :style="{ backgroundImage: `url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
+        <div class="tw-w-full tw-bg-white/70 tw-flex tw-items-center tw-justify-center tw-backdrop-blur-md tw-p-5 tw-absolute tw-bottom-0 ">
+            <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-font-bold tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-white tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
+                <span class="material-symbols-outlined tw-text-xl tw-text-purple-500">featured_seasonal_and_gifts</span> {{ event.promotion_announcement }}
+            </div>
+        </div>
     </div>
-
-   <!--  <div class="tw-w-[72%] tw-h-60 tw-overflow-hidden tw-bg-center tw-bg-cover" :style="{ backgroundImage: `url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
-        <div class="tw-h-full tw-w-full tw-bg-black/30 tw-backdrop-blur-md tw-flex tw-items-center tw-justify-center">
-            <h1 class="tw-text-white tw-text-center tw-text-5xl tw-font-bold">{{ event.name }}</h1>
-        </div>
-    </div> -->
-
-    <!-- <div class="tw-relative tw-h-44 lg:tw-h-96 tw-w-full tw-block tw-shadow-xl tw-overflow-hidden tw-rounded-2xl lg:tw-rounded-3xl hover:tw-scale-105 tw-transition-transform tw-duration-500"
-        :style="{ backgroundImage: `url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
-        <div class="tw-absolute tw-bottom-0 tw-w-[100%] tw-rounded-b-2xl lg:tw-rounded-b-3xl tw-bg-black/10 tw-p-2 lg:tw-p-5 tw-backdrop-blur-md tw-backdrop-brightness-150 tw-text-white tw-font-bold tw-text-center">
-            {{ dateFormat(event.start_date) }}
-        </div>
-    </div> -->
 
     <section class="tw-w-full tw-min-h-screen tw-bg-white tw-mt-[-37px] lg:tw-mt-0 tw-rounded-[35px] lg:tw-rounded-[0px] tw-relative tw-mb-20 lg:tw-mb-0">
         <div class="max-w-full md:tw-max-w-[90%] tw-mx-auto tw-py-1 lg:tw-pb-7 tw-px-4 lg:tw-px-0">
@@ -788,19 +1262,22 @@ function printInKioskMode(url) {
                                 </div>
                             </Link >
 
-                           <!--  <h2 class="tw-relative tw-font-bold tw-text-sm lg:tw-text-3xl tw-block tw-py-[2px] tw-px-[2px] tw-text-center tw-bg-purple-100 tw-border-transparent tw-rounded-full tw-bg-clip-border">
-                                <span class="tw-absolute tw-inset-0 tw-bg-gradient-to-r tw-from-blue-300 tw-to-purple-400 tw-rounded-full"></span>
-                                <span class="tw-relative tw-bg-purple-50 tw-rounded-full tw-p-3 tw-block tw-w-full">{{ event.name }}</span>
-                            </h2> -->
-
                             <h2 class="tw-font-bold tw-text-3xl lg:tw-text-5xl">
                                 {{ event.name }}
                             </h2>
                             <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-start lg:tw-items-center tw-gap-2 lg:tw-gap-5">
+                                <div class="tw-inline-flex lg:tw-hidden tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-font-bold tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
+                                    <span class="material-symbols-outlined tw-text-xl tw-text-purple-500">featured_seasonal_and_gifts</span> {{ event.promotion_announcement }}
+                                </div>
+                                <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
+                                    <span class="material-symbols-outlined tw-text-xl">calendar_today</span>{{ event.serie.global_season.name }}
+                                </div>
                                 <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
                                     <span class="material-symbols-outlined tw-text-xl">location_on</span>El nido del halcon
                                 </div>
-                                <p class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-text-gray-800 tw-bg-gray-100 hover:tw-bg-gray-200">📅 | {{ dateFormat(event.start_date) }} </p>
+                                <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
+                                    <span class="material-symbols-outlined tw-text-xl">calendar_clock</span>{{ dateFormat(event.start_date) }}
+                                </div>
                             </div>
                         </div>
                         <div class="tw-mt-7">
@@ -820,9 +1297,11 @@ function printInKioskMode(url) {
                                         v-bind:amountReceived="amountReceived"
                                         v-bind:totalAmount="totalAmount"
                                         v-bind:amountReturned="amountReturned"
+                                        v-bind:paymentInInstallments="paymentInstallmentSelected"
                                         v-bind:globalPaymentTypes="globalPaymentTypes"
                                         v-bind:isOnline="purchaseOnline"
                                         v-bind:serieId="event.serie_id"
+                                        v-bind:finalPromotion="finalPromotion"
                                     />
 
                                     <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-6 tw-items-center tw-gap-2 tw-mt-7">
@@ -879,7 +1358,7 @@ function printInKioskMode(url) {
                                             <template v-slot:activator="{ props: activatorProps }">
                                                 <div v-bind="activatorProps" class="!tw-absolute -tw-top-4 -tw-right-6 ">
                                                     <!-- <div class="tw-animate-ping tw-absolute tw-right-[2px] tw-top-[5px] tw-inline-flex tw-h-5 tw-w-5 tw-rounded-full tw-bg-purple-500 tw-opacity-80"></div> -->
-                                                    <span class="material-symbols-outlined tw-text-2xl tw-text-purple-600 tw-animate-bounce tw-cursor-pointer">photo_library</span>
+                                                    <span class="material-symbols-outlined tw-text-2xl tw-text-purple-600 tw-cursor-pointer">photo_library</span>
                                                 </div>
                                             </template>
                                             <template v-slot:default="{ isActive }">
@@ -933,27 +1412,47 @@ function printInKioskMode(url) {
                                         <img id="stadium-hdx-img" class="tw-size-20 lg:tw-size-32 tw-rotate-0 tw-transition-all tw-duration-1000" src="../../../../../public/img/stadium-hdx-img.svg" alt="">
                                     </div>
                                     <div v-if="isSvgVisible">
-                                        <!-- <StadiumSVG @handle-section-click="handleSectionClick" /> -->
                                         <EstadioHdx  @handle-section-click="handleSectionClick"/>
                                     </div>
-                                   <!--  <div v-if="selectedSection == 'zonaF'" class="">
-                                        <FZona @add-seat="addSeat" v-bind:seats="props.a_zone" v-bind:seatsSelected="seatsSelected" />
-                                    </div> -->
                                     <div v-if="selectedSection == 'zonaA'" class="">
-                                        <ZonaA @add-seat="addSeat" v-bind:seats="props.a_zone" v-bind:seatsSelected="seatsSelected" />
+                                        <ZonaA @add-seat="addSeat" v-bind:seats="seatsASection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                     <div v-if="selectedSection == 'zonaC'" class="">
-                                        <ZonaC @add-seat="addSeat" v-bind:seats="props.c_zone" v-bind:seatsSelected="seatsSelected" />
+                                        <ZonaC @add-seat="addSeat" v-bind:seats="seatsCSection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                     <div v-if="selectedSection == 'zonaF'" class="">
-                                        <ZonaF @add-seat="addSeat" v-bind:seats="props.f_zone" v-bind:seatsSelected="seatsSelected" />
+                                        <ZonaF @add-seat="addSeat" v-bind:seats="seatsFSection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                 </div>
                             </div>
 
                         </div>
 
-                        <div class="tw-p-5 tw-bg-purple-50 tw-text-center tw-rounded-xl tw-mt-10">
+                        <div class="loading-section-dialog">
+                            <v-dialog fullscreen v-model="loadingSectionDialog" transition="dialog-bottom-transition">
+                                <template v-slot:activator="{ props: activatorProps }">
+                                    <v-btn v-bind="activatorProps" variant="elevated" class="!tw-hidden text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                </template>
+                                <template v-slot:default="{ isActive }">
+                                    <div class="tw-w-full tw-h-full">
+                                        <div class="tw-h-screen tw-flex tw-items-center tw-justify-center tw-w-full">
+                                            <div class="tw-p-3 tw-animate-spin tw-drop-shadow-2xl tw-bg-gradient-to-bl tw-from-pink-400 tw-via-purple-400 tw-to-indigo-600 tw-md:w-48 tw-md:h-48 tw-h-32 tw-w-32 tw-aspect-square tw-rounded-full">
+                                                <div class="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-h-full tw-w-full tw-bg-white tw-dark:bg-zinc-900 tw-background-blur-md">
+                                                    <img class="tw-w-14 tw-h-auto" src="https://halconesdexalapa.com.mx/wp-content/uploads/2024/01/cropped-SIMBOLO-HDX-2023-e1705427673690-1.png" alt="img logo">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <v-card>
+                                        <v-card-actions>
+                                                <v-btn @click="isActive.value = false"></v-btn>
+                                        </v-card-actions>
+                                    </v-card>
+                                </template>
+                            </v-dialog>
+                        </div>
+
+                        <div class="tw-p-5 tw-bg-gray-200 tw-text-center tw-rounded-xl tw-mt-10">
                             <p>Zonas disponibles en el estadio.</p>
                         </div>
                     </div>
@@ -961,9 +1460,7 @@ function printInKioskMode(url) {
                     <div class="tw-w-full lg:tw-w-[28%] lg:tw-fixed tw-top-[83px] tw-right-0 tw-bg-white lg:tw-z-40">
                         <div class="tw-w-full tw-pb-5 lg:tw-h-[calc(100vh-83px)] lg:tw-overflow-y-auto tw-shadow-lg [&::-webkit-scrollbar]:!tw-w-2 [&::-webkit-scrollbar-thumb]:!tw-rounded-full [&::-webkit-scrollbar-track]:!tw-bg-white [&::-webkit-scrollbar-thumb]:!tw-bg-neutral-300">
                             <div class="tw-relative tw-flex tw-flex-col tw-bg-white tw-pointer-events-auto">
-                                <div class="tw-relative tw-overflow-hidden tw-min-h-[123px] tw-bg-slate-950 tw-text-center tw-rounded-2xl lg:tw-rounded-none">
-                                    <div class="tw-hidden lg:tw-block tw-absolute tw-left-1/2 tw-bottom-0 tw-h-[100px] tw-w-[300px] tw--translate-x-1/2 tw-rounded-full tw-bg-gradient-to-t tw-blur-[90px] tw-from-tw-primary-800 tw-to-tw-primary-600">
-                                    </div>
+                                <div class="tw-relative tw-overflow-hidden tw-bg-gray-200 tw-min-h-[123px] tw-text-center tw-rounded-2xl lg:tw-rounded-none">
                                     <!-- SVG Background Element -->
                                     <figure class="tw-absolute tw-inset-x-0 tw-bottom-0 -tw-mb-px">
                                     <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 1920 100.1">
@@ -975,7 +1472,7 @@ function printInKioskMode(url) {
 
                                 <div class="tw-relative tw-z-10 -tw-mt-12">
                                     <!-- Icon -->
-                                    <span class="tw-mx-auto tw-flex tw-justify-center tw-items-center tw-size-[62px] tw-rounded-full tw-border tw-border-gray-200 tw-bg-white tw-text-gray-700 tw-shadow-sm">
+                                    <span class="tw-mx-auto tw-flex tw-justify-center tw-items-center tw-size-[62px] tw-rounded-full tw-border tw-border-gray-200 tw-bg-white tw-text-gray-700 tw-shadow-xl">
                                     <svg class="tw-shrink-0 tw-size-6" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                         <path d="M1.92.506a.5.5 0 0 1 .434.14L3 1.293l.646-.647a.5.5 0 0 1 .708 0L5 1.293l.646-.647a.5.5 0 0 1 .708 0L7 1.293l.646-.647a.5.5 0 0 1 .708 0L9 1.293l.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .801.13l.5 1A.5.5 0 0 1 15 2v12a.5.5 0 0 1-.053.224l-.5 1a.5.5 0 0 1-.8.13L13 14.707l-.646.647a.5.5 0 0 1-.708 0L11 14.707l-.646.647a.5.5 0 0 1-.708 0L9 14.707l-.646.647a.5.5 0 0 1-.708 0L7 14.707l-.646.647a.5.5 0 0 1-.708 0L5 14.707l-.646.647a.5.5 0 0 1-.708 0L3 14.707l-.646.647a.5.5 0 0 1-.801-.13l-.5-1A.5.5 0 0 1 1 14V2a.5.5 0 0 1 .053-.224l.5-1a.5.5 0 0 1 .367-.27zm.217 1.338L2 2.118v11.764l.137.274.51-.51a.5.5 0 0 1 .707 0l.646.647.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.509.509.137-.274V2.118l-.137-.274-.51.51a.5.5 0 0 1-.707 0L12 1.707l-.646.647a.5.5 0 0 1-.708 0L10 1.707l-.646.647a.5.5 0 0 1-.708 0L8 1.707l-.646.647a.5.5 0 0 1-.708 0L6 1.707l-.646.647a.5.5 0 0 1-.708 0L4 1.707l-.646.647a.5.5 0 0 1-.708 0l-.509-.51z"></path>
                                         <path d="M3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5zm8-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5z"></path>
@@ -985,19 +1482,34 @@ function printInKioskMode(url) {
                                 </div>
                             </div>
                             <div class="tw-px-5 tw-relative tw-flex tw-flex-col-reverse">
-                                <div v-if="seatsSelected.length == 0" class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-7">
-                                    <p class="tw-w-full tw-text-center tw-text-xs tw-p-3 tw-rounded-full tw-bg-gray-100 tw-mt-5">No se han selecionado asientos</p>
-                                    <h3 class="tw-text-2xl tw-font-bold">Asientos seleccionados</h3>
-                                    <h4 class="tw-text-sm mt-1">📍 El nido del halcon | Xalapa Ver.</h4>
-                                    <img class="tw-w-60 tw-h-auto" src="../../../../../public/img/seats-no-selected-img.svg" alt="">
+                                <div v-if="seatsSelected.length == 0" class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-7 tw-w-full tw-mt-5">
+                                    <div v-if="seatAvailability.length > 0" class="tw-grid tw-grid-cols-2 tw-w-full tw-gap-2 tw-items-center tw-justify-center">
+                                        <div v-for="(availability, index) in seatAvailability" :key="index">
+                                            <div class="tw-shadow-lg tw-p-3 tw-border tw-border-gray-100 tw-rounded-lg">
+                                                <p class="tw-text-[10px] lg:tw-text-xs">Disponibilidad en zona {{ availability.zone }}</p>
+                                                <p class="tw-font-bold tw-text-lg lg:tw-text-2xl tw-mt-1">{{ availability.available_seats }} <span class="tw-text-[10px] lg:tw-text-xs tw-font-normal">asientos libres</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div v-else class="tw-w-full">
+                                        <v-skeleton-loader
+                                        class="mx-auto"
+                                        type="image, article"
+                                        ></v-skeleton-loader>
+                                        <v-skeleton-loader
+                                        class="mx-auto"
+                                        type="image"
+                                        ></v-skeleton-loader>
+                                    </div>
+                                    <img v-if="seatAvailability.length > 0" class="tw-w-48 tw-h-auto" src="../../../../../public/img/seats-no-selected-img.svg" alt="">
                                 </div>
-                                <div v-if="seatsSelected.length > 0" class="">
-                                    <div ref="paymentSection" class="tw-w-full ">
+                                <div v-if="seatsSelected.length > 0" class="payment-secction">
+                                    <div class="tw-w-full ">
                                         <h3 class="tw-font-bold tw-text-lg tw-text-center tw-my-3">Resumen de compra</h3>
                                         <v-expansion-panels v-model="panel" class="" multiple>
                                             <v-expansion-panel>
                                                 <v-expansion-panel-title expand-icon="mdi-menu-down">
-                                                  asientos seleccionados
+                                                  Asientos seleccionados
                                                 </v-expansion-panel-title>
                                                 <v-expansion-panel-text>
                                                     <div>
@@ -1065,7 +1577,7 @@ function printInKioskMode(url) {
                                                                 </td>
                                                                 </tr>
                                                             </tbody>
-                                                            </table>
+                                                        </table>
                                                     </div>
                                                 </v-expansion-panel-text>
                                             </v-expansion-panel>
@@ -1094,27 +1606,30 @@ function printInKioskMode(url) {
                                                         Complemento para pago con tarjeta
                                                         </h4>
                                                         <v-select
-                                                        color="purple"
-                                                        clearable
-                                                        label="seleciona el tipo de tarjeta"
-                                                        hint="Selecciona el tipo de tarjeta"
-                                                        :item-props="globalCardPayementTypeProps"
-                                                        :items="global_card_payment_types"
-                                                        v-model="cardPaymentTypesSelected"
-                                                        :rules="[rules.required]"
+                                                            color="purple"
+                                                            clearable
+                                                            label="Selecciona el tipo de tarjeta"
+                                                            hint="Selecciona el tipo de tarjeta"
+                                                            :item-props="globalCardPayementTypeProps"
+                                                            :items="global_card_payment_types"
+                                                            v-model="cardPaymentTypesSelected"
+                                                            :rules="[rules.required]"
+                                                            :error="cardPaymentTypeError"
+                                                            :error-messages="cardPaymentTypeError ? ['Este campo es obligatorio'] : []"
                                                         ></v-select>
                                                         <v-text-field
                                                             v-if="viewVendorTopics(user_roles)"
-                                                            label="Monto a pagar para tarjeta"
+                                                            label="Monto a pagar con tarjeta"
                                                             color="purple"
                                                             clearable
                                                             hint="Monto recibido por el cliente"
                                                             v-model="amountToPayCard"
                                                             :rules="[rules.required, rules.isNumber, rules.isAmountToPay]"
                                                         ></v-text-field>
+
                                                         <v-text-field
                                                             v-else
-                                                            label="Monto a pagar para tarjeta"
+                                                            label="Monto a pagar con tarjeta"
                                                             color="purple"
                                                             hint="Monto recibido por el cliente"
                                                             readonly
@@ -1146,10 +1661,93 @@ function printInKioskMode(url) {
                                                         ></v-text-field>
                                                     </div>
 
+                                                    <div v-if="paymentTypesSelected.some(type => type.name === 'cortesia')">
+                                                        <h4 class="tw-text-xs tw-px-4 tw-py-1 tw-rounded-full tw-bg-purple-200 tw-text-purple-600 tw-text-center tw-mb-2">
+                                                            Complemento para pago en cortesia
+                                                        </h4>
+                                                        <v-select
+                                                            v-if="viewVendorTopics(user_roles)"
+                                                            color="purple"
+                                                            label="selecciona el complemento a cortesia"
+                                                            hint="Rason de la cortesia"
+                                                            :item-props="reasonAgreementsProps"
+                                                            :items="reason_agreements"
+                                                            v-model="reasonAgreementSelected"
+                                                            chips
+                                                            :rules="[rules.required]"
+                                                        ></v-select>
+                                                        <div v-if="reasonAgreementSelected && reasonAgreementSelected.name === 'otro'">
+                                                            <v-textarea
+                                                                class="tw-w-full"
+                                                                append-inner-icon="mdi-file-document"
+                                                                label="Rason especial de la cortesia"
+                                                                row-height="10"
+                                                                color="purple"
+                                                                clearable
+                                                                rows="3"
+                                                                auto-grow
+                                                                v-model="reasonAgreementDescription"
+                                                                :rules="[rules.required, rules.minChar]"
+                                                        ></v-textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div v-if="viewVendorTopics(user_roles)">
+                                                        <h4 class="tw-text-xs tw-px-4 tw-py-1 tw-rounded-full tw-bg-green-200 tw-text-green-600 tw-text-center tw-mb-2">
+                                                            Complemento para convenios
+                                                        </h4>
+                                                        <v-select
+                                                            color="purple"
+                                                            label="selecciona una instutucion"
+                                                            :item-props="institutionsProps"
+                                                            :items="institutions"
+                                                            v-model="institutionSelected"
+                                                            clearable
+                                                            chips
+                                                        ></v-select>
+                                                        <div v-if="institutionSelected">
+                                                            <v-select
+                                                                v-if="viewVendorTopics(user_roles)"
+                                                                color="purple"
+                                                                label="selecciona un convenio"
+                                                                :item-props="institutionAgreementsProps"
+                                                                :items="agreementsByInstitutionSelected"
+                                                                chips
+                                                                v-model="agreementSelected"
+                                                                clearable
+                                                                :rules="[rules.required]"
+                                                            ></v-select>
+                                                        </div>
+                                                        <div v-if="agreementSelected">
+                                                            <v-radio-group v-model="selectedAgreementPromotion">
+                                                                <div v-for="(promotion, index) in agreementSelected.promotions" :key="index">
+                                                                        <div v-if="promotion.generic_seats_allowed ">
+                                                                            <div class="tw-border-4 tw-border-yellow-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
+                                                                                <v-radio color="yellow" :key="index" :value="promotion">
+                                                                                    <template v-slot:label>
+                                                                                        <div>{{ promotion.description }}<strong class="tw-text-yellow-700">. Para asientos con precio regular</strong></div>
+                                                                                    </template>
+                                                                                </v-radio>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div v-if="promotion.percent_allow > 0 && promotion.promotion_type.name == 'descuento_por_porcentaje_por_compra'">
+                                                                            <div class="tw-border-4 tw-border-purple-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
+                                                                                <v-radio color="purple" :key="index" :value="promotion">
+                                                                                    <template v-slot:label>
+                                                                                        <div>{{ promotion.description }}<strong class="tw-text-purple-700">. Para asientos con precio regular</strong></div>
+                                                                                    </template>
+                                                                                </v-radio>
+                                                                            </div>
+                                                                        </div>
+                                                                </div>
+                                                            </v-radio-group>
+                                                        </div>
+
+                                                    </div>
+
                                                     <p v-if="!valid" class="tw-py-2 tw-px-4 tw-bg-red-100 tw-border-l-4 tw-border-l-red-500 tw-text-red-500 tw-text-xs tw-my-4">{{ error }}</p>
 
-                                                    <div class="tw-mt-5">
-                                                        <v-radio-group :disabled="!form" inline label="Tipo de compra a realizar" v-model="purchaseType">
+                                                    <div class="tw-mt-5"> <!-- :disabled="!form" -->
+                                                        <v-radio-group  inline label="Tipo de compra a realizar" v-model="purchaseType">
                                                             <v-radio
                                                             v-for="(type, index) in purchase_types"
                                                             :key="index"
@@ -1168,8 +1766,11 @@ function printInKioskMode(url) {
                                                         <div v-else-if="purchaseType == 'serie'">
                                                             <p class="tw-py-2 tw-px-4 tw-bg-purple-100 tw-border-l-4 tw-border-l-purple-500 tw-text-purple-500 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para dos partidos del mismo evento.</p>
                                                         </div>
+                                                        <div v-else-if="purchaseType == 'abonado'">
+                                                            <p class="tw-py-2 tw-px-4 tw-bg-yellow-100 tw-border-l-4 tw-border-l-yellow-500 tw-text-yellow-500 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para la temporada a la que pertenece este eventos.</p>
+                                                        </div>
 
-                                                        <p class="tw-opacity-50 tw-text-right tw-mb-3 tw-text-xs">Subtotal (tipos de precios selecionados): {{ formatPrice(totalAmount) }}</p>
+                                                        <p ref="paymentSection" class="tw-opacity-50 tw-text-right tw-mb-3 tw-text-xs">Subtotal (tipos de precios selecionados): {{ formatPrice(totalAmount) }}</p>
                                                         <p class="tw-font-semibold tw-text-right tw-mb-3">Total: {{ formatPrice(totalAmount) }}</p>
                                                         <v-btn
                                                             v-if="showButtonPayment"
@@ -1192,28 +1793,217 @@ function printInKioskMode(url) {
                                                         <v-btn
                                                             @click="selectZones"
                                                             rounded="xl" size="large" block
-                                                            class="text-none !tw-text-white !tw-bg-gradient-to-b !tw-from-red-600 !tw-to-red-400 tw-mt-5"
+                                                            class="text-none !tw-text-white !tw-bg-gradient-to-b !tw-from-red-600 !tw-to-red-400 tw-mt-5 tw-mb-20"
                                                         >
                                                             <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">delete</span>Cancelar seleccion
                                                         </v-btn>
 
-                                                        <!-- <v-dialog max-width="700" v-if="viewVendorTopics(user_roles)">
+                                                        <v-dialog fullscreen v-model="seasonTicketsDialog" transition="dialog-bottom-transition">
                                                             <template v-slot:activator="{ props: activatorProps }">
-                                                                <v-btn :disabled="!form" type="submit" :loading="loadingg" v-bind="activatorProps" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
+                                                                <v-btn v-bind="activatorProps" variant="elevated" class="!tw-hidden text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
                                                             </template>
                                                             <template v-slot:default="{ isActive }">
-                                                                <v-card title="¿Estas seguro de realizar la compra?">
-                                                                <v-card-text>
-                                                                    <iframe src="http://127.0.0.1:8000/img/ticket_test.pdf" width="100%" height="400"></iframe>
-                                                                </v-card-text>
+                                                                <v-card>
+                                                                    <v-toolbar class="!tw-bg-gradient-to-r !tw-from-slate-950 !tw-via-purple-950 !tw-to-slate-950">
+                                                                        <v-btn
+                                                                        class="!tw-text-white"
+                                                                        icon="mdi-close"
+                                                                        @click="seasonTicketsDialog = false"
+                                                                        ></v-btn>
 
-                                                                <v-card-actions>
-                                                                    <v-spacer></v-spacer>
-                                                                    <v-btn color="red" rounded="xl" variant="tonal" class="text-none" text="Cancelar" @click="isActive.value = false"></v-btn>
-                                                                </v-card-actions>
+                                                                        <v-toolbar-title>
+                                                                            <div class="tw-font-bold tw-text-white tw-text-xs lg:tw-text-base">Sección de abonos</div>
+                                                                        </v-toolbar-title>
+
+                                                                        <v-spacer></v-spacer>
+
+                                                                        <v-toolbar-items>
+                                                                        <v-btn
+                                                                            color="white"
+                                                                            text="Aceptar"
+                                                                            variant="tonal"
+                                                                            @click="seasonTicketsDialog = false"
+                                                                        ></v-btn>
+                                                                        </v-toolbar-items>
+                                                                    </v-toolbar>
+                                                                    <v-form v-model="seasonTicketsForm" @submit.prevent="seasonTicktesDataConfirm" lazy-validation>
+                                                                        <v-card-text>
+                                                                            <div class="tw-w-full tw-max-w-[90%] tw-mx-auto">
+                                                                                <p class="tw-font-bold tw-text-sm lg:tw-text-2xl tw-text-gray-700 tw-text-center">Registra y confirma los abonos: </p>
+
+                                                                                <div v-if="seatsSelected.length > 0 && purchaseType == 'abonado'">
+                                                                                        <div class="" v-for="(seat, index) in seatsSelected" :key="seat.seat_catalogue.code">
+                                                                                            <div>
+                                                                                                <table class="tw-min-w-full tw-divide-y tw-divide-gray-200 tw-mt-10">
+                                                                                                    <thead class="tw-bg-gray-100 tw-text-center">
+                                                                                                        <tr>
+                                                                                                            <th scope="col" class=" tw-p-2 tw-text-center tw-whitespace-nowrap">
+                                                                                                                <span class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-gray-800">
+                                                                                                                    zona
+                                                                                                                </span>
+                                                                                                            </th>
+
+                                                                                                            <th scope="col" class=" tw-p-2 tw-text-center tw-whitespace-nowrap">
+                                                                                                                <span class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-gray-800">
+                                                                                                                    Fila
+                                                                                                                </span>
+                                                                                                            </th>
+
+                                                                                                            <th scope="col" class=" tw-p-2 tw-text-center tw-whitespace-nowrap">
+                                                                                                                <span class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-gray-800">
+                                                                                                                    asiento
+                                                                                                                </span>
+                                                                                                            </th>
+
+                                                                                                            <th scope="col" class=" tw-p-2 tw-text-center tw-whitespace-nowrap">
+                                                                                                                <span class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-gray-800">
+                                                                                                                precio
+                                                                                                                </span>
+                                                                                                            </th>
+                                                                                                        </tr>
+                                                                                                    </thead>
+                                                                                                    <tbody class="tw-divide-y tw-divide-gray-200">
+                                                                                                        <tr>
+                                                                                                            <td class="tw-size-px tw-whitespace-nowrap tw-p-2 tw-text-center">
+                                                                                                                <span class="tw-text-sm tw-text-gray-800">{{ seat.seat_catalogue.zone }}</span>
+                                                                                                            </td>
+                                                                                                            <td class="tw-size-px tw-whitespace-nowrap tw-p-2 tw-text-center">
+                                                                                                                <span class="tw-text-sm tw-text-gray-800">{{ seat.seat_catalogue.row }}</span>
+                                                                                                            </td>
+                                                                                                            <td class="tw-size-px tw-whitespace-nowrap tw-p-2 tw-text-center">
+                                                                                                                <span class="tw-text-sm tw-text-gray-800">{{ seat.seat_catalogue.seat }}</span>
+                                                                                                            </td>
+                                                                                                            <td class="tw-size-px tw-whitespace-nowrap tw-p-2 tw-text-center">
+                                                                                                                <span class="tw-text-sm tw-text-green-600">
+                                                                                                                    <div v-for="priceType in seat.price_types" :key="priceType.id">
+                                                                                                                        <div v-if="priceType.name === 'abonado'">
+                                                                                                                                {{ formatPrice(priceType.pivot.price) }}
+                                                                                                                        </div>
+                                                                                                                    </div>
+                                                                                                                </span>
+                                                                                                            </td>
+                                                                                                        </tr>
+                                                                                                    </tbody>
+                                                                                                </table>
+
+                                                                                                <div class="tw-flex tw-items-center tw-justify-between tw-gap-10">
+                                                                                                    <v-text-field
+                                                                                                        class="tw-w-full"
+                                                                                                        append-inner-icon="mdi-account"
+                                                                                                        label="Nombre"
+                                                                                                        color="purple"
+                                                                                                        clearable
+                                                                                                        hint="Nombre de para el abonado"
+                                                                                                        :rules="[rules.required]"
+                                                                                                        v-model="seatsSelected[index].holder_name"
+                                                                                                    ></v-text-field>
+                                                                                                    <v-text-field
+                                                                                                        class="tw-w-full"
+                                                                                                        append-inner-icon="mdi-account"
+                                                                                                        label="Apellido paterno"
+                                                                                                        color="purple"
+                                                                                                        clearable
+                                                                                                        hint="Apellido paterno de para el abonado"
+                                                                                                        :rules="[rules.required]"
+                                                                                                        v-model="seatsSelected[index].holder_last_name"
+                                                                                                    ></v-text-field>
+                                                                                                </div>
+                                                                                                <div class="tw-flex tw-items-center tw-justify-between tw-gap-10">
+                                                                                                    <v-text-field
+                                                                                                        class="tw-w-full"
+                                                                                                        append-inner-icon="mdi-account"
+                                                                                                        label="Apellido materno"
+                                                                                                        color="purple"
+                                                                                                        clearable
+                                                                                                        hint="Apellido materno de para el abonado"
+                                                                                                        :rules="[rules.required]"
+                                                                                                        v-model="seatsSelected[index].holder_middle_name"
+                                                                                                    ></v-text-field>
+                                                                                                    <v-select
+                                                                                                        class="tw-w-full"
+                                                                                                        append-inner-icon="mdi-file-document-check-outline"
+                                                                                                        color="purple"
+                                                                                                        label="¿Es titular?"
+                                                                                                        hint="Titular de la compra"
+                                                                                                        clearable
+                                                                                                        :items="['No', 'Si']"
+                                                                                                        :rules="[rules.required]"
+                                                                                                        v-model="seatsSelected[index].is_owner"
+                                                                                                    ></v-select>
+                                                                                                </div>
+                                                                                                <v-textarea
+                                                                                                    class="tw-w-full"
+                                                                                                    append-inner-icon="mdi-file-document"
+                                                                                                    label="Descripcion adicional"
+                                                                                                    row-height="30"
+                                                                                                    color="purple"
+                                                                                                    clearable
+                                                                                                    rows="3"
+                                                                                                    auto-grow
+                                                                                                    v-model="seatsSelected[index].description"
+                                                                                                ></v-textarea>
+                                                                                                <div v-if="seatsSelected[index].is_owner == 'Si'">
+                                                                                                    <div class="tw-flex tw-items-center tw-justify-between tw-gap-10">
+                                                                                                        <v-text-field
+                                                                                                            class="tw-w-full"
+                                                                                                            append-inner-icon="mdi-qrcode"
+                                                                                                            label="Codigo postal"
+                                                                                                            color="purple"
+                                                                                                            clearable
+                                                                                                            hint="Ingresa el codigo postal del titular"
+                                                                                                            :rules="[rules.required, rules.isNumber]"
+                                                                                                            v-model="seatsSelected[index].holder_zip_code"
+                                                                                                            ></v-text-field>
+                                                                                                        <v-text-field
+                                                                                                            class="tw-w-full"
+                                                                                                            append-inner-icon="mdi-phone"
+                                                                                                            label="Numero de telefono"
+                                                                                                            color="purple"
+                                                                                                            clearable
+                                                                                                            hint="Ingresa el numero de telefono del titular"
+                                                                                                            :rules="[rules.required, rules.isNumber]"
+                                                                                                            v-model="seatsSelected[index].holder_phone"
+                                                                                                        ></v-text-field>
+                                                                                                    </div>
+                                                                                                    <div class="tw-flex tw-items-center tw-justify-between tw-gap-10">
+                                                                                                        <v-select
+                                                                                                            class="tw-w-full"
+                                                                                                            append-inner-icon="mdi-cash"
+                                                                                                            color="purple"
+                                                                                                            label="¿Pago en cuotas a meses?"
+                                                                                                            hint="Meses a intereses"
+                                                                                                            clearable
+                                                                                                            :items="payment_installments"
+                                                                                                            v-model="paymentInstallmentSelected"
+                                                                                                        ></v-select>
+                                                                                                            <v-text-field
+                                                                                                                class="tw-w-full"
+                                                                                                                append-inner-icon="mdi-email"
+                                                                                                                label="Email"
+                                                                                                                color="purple"
+                                                                                                                autocomplete="email"
+                                                                                                                clearable
+                                                                                                                hint="Ingresa el email del titular"
+                                                                                                                :rules="[rules.required]"
+                                                                                                                v-model="seatsSelected[index].holder_email"
+                                                                                                            ></v-text-field>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </v-card-text>
+
+                                                                        <v-card-actions class="tw-w-full tw-max-w-[90%] tw-mx-auto tw-mb-7">
+                                                                            <v-spacer></v-spacer>
+                                                                            <v-btn color="red" rounded="xl" size="large" variant="tonal" class="text-none" text="Cancelar" @click="isActive.value = false"></v-btn>
+                                                                            <v-btn :disabled="!seasonTicketsForm" type="submit" size="large" rounded="xl" variant="elevated" class="text-none !tw-bg-green-500 !tw-text-white tw-mb-2 !tw-px-4" text="Confirmar datos"></v-btn>
+                                                                        </v-card-actions>
+                                                                </v-form>
                                                                 </v-card>
                                                             </template>
-                                                        </v-dialog> -->
+                                                        </v-dialog>
                                                         <v-dialog max-width="600">
                                                             <template v-slot:activator="{ props: activatorProps }">
                                                                 <v-btn id="on-submit-confirm" v-bind="activatorProps" variant="elevated" class="!tw-hidden text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
@@ -1355,7 +2145,10 @@ function printInKioskMode(url) {
 }
 
 .tw-animate-spin {
-        animation: tw-spin 2s linear infinite;
+    animation: tw-spin 2s linear infinite;
+}
+.tw-animate-ping {
+    animation:  tw-ping 3s linear infinite;
 }
 @keyframes tw-bounce {
   0%, 100% {
@@ -1371,8 +2164,13 @@ function printInKioskMode(url) {
 }
 @media (min-width: 1024px) {
     .tw-animate-bounce {
-    animation: tw-bounce 1s infinite;
+    animation: tw-bounce 1.5s infinite;
     }
 }
 
+.v-dialog--fullscreen > .v-overlay__content > .v-card, .v-dialog--fullscreen > .v-overlay__content > .v-sheet, .v-dialog--fullscreen > .v-overlay__content > form > .v-card, .v-dialog--fullscreen > .v-overlay__content > form > .v-sheet {
+    min-height: 100%;
+    min-width: 100%;
+    border-radius: 0px !important;
+}
 </style>

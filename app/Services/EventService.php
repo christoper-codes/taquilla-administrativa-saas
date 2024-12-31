@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\PaymentInstallments;
 use App\Interfaces\EventRepositoryInterface;
 use App\Models\CashRegisterMovement;
 use App\Models\CashRegisterMovementType;
@@ -18,6 +19,7 @@ use Endroid\QrCode\Label\LabelAlignment;
 use Endroid\QrCode\Label\Font\OpenSans;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
+use Exception;
 
 class EventService
 {
@@ -30,13 +32,15 @@ class EventService
     protected $global_payment_type_service;
     protected $global_card_payment_type_service;
     protected $cash_register_service;
+    protected $season_ticket_service;
 
-    public function __construct(EventRepositoryInterface $event_repository, GlobalPaymentTypeService $global_payment_type_service, GlobalCardPaymentTypeService $global_card_payment_type_service, CashRegisterService $cash_register_service)
+    public function __construct(EventRepositoryInterface $event_repository, GlobalPaymentTypeService $global_payment_type_service, GlobalCardPaymentTypeService $global_card_payment_type_service, CashRegisterService $cash_register_service, SeasonTicketService $season_ticket_service)
     {
         $this->event_repository = $event_repository;
         $this->global_payment_type_service = $global_payment_type_service;
         $this->global_card_payment_type_service = $global_card_payment_type_service;
         $this->cash_register_service = $cash_register_service;
+        $this->season_ticket_service = $season_ticket_service;
     }
 
 
@@ -68,6 +72,8 @@ class EventService
         try {
 
             $event = $this->event_repository->getById($id);
+            $event->serie->globalSeason;
+            $payment_installments = [];
             /*
             * Group seats by zone
             */
@@ -89,6 +95,10 @@ class EventService
             $events_by_serie = $this->event_repository->getEventsBySerie($event->serie_id);
             if ($events_by_serie->count() > 1) {
                 $purchase_types[] = 'serie';
+            }
+            if($event->serie->globalSeason->enabled_for_season_tickets){
+                $purchase_types[] = 'abonado';
+                $payment_installments = PaymentInstallments::toArray();
             }
 
             /*
@@ -112,6 +122,7 @@ class EventService
                 'global_payment_types' => $global_payment_types,
                 'global_card_payment_types' => $global_card_payment_types,
                 'purchase_types' => $purchase_types,
+                'payment_installments' => $payment_installments
             ];
 
             return $reponse;
@@ -188,6 +199,35 @@ class EventService
 
     /*
     * |--------------------------------------------------------------------------
+    * | Get seat availablility by zone
+    */
+    public function getAvailability(array $data)
+    {
+        try {
+
+            $event = $this->event_repository->getOnlyEvent($data['event_id']);
+
+            $availability = $event->eventSeatCatalogues->filter(function ($item) {
+                return $item->seatCatalogueStatus->name === 'disponible';
+            })->groupBy(function ($item) {
+                return $item->seatCatalogue->zone;
+            })->map(function ($items, $zone) {
+                return [
+                    'zone' => $zone,
+                    'available_seats' => $items->count()
+                ];
+            })->values()->toArray();
+
+            return $availability;
+
+        } catch(\Exception $e){
+            throw $e;
+        }
+    }
+
+
+    /*
+    * |--------------------------------------------------------------------------
     * | Confirm seats purchase
     */
     public function confirmSeatsPurchase($data)
@@ -212,6 +252,9 @@ class EventService
             $saleTicket->amount_received = $data['amount_received'];
             $saleTicket->total_amount = $data['total_amount'];
             $saleTicket->total_returned = $data['total_returned'];
+            $saleTicket->payment_in_installments = $data['payment_in_installments'] ?? null;
+            $saleTicket->promotion_id = $data['final_promotion']['id'] ?? null;
+            $saleTicket->promotion_quantity = $data['final_promotion']['quantity'] ?? null;
             $saleTicket->is_online = $data['is_online'];
             $saleTicket->is_transfer = $data['is_transfer'] ?? false;
             $saleTicket->save();
@@ -222,22 +265,16 @@ class EventService
             foreach ($data['global_payment_types'] as $global_payment_type) {
                 $saleTicket->globalPaymentTypes()->attach($global_payment_type['id'], [
                     'global_card_payment_type_id' => $global_payment_type['global_card_payment_type_id'] ?? null,
+                    'reason_agreement_id' => $global_payment_type['reason_agreement_id'] ?? null,
                     'amount' => $global_payment_type['amount'],
+                    'original_amount' => $global_payment_type['amount'],
+                    'reason_courtesy' => $global_payment_type['reason_agreement'] ?? null,
                 ]);
             }
 
             /*
             * Get events by serie if purchase type is serie
             */
-            /* $events = [];
-            if ($data['purchase_type'] === 'serie') {
-                $events = $this->event_repository->getEventsBySerie($data['serie_id']);
-                if ($events->count() === 1) {
-                    throw new \Exception('No se puede realizar la compra de una serie de eventos con un solo evento');
-                }
-            } else {
-                $events = collect([$this->event_repository->getById($data['event_id'])]);
-            } */
             $events = ($data['purchase_type'] === 'serie')
                 ? $this->event_repository->getEventsBySerie($data['serie_id'])
                 : collect([$this->event_repository->getById($data['event_id'])]);
@@ -290,17 +327,25 @@ class EventService
                     /*
                     * Confirm seat purchase
                     */
-                    $this->event_repository->confirmSeatsPurchase($event->id, $seat['seat_catalogue_id'], $data['member_user_id'], $saleTicket->id, $qr, $seat['final_price']);
+                    $this->event_repository->confirmSeatsPurchase($event->id, $seat['seat_catalogue_id'], $data['member_user_id'], $saleTicket->id, $qr, $seat['final_price'], $seat['is_gift']);
 
                     /*
                     * Create relationship between sale ticket and eventSeatCatalogs
                     */
                     $saleTicket->eventSeatCatalogs()->attach($event_seat_catalogue->id, [
                         'user_id' => $data['member_user_id'],
-                        'promotion_id' => null,
-                        'agreement_promotion_id' => null,
+                        'promotion_id' => $seat['promotion_id'],
+                        'agreement_promotion_id' => $seat['agreement_promotion_id'] ?? null,
                         'is_active' => true,
                     ]);
+
+                    /*
+                    * Validate if the sale is abonado
+                    */
+                    if($data['purchase_type'] === 'abonado'){
+                        $seat['is_owner'] = $seat['is_owner'] == 'Si' ? true : false;
+                        $this->season_ticket_service->save($seat);
+                    }
 
                     /*
                     * create qr
@@ -366,6 +411,67 @@ class EventService
             return true;
 
         } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /*
+    * |--------------------------------------------------------------------------
+    * | Print sale tciket
+    */
+    public function printSaleTicket($sale_ticket_id)
+    {
+        try {
+            $sale_ticket = SaleTicket::find($sale_ticket_id);
+            $cash_register_type = $sale_ticket->cashRegister->cash_register_type_id;
+            $event_seat_catalogues = $sale_ticket->EventSeatCatalogues;
+            $pdf_data = [];
+
+            $event_seat_catalogues->each(function($event_seat_catalogue) use (&$sale_ticket, &$cash_register_type, &$pdf_data) {
+                $qr = $event_seat_catalogue->qr;
+
+                /*
+                * create qr
+                */
+                $builder = new Builder(
+                    writer: new PngWriter(),
+                    writerOptions: [],
+                    validateResult: false,
+                    data: $qr,
+                    encoding: new Encoding('UTF-8'),
+                    errorCorrectionLevel: ErrorCorrectionLevel::High,
+                    size: 300,
+                    margin: 10,
+                    roundBlockSizeMode: RoundBlockSizeMode::Margin,
+                    labelText: 'Asiento ' . $event_seat_catalogue->seatCatalogue->code,
+                    labelFont: new OpenSans(20),
+                    labelAlignment: LabelAlignment::Center
+                );
+
+                $result = $builder->build();
+
+                $qr_img = $result->getDataUri();
+
+                /*
+                * pdf structure
+                */
+                $pdf_data[] = [
+                    'event_name' => $event_seat_catalogue->event->name,
+                    'event_start_date' => $event_seat_catalogue->event->start_date,
+                    'seat_code' => $event_seat_catalogue->seatCatalogue->code,
+                    'qr_img' => $qr_img,
+                    'qr' => $event_seat_catalogue->qr,
+                    'final_price' => $event_seat_catalogue->price,
+                    'ticket_id' => $sale_ticket->id,
+                    'ticket_created_at' => $sale_ticket->created_at,
+                    'cash_register_type' => $cash_register_type
+                ];
+
+            });
+
+            return $pdf_data;
+
+        } catch(\Exception $e) {
             throw $e;
         }
     }

@@ -35,7 +35,7 @@ class Promotion extends Model
     public function agreements()
     {
         return $this->belongsToMany(Agreement::class, 'agreement_promotion', 'promotion_id', 'agreement_id')
-                    ->withPivot('is_active')
+                    ->withPivot('id','is_active')
                     ->withTimestamps();
     }
 
@@ -44,6 +44,11 @@ class Promotion extends Model
         return $this->belongsToMany(EventSeatCatalog::class, 'event_seat_catalog_promotion', 'promotion_id', 'event_seat_catalog_id')
                     ->withPivot('is_active')
                     ->withTimestamps();
+    }
+
+    public function saleTickets()
+    {
+        return $this->hasMany(SaleTicket::class);
     }
 
 }

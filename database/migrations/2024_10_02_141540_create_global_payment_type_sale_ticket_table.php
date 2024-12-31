@@ -15,11 +15,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('global_payment_type_id')->constrained('global_payment_types');
             $table->foreignId('sale_ticket_id')->constrained('sale_tickets');
+            $table->foreignId('courtesy_type_id')->nullable()->constrained('courtesy_types');
+            $table->foreignId('reason_agreement_id')->nullable()->constrained('reason_agreements');
 
             $table->unsignedBigInteger('global_card_payment_type_id')->nullable();
             $table->foreign('global_card_payment_type_id', 'global_card_payment_type_id_foreign')->references('id')->on('global_card_payment_types');
 
             $table->decimal('amount', 14, 4)->default('0.0000');
+            $table->string('reason_courtesy')->nullable();
+            $table->decimal('original_amount', 14, 4)->default('0.0000');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

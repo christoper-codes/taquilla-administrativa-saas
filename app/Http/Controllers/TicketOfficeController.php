@@ -120,6 +120,7 @@ class TicketOfficeController extends Controller
         try {
 
             $ticket_office = $this->ticket_office_service->getById($ticketOffice->id);
+            $sale_tickets_cancellation_code = $ticket_office->saleTicketCancellationCodes()->where('is_active', true)->first();
             $events = $this->event_service->getAll();
             $auth_user = Auth::user();
             $active_cash_register = $auth_user->cashRegisterActive($ticketOffice->id);
@@ -134,6 +135,7 @@ class TicketOfficeController extends Controller
                 'auth_user' => $auth_user,
                 'active_cash_register' => $active_cash_register,
                 'cash_register_general_history' => $cash_register_general_history,
+                'sale_tickets_cancellation_code' => $sale_tickets_cancellation_code
             ]);
 
         } catch (\Exception $e) {

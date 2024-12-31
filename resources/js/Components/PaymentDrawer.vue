@@ -56,6 +56,10 @@ const props = defineProps({
         type: Number,
         required: true,
     },
+    paymentInInstallments: {
+        type: Object,
+        required: false,
+    },
     globalPaymentTypes: {
         type: Array,
         required: true,
@@ -67,6 +71,10 @@ const props = defineProps({
     serieId: {
         type: Number,
         required: true,
+    },
+    finalPromotion: {
+        type: Object,
+        required: false,
     },
 })
 

@@ -32,7 +32,7 @@ class Agreement extends Model
     public function promotions()
     {
         return $this->belongsToMany(Promotion::class, 'agreement_promotion', 'agreement_id', 'promotion_id')
-                    ->withPivot('is_active')
+                    ->withPivot('id','is_active')
                     ->withTimestamps();
     }
 }

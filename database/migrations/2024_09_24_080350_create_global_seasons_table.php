@@ -21,6 +21,7 @@ return new class extends Migration
             $table->date('start_date');
             $table->date('end_date');
             $table->string('description')->nullable();
+            $table->boolean('enabled_for_season_tickets')->default(true);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
