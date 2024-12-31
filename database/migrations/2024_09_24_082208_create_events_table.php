@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('stadium_id')->default(1);
+            $table->foreign('stadium_id')->references('id')->on('stadiums');
             $table->foreignId('event_type_id')->constrained('event_types');
             $table->foreignId('serie_id')->constrained('series');
             $table->foreignId('global_image_id')->nullable()->constrained('global_images');

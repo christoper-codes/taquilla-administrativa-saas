@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('reason_agreements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('stadium_id')->references('stadiums');
+            $table->foreignId('stadium_id')->constrained('stadiums');
             $table->string('name');
             $table->string('description')->nullable();
             $table->boolean('is_active')->default(true);

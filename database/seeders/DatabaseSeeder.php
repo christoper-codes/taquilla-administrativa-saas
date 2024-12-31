@@ -43,6 +43,8 @@ class DatabaseSeeder extends Seeder
             //SeatCataloguesSeeder::class,
             SalesTicketCancellationCodesSeeder::class,
             CourtesyTypesSeeder::class,
+            ReasonAgreementsSeeder::class,
+            AgreementsSeeder::class,
         ]);
     }
 }

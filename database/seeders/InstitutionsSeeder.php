@@ -20,5 +20,13 @@ class InstitutionsSeeder extends Seeder
             'description' => 'institucion generica destinada a pruebas',
             'is_active' => true
         ]);
+
+        Institution::create([
+            'stadium_id' => 1,
+            'global_image_id' => null,
+            'name' => 'halcones de xalapa',
+            'description' => 'institucion generica',
+            'is_active' => true
+        ]);
     }
 }

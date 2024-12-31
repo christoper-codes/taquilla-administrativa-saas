@@ -35,7 +35,7 @@ class Promotion extends Model
     public function agreements()
     {
         return $this->belongsToMany(Agreement::class, 'agreement_promotion', 'promotion_id', 'agreement_id')
-                    ->withPivot('is_active')
+                    ->withPivot('id','is_active')
                     ->withTimestamps();
     }
 

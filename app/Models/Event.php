@@ -10,6 +10,7 @@ class Event extends Model
     use HasFactory;
 
     protected $fillable = [
+        'stadium_id',
         'global_season_id',
         'event_type_id',
         'serie_id',
@@ -21,6 +22,11 @@ class Event extends Model
         'end_date',
         'is_active',
     ];
+
+    public function stadium()
+    {
+        return $this->belongsTo(Stadium::class);
+    }
 
     public function globalSeason()
     {

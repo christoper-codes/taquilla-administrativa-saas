@@ -221,7 +221,7 @@ function handleImageError() {
                         <!-- Card -->
                         <Link :href="route('blogs.show', 2)" class="tw-w-full lg:tw-w-1/2 group tw-cursor-pointer tw-flex tw-flex-col tw-h-full hover:tw-scale-110 tw-transition tw-duration-500 tw-rounded-xl">
                             <div class="tw-h-60 tw-w-full">
-                                <img class="tw-h-full tw-w-full tw-object-cover tw-object-top tw-rounded-xl tw-bg-gray-200" src="/storage/public/blog1-hdx-img.jpg" alt="Blog Image">
+                                <img class="tw-h-full tw-w-full tw-object-cover tw-object-top tw-rounded-xl tw-bg-gray-200" src="/storage/event_images/6721ee97db56e.jpg" alt="Blog Image">
                             </div>
                             <div class="tw-my-6">
                                 <h3 class="tw-text-xl tw-font-semibold tw-text-gray-800">

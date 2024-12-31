@@ -252,7 +252,7 @@ class EventService
             $saleTicket->amount_received = $data['amount_received'];
             $saleTicket->total_amount = $data['total_amount'];
             $saleTicket->total_returned = $data['total_returned'];
-            $saleTicket->payment_in_installments = $data['payment_in_installments'];
+            $saleTicket->payment_in_installments = $data['payment_in_installments'] ?? null;
             $saleTicket->promotion_id = $data['final_promotion']['id'] ?? null;
             $saleTicket->promotion_quantity = $data['final_promotion']['quantity'] ?? null;
             $saleTicket->is_online = $data['is_online'];
@@ -265,8 +265,10 @@ class EventService
             foreach ($data['global_payment_types'] as $global_payment_type) {
                 $saleTicket->globalPaymentTypes()->attach($global_payment_type['id'], [
                     'global_card_payment_type_id' => $global_payment_type['global_card_payment_type_id'] ?? null,
+                    'reason_agreement_id' => $global_payment_type['reason_agreement_id'] ?? null,
                     'amount' => $global_payment_type['amount'],
-                    'original_amount' => $global_payment_type['amount']
+                    'original_amount' => $global_payment_type['amount'],
+                    'reason_courtesy' => $global_payment_type['reason_agreement'] ?? null,
                 ]);
             }
 
@@ -333,11 +335,11 @@ class EventService
                     $saleTicket->eventSeatCatalogs()->attach($event_seat_catalogue->id, [
                         'user_id' => $data['member_user_id'],
                         'promotion_id' => $seat['promotion_id'],
-                        'agreement_promotion_id' => null,
+                        'agreement_promotion_id' => $seat['agreement_promotion_id'] ?? null,
                         'is_active' => true,
                     ]);
 
-                    /* 
+                    /*
                     * Validate if the sale is abonado
                     */
                     if($data['purchase_type'] === 'abonado'){
@@ -423,7 +425,7 @@ class EventService
             $sale_ticket = SaleTicket::find($sale_ticket_id);
             $cash_register_type = $sale_ticket->cashRegister->cash_register_type_id;
             $event_seat_catalogues = $sale_ticket->EventSeatCatalogues;
-            $pdf_data = [];            
+            $pdf_data = [];
 
             $event_seat_catalogues->each(function($event_seat_catalogue) use (&$sale_ticket, &$cash_register_type, &$pdf_data) {
                 $qr = $event_seat_catalogue->qr;

@@ -13,7 +13,7 @@ class SaleTicketController extends Controller
 
     public function __construct(SaleTicketService $sale_ticket_service)
     {
-        $this->sale_ticket_service = $sale_ticket_service;   
+        $this->sale_ticket_service = $sale_ticket_service;
     }
     /**
      * Display a listing of the resource.
@@ -82,21 +82,11 @@ class SaleTicketController extends Controller
             $response = $this->sale_ticket_service->cancellationSaleTickets($request->all());
 
             DB::commit();
-            
+
             return redirect()->back()->with('success', $response);
-            /* return response()->json([
-                'data' => $response,
-                'message' => 'Exito en el proceso de cancelacion',
-                'success' => true
-            ], 200); */
 
         } catch(\Exception $e){
             DB::rollBack();
-           /*  return response()->json([
-                'data' => null,
-                'message' => $e->getMessage(),
-                'success' => false
-            ], 500); */
             return redirect()->back()->with('error', $e->getMessage());
 
         }
