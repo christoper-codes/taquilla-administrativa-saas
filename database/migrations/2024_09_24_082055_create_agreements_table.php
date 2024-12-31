@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('agreements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('institution_id')->constrained('institutions');
-            $table->foreignId('global_season_id')->constrained('global_seasons');
+            $table->foreignId('global_season_id')->nullable()->constrained('global_seasons');
             $table->string('name');
             $table->string('description')->nullable();
-            $table->dateTime('start_date');
-            $table->dateTime('end_date');
+            $table->dateTime('start_date')->nullable();
+            $table->dateTime('end_date')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

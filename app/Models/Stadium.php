@@ -21,6 +21,9 @@ class Stadium extends Model
         'is_active'
     ];
 
+    public function events(){
+        return $this->hasMany(Event::class);
+    }
 
     public function leadingCompany()
     {

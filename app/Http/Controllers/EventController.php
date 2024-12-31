@@ -9,6 +9,7 @@ use App\Models\Event;
 use App\Models\EventSeatCatalog;
 use App\Models\GlobalCardPaymentType;
 use App\Models\GlobalPaymentType;
+use App\Models\Institution;
 use App\Models\PriceCatalogue;
 use App\Models\PriceTypeSeatCatalogue;
 use App\Models\SeatCatalogue;
@@ -18,6 +19,7 @@ use App\Services\EventService;
 use App\Services\EventTypeService;
 use App\Services\GlobalImageService;
 use App\Services\GlobalSeasonService;
+use App\Services\ReasonAgreementService;
 use App\Services\SerieService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -45,10 +47,12 @@ class EventController extends Controller
     protected $global_image_service;
     protected $event_seat_catalogue_service;
     protected $event_repository;
+    protected $reason_agreement_service;
 
 
     public function __construct(EventService $event_service, EventTypeService $event_type_service, SerieService $serie_service, GlobalSeasonService $global_season_service,
-                                GlobalImageService $global_image_service, EventSeatCatalogueService $event_seat_catalogue_service, EventRepositoryInterface $event_repository)
+                                GlobalImageService $global_image_service, EventSeatCatalogueService $event_seat_catalogue_service, EventRepositoryInterface $event_repository,
+                                ReasonAgreementService $reason_agreement_service)
     {
         $this->event_service = $event_service;
         $this->event_type_service = $event_type_service;
@@ -57,6 +61,7 @@ class EventController extends Controller
         $this->global_image_service = $global_image_service;
         $this->event_seat_catalogue_service = $event_seat_catalogue_service;
         $this->event_repository = $event_repository;
+        $this->reason_agreement_service = $reason_agreement_service;
     }
 
 
@@ -229,6 +234,17 @@ class EventController extends Controller
                 $payment_installments = PaymentInstallments::toArray();
             }
 
+            /*
+            * get all reason agreement by stadium
+            */
+            $reason_agreements = $this->reason_agreement_service->getAllByStadium($event->stadium_id);
+
+            /*
+            * get institutions with its agreements and promotions by stadium
+            */
+            $institutions = Institution::where('stadium_id', $event->stadium_id)
+                ->with(['agreements.promotions.promotionType'])
+                ->get();
 
             return Inertia::render('App/Pos/Event', [
                 'isEventsShow' => true,
@@ -244,6 +260,8 @@ class EventController extends Controller
                 'global_card_payment_types' => $global_card_payment_types,
                 'purchase_types' => $purchase_types,
                 'payment_installments' => $payment_installments,
+                'reason_agreements' => $reason_agreements,
+                'institutions' => $institutions
             ]);
 
         } catch (\Exception $e) {
@@ -255,7 +273,7 @@ class EventController extends Controller
         }
     }
 
-    /* 
+    /*
     * Get seat availablility by zone
     */
     public function getSeatAvailabilityByZone(Request $request)
@@ -271,7 +289,7 @@ class EventController extends Controller
             return response()->json([
                 'data' => $response,
                 'message' => 'Las disponibilidad de los asientos se a obtenido con exito!!',
-                'success' => true 
+                'success' => true
             ], 200);
 
         } catch (\Exception $e) {
@@ -291,7 +309,7 @@ class EventController extends Controller
                 'zone' => 'required',
                 'event_id' => 'required'
             ]);
-    
+
             $seat_catalogues = SeatCatalogue::where('zone', $request->zone)->get();
             $event_seat_catalogues = $seat_catalogues->map(function ($seat_catalogue) use ($request) {
                 $actual_event_seat_catalogue = EventSeatCatalog::where([
@@ -303,11 +321,11 @@ class EventController extends Controller
                     'seatCatalogueStatus',
                     'promotions.promotionType'
                 ])->first();
-    
+
                 return $actual_event_seat_catalogue ? $actual_event_seat_catalogue : null;
-                
+
             })->filter()->values();
-           
+
             return response()->json([
                 'data' => $event_seat_catalogues,
                 'message' => 'Exito al optener los asientos',
@@ -321,7 +339,7 @@ class EventController extends Controller
                 'success' => false
             ], 500);
         }
-        
+
     }
 
     /**
@@ -487,7 +505,7 @@ class EventController extends Controller
         }
     }
 
-    /** 
+    /**
     * Print sale ticket
     */
     public function printSaleTicket(Request $request)

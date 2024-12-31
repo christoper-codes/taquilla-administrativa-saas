@@ -139,9 +139,18 @@ const addSeat = (seat) => {
             "autoClose": 10000,
             "dangerouslyHTMLString": true
         })
-        return 
+        return
     }
-       
+    if(selectedAgreementPromotion.value){
+        toast('Una vez selecionada una promocion ya no es posible agregar mas asientos a la compra.', {
+            "theme": "auto",
+            "type": "error",
+            "autoClose": 10000,
+            "dangerouslyHTMLString": true
+        })
+        return
+    }
+
     if(purchaseStatus.value == 'final' || purchaseStatus.value == 'retry') {
         purchaseStatus.value = 'retry';
         return;
@@ -224,11 +233,12 @@ const filteredPaymentTypes = computed(() => {
 
 watch(filteredPaymentTypes, updateTotal);
 
-/* 
+/*
 * handle promotions
 */
 const promotionTypes = ref([]);
 const selectedPromotion = ref(null);
+const selectedAgreementPromotion = ref(null);
 const seatsSelectedCopy = ref([]);
 const showPromotionToast = ref(false);
 const finalPromotion = ref({id: null, quantity:null});
@@ -244,8 +254,8 @@ watch(promotionTypes, () => {
                     "dangerouslyHTMLString": true
                 })
             }
-        });                      
-    }                                              
+        });
+    }
 });
 
 watch(selectedPromotion, () => {
@@ -259,7 +269,7 @@ watch(selectedPromotion, () => {
         let seatsTopay = selectedPromotion.value.generic_seats_allowed;
         let seatsToGift = selectedPromotion.value.promotional_seats_allowed;
         let applicableIndex = 0;
-        
+
         seatsSelected.value.forEach((seat) => {
 
             if(seat.final_price == selectedPromotion.value.final_price){
@@ -279,7 +289,7 @@ watch(selectedPromotion, () => {
                 applicableIndex++;
             }
         });
-                
+
     } else if(selectedPromotion.value.type == 'descuento_por_porcentaje_por_boleto'){
         seatsSelected.value.forEach((seat) => {
             seat.price_types.forEach(priceType => {
@@ -305,7 +315,69 @@ watch(selectedPromotion, () => {
 
 });
 
+watch(selectedAgreementPromotion, () => {
+
+    finalPromotion.value = {};
+    seatsSelected.value = JSON.parse(JSON.stringify(seatsSelectedCopy.value));
+    console.log(seatsSelectedCopy.value);
+    finalPromotion.value.id = selectedAgreementPromotion.value.id;
+    finalPromotion.value.quantity = 0;
+
+    if(selectedAgreementPromotion.value.promotion_type.name == 'descuento_por_compra_multiple') {
+        let seatsTopay = selectedAgreementPromotion.value.generic_seats_allowed;
+        let seatsToGift = selectedAgreementPromotion.value.promotional_seats_allowed;
+        let applicableIndex = 0;
+
+        seatsSelected.value.forEach((seat) => {
+
+            if(applicableIndex % (seatsTopay + seatsToGift) < seatsTopay){
+                seat.is_promotion = false;
+            } else {
+                finalPromotion.value.quantity++;
+                seat.is_promotion = true;
+                seat.promotion_id = selectedAgreementPromotion.value.id;
+                seat.agreement_promotion_id = selectedAgreementPromotion.value.pivot.id;
+                seat.is_gift = true;
+                seat.price_types.forEach(priceType => {
+                    if(priceType.name == 'regular'){
+                        priceType.pivot.price = parseFloat(0);
+                    }
+                })
+            }
+            applicableIndex++;
+        });
+
+    } else if(selectedAgreementPromotion.value.promotion_type.name == 'descuento_por_porcentaje_por_compra'){
+
+        seatsSelected.value.forEach((seat) => {
+            seat.price_types.forEach(priceType => {
+                finalPromotion.value.quantity++;
+                seat.promotion_id = selectedAgreementPromotion.value.id;
+                seat.agreement_promotion_id = selectedAgreementPromotion.value.pivot.id;
+                if(priceType.name == 'regular'){
+                    const discount = priceType.pivot.price * (selectedAgreementPromotion.value.percent_allow / 100);
+                    priceType.pivot.price = priceType.pivot.price - discount;
+                }
+
+            })
+        });
+    }
+
+    console.log(selectedAgreementPromotion.value)
+    console.log(seatsSelected.value)
+
+    updateTotal();
+
+    toast('La promocion ha sido aplicada', {
+        "theme": "auto",
+        "type": "success",
+        "dangerouslyHTMLString": true
+    })
+
+});
+
 function updateTotal() {
+
     amountReceived.value = 0;
     amountReturned.value = 0;
     if (paymentTypesSelected.value.length >= 2) {
@@ -318,7 +390,7 @@ function updateTotal() {
     const processedSeats = new Set();
 
     filteredPaymentTypes.value.forEach(paymentType => {
-        seatsSelected.value.forEach((seat) => {            
+        seatsSelected.value.forEach((seat) => {
             if (!processedSeats.has(seat.seat_catalogue.code)) {
                 let price;
                 if (paymentType.name === 'cortesia') {
@@ -347,14 +419,14 @@ function updateTotal() {
         amountToPayCard.value = 0;
     }
 
-    if(!selectedPromotion.value){
+    if(!selectedPromotion.value && !selectedAgreementPromotion.value){
         seatsSelectedCopy.value = JSON.parse(JSON.stringify(seatsSelected.value));
     }
 
     promotionTypes.value = [];
 
     seatsSelectedCopy.value.forEach(seat => {
-        if(seat.promotions.length > 0) { 
+        if(seat.promotions.length > 0) {
             seat.promotions.forEach(promotion => {
                 const actualPromotionExist = promotionTypes.value.find(promo => promo.type === promotion.promotion_type.name && promo.final_price === seat.final_price);
                 if(actualPromotionExist) {
@@ -384,6 +456,15 @@ function updateTotal() {
         amountToPayCard.value = totalAmount.value;
     }
 
+    /*
+    * reason agreement section
+    */
+    if(paymentTypesSelected.value.some(type => type.name != 'cortesia')){
+        reasonAgreementSelected.value = null;
+        reasonAgreementDescription.value = null;
+        agreementSection.value = {};
+    }
+
 }
 
 const globalPayementTypeProps = (item) => {
@@ -392,6 +473,27 @@ const globalPayementTypeProps = (item) => {
     subtitle: item.description,
   };
 };
+
+const reasonAgreementsProps = (item) => {
+    return {
+        title: item.name,
+        subtitle: item.description,
+    }
+}
+
+const institutionsProps = (item) => {
+    return {
+        title: item.name,
+        subtitle: item.description,
+    }
+}
+
+const institutionAgreementsProps = (item) => {
+    return {
+        title: item.name,
+        subtitle: item.description,
+    }
+}
 
 const globalCardPayementTypeProps = (item) => {
   return {
@@ -472,6 +574,12 @@ const selectZones = () => {
     amountToPayCash.value = 0;
     paymentTypesSelected.value = [];
     cardPaymentTypesSelected.value = 0;
+    reasonAgreementSelected.value = null;
+    institutionSelected.value = null;
+    agreementsByInstitutionSelected.value = null;
+    agreementSelected.value = null;
+    reasonAgreementDescription.value = null;
+    agreementSection.value = {};
     valid.value = true;
     purchaseStatus.value = 'process';
     viewSelectedSection.value = 'Zonas HDX';
@@ -484,6 +592,7 @@ const selectZones = () => {
     stadiumHdxImg.classList.remove('tw-rotate-90');
     stadiumHdxImg.classList.add('tw-rotate-0');
     selectedPromotion.value = null;
+    selectedAgreementPromotion.value = null;
     seatsSelectedCopy.value = [];
     showPromotionToast.value = false;
     seatAvailability.value = [];
@@ -547,8 +656,19 @@ const props = defineProps({
     payment_installments: {
         type: Object,
         required: false
+    },
+    reason_agreements: {
+        type: Array,
+        required: false
+    },
+    institutions: {
+        type: Array,
+        required: false
     }
 });
+
+console.log(props.institutions);
+
 
 const users_list = [];
 const userToTransfer = ref(null);
@@ -556,7 +676,7 @@ const userToTransfer = ref(null);
 props.users.forEach(element => {
     users_list.push(
         {
-            name: `${element['first_name']} ${element['holder_']} (${element['email']})`,
+            name: `${element['first_name']} ${element['last_name']} (${element['email']})`,
             value: element['id']
         }
     )
@@ -584,11 +704,10 @@ onMounted(() => {
 
 const getSeatAvailability = () => {
     const data = {event_id: props.event.id};
-    
+
     axios.get(route('events.availability'), { params: data })
         .then(response => {
             seatAvailability.value = response.data.data;
-            console.log(seatAvailability.value);
         })
         .catch(error => {
             console.log(error)
@@ -607,12 +726,27 @@ const valid = ref(true);
 const error = ref('');
 const amountToPayCard = ref(0);
 const cardPaymentTypesSelected = ref(0);
+const reasonAgreementSelected = ref(null);
+const reasonAgreementDescription = ref(null);
+const agreementSection = ref({});
+const institutionSelected = ref(null);
+const agreementsByInstitutionSelected = ref(null);
+const agreementSelected = ref(null);
 const amountToPayCash = ref(0);
 const amountReceivedCash = ref(0);
 const purchaseStatus = ref('process');
 const originalTotalAmount = ref(0);
 const totalAttempts = ref(0);
 const memberUserId = ref(1);
+
+watch(() => institutionSelected.value, () => {
+    agreementsByInstitutionSelected.value = null;
+    agreementSelected.value = null;
+    selectedAgreementPromotion.value = null;
+    if(institutionSelected.value){
+        agreementsByInstitutionSelected.value = institutionSelected.value.agreements;
+    }
+});
 
 watch(() => amountReceived.value, (newValue) => {
     amountReturned.value = parseFloat(amountReceived.value) - parseFloat(totalAmount.value)
@@ -635,7 +769,7 @@ watch(() => purchaseType.value, (newValue) => {
             "autoClose": 10000,
             "dangerouslyHTMLString": true
         })
-        return 
+        return
     }
     purchaseStatus.value = 'final';
     if(totalAttempts.value == 0) {
@@ -753,10 +887,23 @@ const onSubmit = () => {
             }
         }
         if(item.name === 'cortesia') {
-            return {
-                id: item.id,
-                global_card_payment_type_id: null,
-                amount: 0,
+            if(reasonAgreementSelected.value){
+                if(reasonAgreementSelected.value.name != 'otro'){
+                    reasonAgreementDescription.value = reasonAgreementSelected.value.name;
+                }
+                return {
+                    id: item.id,
+                    global_card_payment_type_id: null,
+                    amount: 0,
+                    reason_agreement_id:  reasonAgreementSelected.value.id,
+                    reason_agreement: reasonAgreementDescription.value,
+                }
+            }else{
+                return {
+                    id: item.id,
+                    global_card_payment_type_id: null,
+                    amount: 0,
+                }
             }
         }
     });
@@ -853,24 +1000,24 @@ const onSubmitConfirm = (isActive) => {
     const isTransfer = userToTransfer.value ? true : false;
 
     const seatsSelectedData = {
-    purchase_type: purchaseType.value,
-    event_id: props.event.id,
-    cash_register_id: cashRegisterDataId.value,
-    member_user_id: purchaseOnline.value ? props.user.id : (isTransfer ? userToTransfer.value : null),
-    seller_user_id: sellerUserId.value,
-    price_type_id: priceTypeId.value,
-    seats: seatsSelected.value,
-    amount_received: amountReceived.value,
-    total_amount: totalAmount.value,
-    total_returned: amountReturned.value,
-    payment_in_installments: paymentInstallmentSelected.value,
-    global_payment_types: globalPaymentTypes.value,
-    is_online: purchaseOnline.value,
-    serie_id: props.event.serie_id,
-    is_transfer: isTransfer,
-    user_to_transfer: userToTransfer.value,
-    final_promotion: finalPromotion.value,
-};
+        purchase_type: purchaseType.value,
+        event_id: props.event.id,
+        cash_register_id: cashRegisterDataId.value,
+        member_user_id: purchaseOnline.value ? props.user.id : (isTransfer ? userToTransfer.value : null),
+        seller_user_id: sellerUserId.value,
+        price_type_id: priceTypeId.value,
+        seats: seatsSelected.value,
+        amount_received: amountReceived.value,
+        total_amount: totalAmount.value,
+        total_returned: amountReturned.value,
+        payment_in_installments: paymentInstallmentSelected.value,
+        global_payment_types: globalPaymentTypes.value,
+        is_online: purchaseOnline.value,
+        serie_id: props.event.serie_id,
+        is_transfer: isTransfer,
+        user_to_transfer: userToTransfer.value,
+        final_promotion: finalPromotion.value,
+    };
 
 /* console.log(seatsSelectedData);
 return */
@@ -924,6 +1071,7 @@ axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
 const rules = {
     required: value => !!value || 'Campo requerido',
     isNumber: value => !isNaN(value) || 'Debe ser un número',
+    minChar: value => value.length >= 3 || 'Debe tener un mínimo de 3 caracteres',
     //validar si en el array de pagos selecionados solo existe un tipo de pago ya sea efectivo o tarjeta y validar que el monto sea igual al total
     isAmountToPay: value => {
         if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
@@ -947,7 +1095,7 @@ function printInKioskMode(url) {
     };
 }
 
-/* 
+/*
 * Season tickets
 */
 const paymentInstallmentSelected = ref(null);
@@ -960,20 +1108,21 @@ const updateHolder = (index) => {
         if(i !== index){
             seat.is_owner = 'No';
         }
-    }); 
+    });
 }
 
 watch(purchaseType, () => {
     if(purchaseType.value == 'abonado' && selectedPromotion.value) {
-        return 
+        return
     }
     if(purchaseType.value == 'abonado'){
         seasonTicketsDialog.value = true;
     }
-    updateTotal();
     amountToPayCash.value = 0;
     amountReceivedCash.value = 0;
     amountToPayCard.value = 0;
+    updateTotal();
+
 })
 
 watch(seatsSelected, (newSeats) => {
@@ -1095,7 +1244,7 @@ const cardPaymentTypeError = computed(() => {
         <div class="tw-w-full tw-bg-white/70 tw-flex tw-items-center tw-justify-center tw-backdrop-blur-md tw-p-5 tw-absolute tw-bottom-0 ">
             <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-font-bold tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-white tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
                 <span class="material-symbols-outlined tw-text-xl tw-text-purple-500">featured_seasonal_and_gifts</span> {{ event.promotion_announcement }}
-            </div>  
+            </div>
         </div>
     </div>
 
@@ -1119,7 +1268,7 @@ const cardPaymentTypeError = computed(() => {
                             <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-start lg:tw-items-center tw-gap-2 lg:tw-gap-5">
                                 <div class="tw-inline-flex lg:tw-hidden tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-font-bold tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
                                     <span class="material-symbols-outlined tw-text-xl tw-text-purple-500">featured_seasonal_and_gifts</span> {{ event.promotion_announcement }}
-                                </div>                                
+                                </div>
                                 <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
                                     <span class="material-symbols-outlined tw-text-xl">calendar_today</span>{{ event.serie.global_season.name }}
                                 </div>
@@ -1148,9 +1297,11 @@ const cardPaymentTypeError = computed(() => {
                                         v-bind:amountReceived="amountReceived"
                                         v-bind:totalAmount="totalAmount"
                                         v-bind:amountReturned="amountReturned"
+                                        v-bind:paymentInInstallments="paymentInstallmentSelected"
                                         v-bind:globalPaymentTypes="globalPaymentTypes"
                                         v-bind:isOnline="purchaseOnline"
                                         v-bind:serieId="event.serie_id"
+                                        v-bind:finalPromotion="finalPromotion"
                                     />
 
                                     <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-6 tw-items-center tw-gap-2 tw-mt-7">
@@ -1309,7 +1460,7 @@ const cardPaymentTypeError = computed(() => {
                     <div class="tw-w-full lg:tw-w-[28%] lg:tw-fixed tw-top-[83px] tw-right-0 tw-bg-white lg:tw-z-40">
                         <div class="tw-w-full tw-pb-5 lg:tw-h-[calc(100vh-83px)] lg:tw-overflow-y-auto tw-shadow-lg [&::-webkit-scrollbar]:!tw-w-2 [&::-webkit-scrollbar-thumb]:!tw-rounded-full [&::-webkit-scrollbar-track]:!tw-bg-white [&::-webkit-scrollbar-thumb]:!tw-bg-neutral-300">
                             <div class="tw-relative tw-flex tw-flex-col tw-bg-white tw-pointer-events-auto">
-                                <div class="tw-relative tw-overflow-hidden tw-bg-gray-200 tw-min-h-[123px] tw-text-center tw-rounded-2xl lg:tw-rounded-none">                                   
+                                <div class="tw-relative tw-overflow-hidden tw-bg-gray-200 tw-min-h-[123px] tw-text-center tw-rounded-2xl lg:tw-rounded-none">
                                     <!-- SVG Background Element -->
                                     <figure class="tw-absolute tw-inset-x-0 tw-bottom-0 -tw-mb-px">
                                     <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 1920 100.1">
@@ -1475,6 +1626,7 @@ const cardPaymentTypeError = computed(() => {
                                                             v-model="amountToPayCard"
                                                             :rules="[rules.required, rules.isNumber, rules.isAmountToPay]"
                                                         ></v-text-field>
+
                                                         <v-text-field
                                                             v-else
                                                             label="Monto a pagar con tarjeta"
@@ -1507,6 +1659,89 @@ const cardPaymentTypeError = computed(() => {
                                                         v-model="amountToPayCash"
                                                         :rules="[rules.required, rules.isNumber, rules.isAmountToPay]"
                                                         ></v-text-field>
+                                                    </div>
+
+                                                    <div v-if="paymentTypesSelected.some(type => type.name === 'cortesia')">
+                                                        <h4 class="tw-text-xs tw-px-4 tw-py-1 tw-rounded-full tw-bg-purple-200 tw-text-purple-600 tw-text-center tw-mb-2">
+                                                            Complemento para pago en cortesia
+                                                        </h4>
+                                                        <v-select
+                                                            v-if="viewVendorTopics(user_roles)"
+                                                            color="purple"
+                                                            label="selecciona el complemento a cortesia"
+                                                            hint="Rason de la cortesia"
+                                                            :item-props="reasonAgreementsProps"
+                                                            :items="reason_agreements"
+                                                            v-model="reasonAgreementSelected"
+                                                            chips
+                                                            :rules="[rules.required]"
+                                                        ></v-select>
+                                                        <div v-if="reasonAgreementSelected && reasonAgreementSelected.name === 'otro'">
+                                                            <v-textarea
+                                                                class="tw-w-full"
+                                                                append-inner-icon="mdi-file-document"
+                                                                label="Rason especial de la cortesia"
+                                                                row-height="10"
+                                                                color="purple"
+                                                                clearable
+                                                                rows="3"
+                                                                auto-grow
+                                                                v-model="reasonAgreementDescription"
+                                                                :rules="[rules.required, rules.minChar]"
+                                                        ></v-textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div v-if="viewVendorTopics(user_roles)">
+                                                        <h4 class="tw-text-xs tw-px-4 tw-py-1 tw-rounded-full tw-bg-green-200 tw-text-green-600 tw-text-center tw-mb-2">
+                                                            Complemento para convenios
+                                                        </h4>
+                                                        <v-select
+                                                            color="purple"
+                                                            label="selecciona una instutucion"
+                                                            :item-props="institutionsProps"
+                                                            :items="institutions"
+                                                            v-model="institutionSelected"
+                                                            clearable
+                                                            chips
+                                                        ></v-select>
+                                                        <div v-if="institutionSelected">
+                                                            <v-select
+                                                                v-if="viewVendorTopics(user_roles)"
+                                                                color="purple"
+                                                                label="selecciona un convenio"
+                                                                :item-props="institutionAgreementsProps"
+                                                                :items="agreementsByInstitutionSelected"
+                                                                chips
+                                                                v-model="agreementSelected"
+                                                                clearable
+                                                                :rules="[rules.required]"
+                                                            ></v-select>
+                                                        </div>
+                                                        <div v-if="agreementSelected">
+                                                            <v-radio-group v-model="selectedAgreementPromotion">
+                                                                <div v-for="(promotion, index) in agreementSelected.promotions" :key="index">
+                                                                        <div v-if="promotion.generic_seats_allowed ">
+                                                                            <div class="tw-border-4 tw-border-yellow-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
+                                                                                <v-radio color="yellow" :key="index" :value="promotion">
+                                                                                    <template v-slot:label>
+                                                                                        <div>{{ promotion.description }}<strong class="tw-text-yellow-700">. Para asientos con precio regular</strong></div>
+                                                                                    </template>
+                                                                                </v-radio>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div v-if="promotion.percent_allow > 0 && promotion.promotion_type.name == 'descuento_por_porcentaje_por_compra'">
+                                                                            <div class="tw-border-4 tw-border-purple-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
+                                                                                <v-radio color="purple" :key="index" :value="promotion">
+                                                                                    <template v-slot:label>
+                                                                                        <div>{{ promotion.description }}<strong class="tw-text-purple-700">. Para asientos con precio regular</strong></div>
+                                                                                    </template>
+                                                                                </v-radio>
+                                                                            </div>
+                                                                        </div>
+                                                                </div>
+                                                            </v-radio-group>
+                                                        </div>
+
                                                     </div>
 
                                                     <p v-if="!valid" class="tw-py-2 tw-px-4 tw-bg-red-100 tw-border-l-4 tw-border-l-red-500 tw-text-red-500 tw-text-xs tw-my-4">{{ error }}</p>
@@ -1595,7 +1830,7 @@ const cardPaymentTypeError = computed(() => {
                                                                         <v-card-text>
                                                                             <div class="tw-w-full tw-max-w-[90%] tw-mx-auto">
                                                                                 <p class="tw-font-bold tw-text-sm lg:tw-text-2xl tw-text-gray-700 tw-text-center">Registra y confirma los abonos: </p>
-                                                                            
+
                                                                                 <div v-if="seatsSelected.length > 0 && purchaseType == 'abonado'">
                                                                                         <div class="" v-for="(seat, index) in seatsSelected" :key="seat.seat_catalogue.code">
                                                                                             <div>
