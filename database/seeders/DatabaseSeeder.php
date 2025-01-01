@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
             EventTypesSeeder::class,
             GlobalSeasonsSeeder::class,
             SeriesSeeder::class,
-            //EventsSeeder::class,
+            EventsSeeder::class,
             SeatCatalogueStatusesSeeder::class,
             CashRegisterTypesSeeder::class,
             TicketOfficesSeeder::class,

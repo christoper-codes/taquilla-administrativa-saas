@@ -58,6 +58,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function roles()
+    {
+        return $this->hasMany(UserRole::class);
+    }
+
     public function getIsNewAttribute()
     {
         return $this->created_at->gt(now()->subMinutes(20));
