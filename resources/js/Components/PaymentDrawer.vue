@@ -7,6 +7,7 @@ import CountdownTimer from '@/Components/CountdownTimer.vue';
 import { useForm as useFormInertia} from '@inertiajs/vue3';
 import axios from 'axios';
 import { toast } from 'vue3-toastify'
+import { jwtDecode } from 'jwt-decode';
 
 
 const CLIENT_ID = 'AVvNWWNci4r1r8VQUZ919IvcgLmDbPHCSktDNXcwQMaNHNdfqMCDKWdsR4SDs93oNYJQYw6q87Z4mHql';
@@ -93,7 +94,7 @@ var dialog = ref(false);
 
 
 const script = document.createElement('script');
-script.src = "https://testflex.cybersource.com/microform/bundle/v2/flex-microform.min.js";
+script.src = "https://flex.cybersource.com/microform/bundle/v2/flex-microform.min.js";
 script.async = true;
 
 script.onload = () => {
@@ -110,10 +111,11 @@ const generaateContextCapture = async () => {
 
     await axios.get(route('capture.context')).
         then((response)=>{
-            if (response.data.data[0]) {
-                console.log(response.data.data[0])
-                initMicroform(response.data.data[0])
-            }
+            //if (response.data.data[0]) {
+                console.log(response.data.datos[0]);
+                //console.log(response.data.datos.jti);
+                initMicroform(response.data.datos[0])
+            //}
         }).
         catch((error) => {
             console.log(error);
@@ -164,9 +166,9 @@ const initMicroform = (jwt) => {
     }
 }
 
+var deecodedjwt = ref();
 
-
-const buy = ()=>{
+const buy = async () => {
     console.log('entro al buy')
     generalError.value = '';
     loadingPaymentFlex.value = !loadingPaymentFlex.value;
@@ -194,18 +196,22 @@ const buy = ()=>{
         } else {
             console.log(JSON.stringify(token));
             flexResponse.value = JSON.stringify(token);
-
-            paymentFlexMicroForm(JSON.stringify(token));
+            deecodedjwt.value = jwtDecode(JSON.stringify(token))
+            console.log(deecodedjwt.value);
+            paymentFlexMicroForm(deecodedjwt.value);
         }
     });
 }
 
 
-const paymentFlexMicroForm = async (token) => {
+const paymentFlexMicroForm = async (jwt) => {
 
     const data = {
         amount: props.totalAmount,
-        token: token,
+        token: jwt.jti,
+        expirationMonth: jwt.content.paymentInformation.card.expirationMonth.value,
+        expirationYear: jwt.content.paymentInformation.card.expirationYear.value,
+        cardType: jwt.content.paymentInformation.card.number.detectedCardTypes[0],
         user: user,
         state: state.value,
         municipality: municipality.value,
@@ -214,9 +220,22 @@ const paymentFlexMicroForm = async (token) => {
         address: address.value
     };
 
-    await axios.post(route('payment.flex'), data)
+    await axios.post(route('payment.payed.aut.setup'), data)
         .then((response) => {
-            if (response.data.response[1] && response.data.response[2]['X-RequestID']) {
+            console.log(response);
+        })
+        .catch((error) => {
+            generalError.value = 'Ocurrió un error al enviar el formulario. Intenta nuevamente.';
+            disabledButtonBuyFlex.value = !disabledButtonBuyFlex.value
+            loadingPaymentFlex.value = !loadingPaymentFlex.value;
+            console.log(error);
+        }
+    );
+
+}
+
+const xy = ()=>{
+    if (response.data.response[1] && response.data.response[2]['X-RequestID']) {
                 const seatsSelectedData = {
                     purchase_type: props.purchaseType,
                     event_id: props.eventId,
@@ -254,16 +273,6 @@ const paymentFlexMicroForm = async (token) => {
                     }
                 )
            }
-
-        })
-        .catch((error) => {
-            generalError.value = 'Ocurrió un error al enviar el formulario. Intenta nuevamente.';
-            disabledButtonBuyFlex.value = !disabledButtonBuyFlex.value
-            loadingPaymentFlex.value = !loadingPaymentFlex.value;
-            console.log(error);
-        }
-    );
-
 }
 
 const refresh = () => {

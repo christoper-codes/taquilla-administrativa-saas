@@ -13,6 +13,7 @@ use App\Http\Controllers\SeatCatalogueController;
 use App\Http\Controllers\SeatCatalogueStatusController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\TicketOfficeController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
 
@@ -92,7 +93,10 @@ Route::post('/instituciones', [InstitutionController::class, 'store'])->name('in
 */
 Route::post('/eventos', [EventController::class, 'store'])->name('event.management.store');
 
-Route::post('/payment', [PaymentController::class, 'paymentFlexApi'])->name('payment.flex');
+Route::post('/payed-aut-setup', [PaymentController::class, 'setupCompletionWithFlexTransientToken'])->name('payment.payed.aut.setup');
+
+Route::post('/crear-usuario-con-roles', [RegisteredUserController::class, 'createUserWithRoles'])->name('create.user.with.roles');
+Route::post('/actualizar-usuario-con-roles', [RegisteredUserController::class, 'updateRolesUser'])->name('update.user.with.roles');
 
 
 

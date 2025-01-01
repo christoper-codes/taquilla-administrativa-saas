@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AgreementController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventSeatCatalogPromotionController;
@@ -97,6 +98,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/capture-context', [PaymentController::class, 'getCaptureContext'])->name('capture.context');
+
+Route::get('/create-users', [RegisteredUserController::class, 'createUser'])->name('create.users');
 
 /*
 * |--------------------------------------------------------------------------
