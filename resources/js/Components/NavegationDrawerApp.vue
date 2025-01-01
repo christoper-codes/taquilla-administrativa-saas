@@ -134,6 +134,11 @@ const props = defineProps({
                                 </AppNavLink>
                             </div>
                             <div class=" tw-w-full">
+                                <AppNavLink :href="route('create.users')" :active="route().current('create.users')">
+                                    <span class="material-symbols-outlined tw-text-lg">person</span>Usuarios
+                                </AppNavLink>
+                            </div>
+                            <div class=" tw-w-full">
                                 <AppNavLink :href="route('ticket-offices.share')" :active="route().current('ticket-offices.share')">
                                     <span class="material-symbols-outlined tw-text-lg">share</span>Compartir
                                 </AppNavLink>

@@ -13,6 +13,7 @@ use App\Interfaces\SeatCatalogueRepositoryInterface;
 use App\Interfaces\TicketOfficeRepositoryInterface;
 use App\Repositories\CashRegisterRepository;
 use App\Interfaces\CardPaymentDetailRepositoryInterface;
+use App\Interfaces\UserRepositoryInterface;
 use App\Interfaces\EventSeatCatalogPromotionRepositoryInterface;
 use App\Interfaces\EventSeatCatalogueRepositoryInterface;
 use App\Interfaces\EventTypeRepositoryInterface;
@@ -47,6 +48,7 @@ use App\Repositories\SeasonTicketRepository;
 use App\Repositories\SeatCatalogueStatusesRepository;
 use App\Repositories\SerieRepository;
 use App\Repositories\StadiumRepository;
+use App\Repositories\UserRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoriServiceProvider extends ServiceProvider
@@ -84,6 +86,7 @@ class RepositoriServiceProvider extends ServiceProvider
         $this->app->bind(EventSeatCatalogPromotionRepositoryInterface::class, EventSeatCatalogPromotionRepository::class);
         $this->app->bind(SaleTicketRepositoryInterface::class, SaleTicketRepository::class);
         $this->app->bind(SeasonTicketRepositoryInterface::class, SeasonTicketRepository::class);
+        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
     }
 
     /**

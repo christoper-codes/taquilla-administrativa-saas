@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AgreementController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventSeatCatalogPromotionController;
@@ -10,33 +11,35 @@ use App\Http\Controllers\SerieController;
 use App\Http\Controllers\SeatCatalogueController;
 use App\Http\Controllers\SeatCatalogueStatusController;
 use App\Http\Controllers\TicketOfficeController;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\PaymentController;
+
 
 
 
 Route::get('/migrate-fresh', function () {
-    
+
     Artisan::call('migrate:fresh');
-    
+
     return "migrate-fresh";
-    
+
 });
 
 Route::get('/db-seed', function () {
-    
+
     Artisan::call('db:seed');
-    
+
     return "db-seed";
-    
+
 });
 
 Route::get('/storage-link', function () {
-    
+
     Artisan::call('storage:link');
-    
+
     return "storage-link";
-    
+
 });
 
 
@@ -122,6 +125,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [SeatCatalogueController::class, 'index'])->name('dashboard');
 
 });
+
+Route::get('/capture-context', [PaymentController::class, 'getCaptureContext'])->name('capture.context');
+
+Route::get('/create-users', [RegisteredUserController::class, 'createUser'])->name('create.users');
 
 /*
 * |--------------------------------------------------------------------------

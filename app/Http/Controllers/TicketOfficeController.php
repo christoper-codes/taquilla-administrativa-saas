@@ -58,6 +58,63 @@ class TicketOfficeController extends Controller
         }
     }
 
+    public function change(Request $request)
+    {
+        try {
+            //Transferencia de tickets
+
+            $list_ticket = $request->get('ticketListOfSender');
+            $sender_user = $request->get('senderUserName');
+            $receiver_user = $request->get('receiverUserName');
+
+
+            foreach ($list_ticket as $key) {
+                $event_seat_catalog = EventSeatCatalog::find($key);
+
+                if ($event_seat_catalog) {
+                    $event_seat_catalog->user_id = $receiver_user;
+                    $event_seat_catalog->save();
+
+                    $event_seat_catalog_user = EventSeatCatalogUser::create([
+                        'event_seat_catalog_id' => $key,
+                        'sender_user_id' => $sender_user,
+                        'receiver_user_id' => $receiver_user
+                    ]);
+                }
+
+            }
+
+            //Lista de tickets y eventos, usuarios
+
+            $user = Auth::user()->load('globalImages');
+            $users = User::all();
+
+            $tickets = $user->EventSeatCatalogues()
+                ->with('event', 'seatCatalogue', 'seatCatalogueStatus')
+                ->whereHas('seatCatalogueStatus', function ($query) {
+                    $query->where('name', 'vendido');
+                })
+                ->get();
+            $events = $this->event_service->getAll();
+            $eventsWithTickets = [];
+
+            foreach ($events as $event) {
+                $eventsWithTickets[$event->id] = [
+                    'event' => $event,
+                    'tickets' => $tickets->filter(function($ticket) use ($event) {
+                        return $ticket->event_id == $event->id;
+                    })->values()
+                ];
+            }
+
+            return  WebResponseHelper::sendResponse($eventsWithTickets, "Transferencia con éxito", null, false);
+
+
+        } catch (\Throwable $th) {
+            WebResponseHelper::rollback($th, 'Opps! Algo salió mal al cargar');
+        }
+    }
+
     public function share()
     {
         try {
