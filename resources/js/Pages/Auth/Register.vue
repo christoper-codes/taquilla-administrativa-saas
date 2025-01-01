@@ -63,12 +63,16 @@ const imageUrl = ref(null);
 
 const onFileChange = (event) => {
   const file = event.target.files[0];
+  console.log(event);
+  console.log(event.target.files[0])
   if (file) {
     const reader = new FileReader();
     reader.onload = (e) => {
       imageUrl.value = e.target.result;
+      console.log(imageUrl.value)
     };
     reader.readAsDataURL(file);
+    console.log(file)
   }
 };
 

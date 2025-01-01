@@ -131,7 +131,6 @@ function priceFinal(seat, priceTypeName) {
 
 
 const addSeat = (seat) => {
-
     if(selectedPromotion.value){
         toast('Una vez selecionada una promocion ya no es posible agregar mas asientos a la compra.', {
             "theme": "auto",
@@ -704,6 +703,7 @@ onMounted(() => {
 
 const getSeatAvailability = () => {
     const data = {event_id: props.event.id};
+
 
     axios.get(route('events.availability'), { params: data })
         .then(response => {
@@ -1830,6 +1830,8 @@ const cardPaymentTypeError = computed(() => {
                                                                         <v-card-text>
                                                                             <div class="tw-w-full tw-max-w-[90%] tw-mx-auto">
                                                                                 <p class="tw-font-bold tw-text-sm lg:tw-text-2xl tw-text-gray-700 tw-text-center">Registra y confirma los abonos: </p>
+
+
 
                                                                                 <div v-if="seatsSelected.length > 0 && purchaseType == 'abonado'">
                                                                                         <div class="" v-for="(seat, index) in seatsSelected" :key="seat.seat_catalogue.code">
