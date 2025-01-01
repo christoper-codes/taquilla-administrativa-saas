@@ -149,6 +149,7 @@ const addSeat = (seat) => {
         })
         return
     }
+
     if(purchaseStatus.value == 'final' || purchaseStatus.value == 'retry') {
         purchaseStatus.value = 'retry';
         return;
@@ -231,7 +232,6 @@ const filteredPaymentTypes = computed(() => {
 
 watch(filteredPaymentTypes, updateTotal);
 
-/*
 /*
 * handle promotions
 */
@@ -390,21 +390,6 @@ function updateTotal() {
 
     filteredPaymentTypes.value.forEach(paymentType => {
         seatsSelected.value.forEach((seat) => {
-
-            /* if(seat.promotions.length > 0) {
-                seat.promotions.forEach(promotion => {
-                   const actualPromotionExist = promotionTypes.value.find(promo => promo.type === actualPromotionExist);
-                   if(actualPromotionExist) {
-                    promotionTypes.value.map();
-                   } else {
-                        promotionTypes.value.push({
-                            'type': actualPromotionExist,
-                            'quantity': 1
-                        });
-                   }
-                });
-            } */
-
             if (!processedSeats.has(seat.seat_catalogue.code)) {
                 let price;
                 if (paymentType.name === 'cortesia') {
@@ -718,6 +703,7 @@ onMounted(() => {
 
 const getSeatAvailability = () => {
     const data = {event_id: props.event.id};
+
 
     axios.get(route('events.availability'), { params: data })
         .then(response => {
@@ -1110,7 +1096,6 @@ function printInKioskMode(url) {
 }
 
 /*
-/*
 * Season tickets
 */
 const paymentInstallmentSelected = ref(null);
@@ -1124,7 +1109,6 @@ const updateHolder = (index) => {
             seat.is_owner = 'No';
         }
     });
-
 }
 
 watch(purchaseType, () => {
@@ -1846,6 +1830,7 @@ const cardPaymentTypeError = computed(() => {
                                                                         <v-card-text>
                                                                             <div class="tw-w-full tw-max-w-[90%] tw-mx-auto">
                                                                                 <p class="tw-font-bold tw-text-sm lg:tw-text-2xl tw-text-gray-700 tw-text-center">Registra y confirma los abonos: </p>
+
 
 
                                                                                 <div v-if="seatsSelected.length > 0 && purchaseType == 'abonado'">
