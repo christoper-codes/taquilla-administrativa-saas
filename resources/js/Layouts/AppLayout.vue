@@ -29,7 +29,7 @@ const user = usePage().props.auth.user;
                 </Link>
                 <Link :href="route('welcome')" class="tw-flex tw-gap-1 tw-flex-col">
                     <h1 class="tw-bg-clip-text tw-bg-gradient-to-r tw-from-purple-600 tw-to-yellow-300 tw-text-transparent tw-text-lg md:tw-text-2xl tw-font-bold">Halcones de xalapa</h1>
-                    <p class="tw-text-gray-500 tw-text-xs">Club de baloncesto | Temporada 2024 - 2025</p>
+                    <p class="tw-text-gray-500 tw-text-xs">Club de baloncesto | Temporada 2025 - 2026</p>
                 </Link>
             </div>
             <div class="lg:tw-flex tw-items-center tw-gap-4 lg:tw-gap-10 tw-text-gray-500 tw-hidden">
@@ -76,7 +76,7 @@ const user = usePage().props.auth.user;
             </div>
         </main>
         <div class="tw-p-10 tw-bg-slate-200 tw-text-center">
-            <h3 class="tw-font-bold">Halcones<span class="tw-font-light">Xalapa | 2024</span></h3>
+            <h3 class="tw-font-bold">Halcones<span class="tw-font-light">Xalapa | 2025</span></h3>
         </div>
    </div>
 

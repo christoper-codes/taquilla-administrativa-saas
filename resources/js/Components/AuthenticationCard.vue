@@ -28,7 +28,7 @@ const slides = ref([
                     </Link>
                     <div class="tw-flex tw-gap-1 tw-flex-col">
                         <h1 class="tw-bg-clip-text tw-bg-gradient-to-r tw-from-purple-600 tw-to-yellow-300 tw-text-transparent tw-text-lg md:tw-text-2xl tw-font-bold">Halcones de xalapa</h1>
-                        <p class="tw-text-gray-300 tw-text-xs">Club de baloncesto | Temporada 2024 - 2025</p>
+                        <p class="tw-text-gray-300 tw-text-xs">Club de baloncesto | Temporada 2025 - 2026</p>
                     </div>
                 </div>
             </div>

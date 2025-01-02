@@ -44,7 +44,7 @@ defineProps({
                         <a class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200" href="#">
                             Notias deportivas
                         </a>
-                        <p class="tw-text-xs sm:tw-text-sm tw-text-gray-800">Octubre 10, 2024</p>
+                        <p class="tw-text-xs sm:tw-text-sm tw-text-gray-800">Octubre 10, 2025</p>
                     </div>
 
                     <p class="tw-text-lg tw-text-gray-800">La temporada de los Halcones de Xalapa no solo se trata de baloncesto; es una fiesta completa que te espera en cada partido en casa. Cada encuentro se convierte en una experiencia inolvidable gracias al emocionante fanfest que acompaña a los juegos.</p>

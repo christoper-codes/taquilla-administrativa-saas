@@ -23,7 +23,7 @@ const cashRegisterFields = {
     'opening_balance': useField('opening_balance'),
 }
 const loading = ref(false);
-const { cashRegisterPresent } = useTicketOfficeState();
+const { cashRegisterPresent, cashRegisterDataId, sellerUserId } = useTicketOfficeState();
 
 const selectedEvents = ref([]);
 const cashRegisterData = useFormInertia({
@@ -53,6 +53,56 @@ const cashRegisterSubmit = handleSubmit((values, isActive) => {
         }
     });
 });
+
+const closeCashRegister = (isActive) => {
+    loading.value = true;
+    const data = {
+        'cash_register_id': props.active_cash_register.id,
+        'seller_user_closing_id': props.auth_user.id,
+        'ticket_office_id': props.ticket_office.id,
+    };
+
+    axios.post(route('cash-registers.close'), data)
+    .then(response => {
+
+        toast(response.data.message, {
+            "theme": "auto",
+            "type": "success",
+            "dangerouslyHTMLString": true
+        })
+
+        console.log(response.data)
+
+        if(response.data.pdf) {
+            const pdfContent = atob(response.data.pdf);
+            const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
+            const pdfUrl = window.URL.createObjectURL(pdfBlob);
+            printInKioskMode(pdfUrl);
+        }
+
+        localStorage.removeItem('cashRegisterData');
+        cashRegisterPresent.value = false;
+        cashRegisterDataId.value = 1;
+        sellerUserId.value = 1;
+
+       /*  setTimeout(() => {
+            router.visit('/taquillas');
+        }, 3000); */
+
+    })
+    .catch(error => {
+        toast(error.response.data.message, {
+            "theme": "auto",
+            "type": "error",
+            "autoClose": 10000,
+            "dangerouslyHTMLString": true
+        })
+    })
+    .finally(() => {
+        loading.value = false;
+        isActive.value = false;
+    });
+}
 
 const props = defineProps({
     'ticket_office': {
@@ -88,7 +138,6 @@ onMounted(() => {
         cashRegisterPresent.value = props.active_cash_register.cash_register_type_id;
     }
     cancelPassword.value = props.sale_tickets_cancellation_code.cancellation_code;
-    console.log(cancelPassword.value);
 })
 
 const eventProps = (item) => {
@@ -176,7 +225,7 @@ const printTicket = (item, isActive) => {
             const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
             const pdfUrl = window.URL.createObjectURL(pdfBlob);
             printInKioskMode(pdfUrl);
-        }) 
+        })
         .catch(error => {
             console.log(error);
         })
@@ -185,16 +234,18 @@ const printTicket = (item, isActive) => {
             isActive.value = false;
         })
 };
+
 function printInKioskMode(url) {
     const ventana = window.open(url, '_blank', 'fullscreen=yes,kiosk=yes');
     ventana.onload = () => {
         ventana.print();
-        setTimeout(() => {
+       /*  setTimeout(() => {
             ventana.close();
-        }, 4000);
+        }, 4000); */
 
     };
 }
+
 const cancelTicket = (item) => {
 
     if(cencellationPasswordEntered.value != cancelPassword.value) {
@@ -257,9 +308,9 @@ const cancelTicket = (item) => {
 const updateSaleTicketsSelected = (item) => {
     cencellationPasswordEntered.value = '';
     paymentTypesSelected.value = [];
-    cancelSeatCodes.value = [];    
+    cancelSeatCodes.value = [];
     saleTicketsSelected.value = item.Asientos.split(',');
-    paymentTypes.value = item['Tipos de pago'].split(',');    
+    paymentTypes.value = item['Tipos de pago'].split(',');
 }
 
 const pdf = () => {
@@ -312,6 +363,24 @@ const pdf = () => {
                             </div>
                             <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-base tw-shadow-xl tw-text-gray-800 focus:tw-outline-none focus:tw-bg-gray-200">
                                 <span class="material-symbols-outlined tw-text-2xl">check</span>{{ ticket_office.is_active ? 'Activo' : 'Inactivo' }}
+                            </div>
+                            <div v-if="active_cash_register">
+                                <v-dialog max-width="500">
+                                    <template v-slot:activator="{ props: activatorProps }">
+                                        <v-btn v-bind="activatorProps" variant="elevated" class="text-none !tw-bg-gradient-to-r tw-from-red-500 tw-to-pink-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Cerrar caja</v-btn>
+                                    </template>
+                                    <template v-slot:default="{ isActive }">
+                                        <v-card class="!tw-p-5">
+                                            <v-card-title class="!tw-text-lg"> ¿Estás seguro de cerrar la caja registradora #{{ active_cash_register.cash_register_type_id }}? </v-card-title>
+                                            <v-card-actions>
+                                                <div class="tw-flex tw-items-center tw-gap-3 tw-mt-5">
+                                                        <v-btn variant="tonal" color="red" class="text-none !tw-px-7" size="large" rounded="xl" @click="isActive.value = false">Cancelar</v-btn>
+                                                        <v-btn @click="closeCashRegister(isActive)" :loading="loading" variant="elevated" class="text-none !tw-bg-red-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Cerrar ahora</v-btn>
+                                                </div>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </template>
+                                </v-dialog>
                             </div>
                         </div>
                     </div>
@@ -443,7 +512,7 @@ const pdf = () => {
                                         </div>
                                     </div>
                                 </div>
-                                              
+
                                 <div class="my-10 cash-register-history">
                                     <v-data-table :items="items" :headers="headers" :header-props="headerProps">
                                         <template v-slot:item.Estatus="{ item }">
