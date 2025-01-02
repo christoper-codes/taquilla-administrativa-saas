@@ -37,7 +37,7 @@ const props = defineProps({
             </Link>
             <div class="tw-flex tw-gap-1 tw-flex-col">
                 <h1 class="tw-bg-clip-text tw-bg-gradient-to-r tw-from-purple-600 tw-to-yellow-300 tw-text-transparent tw-text-lg md:tw-text-2xl tw-font-bold">Halcones de xalapa</h1>
-                <p class="tw-text-gray-50 tw-text-xs tw-flex tw-gap-1"><span class="tw-hidden lg:tw-block">Club de baloncesto | </span> Temporada 2024 - 2025</p>
+                <p class="tw-text-gray-50 tw-text-xs tw-flex tw-gap-1"><span class="tw-hidden lg:tw-block">Club de baloncesto | </span> Temporada 2025 - 2026</p>
             </div>
         </div>
         <div v-if="cashRegisterPresent" class="tw-text-white tw-font-semibold  lg:tw-flex tw-items-center tw-gap-3">

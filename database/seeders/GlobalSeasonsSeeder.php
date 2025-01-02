@@ -18,10 +18,10 @@ class GlobalSeasonsSeeder extends Seeder
             'global_image_id' => null,
             'global_season_type_id' => 3,
             'league_type_id' => 1,
-            'name' => 'Temporada 2024/2025',
-            'start_date' => '2024-09-24',
-            'end_date' => '2025-06-30',
-            'description' => 'Temporada 2024/2025',
+            'name' => 'Temporada 2025/2026',
+            'start_date' => '2025-01-01',
+            'end_date' => '2025-05-01',
+            'description' => 'Temporada 2025/2026',
             'is_active' => true
         ]);
     }

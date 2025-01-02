@@ -43,7 +43,7 @@ const qrValue = computed(() => {
                     <div class="tw-flex tw-items-center">
                         <div class="tw-flex tw-flex-col">
                         <div class="tw-flex-auto tw-text-xs tw-text-gray-400 tw-my-1">
-                            <span class="tw-mr-1">2024 -</span><span>2025</span>
+                            <span class="tw-mr-1">2025 -</span><span>2026</span>
                         </div>
                         <div class="tw-w-full tw-flex-none tw-text-lg tw-text-tw-primary-700 tw-font-bold tw-leading-none">{{ ticket.is_verified ? 'Expiro' : 'Valido' }}</div>
                         <div class="tw-text-xs">Estatus</div>
@@ -65,7 +65,7 @@ const qrValue = computed(() => {
                         </div>
                         <div class="tw-flex tw-flex-col">
                         <div class="tw-flex-auto tw-text-xs tw-text-gray-400 tw-my-1">
-                            <span class="tw-mr-1">2024 -</span><span>2025</span>
+                            <span class="tw-mr-1">2025 -</span><span>2026</span>
                         </div>
                         <div class="tw-w-full tw-flex-none tw-text-lg tw-text-tw-primary-700 tw-font-bold tw-leading-none">{{ ticket.is_verified ? 'Expiro' : 'Valido' }}</div>
                         <div class="tw-text-xs">Estatus</div>

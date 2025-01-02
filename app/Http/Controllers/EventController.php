@@ -174,41 +174,6 @@ class EventController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    /* public function show($slug, $id)
-    {
-
-        try {
-            $response = $this->event_service->getById($id);
-            $user = Auth::user();
-            $users = User::all();
-
-            return Inertia::render('App/Pos/Event', [
-                'isEventsShow' => true,
-                'event' => $response['event'],
-                'a_zone' => $response['a_zone'],
-                'b_zone' => $response['b_zone'],
-                'c_zone' => $response['c_zone'],
-                'f_zone' => $response['f_zone'],
-                'user' => $user,
-                'users' => $users,
-                'user_roles' => $response['user_roles'],
-                'global_payment_types' => $response['global_payment_types'],
-                'global_card_payment_types' => $response['global_card_payment_types'],
-                'purchase_types' => $response['purchase_types'],
-                'payment_installments' => $response['payment_installments'],
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'data' => null,
-                'message' => $e->getMessage() ?? 'Opps! Algo salió mal al reservar los asientos',
-                'success' => false
-            ], 500);
-        }
-    } */
     public function show($slug, $id)
     {
 

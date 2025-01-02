@@ -36,6 +36,7 @@ class CashRegisterRepository implements CashRegisterRepositoryInterface
         $new_cash_register->opening_balance = $data['opening_balance'];
         $new_cash_register->current_balance = $data['opening_balance'];
         $new_cash_register->closing_balance = null;
+        $new_cash_register->opening_time = now();
         $new_cash_register->save();
 
         return $new_cash_register;

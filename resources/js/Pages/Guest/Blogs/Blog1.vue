@@ -19,7 +19,7 @@ defineProps({
     <NavigationDrawer />
     <Breadcrumb>
             <template #title>
-                <span>Los Halcones de Xalapa en la Temporada 2024 </span>
+                <span>Los Halcones de Xalapa en la Temporada 2025 </span>
             </template>
     </Breadcrumb>
     <main class="tw-px-4 lg:tw-px-0 tw-relative">
@@ -43,7 +43,7 @@ defineProps({
                         <a class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200" href="#">
                             Notias deportivas
                         </a>
-                        <p class="tw-text-xs sm:tw-text-sm tw-text-gray-800">Octubre 10, 2024</p>
+                        <p class="tw-text-xs sm:tw-text-sm tw-text-gray-800">Octubre 10, 2025</p>
                     </div>
 
                     <p class="tw-text-lg tw-text-gray-800">Xalapa, Veracruz - En un inicio de temporada emocionante, los Halcones de Xalapa han demostrado ser uno de los equipos más competitivos de la liga profesional de baloncesto en México. Con un roster lleno de talento y una estrategia bien definida, el equipo ha capturado la atención de los aficionados y los medios deportivos.</p>
@@ -76,7 +76,7 @@ defineProps({
 
                     <blockquote class="tw-text-center tw-p-4 sm:tw-px-7">
                         <p class="tw-text-xl tw-font-medium tw-text-gray-800 lg:tw-text-2xl lg:tw-leading-normal xl:tw-text-2xl xl:tw-leading-normal">
-                            Los Halcones de Xalapa han comenzado la temporada con un con grandes victorias, colocándose en los primeros lugares de la tabla en temporada la 2024 - 2025.
+                            Los Halcones de Xalapa han comenzado la temporada con un con grandes victorias, colocándose en los primeros lugares de la tabla en temporada la 2025 - 2026.
                         </p>
                         <p class="tw-mt-5 tw-text-gray-800">
                             Directiva Halcones de Xalapa

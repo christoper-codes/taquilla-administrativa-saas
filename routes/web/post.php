@@ -27,6 +27,7 @@ use App\Http\Controllers\PaymentController;
 Route::middleware('auth')->group(function() {
 
     Route::post('/caja-registradora/store', [CashRegisterController::class, 'store'])->name('cash-registers.store');
+    Route::post('/caja-registradora/close', [CashRegisterController::class, 'closeCashRegister'])->name('cash-registers.close');
 
 });
 

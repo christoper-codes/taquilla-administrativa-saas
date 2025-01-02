@@ -25,6 +25,8 @@ return new class extends Migration
             $table->decimal('opening_balance', 14, 4)->default('0.0000');
             $table->decimal('current_balance', 14, 4)->default('0.0000');
             $table->decimal('closing_balance', 14, 4)->nullable();
+            $table->dateTime('opening_time')->nullable();
+            $table->dateTime('closing_time')->nullable();
             $table->timestamps();
         });
     }
