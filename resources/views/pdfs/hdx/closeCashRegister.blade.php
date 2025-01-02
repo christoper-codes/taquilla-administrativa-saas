@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div class="ticket">
+        <h1>LOS HALCONES DE XALAPA</h1>
+        <p class="info" style="margin-top: 20px;">
+            Cultura Veracruzana, Zona Universitaria,<br>
+            Campus Cad, Xalapa Enriquez, 91094
+        </p>
+        <h2 style="margin-top: 40px;">Resumen de caja #{{ $pdf_data['cash_register']['cash_register_type_id'] }}</h2>
+
+        <table class="w-full" style="margin-top: 40px;">
+            <tr>
+                <td class="w-half-left">
+                    <p>Taquila: {{ $pdf_data['ticket_office']['name'] }}</p>
+                    <p>Fecha de apertura: {{ date('d/m/Y H:i', strtotime($pdf_data['cash_register']['opening_time'])) }}</p>
+                    <p>Fecha de cierre: {{ date('d/m/Y H:i', strtotime($pdf_data['cash_register']['closing_time'])) }}</p>
+                </td>
+                <td class="w-half-right">
+                    <p>Lote: {{ $pdf_data['cash_register']['batch_cash_register'] }}</p>
+                    <p>Caja registradora: {{ $pdf_data['cash_register']['cash_register_type_id'] }}</p>
+                </td>
+            </tr>
+        </table>
+        <div class="line"></div>
+        <h3 style="">Total en venta: ${{ number_format($pdf_data['cash_register']['closing_balance'], 2, '.', ',') }}</h3>
+
+        <p class="info" style="margin-top: 20px;">
+            El total de la venta inluye <br>
+            todos los tipos de pago (efectivo, tarjeta, cashless...)
+        </p>
+
+        <h2 style="margin-top: 40px;">Fondo inicial: ${{ number_format($pdf_data['cash_register']['opening_balance'], 2, '.', ',') }}</h2>
+
+        <table class="w-full" style="margin-top: 40px; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th class="text-left">Tipo de Pago</th>
+                    <th class="text-right">Monto</th>
+                    <th class="text-right">Transacciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($pdf_data['type_payments'] as $payment_type => $value)
+                    <tr>
+                        <td class="text-left">{{ $payment_type }}</td>
+                        <td class="text-right">{{ number_format($value['amount'], 2, '.', ',') }} MXN</td>
+                        <td class="text-right">{{ $value['transactions'] }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+
+        <div class="line"></div>
+
+        <table class="w-full" style="margin-top: 40px;">
+            <tr>
+                <td class="w-half-left">
+                    <p>B. vendidos precio regular: </p>
+                    <p>B. vendidos en promocion: </p>
+                    <p>B. vendidos con convenio: </p>
+                    <p>B. vendidos por cortesia: </p>
+                </td>
+                <td class="w-half-right">
+                    <p>1</p>
+                    <p>2</p>
+                    <p>3</p>
+                    <p>3</p>
+                </td>
+            </tr>
+        </table>
+
+        <div class="footer">
+            <p>
+                Este documento es un resumen del cierre de caja generado automáticamente. <br>
+                Para información más detallada y opciones avanzadas consulte el panel de administración<br>
+            </p>
+            <h5>
+                ¡Agradecemos su confianza en nuestro sistema! <br>
+                Halcones de Xalapa 2025
+            </h5>
+        </div>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .ticket {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .ticket h1, .ticket h2, .ticket h3 {
+            margin: 0;
+            padding: 5px 0;
+            text-align: center;
+        }
+        .ticket h2, .ticket h3 {
+            font-size: 30px;
+        }
+        .ticket h1{
+            font-size: 40px;
+            background: #000000;
+            color: white;
+            border-radius: 20px;
+            padding: 35px 0px
+        }
+        .ticket h3{
+            font-size: 60px;
+            border-top: 4px dashed #000;
+            padding-top: 40px;
+        }
+        .ticket p {
+            margin: 5px 0;
+            font-size: 20px;
+        }
+        .ticket .info {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .ticket .products {
+            margin: 10px 0;
+        }
+        .ticket .products p {
+            display: flex;
+            justify-content: space-between;
+        }
+        .ticket .footer p, .ticket .footer h5 {
+            padding: 20px;
+            background: #f1f1f1;
+            margin-top: 40px;
+            text-align: center;
+            border-radius: 20px;
+            font-size: 17px;
+        }
+        .ticket .qr {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 4px dashed #000;
+        }
+        .line {
+            margin-top: 40px;
+            border-top: 4px dashed #000;
+            margin-bottom: 3px;
+        }
+        .ticket .qr img {
+            width: 400px;
+            height: 400px;
+        }
+        .w-full {
+            width: 100%;
+        }
+        .w-half-left {
+            width: 50%;
+            text-align: left;
+        }
+        .w-half-right {
+            width: 50%;
+            text-align: right;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .text-left {
+            text-align: left;
+        }
+        .text-right {
+            text-align: right;
+        }
+    </style>
+</body>
+</html>

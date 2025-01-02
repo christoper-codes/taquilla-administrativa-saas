@@ -29,7 +29,7 @@
     <div class="tw-grid tw-grid-cols-2 md:tw-grid-cols-4 lg:tw-grid-cols-5 tw-gap-6 tw-mb-10 tw-max-w-[85rem] tw-px-4 sm:tw-px-6 lg:tw-px-8 tw-mx-auto">
       <div class="tw-col-span-full tw-hidden lg:tw-col-span-1 lg:tw-block">
         <a class="tw-flex-none tw-font-bold tw-text-lg md:tw-text-xl tw-text-gray-50 focus:tw-outline-none focus:tw-opacity-80" href="#" aria-label="Brand">Halcones<span class="tw-font-thin">Xalapa</span></a>
-        <p class="tw-mt-3 tw-text-xs sm:tw-text-sm tw-text-gray-50">© 2024 Xalapa Mexico.</p>
+        <p class="tw-mt-3 tw-text-xs sm:tw-text-sm tw-text-gray-50">© 2025 Xalapa Mexico.</p>
       </div>
       <!-- End Col -->
 
@@ -100,7 +100,7 @@
         <div class="tw-flex tw-justify-between tw-items-end md:tw-items-center">
           <div class="tw-mt-3 sm:tw-hidden">
             <a class="tw-flex-none tw-text-xl tw-font-semibold tw-text-gray-50" href="#" aria-label="Brand">Halcones de Xalapa</a>
-            <p class="tw-mt-1 tw-text-xs sm:tw-text-sm tw-text-gray-50">© 2024 Xalapa Mexico.</p>
+            <p class="tw-mt-1 tw-text-xs sm:tw-text-sm tw-text-gray-50">© 2025 Xalapa Mexico.</p>
           </div>
         </div>
         <!-- End Col -->

@@ -8,6 +8,16 @@ use App\Services\CashRegisterService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\Label\LabelAlignment;
+use Endroid\QrCode\Label\Font\OpenSans;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Support\Str;
 
 class CashRegisterController extends Controller
 {
@@ -98,5 +108,45 @@ class CashRegisterController extends Controller
     public function destroy(CashRegister $cashRegister)
     {
         //
+    }
+
+    public function closeCashRegister(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+
+            $request->validate([
+                'cash_register_id' => 'required',
+                'seller_user_closing_id' => 'required',
+                'ticket_office_id' => 'required'
+            ]);
+
+            $response = $this->cash_register_service->closeCashRegister($request->all());
+
+            return response()->json([
+                'data' => $response,
+                'message' => 'success',
+                'success' => false,
+            ], 200);
+                        $pdf_response = Pdf::loadView('pdfs.hdx.closeCashRegister', ['pdf_data' => $response]);
+            $pdfContent = $pdf_response->output();
+
+           // DB::commit();
+
+            return response()->json([
+                'data' => $response,
+                'message' => 'Caja registradora cerrada con exito',
+                'success' => true,
+                'pdf' => base64_encode($pdfContent)
+            ], 200);
+
+        } catch(\Exception $e){
+            DB::rollBack();
+            return response()->json([
+                'data' => null,
+                'message' => $e->getMessage(),
+                'success' => false,
+            ], 500);
+        }
     }
 }

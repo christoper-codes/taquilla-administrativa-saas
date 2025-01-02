@@ -225,6 +225,145 @@ class CashRegisterService
         }
     }
 
+     /*
+    * |--------------------------------------------------------------------------
+    * | Close cash register
+    */
+    public function closeCashRegister(array $data)
+    {
+        try {
+            /*
+            * Check that the cash register is open
+            */
+            $cash_register = $this->cash_register_repository->getById($data['cash_register_id']);
+            if(!$cash_register->is_open){
+                throw new \Exception('La caja actual ya ha sido cerrada');
+            }
+
+            /*
+            * close cash register
+            */
+            $cash_register->is_open = false;
+            $cash_register->confirmed_closure = true;
+            $cash_register->seller_user_closing_id = $data['seller_user_closing_id'];
+            $cash_register->closing_balance = $cash_register->current_balance;
+            $cash_register->closing_time = now();
+            $cash_register->save();
+
+            /*
+            * Verify if there is any cash register open for the ticket office
+            */
+            $someCashRegisterIsOpen = CashRegister::where('ticket_office_id', $data['ticket_office_id'])
+                        ->where('is_open', true)
+                        ->first();
+
+            if(!$someCashRegisterIsOpen){
+                // send emails and confimed closure
+            }
+
+            $type_payments = [];
+            $type_sales = [];
+
+            /*
+            * Get all sale tickets associated with the cash register
+            */
+            $sale_tickets = $cash_register->saleTickets()->orderBy('created_at', 'desc')->get();
+
+            $sale_tickets->each(function ($sale_ticket) use (&$type_payments) {
+                $sale_ticket->saleTicketStatus;
+                $sale_ticket->globalPaymentTypes;
+                /*
+                * Get all sale types
+                */
+                if(!isset($type_sales['total'])){
+                    $type_sales['total'] = ['sales' => 0];
+                }
+                if(!isset($type_sales['promocion'])){
+                    $type_sales['promocion'] = ['sales' => 0];
+                }
+                if(!isset($type_sales['convenio'])){
+                    $type_sales['convenio'] = ['sales' => 0];
+                }
+                if(!isset($type_sales['cortesia'])){
+                    $type_sales['cortesia'] = ['sales' => 0];
+                }
+
+                if($sale_ticket->saleTicketStatus->name == 'pagado'){
+                    $type_sales['total']['sales']++;
+                    if($sale_ticket->promotion_id){
+                        $type_sales['promocion']['sales']++;
+                    }
+
+                }
+
+                /*
+                * Get all global payment types associated with the sale ticket
+                */
+                $payment_types = $sale_ticket->globalPaymentTypes;
+                $payment_count = $payment_types->count();
+
+                if ($payment_count == 1) {
+                    /*
+                    * case with only one type payment
+                    */
+                    $global_payment_type = $payment_types->first();
+                    if (!isset($type_payments[$global_payment_type->name])) {
+                        $type_payments[$global_payment_type->name] = [
+                            'amount' => 0,
+                            'transactions' => 0,
+                        ];
+                    }
+                    $type_payments[$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
+                    $type_payments[$global_payment_type->name]['transactions']++;
+                } else {
+                    /*
+                    * case with multiple type payments
+                    */
+                    $composite_key = 'pago compuesto';
+                    if (!isset($type_payments[$composite_key])) {
+                        $type_payments[$composite_key] = [
+                            'amount' => 0,
+                            'transactions' => 0,
+                        ];
+                    }
+                    foreach ($payment_types as $global_payment_type) {
+                        if($global_payment_type->name == 'tarjeta'){
+                            if(!isset($type_payments['tarjeta'])){
+                                $type_payments['tarjeta'] = [
+                                    'amount' => 0,
+                                    'transactions' => 0,
+                                ];
+                            }
+                            $type_payments['tarjeta']['amount'] += $global_payment_type->pivot->amount;
+                        } else if($global_payment_type->name == 'efectivo'){
+                            if(!isset($type_payments['efectivo'])){
+                                $type_payments['efectivo'] = [
+                                    'amount' => 0,
+                                    'transactions' => 0,
+                                ];
+                            }
+                            $type_payments['efectivo']['amount'] += $global_payment_type->pivot->amount;
+                        }
+
+                    }
+                    $type_payments[$composite_key]['transactions']++;
+                }
+            });
+
+            $response = [
+                'ticket_office' => $cash_register->ticketOffice,
+                'cash_register' => $cash_register,
+                'sale_tickets' => $sale_tickets,
+                'type_payments' => $type_payments,
+            ];
+
+            return $response;
+
+
+        } catch(\Exception $e){
+            throw $e;
+        }
+    }
 
 
 }
