@@ -2139,12 +2139,12 @@ const cardPaymentTypeError = computed(() => {
     z-index: -10;
 }
 
-.fade-enter-active, .fade-leave-active {
+/* .fade-enter-active, .fade-leave-active {
   transition: opacity 1s;
 }
 .fade-enter, .fade-leave-to {
   opacity: 0;
-}
+} */
 
 .tw-animate-spin {
     animation: tw-spin 2s linear infinite;

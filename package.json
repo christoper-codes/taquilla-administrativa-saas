@@ -21,6 +21,7 @@
     "dependencies": {
         "@mdi/font": "^7.4.47",
         "@paypal/paypal-js": "^8.1.2",
+        "aos": "^2.3.4",
         "canvas-confetti": "^1.9.3",
         "chart.js": "^4.4.4",
         "cybersource-rest-client": "^0.0.62",

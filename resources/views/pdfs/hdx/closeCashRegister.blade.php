@@ -50,7 +50,7 @@
                 @foreach ($pdf_data['type_payments'] as $payment_type => $value)
                     <tr>
                         <td class="text-left">{{ $payment_type }}</td>
-                        <td class="text-right">{{ number_format($value['amount'], 2, '.', ',') }} MXN</td>
+                        <td class="text-right">${{ number_format($value['amount'], 2, '.', ',') }} MXN</td>
                         <td class="text-right">{{ $value['transactions'] }}</td>
                     </tr>
                 @endforeach
@@ -60,21 +60,21 @@
 
         <div class="line"></div>
 
-        <table class="w-full" style="margin-top: 40px;">
-            <tr>
-                <td class="w-half-left">
-                    <p>B. vendidos precio regular: </p>
-                    <p>B. vendidos en promocion: </p>
-                    <p>B. vendidos con convenio: </p>
-                    <p>B. vendidos por cortesia: </p>
-                </td>
-                <td class="w-half-right">
-                    <p>1</p>
-                    <p>2</p>
-                    <p>3</p>
-                    <p>3</p>
-                </td>
-            </tr>
+        <table class="w-full" style="margin-top: 40px; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th class="text-left">Tipo de venta</th>
+                    <th class="text-right">Ventas</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($pdf_data['type_sales'] as $type_sale => $value)
+                    <tr>
+                        <td class="text-left">{{ $type_sale }}</td>
+                        <td class="text-right">{{ $value['sales'] }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
         </table>
 
         <div class="footer">

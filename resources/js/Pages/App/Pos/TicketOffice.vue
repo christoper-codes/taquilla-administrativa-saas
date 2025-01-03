@@ -85,9 +85,9 @@ const closeCashRegister = (isActive) => {
         cashRegisterDataId.value = 1;
         sellerUserId.value = 1;
 
-       /*  setTimeout(() => {
+        setTimeout(() => {
             router.visit('/taquillas');
-        }, 3000); */
+        }, 3000);
 
     })
     .catch(error => {
@@ -239,10 +239,9 @@ function printInKioskMode(url) {
     const ventana = window.open(url, '_blank', 'fullscreen=yes,kiosk=yes');
     ventana.onload = () => {
         ventana.print();
-       /*  setTimeout(() => {
+        setTimeout(() => {
             ventana.close();
-        }, 4000); */
-
+        }, 4000);
     };
 }
 

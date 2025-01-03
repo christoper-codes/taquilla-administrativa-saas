@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Interfaces\CashRegisterRepositoryInterface;
 use App\Models\CashRegister;
 use App\Models\CashRegisterType;
+use App\Models\GlobalPaymentType;
+use App\Models\SeatCatalogueStatus;
 
 class CashRegisterService
 {
@@ -239,7 +241,8 @@ class CashRegisterService
             if(!$cash_register->is_open){
                 throw new \Exception('La caja actual ya ha sido cerrada');
             }
-
+            $seat_catalogue_status_id = SeatCatalogueStatus::where('name', 'vendido')->first()->id;
+            $global_payment_type_id = GlobalPaymentType::where('name', 'cortesia')->first()->id;
             /*
             * close cash register
             */
@@ -262,38 +265,49 @@ class CashRegisterService
             }
 
             $type_payments = [];
-            $type_sales = [];
-
+            $type_sales = [
+                'total' => ['sales' => 0],
+                'promocion' => ['sales' => 0],
+                'convenio' => ['sales' => 0],
+                'cortesia' => ['sales' => 0],
+            ];
             /*
             * Get all sale tickets associated with the cash register
             */
             $sale_tickets = $cash_register->saleTickets()->orderBy('created_at', 'desc')->get();
 
-            $sale_tickets->each(function ($sale_ticket) use (&$type_payments) {
+            $sale_tickets->each(function ($sale_ticket) use (&$type_payments, &$seat_catalogue_status_id, &$global_payment_type_id, &$type_sales) {
                 $sale_ticket->saleTicketStatus;
                 $sale_ticket->globalPaymentTypes;
                 /*
                 * Get all sale types
                 */
-                if(!isset($type_sales['total'])){
-                    $type_sales['total'] = ['sales' => 0];
-                }
-                if(!isset($type_sales['promocion'])){
-                    $type_sales['promocion'] = ['sales' => 0];
-                }
-                if(!isset($type_sales['convenio'])){
-                    $type_sales['convenio'] = ['sales' => 0];
-                }
-                if(!isset($type_sales['cortesia'])){
-                    $type_sales['cortesia'] = ['sales' => 0];
-                }
 
-                if($sale_ticket->saleTicketStatus->name == 'pagado'){
-                    $type_sales['total']['sales']++;
-                    if($sale_ticket->promotion_id){
-                        $type_sales['promocion']['sales']++;
+                if($sale_ticket->saleTicketStatus->name == 'pagado' || $sale_ticket->saleTicketStatus->name == 'parcialmente cancelado'){
+
+                   foreach ($sale_ticket->eventSeatCatalogs as $event_seat_catalog) {
+                        if($event_seat_catalog->seat_catalogue_status_id == $seat_catalogue_status_id){
+                            $type_sales['total']['sales']++;
+
+                            $has_agreement_promotion = $sale_ticket->eventSeatCatalogs->contains(function ($eventSeatCatalog) {
+                                return $eventSeatCatalog->pivot->agreement_promotion_id !== null; });
+                            if ($has_agreement_promotion) {
+                                $type_sales['convenio']['sales']++;
+                            }
+
+                            if($sale_ticket->promotion_id && !$has_agreement_promotion){
+                                $type_sales['promocion']['sales']++;
+                            }
+
+                            $has_cortesia = $sale_ticket->globalPaymentTypes->contains(function ($global_payment_type) use ($global_payment_type_id) {
+                                return $global_payment_type->pivot->global_payment_type_id == $global_payment_type_id;
+                            });
+
+                            if ($has_cortesia){
+                                $type_sales['cortesia']['sales']++;
+                            }
+                        }
                     }
-
                 }
 
                 /*
@@ -355,6 +369,7 @@ class CashRegisterService
                 'cash_register' => $cash_register,
                 'sale_tickets' => $sale_tickets,
                 'type_payments' => $type_payments,
+                'type_sales' => $type_sales,
             ];
 
             return $response;

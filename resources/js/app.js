@@ -14,6 +14,8 @@ import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 import Toast from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
+import Aos from 'aos';
+import 'aos/dist/aos.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -65,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
 * | Insert the Leaflet map when the page is loaded | Club
 * |--------------------------------------------------------------------------|
 */
-
+    Aos.init();
 });
 
 
