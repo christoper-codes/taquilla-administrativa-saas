@@ -123,15 +123,16 @@ class CashRegisterController extends Controller
 
             $response = $this->cash_register_service->closeCashRegister($request->all());
 
-            return response()->json([
+           /*  return response()->json([
                 'data' => $response,
                 'message' => 'success',
                 'success' => false,
-            ], 200);
-                        $pdf_response = Pdf::loadView('pdfs.hdx.closeCashRegister', ['pdf_data' => $response]);
+            ], 200); */
+
+            $pdf_response = Pdf::loadView('pdfs.hdx.closeCashRegister', ['pdf_data' => $response]);
             $pdfContent = $pdf_response->output();
 
-           // DB::commit();
+           DB::commit();
 
             return response()->json([
                 'data' => $response,

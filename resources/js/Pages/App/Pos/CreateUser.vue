@@ -156,10 +156,6 @@ const onFileChange = (event) => {
     }
 };
 
-
-
-
-
 var searchTab = ref('');
 var userSelect = ref('');
 var dialogCreateUser = ref(false);
@@ -485,7 +481,7 @@ props.users.forEach(element => {
         </v-dialog>
 
 
-        <div class="tw-w-full tw-px-4 lg:tw-px-0 lg:tw-w-[75%] tw-h-auto tw-mx-auto tw-py-10 lg:tw-py-0">
+        <div class="tw-w-full tw-px-4 lg:tw-p-10 tw-h-auto tw-mx-auto tw-py-10">
             <v-card
                 title=""
                 flat

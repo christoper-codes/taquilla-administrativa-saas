@@ -1,8 +1,8 @@
 <script setup>
 import { drawerNavState, draweAppNavState } from '@/composables/drawersStates';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import { Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
+import { onMounted, ref } from 'vue';
 import AppNavLink from './AppNavLink.vue';
 
 
@@ -12,6 +12,19 @@ const menu1 = ref(false);
 const menu2 = ref(false);
 const message = ref(false);
 const hints = ref(true);
+const open = ref([]);
+const page = usePage();
+
+onMounted(() => {
+    const superAdmin = ['/create-users'];
+    const admin = ['/series', '/eventos-gestion', '/instituciones', '/promociones', '/convenios'];
+    if(superAdmin.some(route => page.url == route)){
+        open.value = ['super_admin']
+    }
+    if(admin.some(route => page.url == route)){
+        open.value = ['admin']
+    }
+});
 
 const toggleFav = () => {
   fav.value = !fav.value;
@@ -130,56 +143,88 @@ const props = defineProps({
                         <div class="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-w-full">
                             <div class="tw-w-full ">
                                 <AppNavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                    <span class="material-symbols-outlined tw-text-lg">home</span>Mis boletos
-                                </AppNavLink>
-                            </div>
-                            <div class=" tw-w-full">
-                                <AppNavLink :href="route('create.users')" :active="route().current('create.users')">
-                                    <span class="material-symbols-outlined tw-text-lg">person</span>Usuarios
+                                    <span class="material-symbols-outlined tw-text-xl">home</span>Mis boletos
                                 </AppNavLink>
                             </div>
                             <div class=" tw-w-full">
                                 <AppNavLink :href="route('ticket-offices.share')" :active="route().current('ticket-offices.share')">
-                                    <span class="material-symbols-outlined tw-text-lg">share</span>Compartir
+                                    <span class="material-symbols-outlined tw-text-xl">share</span>Compartir boletos
                                 </AppNavLink>
                             </div>
                             <div class=" tw-w-full">
-                                <AppNavLink :href="route('series.index')" :active="route().current('series.index')">
-                                    <span class="material-symbols-outlined tw-text-lg">signpost</span>Series
-                                </AppNavLink>
-                            </div>
-                            <div class=" tw-w-full">
-                                <AppNavLink :href="route('event.management.indexManagement')" :active="route().current('event.management.indexManagement')">
-                                    <span class="material-symbols-outlined tw-text-lg">note_stack</span>Eventos
-                                </AppNavLink>
-                            </div>
-                            <div class=" tw-w-full">
-                                <AppNavLink :href="route('institutions.index')" :active="route().current('institutions.index')">
-                                    <span class="material-symbols-outlined tw-text-lg">note_stack</span>Instituciones
-                                </AppNavLink>
-                            </div>
-                            <div class=" tw-w-full">
-                                <AppNavLink :href="route('promotions.index')" :active="route().current('promotions.index')">
-                                    <span class="material-symbols-outlined tw-text-lg">Loyalty</span>Promociones
-                                </AppNavLink>
-                            </div>
-                            <div class=" tw-w-full">
-                                <AppNavLink :href="route('agreements.index')" :active="route().current('agreements.index')">
-                                    <span class="material-symbols-outlined tw-text-lg">Handshake</span>Convenios
+                                <AppNavLink :href="route('welcome')" :active="route().current('welcome')">
+                                    <span class="material-symbols-outlined tw-text-xl">credit_card</span>Mis tarjetas
                                 </AppNavLink>
                             </div>
                         </div>
                     </div>
 
                     <div class="tw-flex tw-flex-col tw-w-full">
-                        <h2 class="tw-font-semibold tw-text-sm tw-mb-3">Widgets</h2>
-                        <div class="tw-flex tw-flex-col tw-items-center tw-gap-3 tw-w-full">
-                            <div class="tw-w-full">
-                                <AppNavLink :href="route('welcome')" :active="route().current('welcome')">
-                                    <span class="material-symbols-outlined tw-text-lg">folder</span>Historial
-                                </AppNavLink>
-                            </div>
-                            <div class="text-center tw-w-full ">
+                        <h2 class="tw-font-semibold tw-text-sm tw-mb-3">Accesos administrativos</h2>
+                        <div class="tw-flex tw-flex-col tw-items-center tw-gap-0 tw-w-full">
+
+                            <v-card class="mx-auto !tw-bg-transparent !tw-text-white !tw-shadow-none" width="100%">
+                                <v-list v-model:opened="open">
+                                    <v-list-group value="super_admin" >
+                                        <template v-slot:activator="{ props }">
+                                        <v-list-item
+                                            v-bind="props"
+                                            prepend-icon="mdi-cloud-key"
+                                            title="Super administracion"
+                                        ></v-list-item>
+                                        </template>
+
+                                        <div class="tw-mt-3 tw-w-full">
+                                            <AppNavLink :href="route('create.users')" :active="route().current('create.users')">
+                                                <span class="material-symbols-outlined tw-text-lg">person</span>Usuarios
+                                            </AppNavLink>
+                                        </div>
+
+                                    </v-list-group>
+                                </v-list>
+                            </v-card>
+                            <v-card class="mx-auto !tw-bg-transparent !tw-text-white !tw-shadow-none" width="100%">
+                                <v-list v-model:opened="open">
+                                    <v-list-group value="admin" >
+                                        <template v-slot:activator="{ props }">
+                                        <v-list-item
+                                            v-bind="props"
+                                            prepend-icon="mdi-cog-outline"
+                                            title="Administracion"
+                                        ></v-list-item>
+                                        </template>
+
+                                        <div class="tw-mt-3 tw-w-full">
+                                            <AppNavLink :href="route('series.index')" :active="route().current('series.index')">
+                                                <span class="material-symbols-outlined tw-text-lg">note_stack</span>Series
+                                            </AppNavLink>
+                                        </div>
+                                        <div class="tw-mt-3 tw-w-full">
+                                            <AppNavLink :href="route('event.management.indexManagement')" :active="route().current('event.management.indexManagement')">
+                                                <span class="material-symbols-outlined tw-text-lg">confirmation_number</span>Eventos
+                                            </AppNavLink>
+                                        </div>
+                                        <div class="tw-mt-3 tw-w-full">
+                                            <AppNavLink :href="route('institutions.index')" :active="route().current('institutions.index')">
+                                                <span class="material-symbols-outlined tw-text-lg">home_work</span>Instituciones
+                                            </AppNavLink>
+                                        </div>
+                                        <div class="tw-mt-3 tw-w-full">
+                                            <AppNavLink :href="route('promotions.index')" :active="route().current('promotions.index')">
+                                                <span class="material-symbols-outlined tw-text-lg">Loyalty</span>Promociones
+                                            </AppNavLink>
+                                        </div>
+                                        <div class="tw-mt-3 tw-w-full">
+                                            <AppNavLink :href="route('agreements.index')" :active="route().current('agreements.index')">
+                                                <span class="material-symbols-outlined tw-text-lg">Handshake</span>Convenios
+                                            </AppNavLink>
+                                        </div>
+
+                                    </v-list-group>
+                                </v-list>
+                            </v-card>
+
+                           <!--  <div class="text-center tw-w-full ">
                                 <v-menu
                                 v-model="menu2"
                                 :close-on-content-click="false"
@@ -212,7 +257,7 @@ const props = defineProps({
                                     </v-card-actions>
                                 </v-card>
                                 </v-menu>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
 

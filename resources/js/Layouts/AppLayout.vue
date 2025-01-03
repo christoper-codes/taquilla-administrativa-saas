@@ -71,7 +71,7 @@ const user = usePage().props.auth.user;
 
    <div class="lg:tw-ml-[270px] tw-mt-[70px] lg:tw-mt-[100px]">
         <main class="tw-p-0 tw-space-y-4 sm:tw-space-y-6 tw-bg-white tw-min-h-screen tw-overflow-hidden tw-relative">
-           <div class="tw-z-20 inner-shadow tw-relative tw-bg-white tw-bg-opacity-30 tw-backdrop-blur-md !tw-m-0  tw-min-h-screen">
+           <div class="tw-z-20 inner-shadow tw-relative tw-bg-white tw-bg-opacity-30 tw-backdrop-blur-md !tw-m-0  tw-min-h-screen" data-aos="fade-zoom-in" data-aos-duration="2500">
             <slot/>
             </div>
         </main>

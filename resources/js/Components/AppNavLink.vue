@@ -15,8 +15,8 @@ const props = defineProps({
 
 const classes = computed(() =>
     props.active
-        ? 'text-none !tw-h-[40px] !tw-w-full !tw-text-white !tw-bg-slate-200/10 !tw-justify-start'
-        : 'text-none !tw-h-[40px] !tw-w-full !tw-text-gray-300  !tw-bg-transparent !tw-justify-start'
+        ? 'text-none !tw-h-[50px] !tw-w-full !tw-text-white !tw-bg-slate-200/10 !tw-justify-start !tw-flex !tw-items-center'
+        : 'text-none !tw-h-[50px] !tw-w-full !tw-text-gray-300  !tw-bg-transparent !tw-justify-start !tw-flex !tw-items-center'
 );
 
 const toggledraweAppNavState = () => {
@@ -29,7 +29,7 @@ const toggledraweAppNavState = () => {
 
 <template>
     <Link :href="href">
-        <v-btn variant="text" :class="classes" rounded="xl" @click="toggledraweAppNavState">
+        <v-btn variant="text" :class="classes" rounded="lg" @click="toggledraweAppNavState">
             <slot />
         </v-btn>
     </Link>

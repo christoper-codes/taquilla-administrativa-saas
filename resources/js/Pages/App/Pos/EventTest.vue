@@ -131,7 +131,7 @@ function priceFinal(seat, priceTypeName) {
 
 
 const addSeat = (seat) => {
-       
+
     if(purchaseStatus.value == 'final' || purchaseStatus.value == 'retry') {
         purchaseStatus.value = 'retry';
         return;
@@ -274,7 +274,7 @@ const viewSelectedSection = ref('Zonas HDX');
 
 const handleSectionClick = (section) => {
     console.log(section);
-    
+
     return
 
     selectedSection.value = section;
@@ -759,7 +759,7 @@ function printInKioskMode(url) {
     };
 }
 
-/* 
+/*
 * Season tickets
 */
 const paymentInstallmentSelected = ref(null);
@@ -772,7 +772,7 @@ const updateHolder = (index) => {
         if(i !== index){
             seat.is_owner = 'No';
         }
-    }); 
+    });
 }
 
 watch(purchaseType, () => {
@@ -1320,7 +1320,7 @@ const seasonTicktesDataConfirm = () => {
                                                                         <v-card-text>
                                                                             <div class="tw-w-full tw-max-w-[90%] tw-mx-auto">
                                                                                 <p class="tw-font-bold tw-text-sm lg:tw-text-2xl tw-text-gray-700 tw-text-center">Registra y confirma los abonos: </p>
-                                                                            
+
                                                                                 <div v-if="seatsSelected.length > 0 && purchaseType == 'abonado'">
                                                                                         <div class="" v-for="(seat, index) in seatsSelected" :key="seat.seat_catalogue.code">
                                                                                             <div>
@@ -1627,12 +1627,12 @@ const seasonTicktesDataConfirm = () => {
     z-index: -10;
 }
 
-.fade-enter-active, .fade-leave-active {
+/* .fade-enter-active, .fade-leave-active {
   transition: opacity 1s;
 }
 .fade-enter, .fade-leave-to {
   opacity: 0;
-}
+} */
 
 .tw-animate-spin {
         animation: tw-spin 2s linear infinite;
