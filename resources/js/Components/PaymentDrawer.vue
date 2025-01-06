@@ -21,6 +21,14 @@ const props = defineProps({
         type: String,
         required: true,
     },
+    stadiumId: {
+        type: Number,
+        required: true,
+    },
+    ticketOfficeId: {
+        type: Number,
+        required: true,
+    },
     eventId: {
         type: Number,
         required: true,

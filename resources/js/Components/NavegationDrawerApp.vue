@@ -16,7 +16,7 @@ const open = ref([]);
 const page = usePage();
 
 onMounted(() => {
-    const superAdmin = ['/create-users'];
+    const superAdmin = ['/create-users', '/indicadores-generales'];
     const admin = ['/series', '/eventos-gestion', '/instituciones', '/promociones', '/convenios'];
     if(superAdmin.some(route => page.url == route)){
         open.value = ['super_admin']
@@ -60,7 +60,6 @@ const props = defineProps({
                                     :class="fav ? 'text-purple' : '!tw-text-purple-500'"
                                     class="!tw-rounded-full !tw-size-40 bg-profile !tw-bg-slate-800"
                                     v-bind="props"
-                                    variant="tonal"
                                     @click="fav = !fav"
                                     >
                                     <div
@@ -152,7 +151,7 @@ const props = defineProps({
                                 </AppNavLink>
                             </div>
                             <div class=" tw-w-full">
-                                <AppNavLink :href="route('welcome')" :active="route().current('welcome')">
+                                <AppNavLink :href="route('wallet-account.index')" :active="route().current('wallet-account.index')">
                                     <span class="material-symbols-outlined tw-text-xl">credit_card</span>Mis tarjetas
                                 </AppNavLink>
                             </div>
@@ -177,6 +176,11 @@ const props = defineProps({
                                         <div class="tw-mt-3 tw-w-full">
                                             <AppNavLink :href="route('create.users')" :active="route().current('create.users')">
                                                 <span class="material-symbols-outlined tw-text-lg">person</span>Usuarios
+                                            </AppNavLink>
+                                        </div>
+                                        <div class="tw-mt-3 tw-w-full">
+                                            <AppNavLink :href="route('indicators.index')" :active="route().current('indicators.index')">
+                                                <span class="material-symbols-outlined tw-text-lg">monitoring</span>Indicadores
                                             </AppNavLink>
                                         </div>
 
@@ -304,7 +308,7 @@ const props = defineProps({
 <style scoped>
 
 .bg-profile{
-    border-radius: 100px 55px 55px 90px/80px 82px 75px 79px !important;
+    border-radius: 100px 55px 55px 99px/80px 82px 75px 79px !important;
 }
 .v-btn__prepend {
     margin-right: 3px;

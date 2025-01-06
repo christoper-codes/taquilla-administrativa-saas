@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventSeatCatalogPromotionController;
+use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SerieController;
@@ -14,9 +15,7 @@ use App\Http\Controllers\TicketOfficeController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\PaymentController;
-
-
-
+use App\Http\Controllers\WalletAccountTemporalController;
 
 Route::get('/migrate-fresh', function () {
 
@@ -146,3 +145,19 @@ Route::get('/block-and-reservation-statuses', [SeatCatalogueStatusController::cl
 */
 Route::get('/promociones-asientos', [EventSeatCatalogPromotionController::class, 'index'])->name('event.seat.catalog.promotion.index');
 Route::get('/save-all-seats-for-stadium', [SeatCatalogueController::class, 'saveAllSeatsForStadium'])->name('save.all.seats.for.stadium');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Digital cards | ROUTES
+*/
+Route::get('/mis-tarjetas', [WalletAccountTemporalController::class, 'index'])->name('wallet-account.index');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* | Indicator for stadium | ROUTES
+*/
+Route::get('/indicadores-generales', [IndicatorController::class, 'index'])->name('indicators.index');

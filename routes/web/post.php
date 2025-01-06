@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function() {
     Route::post('/eventos/reservar-asientos-para-compra', [EventController::class, 'reserveSeatsToBuy'])->name('events.reserve-seats-to-buy');
     Route::post('/eventos/confirmar-compra-de-asientos', [EventController::class, 'confirmSeatsPurchase'])->name('events.confirm-seats-purchase');
     Route::post('/eventos/imprimir-ticket-venta', [EventController::class, 'printSaleTicket'])->name('events.print-sale-ticket');
+    Route::post('/taquillas/share-ticket', [TicketOfficeController::class, 'change'])->name('ticket-offices.change');
 
     Route::post('/pdf-test', [EventController::class, 'testPdf'])->name('pdf-test');
 
@@ -98,8 +99,6 @@ Route::post('/payed-aut-setup', [PaymentController::class, 'setupCompletionWithF
 
 Route::post('/crear-usuario-con-roles', [RegisteredUserController::class, 'createUserWithRoles'])->name('create.user.with.roles');
 Route::post('/actualizar-usuario-con-roles', [RegisteredUserController::class, 'updateRolesUser'])->name('update.user.with.roles');
-
-
 
 
 /*
