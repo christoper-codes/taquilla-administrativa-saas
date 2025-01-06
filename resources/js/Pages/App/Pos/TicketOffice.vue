@@ -23,7 +23,7 @@ const cashRegisterFields = {
     'opening_balance': useField('opening_balance'),
 }
 const loading = ref(false);
-const { cashRegisterPresent, cashRegisterDataId, sellerUserId } = useTicketOfficeState();
+const { cashRegisterPresent, cashRegisterDataId, sellerUserId, ticketOfficeId } = useTicketOfficeState();
 
 const selectedEvents = ref([]);
 const cashRegisterData = useFormInertia({
@@ -84,6 +84,7 @@ const closeCashRegister = (isActive) => {
         cashRegisterPresent.value = false;
         cashRegisterDataId.value = 1;
         sellerUserId.value = 1;
+        ticketOfficeId.value = 1;
 
         setTimeout(() => {
             router.visit('/taquillas');

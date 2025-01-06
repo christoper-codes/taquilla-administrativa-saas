@@ -18,6 +18,11 @@ class TicketOffice extends Model
         'is_active'
     ];
 
+    public function saleTickets()
+    {
+        return $this->hasMany(SaleTicket::class);
+    }
+
     public function stadium()
     {
         return $this->belongsTo(Stadium::class);

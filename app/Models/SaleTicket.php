@@ -10,6 +10,8 @@ class SaleTicket extends Model
     use HasFactory;
 
     protected $fillable = [
+        'stadium_id',
+        'ticket_office_id',
         'seller_user_id',
         'cash_register_id',
         'sale_ticket_status_id',
@@ -23,6 +25,16 @@ class SaleTicket extends Model
         'is_transfer',
         'is_online',
     ];
+
+    public function stadium()
+    {
+        return $this->belongsTo(Stadium::class);
+    }
+
+    public function ticketOffice()
+    {
+        return $this->belongsTo(TicketOffice::class);
+    }
 
     public function events()
     {

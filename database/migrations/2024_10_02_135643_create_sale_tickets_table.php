@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('sale_tickets', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('stadium_id')->constrained('stadiums');
+            $table->foreignId('ticket_office_id')->constrained('ticket_offices');
             $table->foreignId('seller_user_id')->constrained('users');
             $table->foreignId('cash_register_id')->constrained('cash_registers');
             $table->foreignId('sale_ticket_status_id')->constrained('sale_ticket_statuses');

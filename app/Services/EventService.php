@@ -245,6 +245,8 @@ class EventService
             * Create sale ticket
             */
             $saleTicket = new SaleTicket();
+            $saleTicket->stadium_id = $data['stadium_id'];
+            $saleTicket->ticket_office_id = $data['ticket_office_id'];
             $saleTicket->seller_user_id = $data['seller_user_id'];
             $saleTicket->cash_register_id = $data['cash_register_id'];
             $saleTicket->sale_ticket_status_id = SaleTicketStatus::where('name', 'pagado')->first()->id;

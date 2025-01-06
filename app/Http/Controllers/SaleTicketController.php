@@ -92,5 +92,30 @@ class SaleTicketController extends Controller
         }
     }
 
+    /**
+     * Sale tickets per week in a month
+     */
+    public function saleTicketsPerWeekInMonth(Request $request)
+    {
+        try {
+
+            $response = $this->sale_ticket_service->saleTicketsPerWeekInMonth($request->all());
+
+            return response()->json([
+                'data' => $response,
+                'message' => 'Sale tickets per week in a month',
+                'success' => true
+            ], 200);
+
+
+        } catch(\Exception $e){
+            return response()->json([
+                'data' => null,
+                'message' => $e->getMessage(),
+                'success' => false
+            ], 500);
+        }
+    }
+
 
 }

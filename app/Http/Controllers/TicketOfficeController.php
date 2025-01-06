@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\WebResponseHelper;
+use App\Models\EventSeatCatalog;
+use App\Models\EventSeatCatalogUser;
 use App\Models\TicketOffice;
 use App\Models\User;
 use App\Services\CashRegisterService;
