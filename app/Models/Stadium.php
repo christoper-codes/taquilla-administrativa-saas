@@ -21,6 +21,11 @@ class Stadium extends Model
         'is_active'
     ];
 
+    public function saleTickets()
+    {
+        return $this->hasMany(SaleTicket::class);
+    }
+
     public function events(){
         return $this->hasMany(Event::class);
     }

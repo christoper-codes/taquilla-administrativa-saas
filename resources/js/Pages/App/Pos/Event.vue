@@ -27,7 +27,7 @@ import axios from 'axios';
 import { toast } from 'vue3-toastify'
 
 const { dateFormat } = useDateFormat();
-const { cashRegisterDataId, sellerUserId } = useTicketOfficeState();
+const { cashRegisterDataId, sellerUserId, ticketOfficeId } = useTicketOfficeState();
 const snackbar = ref(false);
 const { handleSubmit } = useForm({
     validationSchema: saleTicketSchema,
@@ -1001,6 +1001,8 @@ const onSubmitConfirm = (isActive) => {
 
     const seatsSelectedData = {
         purchase_type: purchaseType.value,
+        stadium_id: props.event.stadium_id,
+        ticket_office_id: ticketOfficeId.value,
         event_id: props.event.id,
         cash_register_id: cashRegisterDataId.value,
         member_user_id: purchaseOnline.value ? props.user.id : (isTransfer ? userToTransfer.value : null),
@@ -1288,6 +1290,8 @@ const cardPaymentTypeError = computed(() => {
 
                                     <PaymentDrawer
                                         v-bind:purchaseType="purchaseType"
+                                        v-bind:stadiumId="event.stadium_id"
+                                        v-bind:ticketOfficeId="ticketOfficeId"
                                         v-bind:eventId="event.id"
                                         v-bind:cashRegisterId="cashRegisterDataId"
                                         v-bind:memberUserId="user.id"

@@ -9,10 +9,11 @@ use App\Models\SaleTicket;
 use App\Models\SaleTicketStatus;
 use App\Models\SeatCatalogueStatus;
 use App\Repositories\SaleTicketRepository;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use PhpOption\Some;
 
-class SaleTicketService 
+class SaleTicketService
 {
      /*
     * |--------------------------------------------------------------------------
@@ -44,18 +45,18 @@ class SaleTicketService
 
      /*
     * |--------------------------------------------------------------------------
-    * | Cacellation of tickets 
+    * | Cacellation of tickets
     */
     public function cancellationSaleTickets(array $data)
     {
         try {
 
-            /* 
+            /*
             * Update sale ticket status
             */
             $sale_ticket = SaleTicket::find($data['sale_ticket_id']);
-            
-            /* 
+
+            /*
             * Get cash register
             */
             $cash_register = $sale_ticket->cashRegister;
@@ -71,27 +72,27 @@ class SaleTicketService
             }
             $sale_ticket->save();
 
-            /* 
+            /*
             * Update pivot beetwen sale tickets and event seat catalog
             */
             $seat_catalogue_status_id = SeatCatalogueStatus::where('name', 'disponible')->first()->id;
             foreach($sale_ticket->eventSeatCatalogs as $event_seat_catalog) {
                 if($data['is_partial_cancel']){
-                
+
                     if (in_array($event_seat_catalog->seatCatalogue->code, $data['cancel_seat_codes'])) {
                         $balance_to_returned += $event_seat_catalog->price;
                        $this->updateEventSeatCatalog($event_seat_catalog, $seat_catalogue_status_id, $sale_ticket, $data['payment_types_selected_keys']);
                     }
-                    
+
                 } else {
                     $balance_to_returned += $event_seat_catalog->price;
                     $this->updateEventSeatCatalog($event_seat_catalog, $seat_catalogue_status_id, $sale_ticket, $data['payment_types_selected_keys']);
 
                 }
-                
+
             }
 
-            /* 
+            /*
             * Intance a new cash register movement
             */
             $cash_register_movement = new CashRegisterMovement();
@@ -104,7 +105,7 @@ class SaleTicketService
             $cash_register_movement->is_active = true;
             $cash_register_movement->save();
 
-            /* 
+            /*
             * Update cash register
             */
             $cash_register->current_balance = ($cash_register->current_balance - $balance_to_returned);
@@ -119,23 +120,23 @@ class SaleTicketService
 
     private function updateEventSeatCatalog($event_seat_catalog, $seat_catalogue_status_id, $sale_ticket, $payment_types_selected_keys)
     {
-        /* 
+        /*
         * Update sale ticket
         */
         $sale_ticket->total_amount = ($sale_ticket->total_amount - $event_seat_catalog->price);
         $sale_ticket->total_returned = ($sale_ticket->total_returned + $event_seat_catalog->price);
         $sale_ticket->save();
 
-        /* 
+        /*
         * Update pivot beetwen sale ticket and global payment types
         */
         $remainingAmount = $event_seat_catalog->price;
         foreach ($payment_types_selected_keys as $payment_type_key) {
             $global_payment_type = GlobalPaymentType::where('name', $payment_type_key)->first();
-        
+
             if ($global_payment_type) {
                 $currentAmount = $sale_ticket->globalPaymentTypes()->where('global_payment_type_id', $global_payment_type->id)->first()->pivot->amount;
-        
+
                 if ($remainingAmount > 0) {
                     if ($currentAmount >= $remainingAmount) {
                         $sale_ticket->globalPaymentTypes()->updateExistingPivot($global_payment_type->id, [
@@ -154,7 +155,7 @@ class SaleTicketService
             }
         }
 
-        /* 
+        /*
         * Update event seat catalog
         */
         $event_seat_catalog->user_id = null;
@@ -170,5 +171,164 @@ class SaleTicketService
         ]);
     }
 
-    
+    /*
+    * |--------------------------------------------------------------------------
+    * | Get sale tickets per week in a month
+    */
+    public function saleTicketsPerWeekInMonth(array $data)
+    {
+        try {
+
+            $type_payments = [];
+            $type_sales = [
+                'total' => ['sales' => 0],
+                'promocion' => ['sales' => 0],
+                'convenio' => ['sales' => 0],
+                'cortesia' => ['sales' => 0],
+            ];
+            $seat_catalogue_status_id = SeatCatalogueStatus::where('name', 'vendido')->first()->id;
+            $global_payment_type_id = GlobalPaymentType::where('name', 'cortesia')->first()->id;
+
+
+            $current_date = Carbon::now();
+            $start_date = $current_date->copy()->startOfMonth();
+            $end_date = $current_date->copy()->endOfMonth();
+            $weeks = [];
+
+            while ($start_date->lte($end_date)) {
+                $total_seats_sold = 0;
+                $week_start = $start_date->copy();
+                $week_end = $start_date->copy()->addDays(6); // Sumar 6 días para completar la semana de 7 días
+
+                if ($week_end->gt($end_date)) {
+                    $week_end = $end_date; // Asegurarse de que week_end no se extienda más allá de end_date
+                }
+
+                // Si la semana comienza después del 22 y week_end aún no ha alcanzado el final del mes
+                if ($week_start->day >= 22) {
+                    $week_end = $end_date; // Asegurarse de que esta sea la última semana hasta el final del mes
+                }
+
+                $sale_tickets = SaleTicket::whereBetween('created_at', [$week_start, $week_end])
+                    ->where('sale_ticket_status_id', SaleTicketStatus::where('name', 'pagado')->first()->id)
+                    ->where('stadium_id', $data['stadium_id'])
+                    ->get()->each(function($sale_ticket) use (&$type_payments, &$seat_catalogue_status_id, &$global_payment_type_id, &$type_sales, &$total_seats_sold) {
+                        if($sale_ticket->saleTicketStatus->name == 'pagado' || $sale_ticket->saleTicketStatus->name == 'parcialmente cancelado'){
+
+                            foreach ($sale_ticket->eventSeatCatalogs as $event_seat_catalog) {
+                                $total_seats_sold++;
+                                 if($event_seat_catalog->seat_catalogue_status_id == $seat_catalogue_status_id){
+                                     $type_sales['total']['sales']++;
+
+                                     $has_agreement_promotion = $sale_ticket->eventSeatCatalogs->contains(function ($eventSeatCatalog) {
+                                         return $eventSeatCatalog->pivot->agreement_promotion_id !== null; });
+                                     if ($has_agreement_promotion) {
+                                         $type_sales['convenio']['sales']++;
+                                     }
+
+                                     if($sale_ticket->promotion_id && !$has_agreement_promotion){
+                                         $type_sales['promocion']['sales']++;
+                                     }
+
+                                     $has_cortesia = $sale_ticket->globalPaymentTypes->contains(function ($global_payment_type) use ($global_payment_type_id) {
+                                         return $global_payment_type->pivot->global_payment_type_id == $global_payment_type_id;
+                                     });
+
+                                     if ($has_cortesia){
+                                         $type_sales['cortesia']['sales']++;
+                                     }
+                                 }
+                             }
+                         }
+
+                         /*
+                        * Get all global payment types associated with the sale ticket
+                        */
+                        $payment_types = $sale_ticket->globalPaymentTypes;
+                        $payment_count = $payment_types->count();
+
+                        if ($payment_count == 1) {
+                            /*
+                            * case with only one type payment
+                            */
+                            $global_payment_type = $payment_types->first();
+                            if (!isset($type_payments[$global_payment_type->name])) {
+                                $type_payments[$global_payment_type->name] = [
+                                    'amount' => 0,
+                                    'transactions' => 0,
+                                ];
+                            }
+                            $type_payments[$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
+                            $type_payments[$global_payment_type->name]['transactions']++;
+                        } else {
+                            /*
+                            * case with multiple type payments
+                            */
+                            $composite_key = 'pago compuesto';
+                            if (!isset($type_payments[$composite_key])) {
+                                $type_payments[$composite_key] = [
+                                    'amount' => 0,
+                                    'transactions' => 0,
+                                ];
+                            }
+                            foreach ($payment_types as $global_payment_type) {
+                                if($global_payment_type->name == 'tarjeta'){
+                                    if(!isset($type_payments['tarjeta'])){
+                                        $type_payments['tarjeta'] = [
+                                            'amount' => 0,
+                                            'transactions' => 0,
+                                        ];
+                                    }
+                                    $type_payments['tarjeta']['amount'] += $global_payment_type->pivot->amount;
+                                } else if($global_payment_type->name == 'efectivo'){
+                                    if(!isset($type_payments['efectivo'])){
+                                        $type_payments['efectivo'] = [
+                                            'amount' => 0,
+                                            'transactions' => 0,
+                                        ];
+                                    }
+                                    $type_payments['efectivo']['amount'] += $global_payment_type->pivot->amount;
+                                }
+
+                            }
+                            $type_payments[$composite_key]['transactions']++;
+                        }
+                    });
+
+                $weeks[] = [
+                    'week_start' => $week_start->toDateString(),
+                    'week_end' => $week_end->toDateString(),
+                    'tickets' => $total_seats_sold,
+                ];
+
+                $start_date = $week_end->addDay(); // Avanzar al primer día de la siguiente semana
+
+                // Asegurarse de que el start_date no se pase al siguiente mes
+                if ($start_date->month != $current_date->month) {
+                    break;
+                }
+            }
+
+            // Eliminar la última semana si no comienza después del día 22
+            if (isset($weeks[4]) && $weeks[4]['week_start'] >= '2025-01-22') {
+                $last_week = array_pop($weeks);
+                $previous_week = &$weeks[count($weeks) - 1];
+                $previous_week['week_end'] = $last_week['week_end'];
+                $previous_week['tickets'] = $previous_week['tickets']->merge($last_week['tickets']);
+            }
+
+            $response = [
+                'weeks' => $weeks,
+                'type_payments' => $type_payments,
+                'type_sales' => $type_sales,
+            ];
+
+            return $response;
+
+        } catch (\Exception $e) {
+            throw $e;
+        }
+
+    }
+
 }

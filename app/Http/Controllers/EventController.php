@@ -350,6 +350,8 @@ class EventController extends Controller
     {
 
         $request->validate([
+            'stadium_id' => 'required',
+            'ticket_office_id' => 'required',
             'event_id' => 'required',
             'cash_register_id' => 'nullable',
             'member_user_id' => 'nullable',
@@ -421,6 +423,8 @@ class EventController extends Controller
     {
 
         $request->validate([
+            'stadium_id' => 'required',
+            'ticket_office_id' => 'required',
             'event_id' => 'required',
             'cash_register_id' => 'nullable',
             'member_user_id' => 'nullable',
