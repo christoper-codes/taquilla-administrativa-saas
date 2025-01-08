@@ -9,6 +9,7 @@ use App\Models\TicketOffice;
 use App\Models\User;
 use App\Services\CashRegisterService;
 use App\Services\EventService;
+use App\Models\SalesTicketCancellationCode;
 use App\Services\TicketOfficeService;
 use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Http\Request;
@@ -167,6 +168,35 @@ class TicketOfficeController extends Controller
     public function store(Request $request)
     {
         //
+    }
+
+    public function search()
+    {
+
+        //Gate::authorize('viewVendorTopics', Auth::user());
+
+        $events = $this->event_service->getAll();
+        $users = User::all();
+        $salesTicketCancellationCode = SalesTicketCancellationCode::findOrFail(1);
+
+        return Inertia::render('App/Pos/SearchTickets', [
+            'events' => $events,
+            'users' => $users,
+            'salesTicketCancellationCode' => $salesTicketCancellationCode
+        ]);
+
+    }
+
+    public function searchWithEvent($idEvent)
+    {
+        try {
+
+            $event = $this->event_service->getUsersEventForSaleTickets($idEvent);
+
+            return response()->json(['datos' => $event], 200);
+        } catch (\Exception $e) {
+            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar los usuarios');
+        }
     }
 
     /**

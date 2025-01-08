@@ -52,6 +52,9 @@ const props =  defineProps({
                             <Link :href="route('ticket-offices.check')">
                             <v-btn variant="elevated" class="text-none !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Verificar</v-btn>
                             </Link>
+                            <Link :href="route('ticket-offices.search')">
+                            <v-btn variant="elevated" class="text-none !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Buscar Boletos</v-btn>
+                            </Link>
                         </div>
                     </div>
                     <!-- End Title -->
