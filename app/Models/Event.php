@@ -15,11 +15,13 @@ class Event extends Model
         'event_type_id',
         'serie_id',
         'global_image_id',
+        'event_visibility_type_id',
         'name',
         'slug',
         'description',
         'start_date',
         'end_date',
+        'enabled_for_season_tickets',
         'is_active',
     ];
 
@@ -48,10 +50,15 @@ class Event extends Model
         return $this->belongsTo(GlobalImage::class);
     }
 
+    public function eventVisibilityType()
+    {
+        return $this->belongsTo(EventVisibilityType::class);
+    }
+
     public function seatCatalogues()
     {
         return $this->belongsToMany(SeatCatalogue::class, 'event_seat_catalog', 'event_id', 'seat_catalogue_id')
-                    ->withPivot('user_id', 'season_ticket_id', 'seat_catalogue_status_id', 'sale_ticket_id', 'qr', 'price', 'is_verified', 'is_active')
+                    ->withPivot('user_id', 'season_ticket_id', 'seat_catalogue_status_id', 'sale_ticket_id', 'qr', 'price', 'purchase_type', 'is_verified', 'is_active')
                     ->withTimestamps();
     }
 

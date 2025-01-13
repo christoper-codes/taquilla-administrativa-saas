@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\CashRegisterMovement;
 use App\Models\CashRegisterMovementType;
+use App\Models\Event;
 use App\Models\GlobalPaymentType;
 use App\Models\SaleTicket;
 use App\Models\SaleTicketStatus;
@@ -210,14 +211,19 @@ class SaleTicketService
                 }
 
                 $sale_tickets = SaleTicket::whereBetween('created_at', [$week_start, $week_end])
-                    ->where('sale_ticket_status_id', SaleTicketStatus::where('name', 'pagado')->first()->id)
+                    ->where(function ($query) {
+                            $pagado_status_id = SaleTicketStatus::where('name', 'pagado')->first()->id;
+                            $pendiente_status_id = SaleTicketStatus::where('name', 'pendiente')->first()->id;
+                            $query->where('sale_ticket_status_id', $pagado_status_id)
+                                ->orWhere('sale_ticket_status_id', $pendiente_status_id);
+                    })
                     ->where('stadium_id', $data['stadium_id'])
                     ->get()->each(function($sale_ticket) use (&$type_payments, &$seat_catalogue_status_id, &$global_payment_type_id, &$type_sales, &$total_seats_sold) {
-                        if($sale_ticket->saleTicketStatus->name == 'pagado' || $sale_ticket->saleTicketStatus->name == 'parcialmente cancelado'){
+                        if($sale_ticket->saleTicketStatus->name == 'pagado' || $sale_ticket->saleTicketStatus->name == 'parcialmente cancelado' || $sale_ticket->saleTicketStatus->name == 'pendiente'){
 
                             foreach ($sale_ticket->eventSeatCatalogs as $event_seat_catalog) {
-                                $total_seats_sold++;
                                  if($event_seat_catalog->seat_catalogue_status_id == $seat_catalogue_status_id){
+                                    $total_seats_sold++;
                                      $type_sales['total']['sales']++;
 
                                      $has_agreement_promotion = $sale_ticket->eventSeatCatalogs->contains(function ($eventSeatCatalog) {
@@ -321,6 +327,7 @@ class SaleTicketService
                 'weeks' => $weeks,
                 'type_payments' => $type_payments,
                 'type_sales' => $type_sales,
+                'events' => Event::where('stadium_id', $data['stadium_id'])->get(),
             ];
 
             return $response;
@@ -331,4 +338,200 @@ class SaleTicketService
 
     }
 
+    /* public function getHistoryPerEvent(array $data)
+    {
+        try {
+            $event = Event::find($data['event_id']);
+            $event->globalImage;
+            $event->serie->globalSeason;
+
+            $seat_catalogue_status_vendido_id = SeatCatalogueStatus::where('name', 'vendido')->first()->id;
+            $global_payment_type_cortesia_id = GlobalPaymentType::where('name', 'cortesia')->first()->id;
+            $type_payments = [];
+            $total_seats_sold = 0;
+            $type_sales = [
+                'total' => ['sales' => 0],
+                'promocion' => ['sales' => 0],
+                'convenio' => ['sales' => 0],
+                'cortesia' => ['sales' => 0],
+                'abonado' => ['sales' => 0],
+                'regular' => ['sales' => 0],
+            ];
+
+            $sale_tickets = $event->saleTickets()
+                ->where('stadium_id', 1)
+                ->where(function ($query) {
+                    $pagado_status_id = SaleTicketStatus::where('name', 'pagado')->first()->id;
+                    $pendiente_status_id = SaleTicketStatus::where('name', 'pendiente')->first()->id;
+                    $query->where('sale_ticket_status_id', $pagado_status_id)
+                        ->orWhere('sale_ticket_status_id', $pendiente_status_id);
+                })
+                ->get();
+
+            $sale_tickets->each(function ($sale_ticket) use (&$type_payments, &$seat_catalogue_status_vendido_id, &$total_seats_sold, &$type_sales, &$global_payment_type_cortesia_id) {
+
+                $sale_ticket->globalPaymentTypes->each(function ($global_payment_type) use (&$type_payments) {
+                    if (!isset($type_payments[$global_payment_type->name])) {
+                        $type_payments[$global_payment_type->name] = [
+                            'amount' => 0,
+                            'transactions' => 0,
+                        ];
+                    }
+                    $type_payments[$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
+                    $type_payments[$global_payment_type->name]['transactions']++;
+                });
+
+                if ($sale_ticket->saleTicketStatus->name == 'pagado' || $sale_ticket->saleTicketStatus->name == 'parcialmente cancelado' || $sale_ticket->saleTicketStatus->name == 'pendiente') {
+                    foreach ($sale_ticket->eventSeatCatalogs as $event_seat_catalog) {
+                        if ($event_seat_catalog->seat_catalogue_status_id == $seat_catalogue_status_vendido_id) {
+                            $total_seats_sold++;
+                            $type_sales['total']['sales']++;
+
+                            $has_agreement_promotion = $sale_ticket->eventSeatCatalogs->contains(function ($eventSeatCatalog) {
+                                return $eventSeatCatalog->pivot->agreement_promotion_id !== null;
+                            });
+
+                            $has_cortesia = $sale_ticket->globalPaymentTypes->contains(function ($global_payment_type) use ($global_payment_type_cortesia_id) {
+                                return $global_payment_type->pivot->global_payment_type_id == $global_payment_type_cortesia_id;
+                            });
+
+                            if ($has_agreement_promotion) {
+                                $type_sales['convenio']['sales']++;
+                            } else if ($sale_ticket->promotion_id && !$has_agreement_promotion) {
+                                $type_sales['promocion']['sales']++;
+                            } else if ($has_cortesia) {
+                                $type_sales['cortesia']['sales']++;
+                            } else if($event_seat_catalog->purchase_type == 'abonado'){
+                                $type_sales['abonado']['sales']++;
+                            } else {
+                                $type_sales['regular']['sales']++;
+                            }
+                        }
+                    }
+                }
+            });
+
+            $response = [
+                'event' => $event,
+                'total_seats_sold' => $total_seats_sold,
+                'type_payments' => $type_payments,
+                'type_sales' => $type_sales,
+            ];
+
+            return $response;
+
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    } */
+
+    public function getHistoryPerEvent(array $data)
+{
+    try {
+        $event = Event::find($data['event_id']);
+        $event->globalImage;
+        $event->serie->globalSeason;
+
+        $seat_catalogue_status_vendido_id = SeatCatalogueStatus::where('name', 'vendido')->first()->id;
+        $global_payment_type_cortesia_id = GlobalPaymentType::where('name', 'cortesia')->first()->id;
+        $type_payments = [];
+        $total_seats_sold = 0;
+        $type_sales = [
+            'total' => ['sales' => 0],
+            'promocion' => ['sales' => 0],
+            'convenio' => ['sales' => 0],
+            'cortesia' => ['sales' => 0],
+            'abonado' => ['sales' => 0],
+            'regular' => ['sales' => 0],
+        ];
+
+        $current_date = Carbon::now();
+        $start_date = $current_date->copy()->startOfMonth();
+        $end_date = $current_date->copy()->endOfMonth();
+        $days = [];
+
+        while ($start_date->lte($end_date)) {
+            $total_seats_sold_day = 0;
+            $day_start = $start_date->copy()->startOfDay();
+            $day_end = $start_date->copy()->endOfDay();
+
+            $sale_tickets = $event->saleTickets()
+                ->whereBetween('sale_tickets.created_at', [$day_start, $day_end])
+                ->where('sale_tickets.stadium_id', 1)
+                ->where(function ($query) {
+                    $pagado_status_id = SaleTicketStatus::where('name', 'pagado')->first()->id;
+                    $pendiente_status_id = SaleTicketStatus::where('name', 'pendiente')->first()->id;
+                    $query->where('sale_tickets.sale_ticket_status_id', $pagado_status_id)
+                        ->orWhere('sale_tickets.sale_ticket_status_id', $pendiente_status_id);
+                })
+                ->get();
+
+            $sale_tickets->each(function ($sale_ticket) use (&$type_payments, &$seat_catalogue_status_vendido_id, &$total_seats_sold, &$total_seats_sold_day, &$type_sales, &$global_payment_type_cortesia_id) {
+                /*
+                * Get all global payment types associated with the sale ticket
+                */
+                $sale_ticket->globalPaymentTypes->each(function ($global_payment_type) use (&$type_payments) {
+                    if (!isset($type_payments[$global_payment_type->name])) {
+                        $type_payments[$global_payment_type->name] = [
+                            'amount' => 0,
+                            'transactions' => 0,
+                        ];
+                    }
+                    $type_payments[$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
+                    $type_payments[$global_payment_type->name]['transactions']++;
+                });
+
+                if ($sale_ticket->saleTicketStatus->name == 'pagado' || $sale_ticket->saleTicketStatus->name == 'parcialmente cancelado' || $sale_ticket->saleTicketStatus->name == 'pendiente') {
+                    foreach ($sale_ticket->eventSeatCatalogs as $event_seat_catalog) {
+                        if ($event_seat_catalog->seat_catalogue_status_id == $seat_catalogue_status_vendido_id) {
+                            $total_seats_sold++;
+                            $total_seats_sold_day++;
+                            $type_sales['total']['sales']++;
+
+                            $has_agreement_promotion = $sale_ticket->eventSeatCatalogs->contains(function ($eventSeatCatalog) {
+                                return $eventSeatCatalog->pivot->agreement_promotion_id !== null;
+                            });
+
+                            $has_cortesia = $sale_ticket->globalPaymentTypes->contains(function ($global_payment_type) use ($global_payment_type_cortesia_id) {
+                                return $global_payment_type->pivot->global_payment_type_id == $global_payment_type_cortesia_id;
+                            });
+
+                            if ($has_agreement_promotion) {
+                                $type_sales['convenio']['sales']++;
+                            } else if ($sale_ticket->promotion_id && !$has_agreement_promotion) {
+                                $type_sales['promocion']['sales']++;
+                            } else if ($has_cortesia) {
+                                $type_sales['cortesia']['sales']++;
+                            } else if($event_seat_catalog->purchase_type == 'abonado'){
+                                $type_sales['abonado']['sales']++;
+                            } else {
+                                $type_sales['regular']['sales']++;
+                            }
+                        }
+                    }
+                }
+            });
+
+            $days[] = [
+                'day' => $day_start->toDateString(),
+                'tickets' => $total_seats_sold_day,
+            ];
+
+            $start_date->addDay(); // Avanzar al siguiente día
+        }
+
+        $response = [
+            'event' => $event,
+            'total_seats_sold' => $total_seats_sold,
+            'type_payments' => $type_payments,
+            'type_sales' => $type_sales,
+            'sales_per_day' => $days,
+        ];
+
+        return $response;
+
+    } catch (\Exception $e) {
+        throw $e;
+    }
+}
 }

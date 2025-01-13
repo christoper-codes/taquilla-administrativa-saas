@@ -20,6 +20,7 @@ use App\Services\EventTypeService;
 use App\Services\GlobalImageService;
 use App\Services\GlobalSeasonService;
 use App\Services\ReasonAgreementService;
+use App\Services\SaleDebtorService;
 use App\Services\SerieService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -48,11 +49,12 @@ class EventController extends Controller
     protected $event_seat_catalogue_service;
     protected $event_repository;
     protected $reason_agreement_service;
+    protected $sale_debtor_service;
 
 
     public function __construct(EventService $event_service, EventTypeService $event_type_service, SerieService $serie_service, GlobalSeasonService $global_season_service,
                                 GlobalImageService $global_image_service, EventSeatCatalogueService $event_seat_catalogue_service, EventRepositoryInterface $event_repository,
-                                ReasonAgreementService $reason_agreement_service)
+                                ReasonAgreementService $reason_agreement_service, SaleDebtorService $sale_debtor_service)
     {
         $this->event_service = $event_service;
         $this->event_type_service = $event_type_service;
@@ -62,6 +64,7 @@ class EventController extends Controller
         $this->event_seat_catalogue_service = $event_seat_catalogue_service;
         $this->event_repository = $event_repository;
         $this->reason_agreement_service = $reason_agreement_service;
+        $this->sale_debtor_service = $sale_debtor_service;
     }
 
 
@@ -72,9 +75,13 @@ class EventController extends Controller
     {
       try {
             $events = $this->event_service->getAll();
-
+            $user_roles = null;
+            if(Auth::user()){
+                $user_roles = Auth::user()->userRoles;
+            }
             return Inertia::render('App/Pos/Events', [
                 'events' => $events,
+                'user_roles' => $user_roles
             ]);
 
       } catch (\Exception $e) {
@@ -148,9 +155,12 @@ class EventController extends Controller
                 'is_active' => 'required|boolean'
             ]);
 
-            $request->merge(['slug' => Str::slug($request->name, '-')]);
+            $request->merge([
+                'slug' => Str::slug($request->name, '-'),
+                'event_visibility_type_id' => 1,
+            ]);
 
-            $data = $request->only(['global_season_id','event_type_id','serie_id','name','slug','description','start_date', 'end_date','is_active']);
+            $data = $request->only(['global_season_id','event_type_id','serie_id','name','slug','description','start_date', 'end_date','is_active', 'event_visibility_type_id']);
 
             $event = $this->event_service->save( $data );
 
@@ -188,16 +198,18 @@ class EventController extends Controller
             $user_roles = Auth::user()->userRoles;
             $global_payment_types = GlobalPaymentType::all();
             $global_card_payment_types = GlobalCardPaymentType::all();
+            $sale_debtors = $this->sale_debtor_service->getAll(1);
 
             $purchase_types = ['partido'];
             $events_by_serie = $this->event_repository->getEventsBySerie($event->serie_id);
             if ($events_by_serie->count() > 1) {
                 $purchase_types[] = 'serie';
             }
-            if($event->serie->globalSeason->enabled_for_season_tickets){
+            if($event->enabled_for_season_tickets){
                 $purchase_types[] = 'abonado';
                 $payment_installments = PaymentInstallments::toArray();
             }
+
 
             /*
             * get all reason agreement by stadium
@@ -226,7 +238,8 @@ class EventController extends Controller
                 'purchase_types' => $purchase_types,
                 'payment_installments' => $payment_installments,
                 'reason_agreements' => $reason_agreements,
-                'institutions' => $institutions
+                'institutions' => $institutions,
+                'sale_debtors' => $sale_debtors
             ]);
 
         } catch (\Exception $e) {
@@ -377,8 +390,8 @@ class EventController extends Controller
             'description' => 'nullable',
             'is_owner' => 'nullable',
             'final_promotion' => 'nullable',
+            'sale_debtor' => 'nullable',
         ]);
-
 
         DB::beginTransaction();
         try {
@@ -392,6 +405,30 @@ class EventController extends Controller
                     'data' => $response,
                     'message' => 'Asientos reservados correctamente',
                     'success' => true
+                ], 200);
+            }
+
+            if($request->purchase_type === 'abonado') {
+
+                $generic_data = [
+                    'sale_date' => Carbon::now()->format('d/m/Y'),
+                    'folio' => $response[0]['ticket_id'],
+                    'payment_in_installments' => $request->payment_in_installments ?? null,
+                    'total_amount' => $request->total_amount,
+                    'global_payment_types' => $request->global_payment_types,
+                ];
+
+                $pdf_response = Pdf::loadView('pdfs.hdx.saleTicket', [
+                    'pdf_data' => $response,
+                    'generic_data' => $generic_data
+                ]);
+                $pdfContent = $pdf_response->output();
+
+                return response()->json([
+                    'data' => $response,
+                    'message' => 'Asientos reservados y comprados correctamente',
+                    'success' => true,
+                    'pdf' => base64_encode($pdfContent)
                 ], 200);
             }
 
@@ -421,6 +458,11 @@ class EventController extends Controller
      */
     public function confirmSeatsPurchase(Request $request)
     {
+        return response()->json([
+            'data' => $request,
+            'message' => 'Compra de asientos confirmada correctamente',
+            'success' => true
+        ], 200);
 
         $request->validate([
             'stadium_id' => 'required',
@@ -450,6 +492,7 @@ class EventController extends Controller
             'description' => 'nullable',
             'is_owner' => 'nullable',
             'final_promotion' => 'nullable',
+            'sale_deptor' => 'nullable',
         ]);
 
         DB::beginTransaction();

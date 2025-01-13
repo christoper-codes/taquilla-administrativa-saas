@@ -109,4 +109,9 @@ class Stadium extends Model
         return $this->hasMany(ReasonAgreement::class);
     }
 
+    public function saleDebtors()
+    {
+        return $this->hasMany(SaleDebtor::class);
+    }
+
 }

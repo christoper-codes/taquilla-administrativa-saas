@@ -161,3 +161,4 @@ Route::get('/mis-tarjetas', [WalletAccountTemporalController::class, 'index'])->
 * | Indicator for stadium | ROUTES
 */
 Route::get('/indicadores-generales', [IndicatorController::class, 'index'])->name('indicators.index');
+Route::get('/indicadores-evento/{slug}/{id}', [IndicatorController::class, 'show'])->name('indicators.show');

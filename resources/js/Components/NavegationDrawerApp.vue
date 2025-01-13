@@ -94,26 +94,6 @@ const props = defineProps({
 
                                 <v-divider></v-divider>
 
-                                <v-list class="!tw-bg-transparent">
-                                <v-list-item>
-                                    <v-switch
-                                    v-model="message"
-                                    color="purple"
-                                    label="Ver boeltos solo en web"
-                                    hide-details
-                                    ></v-switch>
-                                </v-list-item>
-
-                                <v-list-item>
-                                    <v-switch
-                                    v-model="hints"
-                                    color="purple"
-                                    label="Ver boletos en la app y web"
-                                    hide-details
-                                    ></v-switch>
-                                </v-list-item>
-                                </v-list>
-
                                 <v-card-actions>
                                 <v-spacer></v-spacer>
                                 <div class="tw-w-full tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-overflow-hidden tw-shadow-lg tw-relative tw-mb-3">

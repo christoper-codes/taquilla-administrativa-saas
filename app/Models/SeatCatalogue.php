@@ -45,7 +45,7 @@ class SeatCatalogue extends Model
     public function events()
     {
         return $this->belongsToMany(Event::class, 'event_seat_catalog', 'seat_catalogue_id', 'event_id')
-                    ->withPivot('user_id','season_ticket_id', 'seat_catalogue_status_id', 'sale_ticket_id', 'qr', 'price', 'is_verified', 'is_active')
+                    ->withPivot('user_id','season_ticket_id', 'seat_catalogue_status_id', 'sale_ticket_id', 'qr', 'price', 'purchase_type', 'is_verified', 'is_active')
                     ->withTimestamps();
     }
 
