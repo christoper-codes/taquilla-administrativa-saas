@@ -43,7 +43,9 @@ class DatabaseSeeder extends Seeder
             SalesTicketCancellationCodesSeeder::class,
             CourtesyTypesSeeder::class,
             ReasonAgreementsSeeder::class,
+            EventVisibilityTypesSeeder::class,
             //AgreementsSeeder::class,
+            SaleDebtorsSeeder::class,
         ]);
     }
 }

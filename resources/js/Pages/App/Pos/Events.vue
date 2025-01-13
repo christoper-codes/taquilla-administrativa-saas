@@ -6,9 +6,12 @@ import Footer from '@/Components/Footer.vue';
 import { onMounted, ref } from 'vue';
 import ErrorSession from '@/Components/ErrorSession.vue';
 import useDateFormat from '@/composables/dateFormat';
+import useUserPolicy from '@/composables/UserPolicy';
 
 const { dateFormat } = useDateFormat();
 const loading = ref(false);
+const filteredEvents = ref([]);
+const { viewVendorTopics } = useUserPolicy();
 
 const showEvent = () => {
     loading.value = true;
@@ -18,22 +21,26 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    user_roles: {
+        type: Array,
+        required: false,
+    },
 });
 
 onMounted(() => {
+    filteredEvents.value = props.events.filter((event) => {
+        if(event.event_visibility_type.name == 'publico'){
+            return true;
+        }
+        if(props.user_roles){
+            if(event.event_visibility_type.name == 'vendedores' && viewVendorTopics(props.user_roles)){
+                return true;
+            }
+        }
 
-  if(document.querySelector('#leaflet-map')) {
-    var map = L.map('leaflet-map').setView([19.513615, -96.916121], 17);
-    if(map) {
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+        return false;
 
-        L.marker([19.513615, -96.916121]).addTo(map)
-            .bindPopup('El nido del halcon | Xalapa Ver.')
-            .openPopup();
-    }
-}
+    });
 });
 
 
@@ -65,7 +72,7 @@ onMounted(() => {
                         <!-- Content -->
                         <div class="lg:tw-col-span-2">
                             <div v-if="events" class="tw-py-8 lg:tw-pe-8">
-                                <div v-for="event in events" :key="event.id"  class="tw-space-y-5 lg:tw-space-y-8">
+                                <div v-for="event in filteredEvents" :key="event.id"  class="tw-space-y-5 lg:tw-space-y-8">
                                     <Link :href="route('welcome')">
                                         <div class="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-x-1.5 tw-text-sm tw-text-gray-600 tw-decoration-2 hover:tw-underline focus:tw-outline-none focus:tw-underline">
                                             <svg class="tw-shrink-0 tw-size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -164,7 +171,6 @@ onMounted(() => {
                                 </form>
                             </div>
                             <div class="tw-h-auto tw-w-full tw-rounded-lg tw-overflow-hidden tw-mt-5 tw-flex tw-items-center tw-justify-center">
-                                <!-- <div id="leaflet-map" class="tw-h-[200px] tw-w-full tw-z-10"></div> -->
                                 <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3760.653263134143!2d-96.91874712501097!3d19.51354808178317!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85db320be3350bd1%3A0xba83c38e6e168a4!2sGimnasio%20Nido%20del%20Halc%C3%B3n%20UV!5e0!3m2!1ses-419!2smx!4v1735482228924!5m2!1ses-419!2smx" width="400" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                             </div>
                         </div>

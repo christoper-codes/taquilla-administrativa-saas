@@ -2,13 +2,13 @@
 
 namespace App\Interfaces;
 
-interface EventRepositoryInterface
+interface SaleDebtorRepositoryInterface
 {
-    /*
+     /*
     * |--------------------------------------------------------------------------
     * | Primaries methods for the repository interface
     */
-    public function getAll();
+    public function getAll($id = null);
     public function getById($id);
     public function save(array $data);
     public function update($id, array $data);
@@ -18,8 +18,5 @@ interface EventRepositoryInterface
     * |--------------------------------------------------------------------------
     * | Custom methods for the repository interface
     */
-    public function reserveSeatsToBuy($event_id, $seat_catalogue_id, $member_user_id);
-    public function confirmSeatsPurchase($event_id, $seat_catalogue_id, $member_user_id = null, $sale_ticket_id = null, $qr = null, $price = null, $is_gift = null, $purchase_type = null);
-    public function getEventsBySerie($serie_id);
-    public function getOnlyEvent($id);
+    public function cancelSaleDebtor();
 }

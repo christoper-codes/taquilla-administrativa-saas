@@ -227,6 +227,12 @@ const filteredPaymentTypes = computed(() => {
         paymentTypesSelected.value = newPaymentTypesSelected;
         return paymentTypesSelected.value;
     }
+    if (paymentTypesSelected.value.some(type => type.name === 'plazos')) {
+        const newPaymentTypesSelected = paymentTypesSelected.value.filter(type => type.name === 'plazos');
+        paymentTypesSelected.value = newPaymentTypesSelected;
+        return paymentTypesSelected.value;
+    }
+
     return paymentTypesSelected.value;
 });
 
@@ -586,6 +592,12 @@ const selectZones = () => {
     loadingg.value = false;
     loading.value = false;
     userToTransfer.value = null;
+    saleDeptorSelected.value = null;
+    installmentSale.value = false;
+    firstNameSaleDeptor.value = '';
+    lastNameSaleDeptor.value = '';
+    phoneSaleDeptor.value = '';
+    saleDebtorData.value = {};
     seatsSelected.value = [];
     const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
     stadiumHdxImg.classList.remove('tw-rotate-90');
@@ -663,14 +675,20 @@ const props = defineProps({
     institutions: {
         type: Array,
         required: false
-    }
+    },
+    sale_debtors: {
+        type: Array,
+        required: false
+    },
 });
 
-console.log(props.institutions);
+console.log(props.event.stadium_id);
 
 
 const users_list = [];
+const sale_debtors_list = [];
 const userToTransfer = ref(null);
+const saleDeptorSelected = ref(null);
 
 props.users.forEach(element => {
     users_list.push(
@@ -680,6 +698,16 @@ props.users.forEach(element => {
         }
     )
 });
+
+props.sale_debtors.forEach(element => {
+    sale_debtors_list.push(
+        {
+            name: `${element['first_name']} ${element['last_name']} (${element['phone_number']})`,
+            value: element['id']
+        }
+    )
+});
+
 
 /*
 * |--------------------------------------
@@ -739,6 +767,16 @@ const originalTotalAmount = ref(0);
 const totalAttempts = ref(0);
 const memberUserId = ref(1);
 
+
+/*
+* installment sale module
+*/
+const installmentSale = ref(false);
+const firstNameSaleDeptor = ref('');
+const lastNameSaleDeptor = ref('');
+const phoneSaleDeptor = ref('');
+const saleDebtorData = ref({});
+
 watch(() => institutionSelected.value, () => {
     agreementsByInstitutionSelected.value = null;
     agreementSelected.value = null;
@@ -749,11 +787,36 @@ watch(() => institutionSelected.value, () => {
 });
 
 watch(() => amountReceived.value, (newValue) => {
-    amountReturned.value = parseFloat(amountReceived.value) - parseFloat(totalAmount.value)
+    if(!installmentSale.value){
+        amountReturned.value = parseFloat(amountReceived.value) - parseFloat(totalAmount.value)
+    }else{
+        if(amountReceived.value == 0){
+            amountReturned.value = 0;
+
+        }else{
+            if( paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'efectivo')){
+                amountReturned.value = parseFloat(amountReceived.value) - parseFloat(amountToPayCash.value);
+            }else if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')){
+                amountReturned.value = parseFloat(amountReceived.value) - parseFloat(amountToPayCard.value);
+            } else {
+                amountReturned.value = parseFloat(totalAmount.value) - parseFloat(amountReceived.value);
+            }
+        }
+    }
 });
 
 watch(() => amountToPayCard.value, (newValue) => {
      amountReceived.value = parseFloat(amountToPayCard.value) + parseFloat(amountReceivedCash.value);
+});
+
+watch(() => amountToPayCash.value, (newValue) => {
+     if(installmentSale.value){
+        if( paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'efectivo')){
+            amountReturned.value = parseFloat(amountReceived.value) - parseFloat(amountToPayCash.value);
+        }
+    } else {
+        amountReturned.value = parseFloat(amountReceived.value) - parseFloat(totalAmount.value);
+    }
 });
 
 watch(() => amountReceivedCash.value, (newValue) => {
@@ -834,7 +897,58 @@ function completePurchase(isActive) {
     });
 }
 
+watch(() => installmentSale.value, () => {
+    if(!installmentSale.value){
+        saleDeptorSelected.value = null;
+        firstNameSaleDeptor.value = '';
+        lastNameSaleDeptor.value = '';
+        phoneSaleDeptor.value = '';
+    }else{
+        if(amountReceived.value == 0){
+            amountReturned.value = 0;
+        }else{
+            if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'efectivo')){
+                amountReturned.value = parseFloat(amountReceived.value) - parseFloat(amountReceivedCash.value);
+            }else {
+                amountReturned.value = parseFloat(totalAmount.value) - parseFloat(amountReceived.value);
+            }
+        }
+    }
+});
+
+
 const onSubmit = () => {
+
+    if(installmentSale.value){
+
+        if(saleDeptorSelected.value ){
+            if(saleDeptorSelected.value == 1){
+                if(!firstNameSaleDeptor.value || !lastNameSaleDeptor.value || !phoneSaleDeptor.value){
+                    valid.value = false;
+                    error.value = 'Debe de seleccionar un deudor para la venta a credito o llenar los campos de nombre, apellido y telefono';
+                    return;
+                }
+            }
+        } else{
+            valid.value = false;
+            error.value = 'Debe de seleccionar un deudor para la venta a credito';
+            return;
+        }
+        if(paymentTypesSelected.value.some(type => type.name === 'cortesia')){
+            valid.value = false;
+            error.value = 'No se puede realizar una venta a credito con cortesia';
+            return;
+        }
+        if(paymentTypesSelected.value.length > 1){
+            valid.value = false;
+            error.value = 'Por el momento no se puede realizar una venta a credito con mas de un tipo de pago';
+            return;
+        }
+        form.value = true;
+    }
+
+
+
     if(!form.value) return
 
     if(paymentTypesSelected.value.length == 0) {
@@ -860,15 +974,23 @@ const onSubmit = () => {
 
     if(paymentTypesSelected.value.some(type => type.name === 'efectivo' )){
         //validar que el monto recibido para efectivo sea igual o mayor al monto a pagar para efectivo
-        if(parseFloat(amountReceivedCash.value) < parseFloat(amountToPayCash.value)) {
+        if(parseFloat(amountReceivedCash.value) < parseFloat(amountToPayCash.value) && !installmentSale.value) {
             valid.value = false;
             error.value = 'El monto recibido en efectivo debe ser igual o mayor al monto a pagar en efectivo';
             return;
         }
     }
 
-    if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
+    if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta') && !installmentSale.value) {
         amountToPayCard.value = totalAmount.value;
+    }
+
+    if(paymentTypesSelected.value.some(type => type.name === 'tarjeta') && installmentSale.value){
+        if(!cardPaymentTypesSelected.value){
+            valid.value = false;
+            error.value = 'Debe seleccionar un tipo de tarjeta para la venta a credito';
+            return;
+        }
     }
 
     globalPaymentTypes.value = paymentTypesSelected.value.map((item) => {
@@ -877,6 +999,7 @@ const onSubmit = () => {
                 id: item.id,
                 global_card_payment_type_id: cardPaymentTypesSelected.value.id,
                 amount: amountToPayCard.value,
+                name: item.name,
             }
         }
         if(item.name === 'efectivo') {
@@ -884,6 +1007,15 @@ const onSubmit = () => {
                 id: item.id,
                 global_card_payment_type_id: null,
                 amount: amountToPayCash.value,
+                name: item.name,
+            }
+        }
+        if(item.name === 'plazos') {
+            return {
+                id: item.id,
+                global_card_payment_type_id: null,
+                amount: 0,
+                name: item.name,
             }
         }
         if(item.name === 'cortesia') {
@@ -897,12 +1029,15 @@ const onSubmit = () => {
                     amount: 0,
                     reason_agreement_id:  reasonAgreementSelected.value.id,
                     reason_agreement: reasonAgreementDescription.value,
+                    name: item.name,
+
                 }
             }else{
                 return {
                     id: item.id,
                     global_card_payment_type_id: null,
                     amount: 0,
+                    name: item.name,
                 }
             }
         }
@@ -913,7 +1048,7 @@ const onSubmit = () => {
         totalFinal += parseFloat(item.amount);
     });
 
-    if(totalFinal != totalAmount.value) {
+    if(totalFinal != totalAmount.value && !installmentSale.value) {
         valid.value = false;
         error.value = 'El monto total no coincide con el monto a pagar de los tipos de pago seleccionados';
         return;
@@ -998,6 +1133,13 @@ const onSubmitConfirm = (isActive) => {
     loadingg.value = true;
     loading.value = true;
     const isTransfer = userToTransfer.value ? true : false;
+    const saleDebtorData = {
+        id: saleDeptorSelected.value,
+        first_name: firstNameSaleDeptor.value,
+        last_name: lastNameSaleDeptor.value,
+        phone_number: phoneSaleDeptor.value,
+        stadium_id: props.event.stadium_id,
+    }
 
     const seatsSelectedData = {
         purchase_type: purchaseType.value,
@@ -1019,13 +1161,15 @@ const onSubmitConfirm = (isActive) => {
         is_transfer: isTransfer,
         user_to_transfer: userToTransfer.value,
         final_promotion: finalPromotion.value,
+        sale_debtor: saleDebtorData,
     };
 
-/* console.log(seatsSelectedData);
-return */
+    /* console.log(seatsSelectedData);
+    return */
 
 axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
     .then(response => {
+
         if (response.data.success && purchaseOnline.value) {
             showButtonPayment.value = true;
             drawerPaymentState.value = true;
@@ -1039,11 +1183,12 @@ axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
         // Actualiza el estado de los asientos comprados
         updateZones(seatsSelectedData);
 
+
         if(response.data.pdf) {
             const pdfContent = atob(response.data.pdf);
             const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
             const pdfUrl = window.URL.createObjectURL(pdfBlob);
-            printInKioskMode(pdfUrl);
+            printInKioskMode(pdfUrl, purchaseType.value);
             selectZones();
             setTimeout(() => {
                 selectZones();
@@ -1074,6 +1219,10 @@ const rules = {
     required: value => !!value || 'Campo requerido',
     isNumber: value => !isNaN(value) || 'Debe ser un número',
     minChar: value => value.length >= 3 || 'Debe tener un mínimo de 3 caracteres',
+    phoneNumber: value => {
+        const phoneNumber = value.replace(/\D/g, '');
+        return phoneNumber.length === 10 || 'Número de teléfono inválido (10 dígitos)';
+    },
     //validar si en el array de pagos selecionados solo existe un tipo de pago ya sea efectivo o tarjeta y validar que el monto sea igual al total
     isAmountToPay: value => {
         if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
@@ -1086,14 +1235,15 @@ const rules = {
     }
 };
 
-function printInKioskMode(url) {
+function printInKioskMode(url, purchaseType) {
     const ventana = window.open(url, '_blank', 'fullscreen=yes,kiosk=yes');
     ventana.onload = () => {
         ventana.print();
-        setTimeout(() => {
-            ventana.close();
-        }, 4000);
-
+        if(purchaseType != 'abonado') {
+            setTimeout(() => {
+                ventana.close();
+            }, 4000);
+        }
     };
 }
 
@@ -1306,6 +1456,7 @@ const cardPaymentTypeError = computed(() => {
                                         v-bind:isOnline="purchaseOnline"
                                         v-bind:serieId="event.serie_id"
                                         v-bind:finalPromotion="finalPromotion"
+                                        v-bind:saleDeptor="saleDebtorData"
                                     />
 
                                     <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-6 tw-items-center tw-gap-2 tw-mt-7">
@@ -1601,6 +1752,7 @@ const cardPaymentTypeError = computed(() => {
                                                         :items="global_payment_types"
                                                         chips
                                                         multiple
+                                                        clearable
                                                         v-model="paymentTypesSelected"
                                                         :rules="[rules.required]"
                                                     ></v-select>
@@ -1761,6 +1913,67 @@ const cardPaymentTypeError = computed(() => {
                                                             ></v-radio>
                                                         </v-radio-group>
 
+                                                        <div v-if="viewVendorTopics(user_roles)">
+
+                                                            <v-switch label="Confirmar venta a plazos" color="purple" value="1" v-model="installmentSale"></v-switch>
+
+                                                            <div v-if="installmentSale">
+                                                                <h4 class="tw-text-xs tw-px-4 tw-py-1 tw-rounded-full tw-bg-purple-200 tw-text-purple-600 tw-text-center tw-mb-2">
+                                                                    Complemento para venta a plazos
+                                                                </h4>
+
+                                                                <v-autocomplete
+                                                                    v-model="saleDeptorSelected"
+                                                                    clearable
+                                                                    color="purple"
+                                                                    chips
+                                                                    label="Buscar usuario para asignar la compra"
+                                                                    hint="El usuario que se seleccione sera el responsable de la compra"
+                                                                    persistent-hint=""
+                                                                    :items="sale_debtors_list"
+                                                                    variant="solo-filled"
+                                                                    item-title="name"
+                                                                    item-value="value"
+                                                                    :rules="[rules.required]"
+                                                                ></v-autocomplete>
+                                                                <div v-if="saleDeptorSelected && saleDeptorSelected === 1">
+
+                                                                    <v-text-field
+                                                                        class="tw-w-full"
+                                                                        append-inner-icon="mdi-account"
+                                                                        label="Nombre"
+                                                                        color="purple"
+                                                                        clearable
+                                                                        v-model="firstNameSaleDeptor"
+                                                                        hint="Nombre de para el abonado"
+                                                                        :rules="[rules.required]"
+                                                                    ></v-text-field>
+                                                                    <v-text-field
+                                                                        class="tw-w-full"
+                                                                        append-inner-icon="mdi-account"
+                                                                        label="Apellido paterno"
+                                                                        color="purple"
+                                                                        clearable
+                                                                        v-model="lastNameSaleDeptor"
+                                                                        hint="Apellido paterno de para el abonado"
+                                                                        :rules="[rules.required]"
+                                                                    ></v-text-field>
+                                                                    <v-text-field
+                                                                        class="tw-w-full"
+                                                                        append-inner-icon="mdi-phone"
+                                                                        label="Numero de telefono"
+                                                                        color="purple"
+                                                                        clearable
+                                                                        v-model="phoneSaleDeptor"
+                                                                        hint="Numero de telefono para el pago a plazos"
+                                                                        :rules="[rules.required, rules.isNumber, rules.phoneNumber]"
+                                                                    ></v-text-field>
+
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
                                                         <div v-if="purchaseStatus == 'retry'">
                                                             <p class="tw-py-2 tw-px-4 tw-bg-red-100 tw-border-l-4 tw-border-l-red-500 tw-text-red-500 tw-text-xs tw-my-4">Estas en el proceso final de compra, si se require agregar otro asiento cancele la seleccion actual y reintente.</p>
                                                         </div>
@@ -1785,9 +1998,28 @@ const cardPaymentTypeError = computed(() => {
                                                             <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir bolsetos
                                                         </v-btn>
                                                         <v-btn
-                                                            v-else
+                                                            v-else-if="!installmentSale && viewVendorTopics(user_roles)"
                                                             :disabled="!form"
                                                             :loading="loadingg"
+                                                            type="submit"
+                                                            rounded="xl" size="large" block
+                                                            class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400"
+                                                        >
+                                                            <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos
+                                                        </v-btn>
+                                                        <v-btn
+                                                            v-else-if="installmentSale && viewVendorTopics(user_roles)"
+                                                            :loading="loadingg"
+                                                            type="submit"
+                                                            rounded="xl" size="large" block
+                                                            class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400"
+                                                        >
+                                                            <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos
+                                                        </v-btn>
+                                                        <v-btn
+                                                            v-else
+                                                            :loading="loadingg"
+                                                            :disabled="!form"
                                                             type="submit"
                                                             rounded="xl" size="large" block
                                                             class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400"

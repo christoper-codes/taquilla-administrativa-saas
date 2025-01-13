@@ -85,6 +85,10 @@ const props = defineProps({
         type: Object,
         required: false,
     },
+    saleDebtorData: {
+        type: Object,
+        required: false,
+    },
 })
 
 const user = usePage().props.auth.user;
@@ -330,6 +334,8 @@ onMounted(async () => {
 
                 const seatsSelectedData = {
                     purchase_type: props.purchaseType,
+                    stadium_id: props.stadiumId,
+                    ticket_office_id: props.ticketOfficeId,
                     event_id: props.eventId,
                     cash_register_id: props.cashRegisterId,
                     member_user_id: props.memberUserId,
@@ -342,6 +348,7 @@ onMounted(async () => {
                     global_payment_types: props.globalPaymentTypes,
                     is_online: props.isOnline,
                     serie_id: props.serieId,
+                    sale_debtor: saleDebtorData,
                 }
 
                 axios.post(route('events.confirm-seats-purchase'), seatsSelectedData)

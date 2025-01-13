@@ -5,16 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SeatType extends Model
+class SaleDebtor extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'stadium_id',
-        'name',
-        'code',
-        'percentage_cashback',
-        'description',
+        'first_name',
+        'last_name',
+        'phone_number',
+        'email',
         'is_active',
     ];
 
@@ -23,13 +23,8 @@ class SeatType extends Model
         return $this->belongsTo(Stadium::class);
     }
 
-    public function seatCatalogues()
+    public function saleTickets()
     {
-        return $this->hasMany(SeatCatalogue::class);
+        return $this->hasMany(SaleTicket::class);
     }
-
-    /* public function seasonTickets()
-    {
-        return $this->hasMany(SeasonTicket::class);
-    } */
 }

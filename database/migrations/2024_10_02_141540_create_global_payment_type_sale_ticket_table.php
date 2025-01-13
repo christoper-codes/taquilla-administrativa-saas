@@ -24,6 +24,7 @@ return new class extends Migration
             $table->decimal('amount', 14, 4)->default('0.0000');
             $table->string('reason_courtesy')->nullable();
             $table->decimal('original_amount', 14, 4)->default('0.0000');
+            $table->date('payment_date')->nullable()->useCurrent();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
