@@ -46,6 +46,7 @@ class DatabaseSeeder extends Seeder
             EventVisibilityTypesSeeder::class,
             //AgreementsSeeder::class,
             SaleDebtorsSeeder::class,
+            //AgreementsSeeder::class,
         ]);
     }
 }
