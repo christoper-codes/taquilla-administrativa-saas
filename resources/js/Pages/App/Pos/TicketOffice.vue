@@ -71,13 +71,12 @@ const closeCashRegister = (isActive) => {
             "dangerouslyHTMLString": true
         })
 
-        console.log(response.data)
 
         if(response.data.pdf) {
             const pdfContent = atob(response.data.pdf);
             const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
             const pdfUrl = window.URL.createObjectURL(pdfBlob);
-            printInKioskMode(pdfUrl);
+            printInKioskMode(pdfUrl, false);
         }
 
         localStorage.removeItem('cashRegisterData');
@@ -236,13 +235,15 @@ const printTicket = (item, isActive) => {
         })
 };
 
-function printInKioskMode(url) {
+function printInKioskMode(url, close = true) {
     const ventana = window.open(url, '_blank', 'fullscreen=yes,kiosk=yes');
     ventana.onload = () => {
         ventana.print();
-        setTimeout(() => {
-            ventana.close();
-        }, 4000);
+        if (close){
+            setTimeout(() => {
+                ventana.close();
+            }, 4000);
+        }
     };
 }
 
@@ -351,7 +352,7 @@ const pdf = () => {
                                 Regresar al inicio
                             </div>
                         </Link >
-                        <!-- <v-btn @click="pdf">Pdf</v-btn> -->
+                        <v-btn @click="pdf">Pdf</v-btn>
 
                         <h2 class="lg:tw-text-4xl tw-text-3xl tw-font-bold">{{ ticket_office.name }}. Administracion para el club halcones de xalapa</h2>
                         <div class="tw-py-2 tw-px-5 tw-border-l-4 tw-border-l-purple-500 tw-w-full tw-bg-purple-200 tw-text-purple-600">

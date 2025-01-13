@@ -18,12 +18,14 @@ return new class extends Migration
             $table->foreignId('event_type_id')->constrained('event_types');
             $table->foreignId('serie_id')->constrained('series');
             $table->foreignId('global_image_id')->nullable()->constrained('global_images');
+            $table->foreignId('event_visibility_type_id')->constrained('event_visibility_types');
             $table->string('name');
             $table->string('slug');
             $table->string('description');
             $table->string('promotion_announcement')->default('Proximamente nuevas promociones!!');
             $table->dateTime('start_date')->nullable();
             $table->dateTime('end_date')->nullable();
+            $table->boolean('enabled_for_season_tickets')->default(false);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

@@ -6,10 +6,10 @@ import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, Ca
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale)
 
 const props = defineProps({
-  saleTicketsPerWeek: {
-    type: Object,
-    required: true
-  }
+    salesPerDay: {
+        type: Array,
+        required: true
+    }
 })
 
 const chartData = ref({
@@ -32,7 +32,7 @@ const chartOptions = ref({
   plugins: {
     title: {
       display: true,
-      text: 'Boletos Vendidos por Semana',
+      text: 'Boletos Vendidos por dia',
     },
     tooltip: {
       enabled: true,
@@ -40,11 +40,10 @@ const chartOptions = ref({
   }
 })
 
-
-watch(() => props.saleTicketsPerWeek, (newData) => {
-  chartData.value.labels = newData.weeks.map((week, index) => `Semana ${index + 1}`)
-  chartData.value.datasets[0].data = newData.weeks.map(week => week.tickets)
-}, { immediate: true })
+watch(() => props.salesPerDay, (newData) => {
+  chartData.value.labels = newData.map((dayData, index) => `Dia ${index + 1}`);
+  chartData.value.datasets[0].data = newData.map(dayData => dayData.tickets);
+}, { immediate: true });
 
 </script>
 

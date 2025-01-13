@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\WebResponseHelper;
+use App\Models\Event;
 use App\Services\SaleTicketService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -62,9 +63,22 @@ class IndicatorController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($slug, $id)
     {
-        //
+        try {
+            $user = Auth::user()->load('globalImages');
+            $data = ['event_id' => $id];
+
+            $history_per_event = $this->sale_ticket_service->getHistoryPerEvent($data);
+
+            return Inertia::render('App/Administration/Indicators/Show', [
+                'user' => $user,
+                'historyPerEvent' => $history_per_event
+            ]);
+
+        } catch (\Exception $e) {
+            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar los indicadores');
+        }
     }
 
     /**

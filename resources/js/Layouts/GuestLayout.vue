@@ -41,7 +41,9 @@ const props = defineProps({
             </div>
         </div>
         <div v-if="cashRegisterPresent" class="tw-text-white tw-font-semibold  lg:tw-flex tw-items-center tw-gap-3">
-            <p class="tw-text-3xl tw-font-bold">Caja <span class="tw-font-thin tw-text-yellow-400">{{ cashRegisterPresent }}</span> activa</p>
+            <Link :href="route('ticket-offices.index')">
+                <p class="tw-text-3xl tw-font-bold">Caja <span class="tw-font-thin tw-text-yellow-400">{{ cashRegisterPresent }}</span> activa</p>
+            </Link>
         </div>
         <div v-else class="tw-flex tw-items-center tw-gap-4 lg:tw-gap-10 tw-text-white">
             <div class="tw-items-center tw-gap-2 lg:tw-gap-4 tw-hidden md:tw-flex ">

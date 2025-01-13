@@ -33,14 +33,18 @@ class EventService
     protected $global_card_payment_type_service;
     protected $cash_register_service;
     protected $season_ticket_service;
+    protected $sale_debtor_service;
 
-    public function __construct(EventRepositoryInterface $event_repository, GlobalPaymentTypeService $global_payment_type_service, GlobalCardPaymentTypeService $global_card_payment_type_service, CashRegisterService $cash_register_service, SeasonTicketService $season_ticket_service)
+    public function __construct(EventRepositoryInterface $event_repository, GlobalPaymentTypeService $global_payment_type_service,
+                    GlobalCardPaymentTypeService $global_card_payment_type_service, CashRegisterService $cash_register_service,
+                    SeasonTicketService $season_ticket_service, SaleDebtorService $sale_debtor_service)
     {
         $this->event_repository = $event_repository;
         $this->global_payment_type_service = $global_payment_type_service;
         $this->global_card_payment_type_service = $global_card_payment_type_service;
         $this->cash_register_service = $cash_register_service;
         $this->season_ticket_service = $season_ticket_service;
+        $this->sale_debtor_service = $sale_debtor_service;
     }
 
 
@@ -96,7 +100,7 @@ class EventService
             if ($events_by_serie->count() > 1) {
                 $purchase_types[] = 'serie';
             }
-            if($event->serie->globalSeason->enabled_for_season_tickets){
+            if($event->enabled_for_season_tickets){
                 $purchase_types[] = 'abonado';
                 $payment_installments = PaymentInstallments::toArray();
             }
@@ -242,6 +246,28 @@ class EventService
             }
 
             /*
+            * Handle sale debtor
+            */
+            $sale_debtor_id = null;
+            if (isset($data['sale_debtor']) && isset($data['sale_debtor']['id'])) {
+                $sale_debtor = $this->sale_debtor_service->getById($data['sale_debtor']['id']);
+                if ($sale_debtor) {
+                    if ($sale_debtor->first_name == 'nuevo' && $sale_debtor->last_name == 'deudor') {
+                        if (!empty($data['sale_debtor']['first_name']) && !empty($data['sale_debtor']['last_name']) && !empty($data['sale_debtor']['phone_number'])) {
+                            $new_sale_debtor = $this->sale_debtor_service->save($data['sale_debtor']);
+                            $sale_debtor_id = $new_sale_debtor->id;
+                        } else {
+                            throw new \Exception('Debe ingresar los datos del nuevo deudor');
+                        }
+                    } else {
+                        $sale_debtor_id = $data['sale_debtor']['id'];
+                    }
+                } else {
+                    throw new \Exception('El deudor proporcionado no existe');
+                }
+            }
+
+            /*
             * Create sale ticket
             */
             $saleTicket = new SaleTicket();
@@ -249,8 +275,9 @@ class EventService
             $saleTicket->ticket_office_id = $data['ticket_office_id'];
             $saleTicket->seller_user_id = $data['seller_user_id'];
             $saleTicket->cash_register_id = $data['cash_register_id'];
-            $saleTicket->sale_ticket_status_id = SaleTicketStatus::where('name', 'pagado')->first()->id;
+            $saleTicket->sale_ticket_status_id = $sale_debtor_id ? SaleTicketStatus::where('name', 'pendiente')->first()->id : SaleTicketStatus::where('name', 'pagado')->first()->id;
             $saleTicket->price_type_id = null;
+            $saleTicket->sale_debtor_id = $sale_debtor_id ?? null;
             $saleTicket->amount_received = $data['amount_received'];
             $saleTicket->total_amount = $data['total_amount'];
             $saleTicket->total_returned = $data['total_returned'];
@@ -264,6 +291,7 @@ class EventService
             /*
             * Assign payment types to the sale ticket
             */
+            $total_actual_paid = 0;
             foreach ($data['global_payment_types'] as $global_payment_type) {
                 $saleTicket->globalPaymentTypes()->attach($global_payment_type['id'], [
                     'global_card_payment_type_id' => $global_payment_type['global_card_payment_type_id'] ?? null,
@@ -272,6 +300,7 @@ class EventService
                     'original_amount' => $global_payment_type['amount'],
                     'reason_courtesy' => $global_payment_type['reason_agreement'] ?? null,
                 ]);
+                $total_actual_paid += $global_payment_type['amount'];
             }
 
             /*
@@ -329,7 +358,7 @@ class EventService
                     /*
                     * Confirm seat purchase
                     */
-                    $this->event_repository->confirmSeatsPurchase($event->id, $seat['seat_catalogue_id'], $data['member_user_id'], $saleTicket->id, $qr, $seat['final_price'], $seat['is_gift']);
+                    $this->event_repository->confirmSeatsPurchase($event->id, $seat['seat_catalogue_id'], $data['member_user_id'], $saleTicket->id, $qr, $seat['final_price'], $seat['is_gift'], $data['purchase_type']);
 
                     /*
                     * Create relationship between sale ticket and eventSeatCatalogs
@@ -378,12 +407,25 @@ class EventService
                         'event_name' => $event->name,
                         'event_start_date' => $event->start_date,
                         'seat_code' => $event_seat_catalogue->seatCatalogue->code,
+                        'zone_type' => $event_seat_catalogue->seatCatalogue->zone,
+                        'row' => $event_seat_catalogue->seatCatalogue->row,
+                        'seat' => $event_seat_catalogue->seatCatalogue->seat,
+                        'seat_type' => $event_seat_catalogue->seatCatalogue->seatType->name,
+                        'percentage_cashback' => $event_seat_catalogue->seatCatalogue->seatType->percentage_cashback,
                         'qr_img' => $qr_img,
                         'qr' => $qr,
                         'final_price' => $seat['final_price'],
                         'ticket_id' => $saleTicket->id,
                         'ticket_created_at' => $saleTicket->created_at,
                         'cash_register_type' => $cash_register->cash_register_type_id,
+                        'is_owner' => $seat['is_owner'] ?? false,
+                        'description' => $seat['description'] ?? null,
+                        'holder_name' => $seat['holder_name'] ?? null,
+                        'holder_last_name' => $seat['holder_last_name'] ?? null,
+                        'holder_middle_name' => $seat['holder_middle_name'] ?? null,
+                        'holder_zip_code' => $seat['holder_zip_code'] ?? null,
+                        'holder_phone' => $seat['holder_phone'] ?? null,
+                        'holder_email' => $seat['holder_email'] ?? null,
                     ];
                 }
             }
@@ -396,8 +438,8 @@ class EventService
             $cash_register_movement->cash_register_movement_type_id = CashRegisterMovementType::where('name', 'venta')->first()->id;
             $cash_register_movement->sale_ticket_id = $saleTicket->id;
             $cash_register_movement->previous_balance = $cash_register->current_balance;
-            $cash_register_movement->movement_amount = $data['total_amount'];
-            $cash_register_movement->new_balance = $cash_register->current_balance + $data['total_amount'];
+            $cash_register_movement->movement_amount = $total_actual_paid;
+            $cash_register_movement->new_balance = $cash_register->current_balance + $total_actual_paid;
             $cash_register_movement->save();
 
             /*

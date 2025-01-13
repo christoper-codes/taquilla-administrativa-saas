@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('seat_types', function (Blueprint $table) {
+        Schema::create('sale_debtors', function (Blueprint $table) {
             $table->id();
             $table->foreignId('stadium_id')->constrained('stadiums');
-            $table->string('name');
-            $table->string('code')->unique();
-            $table->integer('percentage_cashback')->default(0);
-            $table->string('description')->nullable();
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->string('phone_number');
+            $table->string('email')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('seat_types');
+        Schema::dropIfExists('sale_debtors');
     }
 };
