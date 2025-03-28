@@ -25,6 +25,9 @@ import { saleTicketSchema } from '@/validation/pos/sale-ticket-schema';
 import { useField, useForm } from 'vee-validate';
 import axios from 'axios';
 import { toast } from 'vue3-toastify'
+import ZonaB from '@/Components/SectionsHdx/ZonaB.vue';
+import ZonaE from '@/Components/SectionsHdx/ZonaE.vue';
+import ZonaH from '@/Components/SectionsHdx/ZonaH.vue';
 
 const { dateFormat } = useDateFormat();
 const { cashRegisterDataId, sellerUserId, ticketOfficeId } = useTicketOfficeState();
@@ -168,6 +171,8 @@ const addSeat = (seat) => {
         seat.holder_middle_name = '';
         seat.is_owner = 'No';
         seat.description = '';
+        seat.holder_jersey_type = null;
+        seat.holder_jersey_size = null;
         seat.holder_zip_code = '';
         seat.holder_phone = '';
         seat.holder_email = '';
@@ -218,7 +223,7 @@ const purchaseOnline = ref(true);
 const priceTypeId = ref(1);
 
 const panel = ref([0,1]);
-const purchaseType = ref('partido');
+const purchaseType = ref('abonado');
 const paymentTypesSelected = ref([]); //
 
 const filteredPaymentTypes = computed(() => {
@@ -227,6 +232,12 @@ const filteredPaymentTypes = computed(() => {
         paymentTypesSelected.value = newPaymentTypesSelected;
         return paymentTypesSelected.value;
     }
+    if (paymentTypesSelected.value.some(type => type.name === 'plazos')) {
+        const newPaymentTypesSelected = paymentTypesSelected.value.filter(type => type.name === 'plazos');
+        paymentTypesSelected.value = newPaymentTypesSelected;
+        return paymentTypesSelected.value;
+    }
+
     return paymentTypesSelected.value;
 });
 
@@ -318,7 +329,6 @@ watch(selectedAgreementPromotion, () => {
 
     finalPromotion.value = {};
     seatsSelected.value = JSON.parse(JSON.stringify(seatsSelectedCopy.value));
-    console.log(seatsSelectedCopy.value);
     finalPromotion.value.id = selectedAgreementPromotion.value.id;
     finalPromotion.value.quantity = 0;
 
@@ -361,9 +371,6 @@ watch(selectedAgreementPromotion, () => {
             })
         });
     }
-
-    console.log(selectedAgreementPromotion.value)
-    console.log(seatsSelected.value)
 
     updateTotal();
 
@@ -505,8 +512,11 @@ const isSvgVisible = ref(true);
 const selectedSection = ref('');
 const viewSelectedSection = ref('Zonas HDX');
 const seatsASection = ref([]);
+const seatsBSection = ref([]);
 const seatsCSection = ref([]);
+const seatsESection = ref([]);
 const seatsFSection = ref([]);
+const seatsHSection = ref([]);
 const loadingSectionDialog = ref(false);
 const seatAvailability = ref([]);
 
@@ -542,6 +552,22 @@ const handleSectionClick = (section) => {
                 stadiumHdxImg.classList.remove('tw-rotate-0');
                 stadiumHdxImg.classList.add('tw-rotate-90');
             }
+            if(section == 'zonaB'){
+                seatsBSection.value = success.data.data;
+                loadSvg('zonaB');
+                viewSelectedSection.value = 'Zona B';
+                const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
+                stadiumHdxImg.classList.remove('tw-rotate-0');
+                stadiumHdxImg.classList.add('tw-rotate-90');
+            }
+            if(section == 'zonaE'){
+                seatsESection.value = success.data.data;
+                loadSvg('zonaE');
+                viewSelectedSection.value = 'Zona E';
+                const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
+                stadiumHdxImg.classList.remove('tw-rotate-0');
+                stadiumHdxImg.classList.add('tw-rotate-90');
+            }
             if(section == 'zonaF'){
                 seatsFSection.value = success.data.data;
                 loadSvg('zonaF');
@@ -550,7 +576,14 @@ const handleSectionClick = (section) => {
                 stadiumHdxImg.classList.remove('tw-rotate-0');
                 stadiumHdxImg.classList.add('tw-rotate-90');
             }
-            console.log(success.data.data)
+            if(section == 'zonaH'){
+                seatsHSection.value = success.data.data;
+                loadSvg('zonaH');
+                viewSelectedSection.value = 'Zona H';
+                const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
+                stadiumHdxImg.classList.remove('tw-rotate-0');
+                stadiumHdxImg.classList.add('tw-rotate-90');
+            }
         })
         .catch(error => {
             console.log(error)
@@ -582,10 +615,16 @@ const selectZones = () => {
     valid.value = true;
     purchaseStatus.value = 'process';
     viewSelectedSection.value = 'Zonas HDX';
-    purchaseType.value = 'partido';
+    purchaseType.value = 'abonado';
     loadingg.value = false;
     loading.value = false;
     userToTransfer.value = null;
+    saleDeptorSelected.value = null;
+    installmentSale.value = false;
+    firstNameSaleDeptor.value = '';
+    lastNameSaleDeptor.value = '';
+    phoneSaleDeptor.value = '';
+    saleDebtorData.value = {};
     seatsSelected.value = [];
     const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
     stadiumHdxImg.classList.remove('tw-rotate-90');
@@ -663,14 +702,17 @@ const props = defineProps({
     institutions: {
         type: Array,
         required: false
-    }
+    },
+    sale_debtors: {
+        type: Array,
+        required: false
+    },
 });
 
-console.log(props.institutions);
-
-
 const users_list = [];
+const sale_debtors_list = [];
 const userToTransfer = ref(null);
+const saleDeptorSelected = ref(null);
 
 props.users.forEach(element => {
     users_list.push(
@@ -681,12 +723,21 @@ props.users.forEach(element => {
     )
 });
 
+props.sale_debtors.forEach(element => {
+    sale_debtors_list.push(
+        {
+            name: `${element['first_name']} ${element['last_name']} (${element['phone_number']})`,
+            value: element['id']
+        }
+    )
+});
+
+
 /*
 * |--------------------------------------
 * | declare OnMounted
 */
 onMounted(() => {
-
     nextTick(() => {
         loadSvg('zones_hdx');
     });
@@ -698,13 +749,11 @@ onMounted(() => {
         }
     }
     getSeatAvailability();
-
+    globalPaymentTypesOnlyCard.value = props.global_payment_types.filter(item => item.name === 'tarjeta');
 });
 
 const getSeatAvailability = () => {
     const data = {event_id: props.event.id};
-
-
     axios.get(route('events.availability'), { params: data })
         .then(response => {
             seatAvailability.value = response.data.data;
@@ -739,6 +788,15 @@ const originalTotalAmount = ref(0);
 const totalAttempts = ref(0);
 const memberUserId = ref(1);
 
+/*
+* installment sale module
+*/
+const installmentSale = ref(false);
+const firstNameSaleDeptor = ref('');
+const lastNameSaleDeptor = ref('');
+const phoneSaleDeptor = ref('');
+const saleDebtorData = ref({});
+
 watch(() => institutionSelected.value, () => {
     agreementsByInstitutionSelected.value = null;
     agreementSelected.value = null;
@@ -749,11 +807,36 @@ watch(() => institutionSelected.value, () => {
 });
 
 watch(() => amountReceived.value, (newValue) => {
-    amountReturned.value = parseFloat(amountReceived.value) - parseFloat(totalAmount.value)
+    if(!installmentSale.value){
+        amountReturned.value = parseFloat(amountReceived.value) - parseFloat(totalAmount.value)
+    }else{
+        if(amountReceived.value == 0){
+            amountReturned.value = 0;
+
+        }else{
+            if( paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'efectivo')){
+                amountReturned.value = parseFloat(amountReceived.value) - parseFloat(amountToPayCash.value);
+            }else if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')){
+                amountReturned.value = parseFloat(amountReceived.value) - parseFloat(amountToPayCard.value);
+            } else {
+                amountReturned.value = parseFloat(totalAmount.value) - parseFloat(amountReceived.value);
+            }
+        }
+    }
 });
 
 watch(() => amountToPayCard.value, (newValue) => {
      amountReceived.value = parseFloat(amountToPayCard.value) + parseFloat(amountReceivedCash.value);
+});
+
+watch(() => amountToPayCash.value, (newValue) => {
+     if(installmentSale.value){
+        if( paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'efectivo')){
+            amountReturned.value = parseFloat(amountReceived.value) - parseFloat(amountToPayCash.value);
+        }
+    } else {
+        amountReturned.value = parseFloat(amountReceived.value) - parseFloat(totalAmount.value);
+    }
 });
 
 watch(() => amountReceivedCash.value, (newValue) => {
@@ -763,7 +846,7 @@ watch(() => amountReceivedCash.value, (newValue) => {
 watch(() => purchaseType.value, (newValue) => {
 
     if(newValue == 'abonado' && selectedPromotion.value) {
-        toast('Una vez selecionada una promocion no sera posible la compra de abonos', {
+        toast('Una vez seleccionada una promocion no sera posible la compra de abonos', {
             "theme": "auto",
             "type": "error",
             "autoClose": 10000,
@@ -834,7 +917,58 @@ function completePurchase(isActive) {
     });
 }
 
+watch(() => installmentSale.value, () => {
+    if(!installmentSale.value){
+        saleDeptorSelected.value = null;
+        firstNameSaleDeptor.value = '';
+        lastNameSaleDeptor.value = '';
+        phoneSaleDeptor.value = '';
+    }else{
+        if(amountReceived.value == 0){
+            amountReturned.value = 0;
+        }else{
+            if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'efectivo')){
+                amountReturned.value = parseFloat(amountReceived.value) - parseFloat(amountReceivedCash.value);
+            }else {
+                amountReturned.value = parseFloat(totalAmount.value) - parseFloat(amountReceived.value);
+            }
+        }
+    }
+});
+
+
 const onSubmit = () => {
+
+    if(installmentSale.value){
+
+        if(saleDeptorSelected.value ){
+            if(saleDeptorSelected.value == 1){
+                if(!firstNameSaleDeptor.value || !lastNameSaleDeptor.value || !phoneSaleDeptor.value){
+                    valid.value = false;
+                    error.value = 'Debe de seleccionar un deudor para la venta a credito o llenar los campos de nombre, apellido y telefono';
+                    return;
+                }
+            }
+        } else{
+            valid.value = false;
+            error.value = 'Debe de seleccionar un deudor para la venta a credito';
+            return;
+        }
+        if(paymentTypesSelected.value.some(type => type.name === 'cortesia')){
+            valid.value = false;
+            error.value = 'No se puede realizar una venta a credito con cortesia';
+            return;
+        }
+        if(paymentTypesSelected.value.length > 1){
+            valid.value = false;
+            error.value = 'Por el momento no se puede realizar una venta a credito con mas de un tipo de pago';
+            return;
+        }
+        form.value = true;
+    }
+
+
+
     if(!form.value) return
 
     if(paymentTypesSelected.value.length == 0) {
@@ -860,15 +994,23 @@ const onSubmit = () => {
 
     if(paymentTypesSelected.value.some(type => type.name === 'efectivo' )){
         //validar que el monto recibido para efectivo sea igual o mayor al monto a pagar para efectivo
-        if(parseFloat(amountReceivedCash.value) < parseFloat(amountToPayCash.value)) {
+        if(parseFloat(amountReceivedCash.value) < parseFloat(amountToPayCash.value) && !installmentSale.value) {
             valid.value = false;
             error.value = 'El monto recibido en efectivo debe ser igual o mayor al monto a pagar en efectivo';
             return;
         }
     }
 
-    if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
+    if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta') && !installmentSale.value) {
         amountToPayCard.value = totalAmount.value;
+    }
+
+    if(paymentTypesSelected.value.some(type => type.name === 'tarjeta') && installmentSale.value){
+        if(!cardPaymentTypesSelected.value){
+            valid.value = false;
+            error.value = 'Debe seleccionar un tipo de tarjeta para la venta a credito';
+            return;
+        }
     }
 
     globalPaymentTypes.value = paymentTypesSelected.value.map((item) => {
@@ -877,6 +1019,7 @@ const onSubmit = () => {
                 id: item.id,
                 global_card_payment_type_id: cardPaymentTypesSelected.value.id,
                 amount: amountToPayCard.value,
+                name: item.name,
             }
         }
         if(item.name === 'efectivo') {
@@ -884,6 +1027,15 @@ const onSubmit = () => {
                 id: item.id,
                 global_card_payment_type_id: null,
                 amount: amountToPayCash.value,
+                name: item.name,
+            }
+        }
+        if(item.name === 'plazos') {
+            return {
+                id: item.id,
+                global_card_payment_type_id: null,
+                amount: 0,
+                name: item.name,
             }
         }
         if(item.name === 'cortesia') {
@@ -897,12 +1049,15 @@ const onSubmit = () => {
                     amount: 0,
                     reason_agreement_id:  reasonAgreementSelected.value.id,
                     reason_agreement: reasonAgreementDescription.value,
+                    name: item.name,
+
                 }
             }else{
                 return {
                     id: item.id,
                     global_card_payment_type_id: null,
                     amount: 0,
+                    name: item.name,
                 }
             }
         }
@@ -913,7 +1068,7 @@ const onSubmit = () => {
         totalFinal += parseFloat(item.amount);
     });
 
-    if(totalFinal != totalAmount.value) {
+    if(totalFinal != totalAmount.value && !installmentSale.value) {
         valid.value = false;
         error.value = 'El monto total no coincide con el monto a pagar de los tipos de pago seleccionados';
         return;
@@ -998,6 +1153,13 @@ const onSubmitConfirm = (isActive) => {
     loadingg.value = true;
     loading.value = true;
     const isTransfer = userToTransfer.value ? true : false;
+    const saleDebtorData = {
+        id: saleDeptorSelected.value,
+        first_name: firstNameSaleDeptor.value,
+        last_name: lastNameSaleDeptor.value,
+        phone_number: phoneSaleDeptor.value,
+        stadium_id: props.event.stadium_id,
+    }
 
     const seatsSelectedData = {
         purchase_type: purchaseType.value,
@@ -1019,13 +1181,15 @@ const onSubmitConfirm = (isActive) => {
         is_transfer: isTransfer,
         user_to_transfer: userToTransfer.value,
         final_promotion: finalPromotion.value,
+        sale_debtor: saleDebtorData,
     };
 
-/* console.log(seatsSelectedData);
-return */
+    /* console.log(seatsSelectedData);
+    return */
 
 axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
     .then(response => {
+
         if (response.data.success && purchaseOnline.value) {
             showButtonPayment.value = true;
             drawerPaymentState.value = true;
@@ -1039,11 +1203,12 @@ axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
         // Actualiza el estado de los asientos comprados
         updateZones(seatsSelectedData);
 
+
         if(response.data.pdf) {
             const pdfContent = atob(response.data.pdf);
             const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
             const pdfUrl = window.URL.createObjectURL(pdfBlob);
-            printInKioskMode(pdfUrl);
+            printInKioskMode(pdfUrl, purchaseType.value);
             selectZones();
             setTimeout(() => {
                 selectZones();
@@ -1052,8 +1217,6 @@ axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
 
     })
     .catch(error => {
-        console.error('Error: upps');
-        console.error('Error:', error);
         toast(error.response.data.message, {
             "theme": "auto",
             "type": "error",
@@ -1074,6 +1237,10 @@ const rules = {
     required: value => !!value || 'Campo requerido',
     isNumber: value => !isNaN(value) || 'Debe ser un número',
     minChar: value => value.length >= 3 || 'Debe tener un mínimo de 3 caracteres',
+    phoneNumber: value => {
+        const phoneNumber = value.replace(/\D/g, '');
+        return phoneNumber.length === 10 || 'Número de teléfono inválido (10 dígitos)';
+    },
     //validar si en el array de pagos selecionados solo existe un tipo de pago ya sea efectivo o tarjeta y validar que el monto sea igual al total
     isAmountToPay: value => {
         if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
@@ -1086,14 +1253,15 @@ const rules = {
     }
 };
 
-function printInKioskMode(url) {
+function printInKioskMode(url, purchaseType) {
     const ventana = window.open(url, '_blank', 'fullscreen=yes,kiosk=yes');
     ventana.onload = () => {
         ventana.print();
-        setTimeout(() => {
-            ventana.close();
-        }, 4000);
-
+        if(purchaseType != 'abonado') {
+            setTimeout(() => {
+                ventana.close();
+            }, 4000);
+        }
     };
 }
 
@@ -1111,6 +1279,10 @@ const updateHolder = (index) => {
             seat.is_owner = 'No';
         }
     });
+}
+
+const seasonTicketsDialogOpen = () => {
+    seasonTicketsDialog.value = true;
 }
 
 watch(purchaseType, () => {
@@ -1150,6 +1322,12 @@ const cardPaymentTypeError = computed(() => {
     return rules.required(cardPaymentTypesSelected.value) !== true;
 });
 
+const globalPaymentTypesOnlyCard = ref([]);
+watch(() => paymentInstallmentSelected.value, () => {
+    if(paymentInstallmentSelected.value){
+        paymentTypesSelected.value = globalPaymentTypesOnlyCard.value;
+    }
+})
 </script>
 
 <template>
@@ -1306,9 +1484,10 @@ const cardPaymentTypeError = computed(() => {
                                         v-bind:isOnline="purchaseOnline"
                                         v-bind:serieId="event.serie_id"
                                         v-bind:finalPromotion="finalPromotion"
+                                        v-bind:saleDeptor="saleDebtorData"
                                     />
 
-                                    <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-6 tw-items-center tw-gap-2 tw-mt-7">
+                                    <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-4 tw-items-center tw-gap-2 tw-mt-7">
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                             <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-yellow-500 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">done_outline</span>
@@ -1331,9 +1510,9 @@ const cardPaymentTypeError = computed(() => {
                                             <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-pink-600 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
-                                            <p class="tw-text-xs lg:tw-text-base">No vendible</p>
+                                            <p class="tw-text-xs lg:tw-text-base">Reservado para abonado</p>
                                         </div>
-                                        <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
+                                        <!-- <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                             <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-gray-600 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
@@ -1344,7 +1523,7 @@ const cardPaymentTypeError = computed(() => {
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
                                             <p class="tw-text-xs lg:tw-text-base">En transito</p>
-                                        </div>
+                                        </div> -->
                                      </div>
                                 </div>
                                 <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-w-full tw-gap-3 tw-my-3">
@@ -1421,11 +1600,20 @@ const cardPaymentTypeError = computed(() => {
                                     <div v-if="selectedSection == 'zonaA'" class="">
                                         <ZonaA @add-seat="addSeat" v-bind:seats="seatsASection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
+                                    <div v-if="selectedSection == 'zonaB'" class="">
+                                        <ZonaB @add-seat="addSeat" v-bind:seats="seatsBSection" v-bind:seatsSelected="seatsSelected" />
+                                    </div>
                                     <div v-if="selectedSection == 'zonaC'" class="">
                                         <ZonaC @add-seat="addSeat" v-bind:seats="seatsCSection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
+                                    <div v-if="selectedSection == 'zonaE'" class="">
+                                        <ZonaE @add-seat="addSeat" v-bind:seats="seatsESection" v-bind:seatsSelected="seatsSelected" />
+                                    </div>
                                     <div v-if="selectedSection == 'zonaF'" class="">
                                         <ZonaF @add-seat="addSeat" v-bind:seats="seatsFSection" v-bind:seatsSelected="seatsSelected" />
+                                    </div>
+                                    <div v-if="selectedSection == 'zonaH'" class="">
+                                        <ZonaH @add-seat="addSeat" v-bind:seats="seatsHSection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                 </div>
                             </div>
@@ -1565,14 +1753,17 @@ const cardPaymentTypeError = computed(() => {
                                                                 <td class="tw-size-px tw-whitespace-nowrap  tw-p-2">
                                                                     <span class="tw-text-sm tw-text-green-600">
                                                                         <div v-for="priceType in seat.price_types" :key="priceType.id">
-                                                                            <div v-if="viewVendorTopics(user_roles)">
-                                                                                {{ priceType.name }}: {{ formatPrice(priceType.pivot.price) }}
+                                                                            <div v-if="viewVendorTopics(user_roles) && priceType.name == 'abonado'">
+                                                                                {{ formatPrice(priceType.pivot.price) }}
                                                                             </div>
-                                                                            <div v-else>
+                                                                            <!-- <div v-if="viewVendorTopics(user_roles) && priceType.name == 'abonado'">
+                                                                                {{ priceType.name }}: {{ formatPrice(priceType.pivot.price) }}
+                                                                            </div> -->
+                                                                            <!-- <div v-else>
                                                                                 <span v-if="priceType.name === 'regular'">
                                                                                     {{ formatPrice(priceType.pivot.price) }}
                                                                                 </span>
-                                                                            </div>
+                                                                            </div> -->
                                                                         </div>
                                                                     </span>
                                                                 </td>
@@ -1592,8 +1783,10 @@ const cardPaymentTypeError = computed(() => {
                                                 </v-expansion-panel-title>
                                                 <v-form v-model="form" @submit.prevent="onSubmit" lazy-validation>
                                                     <v-expansion-panel-text>
+                                                        <!-- paymentInstallmentSelected -->
+
                                                     <v-select
-                                                        v-if="viewVendorTopics(user_roles)"
+                                                        v-if="viewVendorTopics(user_roles) && !paymentInstallmentSelected"
                                                         color="purple"
                                                         label="selecciona el tipo de pago"
                                                         hint="Selecciona el tipo de pago"
@@ -1601,6 +1794,20 @@ const cardPaymentTypeError = computed(() => {
                                                         :items="global_payment_types"
                                                         chips
                                                         multiple
+                                                        clearable
+                                                        v-model="paymentTypesSelected"
+                                                        :rules="[rules.required]"
+                                                    ></v-select>
+                                                    <v-select
+                                                        v-if="viewVendorTopics(user_roles) && paymentInstallmentSelected"
+                                                        color="purple"
+                                                        label="selecciona el tipo de pago"
+                                                        hint="Selecciona el tipo de pago"
+                                                        :item-props="globalPayementTypeProps"
+                                                        :items="globalPaymentTypesOnlyCard"
+                                                        chips
+                                                        multiple
+                                                        clearable
                                                         v-model="paymentTypesSelected"
                                                         :rules="[rules.required]"
                                                     ></v-select>
@@ -1751,7 +1958,7 @@ const cardPaymentTypeError = computed(() => {
                                                     <p v-if="!valid" class="tw-py-2 tw-px-4 tw-bg-red-100 tw-border-l-4 tw-border-l-red-500 tw-text-red-500 tw-text-xs tw-my-4">{{ error }}</p>
 
                                                     <div class="tw-mt-5"> <!-- :disabled="!form" -->
-                                                        <v-radio-group  inline label="Tipo de compra a realizar" v-model="purchaseType">
+                                                       <!--  <v-radio-group  inline label="Tipo de compra a realizar" v-model="purchaseType">
                                                             <v-radio
                                                             v-for="(type, index) in purchase_types"
                                                             :key="index"
@@ -1759,7 +1966,77 @@ const cardPaymentTypeError = computed(() => {
                                                             :label="type"
                                                             :value="type"
                                                             ></v-radio>
-                                                        </v-radio-group>
+                                                        </v-radio-group> -->
+                                                        <div class="tw-flex tw-items-center tw-justify-between">
+                                                            <v-radio-group inline label="Tipo de compra a realizar" v-model="purchaseType">
+                                                                <v-radio
+                                                                    :color="'purple'"
+                                                                    :label="purchaseType"
+                                                                    :value="purchaseType"
+                                                                ></v-radio>
+                                                            </v-radio-group>
+                                                            <v-btn @click="seasonTicketsDialogOpen" class="!tw-mt-2" color="purple" variant="tonal" rounded="xl">Tomar datos</v-btn>
+                                                        </div>
+                                                        <div v-if="viewVendorTopics(user_roles)">
+
+                                                            <v-switch v-if="!paymentInstallmentSelected" label="¿Se requiere venta a plazos?" color="purple" value="1" v-model="installmentSale"></v-switch>
+
+                                                            <div v-if="installmentSale">
+                                                                <h4 class="tw-text-xs tw-px-4 tw-py-1 tw-rounded-full tw-bg-purple-200 tw-text-purple-600 tw-text-center tw-mb-2">
+                                                                    Complemento para venta a plazos
+                                                                </h4>
+
+                                                                <v-autocomplete
+                                                                    v-model="saleDeptorSelected"
+                                                                    clearable
+                                                                    color="purple"
+                                                                    chips
+                                                                    label="Buscar usuario para asignar la compra"
+                                                                    hint="El usuario que se seleccione sera el responsable de la compra"
+                                                                    persistent-hint=""
+                                                                    :items="sale_debtors_list"
+                                                                    variant="solo-filled"
+                                                                    item-title="name"
+                                                                    item-value="value"
+                                                                    :rules="[rules.required]"
+                                                                ></v-autocomplete>
+                                                                <div v-if="saleDeptorSelected && saleDeptorSelected === 1">
+
+                                                                    <v-text-field
+                                                                        class="tw-w-full"
+                                                                        append-inner-icon="mdi-account"
+                                                                        label="Nombre"
+                                                                        color="purple"
+                                                                        clearable
+                                                                        v-model="firstNameSaleDeptor"
+                                                                        hint="Nombre de para el abonado"
+                                                                        :rules="[rules.required]"
+                                                                    ></v-text-field>
+                                                                    <v-text-field
+                                                                        class="tw-w-full"
+                                                                        append-inner-icon="mdi-account"
+                                                                        label="Apellido paterno"
+                                                                        color="purple"
+                                                                        clearable
+                                                                        v-model="lastNameSaleDeptor"
+                                                                        hint="Apellido paterno de para el abonado"
+                                                                        :rules="[rules.required]"
+                                                                    ></v-text-field>
+                                                                    <v-text-field
+                                                                        class="tw-w-full"
+                                                                        append-inner-icon="mdi-phone"
+                                                                        label="Numero de telefono"
+                                                                        color="purple"
+                                                                        clearable
+                                                                        v-model="phoneSaleDeptor"
+                                                                        hint="Numero de telefono para el pago a plazos"
+                                                                        :rules="[rules.required, rules.isNumber, rules.phoneNumber]"
+                                                                    ></v-text-field>
+
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
 
                                                         <div v-if="purchaseStatus == 'retry'">
                                                             <p class="tw-py-2 tw-px-4 tw-bg-red-100 tw-border-l-4 tw-border-l-red-500 tw-text-red-500 tw-text-xs tw-my-4">Estas en el proceso final de compra, si se require agregar otro asiento cancele la seleccion actual y reintente.</p>
@@ -1771,7 +2048,7 @@ const cardPaymentTypeError = computed(() => {
                                                             <p class="tw-py-2 tw-px-4 tw-bg-purple-100 tw-border-l-4 tw-border-l-purple-500 tw-text-purple-500 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para dos partidos del mismo evento.</p>
                                                         </div>
                                                         <div v-else-if="purchaseType == 'abonado'">
-                                                            <p class="tw-py-2 tw-px-4 tw-bg-yellow-100 tw-border-l-4 tw-border-l-yellow-500 tw-text-yellow-500 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para la temporada a la que pertenece este eventos.</p>
+                                                            <p class="tw-py-2 tw-px-4 tw-bg-yellow-100 tw-border-l-4 tw-border-l-yellow-500 tw-text-yellow-500 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para la temporada a la que pertenece este evento.</p>
                                                         </div>
 
                                                         <p ref="paymentSection" class="tw-opacity-50 tw-text-right tw-mb-3 tw-text-xs">Subtotal (tipos de precios selecionados): {{ formatPrice(totalAmount) }}</p>
@@ -1785,9 +2062,28 @@ const cardPaymentTypeError = computed(() => {
                                                             <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir bolsetos
                                                         </v-btn>
                                                         <v-btn
-                                                            v-else
+                                                            v-else-if="!installmentSale && viewVendorTopics(user_roles)"
                                                             :disabled="!form"
                                                             :loading="loadingg"
+                                                            type="submit"
+                                                            rounded="xl" size="large" block
+                                                            class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400"
+                                                        >
+                                                            <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos
+                                                        </v-btn>
+                                                        <v-btn
+                                                            v-else-if="installmentSale && viewVendorTopics(user_roles)"
+                                                            :loading="loadingg"
+                                                            type="submit"
+                                                            rounded="xl" size="large" block
+                                                            class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400"
+                                                        >
+                                                            <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos
+                                                        </v-btn>
+                                                        <v-btn
+                                                            v-else
+                                                            :loading="loadingg"
+                                                            :disabled="!form"
                                                             type="submit"
                                                             rounded="xl" size="large" block
                                                             class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400"
@@ -1833,9 +2129,7 @@ const cardPaymentTypeError = computed(() => {
                                                                     <v-form v-model="seasonTicketsForm" @submit.prevent="seasonTicktesDataConfirm" lazy-validation>
                                                                         <v-card-text>
                                                                             <div class="tw-w-full tw-max-w-[90%] tw-mx-auto">
-                                                                                <p class="tw-font-bold tw-text-sm lg:tw-text-2xl tw-text-gray-700 tw-text-center">Registra y confirma los abonos: </p>
-
-
+                                                                                <p class="tw-font-bold tw-text-sm lg:tw-text-2xl tw-text-gray-700 tw-text-center">Registra y confirma los abonos</p>
 
                                                                                 <div v-if="seatsSelected.length > 0 && purchaseType == 'abonado'">
                                                                                         <div class="" v-for="(seat, index) in seatsSelected" :key="seat.seat_catalogue.code">
@@ -1937,6 +2231,30 @@ const cardPaymentTypeError = computed(() => {
                                                                                                         v-model="seatsSelected[index].is_owner"
                                                                                                     ></v-select>
                                                                                                 </div>
+                                                                                                <div class="tw-flex tw-items-center tw-justify-between tw-gap-10">
+                                                                                                    <v-select
+                                                                                                        class="tw-w-full"
+                                                                                                        append-inner-icon="mdi-file-document-check-outline"
+                                                                                                        color="purple"
+                                                                                                        label="Tipo de jersey"
+                                                                                                        hint="Tipo de jersey del abonado"
+                                                                                                        clearable
+                                                                                                        :items="['Femenino', 'Masculino', 'Unisex']"
+                                                                                                        :rules="[rules.required]"
+                                                                                                        v-model="seatsSelected[index].holder_jersey_type"
+                                                                                                    ></v-select>
+                                                                                                    <v-select
+                                                                                                        class="tw-w-full"
+                                                                                                        append-inner-icon="mdi-file-document-check-outline"
+                                                                                                        color="purple"
+                                                                                                        label="Talla de jersey"
+                                                                                                        hint="Talla de jersey del abonado"
+                                                                                                        clearable
+                                                                                                        :items="['S', 'M', 'L', 'XL', 'XXL']"
+                                                                                                        :rules="[rules.required]"
+                                                                                                        v-model="seatsSelected[index].holder_jersey_size"
+                                                                                                    ></v-select>
+                                                                                                </div>
                                                                                                 <v-textarea
                                                                                                     class="tw-w-full"
                                                                                                     append-inner-icon="mdi-file-document"
@@ -1976,7 +2294,7 @@ const cardPaymentTypeError = computed(() => {
                                                                                                             class="tw-w-full"
                                                                                                             append-inner-icon="mdi-cash"
                                                                                                             color="purple"
-                                                                                                            label="¿Pago en cuotas a meses?"
+                                                                                                            label="¿Pago a meses?"
                                                                                                             hint="Meses a intereses"
                                                                                                             clearable
                                                                                                             :items="payment_installments"
@@ -2018,7 +2336,7 @@ const cardPaymentTypeError = computed(() => {
                                                                 <v-card>
                                                                 <v-card-text>
                                                                     <p class="tw-font-bold tw-text-sm lg:tw-text-xl tw-text-gray-700">¿Estas seguro de realizar la compra?</p>
-                                                                    <v-container v-if="viewVendorTopics(user_roles)">
+                                                                    <!-- <v-container v-if="viewVendorTopics(user_roles)">
                                                                         <v-row>
                                                                             <v-col xs12 sm6 md4>
                                                                                 <v-autocomplete
@@ -2036,7 +2354,7 @@ const cardPaymentTypeError = computed(() => {
                                                                                 ></v-autocomplete>
                                                                             </v-col>
                                                                         </v-row>
-                                                                    </v-container>
+                                                                    </v-container> -->
                                                                     <p class="tw-opacity-50 tw-mt-3 tw-text-xs lg:tw-text-base">Subtotal (precio en compra): {{ formatPrice(totalAmount) }}</p>
                                                                     <p class="tw-font-semibold tw-text-gray-700">Total: {{ formatPrice(totalAmount) }}</p>
                                                                 </v-card-text>
@@ -2111,16 +2429,6 @@ const cardPaymentTypeError = computed(() => {
                                                         readonly
                                                     ></v-text-field>
                                                 </div>
-
-                                                <template v-slot:actions>
-                                                    <v-btn
-                                                    color="red"
-                                                    variant="tonal"
-                                                    @click="snackbar = false"
-                                                    >
-                                                    Cerrar
-                                                    </v-btn>
-                                                </template>
                                                 </v-snackbar>
                                             </div>
                                         </div>

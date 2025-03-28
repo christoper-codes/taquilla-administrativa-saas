@@ -20,6 +20,7 @@ use App\Interfaces\EventTypeRepositoryInterface;
 use App\Interfaces\InstitutionRepositoryInterface;
 use App\Interfaces\PromotionRepositoryInterface;
 use App\Interfaces\PromotionTypeRepositoryInterface;
+use App\Interfaces\SaleDebtorRepositoryInterface;
 use App\Interfaces\SaleTicketRepositoryInterface;
 use App\Interfaces\SeasonTicketRepositoryInterface;
 use App\Interfaces\SeatCatalogueStatusesRepositoryInterface;
@@ -43,6 +44,7 @@ use App\Repositories\EventTypeRepository;
 use App\Repositories\InstitutionRepository;
 use App\Repositories\PromotionRepository;
 use App\Repositories\PromotionTypeRepository;
+use App\Repositories\SaleDebtorRepository;
 use App\Repositories\SaleTicketRepository;
 use App\Repositories\SeasonTicketRepository;
 use App\Repositories\SeatCatalogueStatusesRepository;
@@ -62,7 +64,7 @@ class RepositoriServiceProvider extends ServiceProvider
         * |--------------------------------------------------------------------------
         * | Resgister services with bind method for the repository service provider
         * |--------------------------------------------------------------------------
-        * | Register the repository services by Christoper Patiño
+        * | Register the repository services by team
         */
 
         $this->app->bind(GlobalImageRepositoryInterface::class, GlobalImageRepository::class);
@@ -87,6 +89,7 @@ class RepositoriServiceProvider extends ServiceProvider
         $this->app->bind(SaleTicketRepositoryInterface::class, SaleTicketRepository::class);
         $this->app->bind(SeasonTicketRepositoryInterface::class, SeasonTicketRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->bind(SaleDebtorRepositoryInterface::class, SaleDebtorRepository::class);
     }
 
     /**

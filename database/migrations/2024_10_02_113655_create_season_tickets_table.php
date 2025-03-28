@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('holder_email')->nullable();
             $table->string('holder_phone')->nullable();
             $table->string('holder_zip_code')->nullable();
+            $table->string('holder_jersey_type')->nullable();
+            $table->string('holder_jersey_size')->nullable();
             $table->text('description')->nullable();
             $table->boolean('is_owner');
             $table->boolean('is_active')->default(true);

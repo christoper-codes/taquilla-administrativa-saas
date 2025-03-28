@@ -30,5 +30,11 @@ class GlobalPaymentTypesSeeder extends Seeder
             'description' => 'pago por cortesia',
             'is_active' => true
         ]);
+
+        GlobalPaymentType::create([
+            'name' => 'plazos',
+            'description' => 'pago a plazos',
+            'is_active' => true
+        ]);
     }
 }
