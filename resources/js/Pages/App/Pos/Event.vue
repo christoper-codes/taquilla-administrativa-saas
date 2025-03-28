@@ -634,7 +634,7 @@ const selectZones = () => {
     seatsSelectedCopy.value = [];
     showPromotionToast.value = false;
     seatAvailability.value = [];
-
+    paymentInstallmentSelected.value = null;
     getSeatAvailability();
 
 };
@@ -933,6 +933,19 @@ watch(() => installmentSale.value, () => {
                 amountReturned.value = parseFloat(totalAmount.value) - parseFloat(amountReceived.value);
             }
         }
+        saleDeptorSelected.value = 1;
+        const owner = seatsSelected.value.find(seat => seat.is_owner == 'Si');
+        firstNameSaleDeptor.value = owner.holder_name;
+        lastNameSaleDeptor.value = owner.holder_last_name;
+        phoneSaleDeptor.value = owner.holder_phone;
+        if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
+            amountReturned.value = 0;
+        }
+        if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'efectivo')) {
+            if(amountReceivedCash.value){
+                amountReturned.value = parseFloat(totalAmount.value) - parseFloat(amountReceivedCash.value);
+            }
+        }
     }
 });
 
@@ -1086,6 +1099,21 @@ const onSubmit = () => {
         if(atLeastOneHolder != 1){
             valid.value = false;
             error.value = 'Debe de haber un titular de compra en abonados';
+            return;
+        }
+    }
+
+    if(installmentSale.value){
+        const amountToPay = amountReceived.value - amountReturned.value;
+        const seatsTotal = seatsSelected.value.length;
+        if((seatsTotal * 500) > amountToPay) {
+            toast('El monto a pagar no puede ser menor a 500 por asiento', {
+                "theme": "auto",
+                "type": "error",
+                "dangerouslyHTMLString": true
+            })
+            valid.value = false;
+            error.value = 'El monto a pagar no puede ser menor a 500 por asiento';
             return;
         }
     }
@@ -1326,6 +1354,7 @@ const globalPaymentTypesOnlyCard = ref([]);
 watch(() => paymentInstallmentSelected.value, () => {
     if(paymentInstallmentSelected.value){
         paymentTypesSelected.value = globalPaymentTypesOnlyCard.value;
+        installmentSale.value = false;
     }
 })
 </script>
@@ -1783,8 +1812,6 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                 </v-expansion-panel-title>
                                                 <v-form v-model="form" @submit.prevent="onSubmit" lazy-validation>
                                                     <v-expansion-panel-text>
-                                                        <!-- paymentInstallmentSelected -->
-
                                                     <v-select
                                                         v-if="viewVendorTopics(user_roles) && !paymentInstallmentSelected"
                                                         color="purple"
@@ -1828,16 +1855,26 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                             :error="cardPaymentTypeError"
                                                             :error-messages="cardPaymentTypeError ? ['Este campo es obligatorio'] : []"
                                                         ></v-select>
-                                                        <v-text-field
-                                                            v-if="viewVendorTopics(user_roles)"
-                                                            label="Monto a pagar con tarjeta"
-                                                            color="purple"
-                                                            clearable
-                                                            hint="Monto recibido por el cliente"
-                                                            v-model="amountToPayCard"
-                                                            :rules="[rules.required, rules.isNumber, rules.isAmountToPay]"
-                                                        ></v-text-field>
-
+                                                        <div v-if="!installmentSale && viewVendorTopics(user_roles)">
+                                                            <v-text-field
+                                                                label="Monto a pagar con tarjeta"
+                                                                color="purple"
+                                                                clearable
+                                                                hint="Monto recibido por el cliente"
+                                                                v-model="amountToPayCard"
+                                                                :rules="[rules.required, rules.isNumber, rules.isAmountToPay]"
+                                                            ></v-text-field>
+                                                        </div>
+                                                        <div v-else-if="installmentSale && viewVendorTopics(user_roles)">
+                                                            <v-text-field
+                                                                label="Monto a pagar con tarjeta"
+                                                                color="purple"
+                                                                clearable
+                                                                hint="Monto recibido por el cliente"
+                                                                v-model="amountToPayCard"
+                                                                :rules="[rules.required, rules.isNumber]"
+                                                            ></v-text-field>
+                                                        </div>
                                                         <v-text-field
                                                             v-else
                                                             label="Monto a pagar con tarjeta"
@@ -1853,6 +1890,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                         <h4 class="tw-text-xs tw-px-4 tw-py-1 tw-rounded-full tw-bg-green-200 tw-text-green-600 tw-text-center tw-mb-2">
                                                         Complemento para pago con efectivo
                                                         </h4>
+
                                                         <v-text-field
                                                         label="Monto recibido para efectivo"
                                                         color="purple"
@@ -1862,14 +1900,26 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                         :rules="[rules.required, rules.isNumber]"
                                                         ></v-text-field>
 
-                                                        <v-text-field
-                                                        label="Monto a pagar para efectivo"
-                                                        color="purple"
-                                                        clearable
-                                                        hint="Monto a pagar por el cliente"
-                                                        v-model="amountToPayCash"
-                                                        :rules="[rules.required, rules.isNumber, rules.isAmountToPay]"
-                                                        ></v-text-field>
+                                                        <div v-if="!installmentSale && viewVendorTopics(user_roles)">
+                                                            <v-text-field
+                                                                label="Monto a pagar para efectivo"
+                                                                color="purple"
+                                                                clearable
+                                                                hint="Monto a pagar por el cliente"
+                                                                v-model="amountToPayCash"
+                                                                :rules="[rules.required, rules.isNumber, rules.isAmountToPay]"
+                                                                ></v-text-field>
+                                                        </div>
+                                                        <div v-else-if="installmentSale && viewVendorTopics(user_roles)">
+                                                            <v-text-field
+                                                                label="Monto a pagar para efectivo"
+                                                                color="purple"
+                                                                clearable
+                                                                hint="Monto a pagar por el cliente"
+                                                                v-model="amountToPayCash"
+                                                                :rules="[rules.required, rules.isNumber]"
+                                                                ></v-text-field>
+                                                        </div>
                                                     </div>
 
                                                     <div v-if="paymentTypesSelected.some(type => type.name === 'cortesia')">
@@ -1978,15 +2028,16 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                             <v-btn @click="seasonTicketsDialogOpen" class="!tw-mt-2" color="purple" variant="tonal" rounded="xl">Tomar datos</v-btn>
                                                         </div>
                                                         <div v-if="viewVendorTopics(user_roles)">
-
-                                                            <v-switch v-if="!paymentInstallmentSelected" label="¿Se requiere venta a plazos?" color="purple" value="1" v-model="installmentSale"></v-switch>
+                                                            <div v-if="seatsSelected.filter(seat => seat.is_owner == 'Si').length > 0">
+                                                                <v-switch v-if="!paymentInstallmentSelected" label="¿Se requiere venta a plazos?" color="purple" value="1" v-model="installmentSale"></v-switch>
+                                                            </div>
 
                                                             <div v-if="installmentSale">
                                                                 <h4 class="tw-text-xs tw-px-4 tw-py-1 tw-rounded-full tw-bg-purple-200 tw-text-purple-600 tw-text-center tw-mb-2">
                                                                     Complemento para venta a plazos
                                                                 </h4>
 
-                                                                <v-autocomplete
+                                                                <!-- <v-autocomplete
                                                                     v-model="saleDeptorSelected"
                                                                     clearable
                                                                     color="purple"
@@ -1999,7 +2050,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                     item-title="name"
                                                                     item-value="value"
                                                                     :rules="[rules.required]"
-                                                                ></v-autocomplete>
+                                                                ></v-autocomplete> -->
                                                                 <div v-if="saleDeptorSelected && saleDeptorSelected === 1">
 
                                                                     <v-text-field
@@ -2007,30 +2058,30 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                         append-inner-icon="mdi-account"
                                                                         label="Nombre"
                                                                         color="purple"
-                                                                        clearable
                                                                         v-model="firstNameSaleDeptor"
                                                                         hint="Nombre de para el abonado"
                                                                         :rules="[rules.required]"
+                                                                        readonly
                                                                     ></v-text-field>
                                                                     <v-text-field
                                                                         class="tw-w-full"
                                                                         append-inner-icon="mdi-account"
                                                                         label="Apellido paterno"
                                                                         color="purple"
-                                                                        clearable
                                                                         v-model="lastNameSaleDeptor"
                                                                         hint="Apellido paterno de para el abonado"
                                                                         :rules="[rules.required]"
+                                                                        readonly
                                                                     ></v-text-field>
                                                                     <v-text-field
                                                                         class="tw-w-full"
                                                                         append-inner-icon="mdi-phone"
                                                                         label="Numero de telefono"
                                                                         color="purple"
-                                                                        clearable
                                                                         v-model="phoneSaleDeptor"
                                                                         hint="Numero de telefono para el pago a plazos"
                                                                         :rules="[rules.required, rules.isNumber, rules.phoneNumber]"
+                                                                        readonly
                                                                     ></v-text-field>
 
                                                                 </div>
@@ -2322,7 +2373,12 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                         <v-card-actions class="tw-w-full tw-max-w-[90%] tw-mx-auto tw-mb-7">
                                                                             <v-spacer></v-spacer>
                                                                             <v-btn color="red" rounded="xl" size="large" variant="tonal" class="text-none" text="Cancelar" @click="isActive.value = false"></v-btn>
-                                                                            <v-btn :disabled="!seasonTicketsForm" type="submit" size="large" rounded="xl" variant="elevated" class="text-none !tw-bg-green-500 !tw-text-white tw-mb-2 !tw-px-4" text="Confirmar datos"></v-btn>
+                                                                            <div v-if="seatsSelected.filter(seat => seat.is_owner == 'Si').length != 1">
+                                                                                <v-btn disabled type="submit" size="large" rounded="xl" variant="elevated" class="text-none !tw-bg-green-500 !tw-text-white tw-mb-2 !tw-px-4" text="Confirmar datos"></v-btn>
+                                                                            </div>
+                                                                            <div v-else>
+                                                                                <v-btn :disabled="!seasonTicketsForm" type="submit" size="large" rounded="xl" variant="elevated" class="text-none !tw-bg-green-500 !tw-text-white tw-mb-2 !tw-px-4" text="Confirmar datos"></v-btn>
+                                                                            </div>
                                                                         </v-card-actions>
                                                                 </v-form>
                                                                 </v-card>

@@ -17,6 +17,7 @@ use App\Interfaces\UserRepositoryInterface;
 use App\Interfaces\EventSeatCatalogPromotionRepositoryInterface;
 use App\Interfaces\EventSeatCatalogueRepositoryInterface;
 use App\Interfaces\EventTypeRepositoryInterface;
+use App\Interfaces\InstallmentPaymentHistoryRepositoryInterface;
 use App\Interfaces\InstitutionRepositoryInterface;
 use App\Interfaces\PromotionRepositoryInterface;
 use App\Interfaces\PromotionTypeRepositoryInterface;
@@ -41,6 +42,7 @@ use App\Repositories\CardPaymentDetailRepository;
 use App\Repositories\EventSeatCatalogPromotionRepository;
 use App\Repositories\EventSeatCatalogueRepository;
 use App\Repositories\EventTypeRepository;
+use App\Repositories\InstallmentPaymentHistoryRepository;
 use App\Repositories\InstitutionRepository;
 use App\Repositories\PromotionRepository;
 use App\Repositories\PromotionTypeRepository;
@@ -90,6 +92,7 @@ class RepositoriServiceProvider extends ServiceProvider
         $this->app->bind(SeasonTicketRepositoryInterface::class, SeasonTicketRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(SaleDebtorRepositoryInterface::class, SaleDebtorRepository::class);
+        $this->app->bind(InstallmentPaymentHistoryRepositoryInterface::class, InstallmentPaymentHistoryRepository::class);
     }
 
     /**
