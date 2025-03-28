@@ -574,4 +574,18 @@ class EventService
         }
     }
 
+    public function getUsersEventForSaleTickets($id)
+    {
+        try {
+
+            $event = $this->event_repository->getUsersEventForSaleTickets($id);
+
+            return $event;
+
+        } catch (\Exception $e) {
+
+            throw $e;
+        }
+    }
+
 }
