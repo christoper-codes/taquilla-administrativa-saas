@@ -160,7 +160,7 @@ class EventService
                         * Verificar si el asiento está disponible para comprar
                         */
                         $event_seat_catalogue = $event->eventSeatCatalogues->where('seat_catalogue_id', $seat['seat_catalogue_id'])->first();
-                        if ($event_seat_catalogue->seatCatalogueStatus->name !== 'disponible') {
+                        if (!in_array($event_seat_catalogue->seatCatalogueStatus->name, ['disponible', 'reservado'])) {
                             throw new \Exception('El asiento ' . $event_seat_catalogue->seatCatalogue->code . ' no está disponible para comprar en el evento ' . $event->name . ' del dia ' . $event->start_date . ' ya que esta comprado o reservado');
                         }
 
@@ -176,7 +176,7 @@ class EventService
                     * Verificar si el asiento está disponible para comprar
                     */
                     $event_seat_catalogue = $this->event_repository->getById($data['event_id'])->eventSeatCatalogues->where('seat_catalogue_id', $seat['seat_catalogue_id'])->first();
-                    if ($event_seat_catalogue->seatCatalogueStatus->name !== 'disponible') {
+                    if (!in_array($event_seat_catalogue->seatCatalogueStatus->name, ['disponible', 'reservado'])) {
                         throw new \Exception('El asiento ' . $event_seat_catalogue->seatCatalogue->code . ' no está disponible para comprar');
                     }
 

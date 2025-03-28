@@ -76,7 +76,7 @@ class RegisteredUserController extends Controller
         $request->merge([
             'stadium_id' => 1,
             'is_new_user' => true,
-            'password' => 'dev-cdmx-'.Str::uuid()
+            'password' => 'HDX-' . str_pad(mt_rand(0, 9999), 4, '0', STR_PAD_LEFT),
         ]);
 
         $existUser = User::where('email', $request->email)->first();

@@ -25,6 +25,9 @@ import { saleTicketSchema } from '@/validation/pos/sale-ticket-schema';
 import { useField, useForm } from 'vee-validate';
 import axios from 'axios';
 import { toast } from 'vue3-toastify'
+import ZonaB from '@/Components/SectionsHdx/ZonaB.vue';
+import ZonaE from '@/Components/SectionsHdx/ZonaE.vue';
+import ZonaH from '@/Components/SectionsHdx/ZonaH.vue';
 
 const { dateFormat } = useDateFormat();
 const { cashRegisterDataId, sellerUserId, ticketOfficeId } = useTicketOfficeState();
@@ -168,6 +171,8 @@ const addSeat = (seat) => {
         seat.holder_middle_name = '';
         seat.is_owner = 'No';
         seat.description = '';
+        seat.holder_jersey_type = null;
+        seat.holder_jersey_size = null;
         seat.holder_zip_code = '';
         seat.holder_phone = '';
         seat.holder_email = '';
@@ -218,7 +223,7 @@ const purchaseOnline = ref(true);
 const priceTypeId = ref(1);
 
 const panel = ref([0,1]);
-const purchaseType = ref('partido');
+const purchaseType = ref('abonado');
 const paymentTypesSelected = ref([]); //
 
 const filteredPaymentTypes = computed(() => {
@@ -324,7 +329,6 @@ watch(selectedAgreementPromotion, () => {
 
     finalPromotion.value = {};
     seatsSelected.value = JSON.parse(JSON.stringify(seatsSelectedCopy.value));
-    console.log(seatsSelectedCopy.value);
     finalPromotion.value.id = selectedAgreementPromotion.value.id;
     finalPromotion.value.quantity = 0;
 
@@ -367,9 +371,6 @@ watch(selectedAgreementPromotion, () => {
             })
         });
     }
-
-    console.log(selectedAgreementPromotion.value)
-    console.log(seatsSelected.value)
 
     updateTotal();
 
@@ -511,8 +512,11 @@ const isSvgVisible = ref(true);
 const selectedSection = ref('');
 const viewSelectedSection = ref('Zonas HDX');
 const seatsASection = ref([]);
+const seatsBSection = ref([]);
 const seatsCSection = ref([]);
+const seatsESection = ref([]);
 const seatsFSection = ref([]);
+const seatsHSection = ref([]);
 const loadingSectionDialog = ref(false);
 const seatAvailability = ref([]);
 
@@ -548,6 +552,22 @@ const handleSectionClick = (section) => {
                 stadiumHdxImg.classList.remove('tw-rotate-0');
                 stadiumHdxImg.classList.add('tw-rotate-90');
             }
+            if(section == 'zonaB'){
+                seatsBSection.value = success.data.data;
+                loadSvg('zonaB');
+                viewSelectedSection.value = 'Zona B';
+                const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
+                stadiumHdxImg.classList.remove('tw-rotate-0');
+                stadiumHdxImg.classList.add('tw-rotate-90');
+            }
+            if(section == 'zonaE'){
+                seatsESection.value = success.data.data;
+                loadSvg('zonaE');
+                viewSelectedSection.value = 'Zona E';
+                const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
+                stadiumHdxImg.classList.remove('tw-rotate-0');
+                stadiumHdxImg.classList.add('tw-rotate-90');
+            }
             if(section == 'zonaF'){
                 seatsFSection.value = success.data.data;
                 loadSvg('zonaF');
@@ -556,7 +576,14 @@ const handleSectionClick = (section) => {
                 stadiumHdxImg.classList.remove('tw-rotate-0');
                 stadiumHdxImg.classList.add('tw-rotate-90');
             }
-            console.log(success.data.data)
+            if(section == 'zonaH'){
+                seatsHSection.value = success.data.data;
+                loadSvg('zonaH');
+                viewSelectedSection.value = 'Zona H';
+                const stadiumHdxImg = document.querySelector('#stadium-hdx-img');
+                stadiumHdxImg.classList.remove('tw-rotate-0');
+                stadiumHdxImg.classList.add('tw-rotate-90');
+            }
         })
         .catch(error => {
             console.log(error)
@@ -588,7 +615,7 @@ const selectZones = () => {
     valid.value = true;
     purchaseStatus.value = 'process';
     viewSelectedSection.value = 'Zonas HDX';
-    purchaseType.value = 'partido';
+    purchaseType.value = 'abonado';
     loadingg.value = false;
     loading.value = false;
     userToTransfer.value = null;
@@ -682,9 +709,6 @@ const props = defineProps({
     },
 });
 
-console.log(props.event.stadium_id);
-
-
 const users_list = [];
 const sale_debtors_list = [];
 const userToTransfer = ref(null);
@@ -714,7 +738,6 @@ props.sale_debtors.forEach(element => {
 * | declare OnMounted
 */
 onMounted(() => {
-
     nextTick(() => {
         loadSvg('zones_hdx');
     });
@@ -726,13 +749,11 @@ onMounted(() => {
         }
     }
     getSeatAvailability();
-
+    globalPaymentTypesOnlyCard.value = props.global_payment_types.filter(item => item.name === 'tarjeta');
 });
 
 const getSeatAvailability = () => {
     const data = {event_id: props.event.id};
-
-
     axios.get(route('events.availability'), { params: data })
         .then(response => {
             seatAvailability.value = response.data.data;
@@ -766,7 +787,6 @@ const purchaseStatus = ref('process');
 const originalTotalAmount = ref(0);
 const totalAttempts = ref(0);
 const memberUserId = ref(1);
-
 
 /*
 * installment sale module
@@ -826,7 +846,7 @@ watch(() => amountReceivedCash.value, (newValue) => {
 watch(() => purchaseType.value, (newValue) => {
 
     if(newValue == 'abonado' && selectedPromotion.value) {
-        toast('Una vez selecionada una promocion no sera posible la compra de abonos', {
+        toast('Una vez seleccionada una promocion no sera posible la compra de abonos', {
             "theme": "auto",
             "type": "error",
             "autoClose": 10000,
@@ -1197,8 +1217,6 @@ axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
 
     })
     .catch(error => {
-        console.error('Error: upps');
-        console.error('Error:', error);
         toast(error.response.data.message, {
             "theme": "auto",
             "type": "error",
@@ -1263,6 +1281,10 @@ const updateHolder = (index) => {
     });
 }
 
+const seasonTicketsDialogOpen = () => {
+    seasonTicketsDialog.value = true;
+}
+
 watch(purchaseType, () => {
     if(purchaseType.value == 'abonado' && selectedPromotion.value) {
         return
@@ -1300,6 +1322,12 @@ const cardPaymentTypeError = computed(() => {
     return rules.required(cardPaymentTypesSelected.value) !== true;
 });
 
+const globalPaymentTypesOnlyCard = ref([]);
+watch(() => paymentInstallmentSelected.value, () => {
+    if(paymentInstallmentSelected.value){
+        paymentTypesSelected.value = globalPaymentTypesOnlyCard.value;
+    }
+})
 </script>
 
 <template>
@@ -1459,7 +1487,7 @@ const cardPaymentTypeError = computed(() => {
                                         v-bind:saleDeptor="saleDebtorData"
                                     />
 
-                                    <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-6 tw-items-center tw-gap-2 tw-mt-7">
+                                    <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-4 tw-items-center tw-gap-2 tw-mt-7">
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                             <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-yellow-500 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">done_outline</span>
@@ -1482,9 +1510,9 @@ const cardPaymentTypeError = computed(() => {
                                             <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-pink-600 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
-                                            <p class="tw-text-xs lg:tw-text-base">No vendible</p>
+                                            <p class="tw-text-xs lg:tw-text-base">Reservado para abonado</p>
                                         </div>
-                                        <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
+                                        <!-- <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                             <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-gray-600 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
@@ -1495,7 +1523,7 @@ const cardPaymentTypeError = computed(() => {
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
                                             <p class="tw-text-xs lg:tw-text-base">En transito</p>
-                                        </div>
+                                        </div> -->
                                      </div>
                                 </div>
                                 <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-w-full tw-gap-3 tw-my-3">
@@ -1572,11 +1600,20 @@ const cardPaymentTypeError = computed(() => {
                                     <div v-if="selectedSection == 'zonaA'" class="">
                                         <ZonaA @add-seat="addSeat" v-bind:seats="seatsASection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
+                                    <div v-if="selectedSection == 'zonaB'" class="">
+                                        <ZonaB @add-seat="addSeat" v-bind:seats="seatsBSection" v-bind:seatsSelected="seatsSelected" />
+                                    </div>
                                     <div v-if="selectedSection == 'zonaC'" class="">
                                         <ZonaC @add-seat="addSeat" v-bind:seats="seatsCSection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
+                                    <div v-if="selectedSection == 'zonaE'" class="">
+                                        <ZonaE @add-seat="addSeat" v-bind:seats="seatsESection" v-bind:seatsSelected="seatsSelected" />
+                                    </div>
                                     <div v-if="selectedSection == 'zonaF'" class="">
                                         <ZonaF @add-seat="addSeat" v-bind:seats="seatsFSection" v-bind:seatsSelected="seatsSelected" />
+                                    </div>
+                                    <div v-if="selectedSection == 'zonaH'" class="">
+                                        <ZonaH @add-seat="addSeat" v-bind:seats="seatsHSection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                 </div>
                             </div>
@@ -1716,14 +1753,17 @@ const cardPaymentTypeError = computed(() => {
                                                                 <td class="tw-size-px tw-whitespace-nowrap  tw-p-2">
                                                                     <span class="tw-text-sm tw-text-green-600">
                                                                         <div v-for="priceType in seat.price_types" :key="priceType.id">
-                                                                            <div v-if="viewVendorTopics(user_roles)">
-                                                                                {{ priceType.name }}: {{ formatPrice(priceType.pivot.price) }}
+                                                                            <div v-if="viewVendorTopics(user_roles) && priceType.name == 'abonado'">
+                                                                                {{ formatPrice(priceType.pivot.price) }}
                                                                             </div>
-                                                                            <div v-else>
+                                                                            <!-- <div v-if="viewVendorTopics(user_roles) && priceType.name == 'abonado'">
+                                                                                {{ priceType.name }}: {{ formatPrice(priceType.pivot.price) }}
+                                                                            </div> -->
+                                                                            <!-- <div v-else>
                                                                                 <span v-if="priceType.name === 'regular'">
                                                                                     {{ formatPrice(priceType.pivot.price) }}
                                                                                 </span>
-                                                                            </div>
+                                                                            </div> -->
                                                                         </div>
                                                                     </span>
                                                                 </td>
@@ -1743,13 +1783,28 @@ const cardPaymentTypeError = computed(() => {
                                                 </v-expansion-panel-title>
                                                 <v-form v-model="form" @submit.prevent="onSubmit" lazy-validation>
                                                     <v-expansion-panel-text>
+                                                        <!-- paymentInstallmentSelected -->
+
                                                     <v-select
-                                                        v-if="viewVendorTopics(user_roles)"
+                                                        v-if="viewVendorTopics(user_roles) && !paymentInstallmentSelected"
                                                         color="purple"
                                                         label="selecciona el tipo de pago"
                                                         hint="Selecciona el tipo de pago"
                                                         :item-props="globalPayementTypeProps"
                                                         :items="global_payment_types"
+                                                        chips
+                                                        multiple
+                                                        clearable
+                                                        v-model="paymentTypesSelected"
+                                                        :rules="[rules.required]"
+                                                    ></v-select>
+                                                    <v-select
+                                                        v-if="viewVendorTopics(user_roles) && paymentInstallmentSelected"
+                                                        color="purple"
+                                                        label="selecciona el tipo de pago"
+                                                        hint="Selecciona el tipo de pago"
+                                                        :item-props="globalPayementTypeProps"
+                                                        :items="globalPaymentTypesOnlyCard"
                                                         chips
                                                         multiple
                                                         clearable
@@ -1903,7 +1958,7 @@ const cardPaymentTypeError = computed(() => {
                                                     <p v-if="!valid" class="tw-py-2 tw-px-4 tw-bg-red-100 tw-border-l-4 tw-border-l-red-500 tw-text-red-500 tw-text-xs tw-my-4">{{ error }}</p>
 
                                                     <div class="tw-mt-5"> <!-- :disabled="!form" -->
-                                                        <v-radio-group  inline label="Tipo de compra a realizar" v-model="purchaseType">
+                                                       <!--  <v-radio-group  inline label="Tipo de compra a realizar" v-model="purchaseType">
                                                             <v-radio
                                                             v-for="(type, index) in purchase_types"
                                                             :key="index"
@@ -1911,11 +1966,20 @@ const cardPaymentTypeError = computed(() => {
                                                             :label="type"
                                                             :value="type"
                                                             ></v-radio>
-                                                        </v-radio-group>
-
+                                                        </v-radio-group> -->
+                                                        <div class="tw-flex tw-items-center tw-justify-between">
+                                                            <v-radio-group inline label="Tipo de compra a realizar" v-model="purchaseType">
+                                                                <v-radio
+                                                                    :color="'purple'"
+                                                                    :label="purchaseType"
+                                                                    :value="purchaseType"
+                                                                ></v-radio>
+                                                            </v-radio-group>
+                                                            <v-btn @click="seasonTicketsDialogOpen" class="!tw-mt-2" color="purple" variant="tonal" rounded="xl">Tomar datos</v-btn>
+                                                        </div>
                                                         <div v-if="viewVendorTopics(user_roles)">
 
-                                                            <v-switch label="Confirmar venta a plazos" color="purple" value="1" v-model="installmentSale"></v-switch>
+                                                            <v-switch v-if="!paymentInstallmentSelected" label="¿Se requiere venta a plazos?" color="purple" value="1" v-model="installmentSale"></v-switch>
 
                                                             <div v-if="installmentSale">
                                                                 <h4 class="tw-text-xs tw-px-4 tw-py-1 tw-rounded-full tw-bg-purple-200 tw-text-purple-600 tw-text-center tw-mb-2">
@@ -1984,7 +2048,7 @@ const cardPaymentTypeError = computed(() => {
                                                             <p class="tw-py-2 tw-px-4 tw-bg-purple-100 tw-border-l-4 tw-border-l-purple-500 tw-text-purple-500 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para dos partidos del mismo evento.</p>
                                                         </div>
                                                         <div v-else-if="purchaseType == 'abonado'">
-                                                            <p class="tw-py-2 tw-px-4 tw-bg-yellow-100 tw-border-l-4 tw-border-l-yellow-500 tw-text-yellow-500 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para la temporada a la que pertenece este eventos.</p>
+                                                            <p class="tw-py-2 tw-px-4 tw-bg-yellow-100 tw-border-l-4 tw-border-l-yellow-500 tw-text-yellow-500 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para la temporada a la que pertenece este evento.</p>
                                                         </div>
 
                                                         <p ref="paymentSection" class="tw-opacity-50 tw-text-right tw-mb-3 tw-text-xs">Subtotal (tipos de precios selecionados): {{ formatPrice(totalAmount) }}</p>
@@ -2065,9 +2129,7 @@ const cardPaymentTypeError = computed(() => {
                                                                     <v-form v-model="seasonTicketsForm" @submit.prevent="seasonTicktesDataConfirm" lazy-validation>
                                                                         <v-card-text>
                                                                             <div class="tw-w-full tw-max-w-[90%] tw-mx-auto">
-                                                                                <p class="tw-font-bold tw-text-sm lg:tw-text-2xl tw-text-gray-700 tw-text-center">Registra y confirma los abonos: </p>
-
-
+                                                                                <p class="tw-font-bold tw-text-sm lg:tw-text-2xl tw-text-gray-700 tw-text-center">Registra y confirma los abonos</p>
 
                                                                                 <div v-if="seatsSelected.length > 0 && purchaseType == 'abonado'">
                                                                                         <div class="" v-for="(seat, index) in seatsSelected" :key="seat.seat_catalogue.code">
@@ -2169,6 +2231,30 @@ const cardPaymentTypeError = computed(() => {
                                                                                                         v-model="seatsSelected[index].is_owner"
                                                                                                     ></v-select>
                                                                                                 </div>
+                                                                                                <div class="tw-flex tw-items-center tw-justify-between tw-gap-10">
+                                                                                                    <v-select
+                                                                                                        class="tw-w-full"
+                                                                                                        append-inner-icon="mdi-file-document-check-outline"
+                                                                                                        color="purple"
+                                                                                                        label="Tipo de jersey"
+                                                                                                        hint="Tipo de jersey del abonado"
+                                                                                                        clearable
+                                                                                                        :items="['Femenino', 'Masculino', 'Unisex']"
+                                                                                                        :rules="[rules.required]"
+                                                                                                        v-model="seatsSelected[index].holder_jersey_type"
+                                                                                                    ></v-select>
+                                                                                                    <v-select
+                                                                                                        class="tw-w-full"
+                                                                                                        append-inner-icon="mdi-file-document-check-outline"
+                                                                                                        color="purple"
+                                                                                                        label="Talla de jersey"
+                                                                                                        hint="Talla de jersey del abonado"
+                                                                                                        clearable
+                                                                                                        :items="['S', 'M', 'L', 'XL', 'XXL']"
+                                                                                                        :rules="[rules.required]"
+                                                                                                        v-model="seatsSelected[index].holder_jersey_size"
+                                                                                                    ></v-select>
+                                                                                                </div>
                                                                                                 <v-textarea
                                                                                                     class="tw-w-full"
                                                                                                     append-inner-icon="mdi-file-document"
@@ -2208,7 +2294,7 @@ const cardPaymentTypeError = computed(() => {
                                                                                                             class="tw-w-full"
                                                                                                             append-inner-icon="mdi-cash"
                                                                                                             color="purple"
-                                                                                                            label="¿Pago en cuotas a meses?"
+                                                                                                            label="¿Pago a meses?"
                                                                                                             hint="Meses a intereses"
                                                                                                             clearable
                                                                                                             :items="payment_installments"
@@ -2250,7 +2336,7 @@ const cardPaymentTypeError = computed(() => {
                                                                 <v-card>
                                                                 <v-card-text>
                                                                     <p class="tw-font-bold tw-text-sm lg:tw-text-xl tw-text-gray-700">¿Estas seguro de realizar la compra?</p>
-                                                                    <v-container v-if="viewVendorTopics(user_roles)">
+                                                                    <!-- <v-container v-if="viewVendorTopics(user_roles)">
                                                                         <v-row>
                                                                             <v-col xs12 sm6 md4>
                                                                                 <v-autocomplete
@@ -2268,7 +2354,7 @@ const cardPaymentTypeError = computed(() => {
                                                                                 ></v-autocomplete>
                                                                             </v-col>
                                                                         </v-row>
-                                                                    </v-container>
+                                                                    </v-container> -->
                                                                     <p class="tw-opacity-50 tw-mt-3 tw-text-xs lg:tw-text-base">Subtotal (precio en compra): {{ formatPrice(totalAmount) }}</p>
                                                                     <p class="tw-font-semibold tw-text-gray-700">Total: {{ formatPrice(totalAmount) }}</p>
                                                                 </v-card-text>
@@ -2343,16 +2429,6 @@ const cardPaymentTypeError = computed(() => {
                                                         readonly
                                                     ></v-text-field>
                                                 </div>
-
-                                                <template v-slot:actions>
-                                                    <v-btn
-                                                    color="red"
-                                                    variant="tonal"
-                                                    @click="snackbar = false"
-                                                    >
-                                                    Cerrar
-                                                    </v-btn>
-                                                </template>
                                                 </v-snackbar>
                                             </div>
                                         </div>
