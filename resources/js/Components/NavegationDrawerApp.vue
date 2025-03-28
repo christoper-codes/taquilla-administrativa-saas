@@ -68,8 +68,11 @@ const props = defineProps({
                                         :style="{ backgroundImage: `url(/storage/${user.global_images[0].file_path})`, backgroundSize: 'cover', backgroundPosition: 'center' }"
                                         >
                                     </div>
-                                    <div v-else>
-                                        <img  class="tw-shrink-0 tw-size-40 tw-rounded-full" src="https://img.icons8.com/?size=100&id=m0c1h1XS3gNM&format=png&color=000000" alt="">
+                                    <div
+                                        v-else
+                                        class="tw-size-36 tw-overflow-hidden tw-flex tw-items-center tw-justify-center bg-profile"
+                                        :style="{ backgroundImage: `url('https://images.pexels.com/photos/2847648/pexels-photo-2847648.jpeg')`, backgroundSize: 'cover', backgroundPosition: 'center' }"
+                                        >
                                     </div>
                                 </v-btn>
                             </template>
@@ -77,7 +80,7 @@ const props = defineProps({
                             <v-card min-width="350" rounded="lg" class="!tw-bg-white tw-backdrop-blur-sm">
                                 <v-list class="!tw-bg-transparent">
                                 <v-list-item
-                                    :prepend-avatar="`/storage/${user.global_images[0].file_path}`"
+                                    :prepend-avatar="`/storage/public/user-img.svg`"
                                     :title="user.first_name"
                                     :subtitle="'@'+user.username"
                                 >

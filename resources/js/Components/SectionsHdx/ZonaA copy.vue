@@ -2,6 +2,9 @@
 import { onMounted, watch } from 'vue';
 
 const props = defineProps({
+   action: {
+       type: String
+   },
    seats: {
        type: Array,
        required: true,
@@ -10,55 +13,113 @@ const props = defineProps({
        type: Array,
        required: false,
    },
+   seatsAutoClic: {
+       type: Array
+   },
 });
 
 const emit = defineEmits(['add-seat']);
 
-onMounted(() => {
-  props.seats.forEach(seat => {
+function applyClassesAndEvents(){
+    props.seats.forEach(seat => {
     const elemento = document.getElementById(seat.seat_catalogue.code);
     if (elemento) {
-      if (seat.seat_catalogue_status.name === 'disponible' || seat.seat_catalogue_status.name === 'reservado') {
-        if(seat.seat_catalogue_status.name === 'reservado'){
-            elemento.classList.add('tw-cursor-pointer', 'tw-fill-pink-500');
-        } else {
-            elemento.classList.add('tw-cursor-pointer', 'tw-fill-yellow-500');
-        }
-        elemento.classList.remove('tw-cursor-not-allowed', 'tw-fill-purple-500', 'tw-fill-red-500');
-        const handleClick = () => {
-          const existSeat = props.seatsSelected.find(s => s.seat_catalogue.code === seat.seat_catalogue.code);
-          if (existSeat) {
-            if(existSeat.seat_catalogue_status.name === 'reservado') {
-                elemento.classList.remove('tw-fill-green-500');
-                elemento.classList.add('tw-fill-pink-500');
-            } else {
-                elemento.classList.remove('tw-fill-green-500');
+
+        if (props.action === "status") {
+
+            if (seat.seat_catalogue_status.name === 'disponible') {
                 elemento.classList.add('tw-fill-yellow-500');
+            } else if (seat.seat_catalogue_status.name === 'reservado') {
+                elemento.classList.add('tw-fill-pink-600');
+            } else if (seat.seat_catalogue_status.name === 'inhabilitado') {
+                elemento.classList.add('tw-fill-gray-600');
             }
 
-            emit('add-seat', seat);
-          } else {
-            if(seat.seat_catalogue_status.name === 'reservado') {
-                elemento.classList.remove('tw-fill-pink-500');
-                elemento.classList.add('tw-fill-green-500');
-            } else {
-                elemento.classList.remove('tw-fill-yellow-500');
-                elemento.classList.add('tw-fill-green-500');
+            const handleClick = () => {
+
+                const existSeat = props.seatsSelected.find(s => s.seat_catalogue.code === seat.seat_catalogue.code);
+
+                if (!existSeat) {
+                    elemento.classList.remove('tw-fill-yellow-500', 'tw-fill-pink-600', 'tw-fill-gray-600');
+                    elemento.classList.add('tw-fill-green-500');
+                }
+                emit('add-seat', seat);
+            };
+
+            elemento.classList.add('tw-cursor-pointer');
+            elemento.addEventListener('click', handleClick);
+
+        }else if (props.action === "promotion") {
+
+            if (seat.promotions.length === 0) {
+                elemento.classList.add('tw-fill-yellow-500');
+            } else if (seat.promotions.length > 0) {
+                elemento.classList.add('tw-fill-purple-500');
             }
-            emit('add-seat', seat);
-          }
-        };
-        elemento.addEventListener('click', handleClick);
-        elemento.addEventListener('touchstart', handleClick);
-      } else if (seat.seat_catalogue_status.name === 'vendido') {
-        elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-purple-500');
-      } else if (seat.seat_catalogue_status.name === 'inhabilitado') {
-        elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-gray-600');
-      } else if (seat.seat_catalogue_status.name === 'transito') {
-        elemento.classList.add('tw-cursor-not-allowed','tw-fill-cyan-500');
-      }
+
+            const handleClick = () => {
+
+                const existSeat = props.seatsSelected.find(s => s.seat_catalogue.code === seat.seat_catalogue.code);
+
+                if (!existSeat) {
+                    elemento.classList.remove('tw-fill-yellow-500', 'tw-fill-purple-500');
+                    elemento.classList.add('tw-fill-green-500');
+                }
+                emit('add-seat', seat);
+            };
+
+            elemento.classList.add('tw-cursor-pointer');
+            elemento.addEventListener('click', handleClick);
+
+        }else{
+            if (seat.seat_catalogue_status.name === 'disponible') {
+                elemento.classList.add('tw-cursor-pointer', 'tw-fill-yellow-500');
+                elemento.classList.remove('tw-cursor-not-allowed', 'tw-fill-purple-500', 'tw-fill-red-500');
+
+                if(seat.promotions.length > 0){
+                    const bbox = elemento.getBBox();
+                    const cx = bbox.x + bbox.width - 4; 
+                    const cy = bbox.y - 5; 
+
+                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    circle.setAttribute("cx", cx);
+                    circle.setAttribute("cy", cy);
+                    circle.setAttribute("r", "1.5");
+                    circle.classList.add('tw-fill-purple-500');
+                    elemento.parentNode.appendChild(circle);
+                }
+            
+                const handleClick = () => {
+                const existSeat = props.seatsSelected.find(s => s.seat_catalogue.code === seat.seat_catalogue.code);
+                if (existSeat) {
+                    elemento.classList.remove('tw-fill-green-500');
+                    elemento.classList.add('tw-fill-yellow-500');
+                    emit('add-seat', seat);
+                } else {
+                    elemento.classList.remove('tw-fill-yellow-500');
+                    elemento.classList.add('tw-fill-green-500');
+                    emit('add-seat', seat);
+                }
+                };
+                elemento.addEventListener('click', handleClick);
+                elemento.addEventListener('touchstart', handleClick);
+            } else if (seat.seat_catalogue_status.name === 'vendido') {
+                elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-purple-500');
+            } else if (seat.seat_catalogue_status.name === 'reservado') {
+                elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-pink-500');
+            } else if (seat.seat_catalogue_status.name === 'inhabilitado') {
+                elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-gray-600');
+            } else if (seat.seat_catalogue_status.name === 'transito') {
+                elemento.classList.add('tw-cursor-not-allowed','tw-fill-cyan-500');
+            }
+        }
     }
+
   });
+};
+
+onMounted(() => {
+    applyClassesAndEvents();
 });
 
 /*
@@ -69,10 +130,23 @@ watch(() => props.seatsSelected, (newSeatsSelected, oldSeatsSelected) => {
     if (!newSeatsSelected.find(s => s.seat_catalogue.code === seat.seat_catalogue.code)) {
         const elemento = document.getElementById(seat.seat_catalogue.code);
         if (elemento) {
-            if(seat.seat_catalogue_status.name === 'reservado') {
+            if (props.action === "status") {
                 elemento.classList.remove('tw-fill-green-500');
-                elemento.classList.add('tw-fill-pink-500');
-            } else {
+                if (seat.seat_catalogue_status.name === 'disponible') {
+                    elemento.classList.add('tw-fill-yellow-500');
+                } else if (seat.seat_catalogue_status.name === 'reservado') {
+                    elemento.classList.add('tw-fill-pink-600');
+                } else if (seat.seat_catalogue_status.name === 'inhabilitado') {
+                    elemento.classList.add('tw-fill-gray-600');
+                }
+            }else if (props.action === "promotion") {
+                elemento.classList.remove('tw-fill-green-500');
+                if (seat.promotions.length === 0) {
+                    elemento.classList.add('tw-fill-yellow-500');
+                } else if (seat.promotions.length > 0) {
+                    elemento.classList.add('tw-fill-purple-500');
+                }
+            }else{
                 elemento.classList.remove('tw-fill-green-500');
                 elemento.classList.add('tw-fill-yellow-500');
             }
@@ -80,6 +154,24 @@ watch(() => props.seatsSelected, (newSeatsSelected, oldSeatsSelected) => {
     }
   });
 }, { deep: true });
+
+watch(() => props.seatsAutoClic, (newSeatsSelected = [], oldSeatsSelected = []) => {
+
+    newSeatsSelected.forEach((seat) => {
+
+        const elemento = document.getElementById(seat.seat_catalogue.code);
+
+        if (elemento) {
+            const clickEvent = new MouseEvent("click", {
+                bubbles: true,
+                cancelable: true,
+                view: window
+            });
+            elemento.dispatchEvent(clickEvent);
+        }
+  });
+});
+
 </script>
 
 <template>

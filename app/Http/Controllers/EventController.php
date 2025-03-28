@@ -396,8 +396,6 @@ class EventController extends Controller
         DB::beginTransaction();
         try {
             $response = $this->event_service->reserveSeatsToBuy($request->all());
-
-
             DB::commit();
 
             if($request->is_online) {

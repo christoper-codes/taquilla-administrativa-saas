@@ -20,6 +20,8 @@ class SeasonTicket extends Model
         'holder_email',
         'holder_phone',
         'holder_zip_code',
+        'holder_jersey_type',
+        'holder_jersey_size',
         'description',
         'is_owner',
         'is_active',
