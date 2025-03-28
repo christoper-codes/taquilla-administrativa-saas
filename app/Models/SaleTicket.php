@@ -96,4 +96,9 @@ class SaleTicket extends Model
     {
         return $this->belongsTo(SaleDebtor::class);
     }
+
+    public function installmentPaymentHistories()
+    {
+        return $this->hasMany(InstallmentPaymentHistory::class);
+    }
 }

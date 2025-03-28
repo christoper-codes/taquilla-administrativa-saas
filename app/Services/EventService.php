@@ -34,10 +34,12 @@ class EventService
     protected $cash_register_service;
     protected $season_ticket_service;
     protected $sale_debtor_service;
+    protected $installment_payment_history_service;
 
     public function __construct(EventRepositoryInterface $event_repository, GlobalPaymentTypeService $global_payment_type_service,
                     GlobalCardPaymentTypeService $global_card_payment_type_service, CashRegisterService $cash_register_service,
-                    SeasonTicketService $season_ticket_service, SaleDebtorService $sale_debtor_service)
+                    SeasonTicketService $season_ticket_service, SaleDebtorService $sale_debtor_service,
+                    InstallmentPaymentHistoryService $installment_payment_history_service )
     {
         $this->event_repository = $event_repository;
         $this->global_payment_type_service = $global_payment_type_service;
@@ -45,6 +47,7 @@ class EventService
         $this->cash_register_service = $cash_register_service;
         $this->season_ticket_service = $season_ticket_service;
         $this->sale_debtor_service = $sale_debtor_service;
+        $this->installment_payment_history_service = $installment_payment_history_service;
     }
 
 
@@ -289,7 +292,21 @@ class EventService
             $saleTicket->save();
 
             /*
-            * Assign payment types to the sale ticket
+            * Create relationship between installment payment history service and sale ticket
+            */
+            $installment_payment_history_service = null;
+            if($sale_debtor_id){
+                $installment_payment_history_service = $this->installment_payment_history_service->save([
+                    'sale_ticket_id' => $saleTicket->id,
+                    'amount_received' => $data['amount_received'],
+                    'total_amount' => $data['amount_received'] - $data['total_returned'],
+                    'total_returned' => $data['total_returned'],
+                    'is_active' => true,
+                ]);
+            }
+
+            /*
+            * Assign payment types to the sale ticket and installment payment history if is needed
             */
             $total_actual_paid = 0;
             foreach ($data['global_payment_types'] as $global_payment_type) {
@@ -301,6 +318,13 @@ class EventService
                     'reason_courtesy' => $global_payment_type['reason_agreement'] ?? null,
                 ]);
                 $total_actual_paid += $global_payment_type['amount'];
+                if($sale_debtor_id){
+                    $installment_payment_history_service->globalPaymentTypes()->attach($global_payment_type['id'], [
+                        'global_card_payment_type_id' => $global_payment_type['global_card_payment_type_id'] ?? null,
+                        'amount' => $global_payment_type['amount'],
+                        'original_amount' => $global_payment_type['amount'],
+                    ]);
+                }
             }
 
             /*
