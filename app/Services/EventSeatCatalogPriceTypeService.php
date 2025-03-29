@@ -35,4 +35,22 @@ class EventSeatCatalogPriceTypeService
             throw $e;
         }
     }
+
+    /*
+    * |--------------------------------------------------------------------------
+    * | Save new event seat catalog promotion
+    */
+    public function updateInBulk(array $data)
+    {
+        try {
+
+            $event_seat_catalog_price_type = $this->event_seat_catalog_price_type_repository_interface->updateInBulk($data);
+
+            return $event_seat_catalog_price_type;
+
+        } catch (\Exception $e) {
+
+            throw $e;
+        }
+    }
 }

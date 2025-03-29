@@ -33,5 +33,33 @@ class PriceCataloguesSeeder extends Seeder
             'description' => 'generic',
             'is_active' => true,
         ]);
+
+        PriceCatalogue::create([
+            'stadium_id' => 1,
+            'price' => 8300,
+            'description' => 'generic',
+            'is_active' => true,
+        ]);
+
+        PriceCatalogue::create([
+            'stadium_id' => 1,
+            'price' => 5090,
+            'description' => 'generic',
+            'is_active' => true,
+        ]);
+
+        PriceCatalogue::create([
+            'stadium_id' => 1,
+            'price' => 3490,
+            'description' => 'generic',
+            'is_active' => true,
+        ]);
+
+        PriceCatalogue::create([
+            'stadium_id' => 1,
+            'price' => 1860,
+            'description' => 'generic',
+            'is_active' => true,
+        ]);
     }
 }

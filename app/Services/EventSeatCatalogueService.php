@@ -69,30 +69,48 @@ class EventSeatCatalogueService
             */
             $eventSeatCatalogs = EventSeatCatalog::where('event_id', $event_id)->get();
 
+            $seatingPrices = [
+                'courtside' => [
+                    "id" => 4,
+                    "price" => 8300
+                ],
+                'dorado'    =>
+                [
+                    "id" => 5,
+                    "price" => 5090
+                ],
+                'purpura'   => [
+                    "id" => 6,
+                    "price" => 3490
+                ],
+                'fan'       => [
+                    "id" => 7,
+                    "price" => 1860
+                ],
+                'publico'   => [
+                    "id" => 8,
+                    "price" => 1860
+                ],
+            ];
+
             /*
             * Attach the price types to the event seat catalogue
             */
-            $eventSeatCatalogs->each(function (EventSeatCatalog $eventSeatCatalog) {
+            $eventSeatCatalogs->each(function (EventSeatCatalog $eventSeatCatalog) use ($seatingPrices){
+
+                $abono = $seatingPrices[$eventSeatCatalog->seatCatalogue->seatType->name];
 
                 $eventSeatCatalog->priceTypes()->attach([
-                    1 => [
-                        'price_catalogue_id' => 1,
-                        'price' => PriceCatalogue::where('id', 1)->first()->price,
-                        'is_active' => true
-                    ],
-                    2 => [
-                        'price_catalogue_id' => 2,
-                        'price' => PriceCatalogue::where('id', 2)->first()->price,
-                        'is_active' => true
-                    ],
                     3 => [
-                        'price_catalogue_id' => 3,
-                        'price' => PriceCatalogue::where('id', 3)->first()->price,
+                        'price_catalogue_id' => $abono["id"],
+                        'price' => $abono["price"],
                         'is_active' => true
                     ],
                 ]);
-
             });
+
+
+
 
             return $newEventSeatCatalogs;
 

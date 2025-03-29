@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="ticket">
-        <h1>LOS HALCONES DE XALAPA</h1>
+        <h1>HALCONES DE XALAPA</h1>
         <p class="info" style="margin-top: 20px;">
             Cultura Veracruzana, Zona Universitaria,<br>
             Campus Cad, Xalapa Enriquez, 91094
@@ -19,6 +19,7 @@
             <tr>
                 <td class="w-half-left">
                     <p>Taquila: {{ $pdf_data['ticket_office']['name'] }}</p>
+                    <p>Vendedor: {{ trim(implode(' ', array_filter([ $pdf_data['cash_register']['sellerUserOpening']['first_name'], $pdf_data['cash_register']['sellerUserOpening']['middle_name'], $pdf_data['cash_register']['sellerUserOpening']['last_name'] ]))) }}</p>
                     <p>Fecha de apertura: {{ date('d/m/Y H:i', strtotime($pdf_data['cash_register']['opening_time'])) }}</p>
                     <p>Fecha de cierre: {{ date('d/m/Y H:i', strtotime($pdf_data['cash_register']['closing_time'])) }}</p>
                 </td>
@@ -29,7 +30,7 @@
             </tr>
         </table>
         <div class="line"></div>
-        <h3 style="">Total en venta: ${{ number_format($pdf_data['cash_register']['closing_balance'], 2, '.', ',') }}</h3>
+        <h3 style="">Total en venta: ${{ number_format(($pdf_data['cash_register']['closing_balance'] - $pdf_data['cash_register']['opening_balance']), 2, '.', ',') }}</h3>
 
         <p class="info" style="margin-top: 20px;">
             El total de la venta inluye <br>
@@ -44,19 +45,32 @@
                     <th class="text-left">Tipo de Pago</th>
                     <th class="text-right">Monto</th>
                     <th class="text-right">Transacciones</th>
+                    <th class="text-right">Asientos</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($pdf_data['type_payments'] as $payment_type => $value)
                     <tr>
                         <td class="text-left">{{ $payment_type }}</td>
-                        <td class="text-right">${{ number_format($value['amount'], 2, '.', ',') }} MXN</td>
+
+                        @if (isset($value['amount']) && $value['amount'])
+                            <td class="text-right">${{ number_format($value['amount'], 2, '.', ',') }} MXN</td>
+                        @elseif (isset($value['amountList']) && $value['amountList'])
+                            <td class="text-right">
+                                @foreach ($value['amountList'] as $method => $amount_data)
+                                    @if (isset($amount_data['amount']) && $amount_data['amount'])
+                                        ${{ number_format($amount_data['amount'], 2, '.', ',') }} MXN ({{ ucfirst($method) }})
+                                        @if (!$loop->last) <br> @endif
+                                    @endif
+                                @endforeach
+                            </td>
+                        @endif
                         <td class="text-right">{{ $value['transactions'] }}</td>
+                        <td class="text-right">{{ $value['seats'] }}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
-
 
         <div class="line"></div>
 
@@ -83,7 +97,6 @@
                 Para información más detallada y opciones avanzadas consulte el panel de administración<br>
             </p>
             <h5>
-                ¡Agradecemos su confianza en nuestro sistema! <br>
                 Halcones de Xalapa 2025
             </h5>
         </div>

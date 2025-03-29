@@ -2,11 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\WebResponseHelper;
 use App\Models\PriceType;
+use App\Services\PriceTypeService;
 use Illuminate\Http\Request;
 
 class PriceTypeController extends Controller
 {
+
+    protected $priceType_service;
+
+    public function __construct(PriceTypeService $priceType_service) {
+        $this->priceType_service = $priceType_service;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -37,6 +46,23 @@ class PriceTypeController extends Controller
     public function show(PriceType $priceType)
     {
         //
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function getAll()
+    {
+        try {
+
+            $prices_type = $this->priceType_service->getAll();
+
+            return response()->json($prices_type, 200);
+
+      } catch (\Exception $e) {
+
+        WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar los tipos de precio');
+      }
     }
 
     /**

@@ -29,6 +29,26 @@ class TicketOfficesSeeder extends Seeder
         * |--------------------------------------------------------------------------
         * | Create a online seller user
         */
+        $seller_user = User::create([
+            'user_gender_id' => 4,
+            'first_name' => 'Juan',
+            'middle_name' => 'Carlos',
+            'last_name' => 'Hernández',
+            'username' => 'juan-carlos-hdz',
+            'birthdate' =>  Carbon::now(),
+            'email' => 'juan.carlos.hdz@example.com',
+            'color' => 'purple',
+            'is_active' => true,
+            'password' => Hash::make('123456789'),
+        ]);
+
+        $seller_user->userRoles()->attach(2, ['is_active' => true]);
+
+
+        /*
+        * |--------------------------------------------------------------------------
+        * | Create a online seller user
+        */
         $online_seller_user = User::create([
             'user_gender_id' => 4,
             'first_name' => 'usuario hdx online',
@@ -54,7 +74,7 @@ class TicketOfficesSeeder extends Seeder
             'global_address_id' => null,
             'name' => 'taquilla online',
             'description' => 'taquilla online para la venta de boletos en linea',
-            'is_active' => true
+            'is_active' => false
         ]);
 
         $ticket_office1 =  TicketOffice::create([
@@ -72,7 +92,7 @@ class TicketOfficesSeeder extends Seeder
             'global_address_id' => null,
             'name' => 'taquilla test 1',
             'description' => 'taquilla de prueba 1, para testear el sistema y pruebas de integracion',
-            'is_active' => true
+            'is_active' => false
         ]);
 
         /*

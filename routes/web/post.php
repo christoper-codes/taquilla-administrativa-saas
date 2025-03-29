@@ -16,7 +16,7 @@ use App\Http\Controllers\TicketOfficeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
-
+use App\Http\Controllers\PriceCatalogueController;
 
 /*
 * |--------------------------------------------------------------------------
@@ -28,6 +28,8 @@ Route::middleware('auth')->group(function() {
 
     Route::post('/caja-registradora/store', [CashRegisterController::class, 'store'])->name('cash-registers.store');
     Route::post('/caja-registradora/close', [CashRegisterController::class, 'closeCashRegister'])->name('cash-registers.close');
+    Route::post('/caja-registradora/resumen', [CashRegisterController::class, 'getCashRegisterSummary'])->name('cash-registers.summary');
+
 
 });
 
@@ -108,3 +110,12 @@ Route::post('/actualizar-usuario-con-roles', [RegisteredUserController::class, '
 * |Seat Catalog Status | ROUTES
 */
 Route::post('/catalogo-de-status-para-asientos', [SeatCatalogueStatusController::class, 'store'])->name('seat.catalog.status.store');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* | Wallets | ROUTES
+*/
+Route::post('/precios-de-estadio', [PriceCatalogueController::class, 'getAllForStadium'])->name('get.all.for.stadium');
+Route::post('/precio-de-estadio', [PriceCatalogueController::class, 'firstOrCreate'])->name('first.or.create.for.stadium');

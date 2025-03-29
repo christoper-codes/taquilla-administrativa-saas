@@ -150,4 +150,35 @@ class CashRegisterController extends Controller
             ], 500);
         }
     }
+
+    public function getCashRegisterSummary (Request $request)
+    {
+        try {
+
+            $request->validate([
+                'cash_register_id' => 'required',
+                'seller_user_closing_id' => 'required',
+                'ticket_office_id' => 'required'
+            ]);
+
+            $response = $this->cash_register_service->getCashRegisterSummary($request->all());
+
+            $pdf_response = Pdf::loadView('pdfs.hdx.closeCashRegister', ['pdf_data' => $response]);
+            $pdfContent = $pdf_response->output();
+
+            return response()->json([
+                'data' => $response,
+                'message' => 'Resumen de caja consultado con exito',
+                'success' => true,
+                'pdf' => base64_encode($pdfContent)
+            ], 200);
+
+        } catch(\Exception $e){
+            return response()->json([
+                'data' => null,
+                'message' => $e->getMessage(),
+                'success' => false,
+            ], 500);
+        }
+    }
 }

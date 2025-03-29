@@ -331,10 +331,12 @@ class EventController extends Controller
 
             $data = [
                 'event' => $response['event'],
+                'c_zone' => $response['c_zone'],
                 'a_zone' => $response['a_zone'],
                 'b_zone' => $response['b_zone'],
-                'c_zone' => $response['c_zone'],
-                'f_zone' => $response['f_zone']
+                'e_zone' => $response['e_zone'],
+                'f_zone' => $response['f_zone'],
+                'h_zone' => $response['h_zone']
             ];
 
             return response()->json($data, 200);
@@ -413,7 +415,9 @@ class EventController extends Controller
                     'folio' => $response[0]['ticket_id'],
                     'payment_in_installments' => $request->payment_in_installments ?? null,
                     'total_amount' => $request->total_amount,
-                    'global_payment_types' => $request->global_payment_types,
+                    'global_payment_types' => $response[0]['global_payment_types'],
+                    'seller_user' => $response[0]['seller_user'],
+                    'payment_in_installments' => $response[0]['payment_in_installments']
                 ];
 
                 $pdf_response = Pdf::loadView('pdfs.hdx.saleTicket', [

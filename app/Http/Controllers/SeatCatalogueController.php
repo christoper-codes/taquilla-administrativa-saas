@@ -111,6 +111,7 @@ class SeatCatalogueController extends Controller
                         "code" => [
                             "ED", "EE", "EF", "EG", "EH", "EI", "EJ",
                             "FD", "FE", "FF", "FG", "FH", "FI", "FJ",
+                            "EK"
                         ],
                     ],
                 ];
@@ -188,7 +189,7 @@ class SeatCatalogueController extends Controller
                    "description_seat" => "Asiento",
                    "seat_is_active" => true,
                    "zone_type_id" => 4,
-                   "seats_per_row" => [48, 48, 48, 48, 48, 48, 48, 48, 48, 54]
+                   "seats_per_row" => [48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 54]
                 ],
                 [
                    "stadium" => 1,
@@ -221,6 +222,7 @@ class SeatCatalogueController extends Controller
 
             $out = new \Symfony\Component\Console\Output\ConsoleOutput();
             $out->writeln("Se ejecuta");
+
 
             $save_all_seats_for_stadium = $this->seat_catalogue_service->saveAllSeatsForStadium($data_seats_for_stadium);
 

@@ -9,6 +9,7 @@ import { Head, useForm as useFormInertia } from '@inertiajs/vue3';
 import InputError from '@/Components/InputError.vue';
 import BreadcrumbAppSecondary from '@/Components/BreadcrumbAppSecondary.vue';
 import EventSeatCatalogPromotion from '@/Components/../Pages/App/Administration/Offer/EventSeatCatalogPromotion.vue';
+import EventSeatCatalogPrices from '@/Components/../Pages/App/Administration/Offer/EventSeatCatalogPrices.vue';
 import EventSeatCatalogStatus from '@/Components/../Pages/App/Administration/Offer/EventSeatCatalogStatus.vue';
 import useStringFormat from '@/composables/stringFormat';
 import { VTimePicker } from 'vuetify/labs/VTimePicker';
@@ -33,6 +34,7 @@ const headersEvent = [
     { title: 'Fecha/Hora Inicio', align: 'start', sortable: true, key: 'start_date' },
     { title: 'Fecha/Hora Finalización', align: 'start', sortable: true, key: 'end_date' },
     { title: 'Estatus', align: 'start', sortable: true, key: 'is_active' },
+    { title: 'Precio de Asientos', key: 'seatPrices', sortable: false },
     { title: 'Promociones', key: 'promotion', sortable: false },
     { title: 'Bloqueo/Reserva', key: 'block_reserve', sortable: false },
     { title: 'Acciones', key: 'actions', sortable: false }
@@ -104,7 +106,11 @@ const onFileClearEvent = () => {
     imageUrlEvent.value = null;
 };
 
+const isLoading = ref(false);
+
 const saveDataEvent = handleSubmit((dataForm) => {
+
+    isLoading.value = true;
 
     dataEvent.id = dataForm.id;
     dataEvent.global_season_id = dataForm.global_season_id;
@@ -124,7 +130,9 @@ const saveDataEvent = handleSubmit((dataForm) => {
                 closeFormEvent();
             },
             onError: (errors) => { },
-            onFinish: () => { }
+            onFinish: () => {
+                isLoading.value = false;
+            }
         });
 
     } else {
@@ -134,7 +142,9 @@ const saveDataEvent = handleSubmit((dataForm) => {
                 closeFormEvent();
             },
             onError: (errors) => { },
-            onFinish: () => { }
+            onFinish: () => {
+                isLoading.value = false;
+            }
         });
     }
 });
@@ -211,9 +221,16 @@ const editEvent = (selectedEvent) => {
     dialogFormEvent.value = true;
 }
 
-const dialogPromotion = ref(false);
 const eventSelected = ref(null);
 
+const dialogSeatPrices = ref(false);
+const openDialogSeatPrices = (event, open) => {
+
+    eventSelected.value = event;
+    dialogSeatPrices.value = open;
+}
+
+const dialogPromotion = ref(false);
 const openDialogPromotion = (event, open) => {
 
     eventSelected.value = event;
@@ -458,7 +475,7 @@ const openDialogBlockAndReserve = (event, open) => {
                                                 Cancelar
                                             </v-btn>
                                             <v-btn color="purple" rounded="xl" class="!tw-px-4 text-none"
-                                                variant="elevated" @click="saveDataEvent">
+                                                variant="elevated" @click="saveDataEvent" :loading="isLoading" :disabled="isLoading">
                                                 Guardar
                                             </v-btn>
                                         </v-card-actions>
@@ -507,6 +524,11 @@ const openDialogBlockAndReserve = (event, open) => {
                                 {{ item.is_active ? 'Activa' : 'Inactiva' }}
                             </v-chip>
                         </template>
+                        <template v-slot:item.seatPrices="{ item }">
+                            <v-btn @click="openDialogSeatPrices(item, true)">
+                                <span class="material-symbols-outlined tw-text-lg">finance_chip</span>
+                            </v-btn>
+                        </template>
                         <template v-slot:item.promotion="{ item }">
                             <v-btn @click="openDialogPromotion(item, true)">
                                 <span class="material-symbols-outlined tw-text-lg">featured_seasonal_and_gifts</span>
@@ -530,6 +552,24 @@ const openDialogBlockAndReserve = (event, open) => {
             </v-tabs-window>
         </div>
 
+        <v-dialog v-model="dialogSeatPrices" transition="dialog-bottom-transition" fullscreen>
+            <v-card>
+
+                <v-toolbar>
+                    <v-toolbar-title class="tw-w-full">Asignación de Precios</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                    <v-toolbar-items>
+                        <v-btn icon="mdi-close" @click="openDialogSeatPrices(eventSelected, false)">
+                        </v-btn>
+                    </v-toolbar-items>
+                </v-toolbar>
+
+                <div class="tw-overflow-y-auto tw-w-full tw-h-full">
+                    <EventSeatCatalogPrices :event="eventSelected" />
+                </div>
+
+            </v-card>
+        </v-dialog>
 
         <v-dialog v-model="dialogPromotion" transition="dialog-bottom-transition" fullscreen>
             <v-card>

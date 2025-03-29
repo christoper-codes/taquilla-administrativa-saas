@@ -128,6 +128,14 @@ const props = defineProps({
                                     <span class="material-symbols-outlined tw-text-xl">home</span>Mis boletos
                                 </AppNavLink>
                             </div>
+
+
+                            <div class="tw-w-full ">
+                                <AppNavLink :href="route('events.index')" :active="route().current('events.index')">
+                                    <span class="material-symbols-outlined tw-text-xl">note_stack</span>Eventos
+                                </AppNavLink>
+                            </div>
+
                             <div class=" tw-w-full">
                                 <AppNavLink :href="route('ticket-offices.share')" :active="route().current('ticket-offices.share')">
                                     <span class="material-symbols-outlined tw-text-xl">share</span>Compartir boletos

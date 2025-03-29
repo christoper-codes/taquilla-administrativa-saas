@@ -1,6 +1,7 @@
 <?php
 
 namespace Database\Seeders;
+use App\Http\Controllers\SeatCatalogueController;
 
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -48,5 +49,8 @@ class DatabaseSeeder extends Seeder
             SaleDebtorsSeeder::class,
             //AgreementsSeeder::class,
         ]);
+
+        $controller = app(SeatCatalogueController::class);
+        $controller->saveAllSeatsForStadium();
     }
 }

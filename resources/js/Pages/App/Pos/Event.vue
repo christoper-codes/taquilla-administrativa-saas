@@ -28,8 +28,11 @@ import { toast } from 'vue3-toastify'
 import ZonaB from '@/Components/SectionsHdx/ZonaB.vue';
 import ZonaE from '@/Components/SectionsHdx/ZonaE.vue';
 import ZonaH from '@/Components/SectionsHdx/ZonaH.vue';
+import useStringFormat from '@/composables/stringFormat';
 
 const { dateFormat } = useDateFormat();
+const { formatFirstLetterUppercase } = useStringFormat();
+
 const { cashRegisterDataId, sellerUserId, ticketOfficeId } = useTicketOfficeState();
 const snackbar = ref(false);
 const { handleSubmit } = useForm({
@@ -291,7 +294,11 @@ watch(selectedPromotion, () => {
                     seat.promotion_id = selectedPromotion.value.id;
                     seat.is_gift = true;
                     seat.price_types.forEach(priceType => {
+
                         if(priceType.name == 'regular'){
+                            priceType.pivot.price = parseFloat(0);
+
+                        }else if(priceType.name == 'abonado'){
                             priceType.pivot.price = parseFloat(0);
                         }
                     })
@@ -306,7 +313,12 @@ watch(selectedPromotion, () => {
                 if(seat.final_price == selectedPromotion.value.final_price){
                     finalPromotion.value.quantity++;
                     seat.promotion_id = selectedPromotion.value.id;
+
                     if(priceType.name == 'regular'){
+                        const discount = priceType.pivot.price * (selectedPromotion.value.percent_allow / 100);
+                        priceType.pivot.price = priceType.pivot.price - discount;
+
+                    }else if(priceType.name == 'abonado'){
                         const discount = priceType.pivot.price * (selectedPromotion.value.percent_allow / 100);
                         priceType.pivot.price = priceType.pivot.price - discount;
                     }
@@ -434,16 +446,17 @@ function updateTotal() {
     seatsSelectedCopy.value.forEach(seat => {
         if(seat.promotions.length > 0) {
             seat.promotions.forEach(promotion => {
-                const actualPromotionExist = promotionTypes.value.find(promo => promo.type === promotion.promotion_type.name && promo.final_price === seat.final_price);
+                const actualPromotionExist = promotionTypes.value.find(promo => promo.name === promotion.name && promo.final_price === seat.final_price);
                 if(actualPromotionExist) {
                     promotionTypes.value.forEach(promotionType => {
-                        if (promotionType.type === promotion.promotion_type.name && promotionType.final_price === seat.final_price) {
+                        if (promotionType.name === promotion.name && promotionType.final_price === seat.final_price) {
                             promotionType.quantity++;
                         }
                     });
                 } else {
                     promotionTypes.value.push({
                         'id': promotion.id,
+                        'name': promotion.name,
                         'type': promotion.promotion_type.name,
                         'quantity': 1,
                         'final_price': seat.final_price,
@@ -1283,14 +1296,14 @@ const rules = {
 
 function printInKioskMode(url, purchaseType) {
     const ventana = window.open(url, '_blank', 'fullscreen=yes,kiosk=yes');
-    ventana.onload = () => {
-        ventana.print();
-        if(purchaseType != 'abonado') {
-            setTimeout(() => {
-                ventana.close();
-            }, 4000);
-        }
-    };
+    // ventana.onload = () => {
+    //     ventana.print();
+    //     if(purchaseType != 'abonado') {
+    //         setTimeout(() => {
+    //             ventana.close();
+    //         }, 4000);
+    //     }
+    // };
 }
 
 /*
@@ -1423,7 +1436,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                     <div class="tw-border-4 tw-border-yellow-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
                                         <v-radio color="yellow" :key="index" :value="promotion">
                                             <template v-slot:label>
-                                                <div>{{ promotion.description }}<strong class="tw-text-yellow-700">. Para asientos con precio de {{ formatPrice(promotion.final_price) }}</strong></div>
+                                                <div>{{ promotion.description }} de {{ promotion.percent_allow }}% ({{ formatFirstLetterUppercase(promotion.type) }})<strong class="tw-text-yellow-700">. Asientos de {{ formatPrice(promotion.final_price) }}</strong></div>
                                             </template>
                                         </v-radio>
                                     </div>
