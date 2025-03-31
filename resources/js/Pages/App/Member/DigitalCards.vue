@@ -29,7 +29,7 @@ const props = defineProps({
         <div class="tw-relative tw-min-h-screen tw-w-full tw-block tw-overflow-hidden tw-bg-center tw-bg-cover tw-bg-[url('https://alithemes.com/assets/imgs/bg-blur.png')]">
             <div class="tw-p-10 tw-flex tw-items-center tw-justify-center tw-gap-10">
 
-            <div data-aos="fade-up" data-aos-duration="2500" class="tw-w-full tw-p-7 tw-text-white tw-shadow-xl tw-rounded-3xl tw-bg-gradient-to-r tw-from-red-400 tw-to-pink-300 tw-border-4 tw-border-white">
+           <!--  <div data-aos="fade-up" data-aos-duration="2500" class="tw-w-full tw-p-7 tw-text-white tw-shadow-xl tw-rounded-3xl tw-bg-gradient-to-r tw-from-red-400 tw-to-pink-300 tw-border-4 tw-border-white">
                 <div class="tw-flex tw-items-center tw-justify-between">
                     <div  class="tw-flex tw-items-center tw-gap-3">
                         <img class="tw-w-14" src="https://upload.wikimedia.org/wikipedia/en/3/36/Logo_Halcones_Xalapa.png?Halcones_de_Xalapa1147183265" />
@@ -95,7 +95,7 @@ const props = defineProps({
                     </div>
                 </div>
 
-            </div>
+            </div> -->
 
             </div>
         </div>

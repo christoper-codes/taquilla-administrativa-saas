@@ -59,9 +59,9 @@ const toggleFav = () => {
                             :close-on-content-click="false"
                             location="bottom start" origin="top center"
                             >
-                            <template v-slot:activator="{ props }">
+                            <!-- <template v-slot:activator="{ props }">
                                 <v-btn v-bind="props" variant="text" class="text-none !tw-h-[40px] lg:!tw-rounded-none !tw-rounded-full lg:!tw-h-[80px] !tw-w-full !tw-justify-start lg:!tw-justify-center lg:!tw-w-24 !tw-text-gray-600 !tw-bg-transparent"><span class="material-symbols-outlined tw-text-lg">settings</span>Servicios</v-btn>
-                            </template>
+                            </template> -->
 
                             <v-card min-width="300" rounded="lg" class="">
                                 <v-list class="">
@@ -126,11 +126,11 @@ const toggleFav = () => {
                             </v-card>
                             </v-menu>
                         </div>
-                        <div class="tw-w-full">
+                        <!-- <div class="tw-w-full">
                             <GuestNavLink :href="route('blogs.show', 1)" :active="route().current('blogs.show')">
                                 <span class="material-symbols-outlined tw-text-lg">bookmark</span>Blogs
                             </GuestNavLink>
-                        </div>
+                        </div> -->
                     </div>
                     <Link
                         v-if="$page.props.auth.user"

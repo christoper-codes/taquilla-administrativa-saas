@@ -29,7 +29,7 @@ class SerieController extends Controller
     {
         try {
 
-            $user = Auth::user()->load('globalImages');
+            $user = Auth::user()->load('globalImages', 'userRoles');
             $series = $this->serie_service->getAll();
             $global_seasons = $this->global_season_service->getAll();
 

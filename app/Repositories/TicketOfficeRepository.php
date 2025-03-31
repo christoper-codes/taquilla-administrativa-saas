@@ -13,7 +13,7 @@ class TicketOfficeRepository implements TicketOfficeRepositoryInterface
     */
     public function getAll()
     {
-        return TicketOffice::all();
+        return TicketOffice::where('is_active', true)->get();
     }
 
     public function getById($id)

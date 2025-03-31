@@ -16,6 +16,7 @@ Dia de compra: {{ $generic_data['sale_date'] }}
 Identificador: HDX-{{ $generic_data['folio'] }}
 Status: En proceso
 Folio: #{{ $generic_data['folio'] }}
+Vendedor: {{ trim(implode(' ', array_filter([ $generic_data['seller_user']['first_name'], $generic_data['seller_user']['middle_name'], $generic_data['seller_user']['last_name'] ]))) }}
 </pre>
 
 
@@ -78,26 +79,31 @@ Folio: #{{ $generic_data['folio'] }}
             <thead>
                 <tr>
                     <th class="text-left">USUARIO</th>
+                    <th class="text-right">GENERO</th>
+                    <th class="text-right">TALLA</th>
                     <th class="text-left">ZONA</th>
                     <th class="text-left">FILA</th>
                     <th class="text-right">ASIENTO</th>
                     <th class="text-right">TIPO</th>
                     <th class="text-right">CASHBACK</th>
                     <th class="text-right">PRECIO ABONADO</th>
-                    <th class="text-right">QR</th>
+
+                    {{-- <th class="text-right">QR</th> --}}
                 </tr>
             </thead>
             <tbody>
                 @foreach($pdf_data as $data)
                     <tr>
                         <td class="text-right">{{ $data['holder_name']  . ' ' .  $data['holder_last_name'] }}</td>
+                        <td class="text-right">{{ $data['holder_jersey_type'] }}</td>
+                        <td class="text-right">{{ $data['holder_jersey_size'] }}</td>
                         <td class="text-right">{{ $data['zone_type']  }}</td>
                         <td class="text-right">{{ $data['row']  }}</td>
                         <td class="text-right">{{ $data['seat']  }}</td>
                         <td class="text-right">{{ $data['seat_type']  }}</td>
                         <td class="text-right">{{ $data['percentage_cashback']  }}%</td>
                         <td class="text-right">${{ $data['final_price'] }}</td>
-                        <td class="text-right"><img src="{{ $data['qr_img'] }}" alt="QR Code"></td>
+                        {{-- <td class="text-right"><img src="{{ $data['qr_img'] }}" alt="QR Code"></td> --}}
                     </tr>
                 @endforeach
 
@@ -106,10 +112,12 @@ Folio: #{{ $generic_data['folio'] }}
 
         <div style="margin-top: 30px; text-align: right">
             @foreach($generic_data['global_payment_types'] as $data)
-                <p><strong>Tipo de pago:</strong> {{ $data['name']}}</p>
+                <p><strong>Tipo de pago:</strong> {{ $data['name']}} {{  count($generic_data['global_payment_types']) > 1 ? '$'.number_format($data['pivot']['amount'], 2, '.', ''):'' }}</p>
             @endforeach
-            <p><strong>Pago MSI:</strong> {{ $generic_data['payment_in_installments']}}</p>
-            <p><strong>Importe del abono:</strong> ${{ $generic_data['total_amount'] }}</p>
+            @if ($generic_data['payment_in_installments'])
+                <p><strong>Pago MSI:</strong> {{ $generic_data['payment_in_installments']}} meses</p>
+            @endif
+            <p><strong>Importe del abono:</strong> ${{ number_format($generic_data['total_amount'], 2, '.', '') }}</p>
         </div>
 
         <div style="font-size: 12px;  margin-top: 30px; background: #f2f2f2; padding-top:10px; padding-bottom: 10px; padding-left: 20px; padding-right: 20px; border-radius: 15px;">

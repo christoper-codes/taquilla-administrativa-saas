@@ -3,7 +3,10 @@ import { nextTick, onMounted, ref, onBeforeMount, watch, computed } from 'vue';
 import EstadioHdx from '@/Components/SectionsHdx/EstadioHdx.vue';
 import ZonaA from '@/Components/SectionsHdx/ZonaA.vue';
 import ZonaC from '@/Components/SectionsHdx/ZonaC.vue';
+import ZonaB from '@/Components/SectionsHdx/ZonaB.vue';
+import ZonaE from '@/Components/SectionsHdx/ZonaE.vue';
 import ZonaF from '@/Components/SectionsHdx/ZonaF.vue';
+import ZonaH from '@/Components/SectionsHdx/ZonaH.vue';
 import panzoom from 'panzoom';
 import ErrorSession from '@/Components/ErrorSession.vue';
 import Loader from '@/Components/Loader.vue';
@@ -23,14 +26,18 @@ const props = defineProps({
 
 const dataEvent = ref({
     event: null,
+    c_zone: null,
+    c_rows: null,
     a_zone: null,
     a_rows: null,
     b_zone: null,
     b_rows: null,
-    c_zone: null,
-    c_rows: null,
+    e_zone: null,
+    e_rows: null,
     f_zone: null,
     f_rows: null,
+    h_zone: null,
+    h_rows: null,
 });
 
 const statuses = ref([]);
@@ -133,7 +140,7 @@ const updateSeats = (zones) => {
         }
     };
 
-    ["a_zone", "b_zone", "c_zone", "f_zone"].forEach((zone) => {
+    ["c_zone","a_zone", "b_zone", "e_zone", "f_zone", "h_zone"].forEach((zone) => {
         if (zones[zone].length) {
             const data = updateZone(dataEvent.value[zone], zones[zone]);
 
@@ -166,6 +173,13 @@ const handleSectionClick = (section) => {
     const stadiumHdxImgID = '#stadium-hdx-img';
 
     const zones = {
+        zonaC: {
+            loadSvg: 'zonaC',
+            viewSelectedSection: 'Zona C',
+            rows: dataEvent.value.c_rows,
+            classListRemove: 'tw-rotate-0',
+            classListAdd: 'tw-rotate-90',
+        },
         zonaA: {
             loadSvg: 'zonaA',
             viewSelectedSection: 'Zona A',
@@ -173,10 +187,17 @@ const handleSectionClick = (section) => {
             classListRemove: 'tw-rotate-0',
             classListAdd: 'tw-rotate-90',
         },
-        zonaC: {
-            loadSvg: 'zonaC',
-            viewSelectedSection: 'Zona C',
-            rows: dataEvent.value.c_rows,
+        zonaB: {
+            loadSvg: 'zonaB',
+            viewSelectedSection: 'Zona B',
+            rows: dataEvent.value.b_rows,
+            classListRemove: 'tw-rotate-0',
+            classListAdd: 'tw-rotate-90',
+        },
+        zonaE: {
+            loadSvg: 'zonaE',
+            viewSelectedSection: 'Zona E',
+            rows: dataEvent.value.e_rows,
             classListRemove: 'tw-rotate-0',
             classListAdd: 'tw-rotate-90',
         },
@@ -186,7 +207,14 @@ const handleSectionClick = (section) => {
             rows: dataEvent.value.f_rows,
             classListRemove: 'tw-rotate-0',
             classListAdd: 'tw-rotate-90',
-        }
+        },
+        zonaH: {
+            loadSvg: 'zonaH',
+            viewSelectedSection: 'Zona H',
+            rows: dataEvent.value.h_rows,
+            classListRemove: 'tw-rotate-0',
+            classListAdd: 'tw-rotate-90',
+        },
     }
 
     loadSvg(zones[section].loadSvg);
@@ -223,14 +251,18 @@ const loadEvent = () => {
     axios.get(route('event.management.showManagement', props.event.id)).then((response) => {
 
         dataEvent.value.event = response.data.event;
+        dataEvent.value.c_zone = response.data.c_zone;
+        dataEvent.value.c_rows = getUniqueRows(response.data.c_zone);
         dataEvent.value.a_zone = response.data.a_zone;
         dataEvent.value.a_rows = getUniqueRows(response.data.a_zone);
         dataEvent.value.b_zone = response.data.b_zone;
         dataEvent.value.b_rows = getUniqueRows(response.data.b_zone);
-        dataEvent.value.c_zone = response.data.c_zone;
-        dataEvent.value.c_rows = getUniqueRows(response.data.c_zone);
+        dataEvent.value.e_zone = response.data.e_zone;
+        dataEvent.value.e_rows = getUniqueRows(response.data.e_zone);
         dataEvent.value.f_zone = response.data.f_zone;
         dataEvent.value.f_rows = getUniqueRows(response.data.f_zone);
+        dataEvent.value.h_zone = response.data.h_zone;
+        dataEvent.value.h_rows = getUniqueRows(response.data.h_zone);
     })
         .catch((error) => {
             console.error('Error:', error);
@@ -273,17 +305,29 @@ const listOfSeatsToSelect = (selectedSection, rows) => {
 
     let seats = [];
 
-    if (selectedSection === 'zonaA') {
+    if (selectedSection === 'zonaC') {
+
+        seats = dataEvent.value.c_zone.filter((seat) => rows.includes(seat.seat_catalogue.row));
+
+    } else if (selectedSection === 'zonaA') {
 
         seats = dataEvent.value.a_zone.filter((seat) => rows.includes(seat.seat_catalogue.row));
 
-    } else if (selectedSection === 'zonaC') {
+    } else if (selectedSection === 'zonaB') {
 
-        seats = dataEvent.value.c_zone.filter((seat) => rows.includes(seat.seat_catalogue.row));
+        seats = dataEvent.value.b_zone.filter((seat) => rows.includes(seat.seat_catalogue.row));
+
+    } else if (selectedSection === 'zonaE') {
+
+        seats = dataEvent.value.e_zone.filter((seat) => rows.includes(seat.seat_catalogue.row));
 
     } else if (selectedSection === 'zonaF') {
 
         seats = dataEvent.value.f_zone.filter((seat) => rows.includes(seat.seat_catalogue.row));
+
+    } else if (selectedSection === 'zonaH') {
+
+        seats = dataEvent.value.h_zone.filter((seat) => rows.includes(seat.seat_catalogue.row));
     }
 
     seatsAutoClic.value = seats;
@@ -464,17 +508,29 @@ const getStatus = (status) => {
                         <div v-if="isSvgVisible">
                             <EstadioHdx @handle-section-click="handleSectionClick" />
                         </div>
-                        <div v-if="selectedSection == 'zonaA'" class="">
-                            <ZonaA @add-seat="addSeat" v-bind:action="'status'" v-bind:seats="dataEvent.a_zone"
-                                v-bind:seatsSelected="seatsSelected" v-bind:seatsAutoClic="seatsAutoClic" />
-                        </div>
                         <div v-if="selectedSection == 'zonaC'" class="">
                             <ZonaC @add-seat="addSeat" v-bind:action="'status'" v-bind:seats="dataEvent.c_zone"
-                                v-bind:seatsSelected="seatsSelected" />
+                                v-bind:seatsSelected="seatsSelected" v-bind:seatsAutoClic="seatsAutoClic"/>
+                        </div>
+                        <div v-if="selectedSection == 'zonaA'" class="">
+                            <ZonaA @add-seat="addSeat" v-bind:action="'status'" v-bind:seats="dataEvent.a_zone"
+                                v-bind:seatsSelected="seatsSelected" v-bind:seatsAutoClic="seatsAutoClic"/>
+                        </div>
+                        <div v-if="selectedSection == 'zonaB'" class="">
+                            <ZonaB @add-seat="addSeat" v-bind:action="'status'" v-bind:seats="dataEvent.b_zone"
+                                v-bind:seatsSelected="seatsSelected" v-bind:seatsAutoClic="seatsAutoClic"/>
+                        </div>
+                        <div v-if="selectedSection == 'zonaE'" class="">
+                            <ZonaE @add-seat="addSeat" v-bind:action="'status'" v-bind:seats="dataEvent.e_zone"
+                                v-bind:seatsSelected="seatsSelected" v-bind:seatsAutoClic="seatsAutoClic"/>
                         </div>
                         <div v-if="selectedSection == 'zonaF'" class="">
                             <ZonaF @add-seat="addSeat" v-bind:action="'status'" v-bind:seats="dataEvent.f_zone"
-                                v-bind:seatsSelected="seatsSelected" />
+                                v-bind:seatsSelected="seatsSelected" v-bind:seatsAutoClic="seatsAutoClic"/>
+                        </div>
+                        <div v-if="selectedSection == 'zonaH'" class="">
+                            <ZonaH @add-seat="addSeat" v-bind:action="'status'" v-bind:seats="dataEvent.h_zone"
+                                v-bind:seatsSelected="seatsSelected" v-bind:seatsAutoClic="seatsAutoClic"/>
                         </div>
                     </div>
                 </div>
@@ -551,7 +607,7 @@ const getStatus = (status) => {
                                 class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-7 tw-my-4">
                                 <div class="text-center">
                                     <v-btn @click="savePromotionSeat" :loading="loadingSavePromotion">
-                                        Guardar Promociones
+                                        Guardar Status
                                     </v-btn>
                                 </div>
                             </div>

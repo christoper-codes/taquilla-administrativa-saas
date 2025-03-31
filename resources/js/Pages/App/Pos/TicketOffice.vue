@@ -104,6 +104,43 @@ const closeCashRegister = (isActive) => {
     });
 }
 
+const getCashRegisterSummary = () => {
+    loading.value = true;
+    const data = {
+        'cash_register_id': props.active_cash_register.id,
+        'seller_user_closing_id': props.auth_user.id,
+        'ticket_office_id': props.ticket_office.id,
+    };
+
+    axios.post(route('cash-registers.summary'), data)
+    .then(response => {
+
+        toast(response.data.message, {
+            "theme": "auto",
+            "type": "success",
+            "dangerouslyHTMLString": true
+        })
+
+        if(response.data.pdf) {
+            const pdfContent = atob(response.data.pdf);
+            const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
+            const pdfUrl = window.URL.createObjectURL(pdfBlob);
+            printInKioskMode(pdfUrl, false);
+        }
+    })
+    .catch(error => {
+        toast(error.response.data.message, {
+            "theme": "auto",
+            "type": "error",
+            "autoClose": 10000,
+            "dangerouslyHTMLString": true
+        })
+    })
+    .finally(() => {
+        loading.value = false;
+    });
+}
+
 const props = defineProps({
     'ticket_office': {
         type: Object,
@@ -352,7 +389,7 @@ const pdf = () => {
                                 Regresar al inicio
                             </div>
                         </Link >
-                        <v-btn @click="pdf">Pdf</v-btn>
+                        <!-- <v-btn @click="pdf">Pdf</v-btn> -->
 
                         <h2 class="lg:tw-text-4xl tw-text-3xl tw-font-bold">{{ ticket_office.name }}. Administracion para el club halcones de xalapa</h2>
                         <div class="tw-py-2 tw-px-5 tw-border-l-4 tw-border-l-purple-500 tw-w-full tw-bg-purple-200 tw-text-purple-600">
@@ -488,7 +525,16 @@ const pdf = () => {
                                 </v-toolbar-items>
                             </v-toolbar>
                             <div v-if="active_cash_register" class="tw-w-full tw-max-w-[90%] tw-mx-auto tw-mt-10">
-                                <div class="tw-text-4xl tw-font-bold"> <span class="tw-text-purple-600">Apertura:</span> {{ dateFormat(active_cash_register.created_at) }}</div>
+
+                                <div class="tw-grid tw-grid-cols-2 tw-gap-10">
+                                    <div class="tw-p-5 tw-flex tw-items-start tw-justify-center tw-flex-col tw-gap-3">
+                                        <div class="tw-text-4xl tw-font-bold"> <span class="tw-text-purple-600">Apertura:</span> {{ dateFormat(active_cash_register.created_at) }}</div>
+                                    </div>
+                                    <div class="tw-p-5 tw-flex tw-items-end tw-justify-center tw-flex-col tw-gap-3">
+                                        <v-btn @click="getCashRegisterSummary()" :loading="loading" variant="elevated" class="text-none !tw-bg-blue-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Imprimir Corte</v-btn>
+                                    </div>
+                                </div>
+
                                 <div class="tw-grid tw-grid-cols-4 tw-gap-10  tw-mt-10">
                                     <div class="tw-p-5 tw-rounded-xl tw-shadow-xl tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-3">
                                         <div class="tw-bg-gray-100 tw-py-2 tw-px-4 tw-rounded-full tw-text-sm">Usuario vendedor</div>
