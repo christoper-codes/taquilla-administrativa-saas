@@ -10,7 +10,7 @@ class WalletAccountTemporalController extends Controller
 {
     public function index()
     {
-        $user = Auth::user()->load('globalImages');
+        $user = Auth::user()->load('globalImages', 'userRoles');
         return Inertia::render('App/Member/DigitalCards', [
             'user' => $user
         ]);

@@ -45,7 +45,7 @@ class RegisteredUserController extends Controller
 
     public function createUser(): Response
     {
-        $user = Auth::user()->load('globalImages');
+        $user = Auth::user()->load('globalImages', 'userRoles');
         $users = $this->user_service->getAll()->load('userRoles');
         $roles = UserRole::all();
         return Inertia::render('App/Pos/CreateUser', [

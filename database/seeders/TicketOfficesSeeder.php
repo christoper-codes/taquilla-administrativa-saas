@@ -31,18 +31,18 @@ class TicketOfficesSeeder extends Seeder
         */
         $seller_user = User::create([
             'user_gender_id' => 4,
-            'first_name' => 'Juan',
-            'middle_name' => 'Carlos',
-            'last_name' => 'Hernández',
-            'username' => 'juan-carlos-hdz',
+            'first_name' => 'as100',
+            'middle_name' => 'as100',
+            'last_name' => 'as100',
+            'username' => 'as-100',
             'birthdate' =>  Carbon::now(),
-            'email' => 'juan.carlos.hdz@example.com',
+            'email' => 'as100@gmail.com',
             'color' => 'purple',
             'is_active' => true,
             'password' => Hash::make('123456789'),
         ]);
 
-        $seller_user->userRoles()->attach(2, ['is_active' => true]);
+        $seller_user->userRoles()->attach(5, ['is_active' => true]);
 
 
         /*

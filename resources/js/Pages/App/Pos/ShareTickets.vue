@@ -10,8 +10,6 @@ import SaleTicket from '@/Components/SaleTicket.vue';
 import { shareTicketSchema } from '@/validation/Administration/share-tickets-schema';
 import InputError from '@/Components/InputError.vue';
 
-
-
 const { handleSubmit } = useForm({validationSchema : shareTicketSchema});
 
 const data  = useFormInertia({
@@ -242,7 +240,6 @@ props.users.forEach(element => {
                                     <v-btn variant="tonal" color="purple" size="large" rounded="xl" class="text-none"><span class="material-symbols-outlined tw-text-lg">note_stack</span>Obtener boletos</v-btn>
                                 </Link>
                             </div>
-                            <img class="tw-w-80" src="https://i.ibb.co/ck1SGFJ/Group.png" />
                         </div>
                     </v-tabs-window-item>
                 </v-tabs-window>

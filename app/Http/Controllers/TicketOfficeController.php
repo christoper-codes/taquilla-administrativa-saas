@@ -89,7 +89,7 @@ class TicketOfficeController extends Controller
 
             //Lista de tickets y eventos, usuarios
 
-            $user = Auth::user()->load('globalImages');
+            $user = Auth::user()->load('globalImages', 'userRoles');
             $users = User::all();
 
             $tickets = $user->EventSeatCatalogues()
@@ -122,7 +122,7 @@ class TicketOfficeController extends Controller
     {
         try {
 
-            $user = Auth::user()->load('globalImages');
+            $user = Auth::user()->load('globalImages', 'userRoles');
             $users = User::all();
 
             $tickets = $user->EventSeatCatalogues()

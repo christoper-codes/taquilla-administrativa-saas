@@ -37,7 +37,7 @@ class AgreementController extends Controller
     {
         try {
 
-            $user = Auth::user()->load('globalImages');
+            $user = Auth::user()->load('globalImages', 'userRoles');
             $agreements = $this->agreement_service->getAll();
             $institutions = $this->institution_service->getAll();
             $global_seasons = $this->global_season_service->getAll();

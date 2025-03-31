@@ -33,7 +33,7 @@ class SeatCatalogueController extends Controller
     {
         try{
 
-            $user = Auth::user()->load('globalImages');
+            $user = Auth::user()->load('globalImages', 'userRoles');
             $flash = $user->is_new ? 'is_new_user' : null;
             $tickets = $user->EventSeatCatalogues()
                 ->with('event', 'seatCatalogue', 'seatCatalogueStatus')
@@ -221,7 +221,7 @@ class SeatCatalogueController extends Controller
             }
 
             $out = new \Symfony\Component\Console\Output\ConsoleOutput();
-            $out->writeln("Se ejecuta");
+            $out->writeln("done");
 
 
             $save_all_seats_for_stadium = $this->seat_catalogue_service->saveAllSeatsForStadium($data_seats_for_stadium);

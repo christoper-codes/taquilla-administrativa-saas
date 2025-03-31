@@ -19,5 +19,12 @@ class SalesTicketCancellationCodesSeeder extends Seeder
             'description' => 'codigo de cancelacion para la taquilla halcones',
             'is_active' => true
         ]);
+
+        SalesTicketCancellationCode::create([
+            'ticket_office_id' => 3,
+            'cancellation_code' => 654321,
+            'description' => 'codigo de cancelacion para la taquilla test 1',
+            'is_active' => true
+        ]);
     }
 }
