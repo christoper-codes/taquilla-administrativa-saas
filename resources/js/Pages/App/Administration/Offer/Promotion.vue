@@ -25,7 +25,7 @@ const headersPromotions = [
     { title: 'Estatus', align: 'start', sortable: true, key: 'is_active' },
     { title: 'Asientos Nec.', align: 'start', sortable: true, key: 'generic_seats_allowed' },
     { title: 'Asientos Reg.', align: 'start', sortable: true, key: 'promotional_seats_allowed' },
-    { title: 'Prom. Permit.', align: 'start', sortable: true, key: 'promotional_seats_allowed' },
+    { title: 'Prom. Permit.', align: 'start', sortable: true, key: 'maximun_promotions_allowed' },
     { title: '% Desc.', align: 'start', sortable: true, key: 'percent_allow' },
     { title: 'Aplica', align: 'start', sortable: true, key: 'is_active_online' },
     { title: 'Acciones', key: 'actions', sortable: false }

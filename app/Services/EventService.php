@@ -10,6 +10,7 @@ use App\Models\EventSeatCatalogPriceType;
 use App\Models\PriceTypeSeatCatalogue;
 use App\Models\SaleTicket;
 use App\Models\SaleTicketStatus;
+use App\Models\GlobalCardPaymentType;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Endroid\QrCode\Builder\Builder;
@@ -90,10 +91,12 @@ class EventService
             });
 
             // Inicializar zonas
+            $c_zone = $zones->get('C', collect());
             $a_zone = $zones->get('A', collect());
             $b_zone = $zones->get('B', collect());
-            $c_zone = $zones->get('C', collect());
+            $e_zone = $zones->get('E', collect());
             $f_zone = $zones->get('F', collect());
+            $h_zone = $zones->get('H', collect());
 
             /*
             * purchase types available
@@ -121,10 +124,12 @@ class EventService
 
             $reponse = [
                 'event' => $event,
+                'c_zone' => $c_zone,
                 'a_zone' => $a_zone,
                 'b_zone' => $b_zone,
-                'c_zone' => $c_zone,
+                'e_zone' => $e_zone,
                 'f_zone' => $f_zone,
+                'h_zone' => $h_zone,
                 'user_roles' => $user_roles,
                 'global_payment_types' => $global_payment_types,
                 'global_card_payment_types' => $global_card_payment_types,
@@ -348,6 +353,7 @@ class EventService
                 }
             }
 
+
             $event_seat_catalogues = [];
             $pdf_data = [];
 
@@ -361,6 +367,23 @@ class EventService
                 $saleTicket->events()->attach($event->id, [
                     'is_active' => true,
                 ]);
+
+                /**
+                 * Add Card Payment Type
+                 */
+                $saleTicket->globalPaymentTypes->each(function ($global_payment_type) {
+
+                    $global_payment_type->pivot->amount;
+
+                    if ($global_payment_type->pivot->global_card_payment_type_id) {
+
+                        $globalCardPaymentType = GlobalCardPaymentType::find($global_payment_type->pivot->global_card_payment_type_id);
+
+                        if ($globalCardPaymentType) {
+                            $global_payment_type->name .= " (".$globalCardPaymentType->name.")";
+                        }
+                    }
+                });
 
                 foreach ($data['seats'] as $seat) {
                     $qr = $data['purchase_type'] === 'serie' ? $seat_qrs[$seat['seat_catalogue']['code']] : 'qr_evento_' . $event->id . '_asiento_' . $seat['seat_catalogue']['code'] . '_ticket_' . $saleTicket->id . '_key_' . uniqid();
@@ -427,6 +450,7 @@ class EventService
                     /*
                     * pdf structure
                     */
+
                     $pdf_data[] = [
                         'event_name' => $event->name,
                         'event_start_date' => $event->start_date,
@@ -440,6 +464,7 @@ class EventService
                         'qr' => $qr,
                         'final_price' => $seat['final_price'],
                         'ticket_id' => $saleTicket->id,
+                        'seller_user' => $saleTicket->sellerUser,
                         'ticket_created_at' => $saleTicket->created_at,
                         'cash_register_type' => $cash_register->cash_register_type_id,
                         'is_owner' => $seat['is_owner'] ?? false,
@@ -450,6 +475,10 @@ class EventService
                         'holder_zip_code' => $seat['holder_zip_code'] ?? null,
                         'holder_phone' => $seat['holder_phone'] ?? null,
                         'holder_email' => $seat['holder_email'] ?? null,
+                        'holder_jersey_type' => $seat['holder_jersey_type'] ?? null,
+                        'holder_jersey_size' => $seat['holder_jersey_size'] ?? null,
+                        'global_payment_types' => $saleTicket->globalPaymentTypes,
+                        'payment_in_installments' => $saleTicket->payment_in_installments
                     ];
                 }
             }
@@ -527,6 +556,7 @@ class EventService
                     'event_name' => $event_seat_catalogue->event->name,
                     'event_start_date' => $event_seat_catalogue->event->start_date,
                     'seat_code' => $event_seat_catalogue->seatCatalogue->code,
+                    'seller_user' => $sale_ticket->sellerUser,
                     'qr_img' => $qr_img,
                     'qr' => $event_seat_catalogue->qr,
                     'final_price' => $event_seat_catalogue->price,

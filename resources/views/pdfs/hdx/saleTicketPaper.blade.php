@@ -1,3 +1,7 @@
+@php
+    use Carbon\Carbon;
+    Carbon::setLocale('es');
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +14,7 @@
 
     @foreach($pdf_data as $data)
         <div class="ticket">
-            <h1>LOS HALCONES DE XALAPA</h1>
+            <h1>HALCONES DE XALAPA</h1>
             <p class="info" style="margin-top: 20px;">
                 Cultura Veracruzana, Zona Universitaria,<br>
                 Campus Cad, Xalapa Enriquez, 91094
@@ -20,10 +24,19 @@
                 <tr>
                     <td class="w-half-left">
                         <p>Taquilla: Taquilla halcones</p>
-                        <p>Fecha de compra: {{ $data['ticket_created_at'] }}</p>
+                        <p>Vendedor: {{
+                            trim(implode(' ', array_filter([
+                                $data['seller_user']['first_name'],
+                                $data['seller_user']['middle_name'],
+                                $data['seller_user']['last_name']
+                            ])))
+                            }}
+                        </p>
+                        <p>Fecha de compra: {{ Carbon::parse($data['ticket_created_at'])->translatedFormat('d F, Y h:i A') }}</p>
                     </td>
                     <td class="w-half-right">
                         <p>Folio de Venta: {{ $data['ticket_id'] }}</p>
+                        <p></p>
                         <p>Caja registradora: {{ $data['cash_register_type'] }}</p>
                     </td>
                 </tr>
@@ -38,11 +51,11 @@
                 <tr>
                     <td class="w-half-left">
                         <p>Lugar: USBI "Nido de los Halcones"</p>
-                        <p>Fecha del evento: {{ $data['event_start_date'] }}</p>
+                        <p>Fecha del evento: {{  Carbon::parse($data['event_start_date'])->translatedFormat('d F, Y h:i A') }}</p>
                     </td>
                     <td class="w-half-right">
                         <p>Boletos: 1</p>
-                        <p>Total: {{ $data['final_price'] }}</p>
+                        <p>Total: ${{  number_format($data['final_price'], 2, '.', '') }}</p>
                     </td>
                 </tr>
             </table>

@@ -12,6 +12,14 @@ export default function useDateFormat() {
         return date.toLocaleDateString('es-ES', options);
     };
 
+    const formatDateForDisplay = (date) => {
+        return new Date(date).toLocaleString('es-MX', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
+    };
+
     const formatDateForDataInput = (date) => {
         return new Date(date);
     };
@@ -50,6 +58,7 @@ export default function useDateFormat() {
         formatDateForDataInput,
         formatHourForTimePicker,
         dateFormat,
-        combineDateTimeForDatabase
+        combineDateTimeForDatabase,
+        formatDateForDisplay
     }
 }
