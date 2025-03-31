@@ -217,6 +217,10 @@ const addSeat = (seat) => {
 }
 
 
+const getHolderInfo = (field) => {
+  const ownerSeat = seatsSelected.value.find(item => item.is_owner === "Si");
+  return ownerSeat ? ownerSeat[field] : "No disponible";
+};
 
 /*
 * handle global payment types
@@ -2397,7 +2401,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                 </v-card>
                                                             </template>
                                                         </v-dialog>
-                                                        <v-dialog max-width="600">
+                                                        <v-dialog max-width="800">
                                                             <template v-slot:activator="{ props: activatorProps }">
                                                                 <v-btn id="on-submit-confirm" v-bind="activatorProps" variant="elevated" class="!tw-hidden text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
                                                             </template>
@@ -2405,6 +2409,68 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                 <v-card>
                                                                 <v-card-text>
                                                                     <p class="tw-font-bold tw-text-sm lg:tw-text-xl tw-text-gray-700">¿Estas seguro de realizar la compra?</p>
+                                                                    <v-card-title class="tw-mt-4">Pago</v-card-title>
+                                                                    <v-card-subtitle class="tw-mb-4">
+                                                                        <v-row>
+                                                                            <v-col cols="12" md="4">
+                                                                                <strong>Metodos de Pago: </strong>{{ paymentTypesSelected.map(payment => formatFirstLetterUppercase(payment.name)).join(', ') }}
+                                                                            </v-col>
+                                                                            <v-col cols="12" md="4">
+                                                                                <strong>Tipo de Compra: </strong>{{ installmentSale ? "Pago a plazos" : "Pago al contado" }}
+                                                                            </v-col>
+                                                                        </v-row>
+                                                                        <v-row>
+                                                                            <v-col cols="12" md="4">
+                                                                                <strong>Promocion: </strong>{{ selectedPromotion ? `${selectedPromotion.name} (${formatFirstLetterUppercase(selectedPromotion.type)})` :'' }}
+                                                                            </v-col>
+                                                                        </v-row>
+                                                                    </v-card-subtitle>
+
+                                                                    <!-- Tabla de asientos seleccionados -->
+                                                                        <v-card-title class="tw-mt-4">Asientos</v-card-title>
+                                                                        <v-data-table :items="seatsSelected" class="" hide-default-footer items-per-page="-1">
+                                                                            <template v-slot:headers>
+                                                                            <tr>
+                                                                                <th>Asiento</th>
+                                                                                <th>Tipo</th>
+                                                                                <th>Precio</th>
+                                                                                <th>Promoción</th>
+                                                                                <th>Abonado</th>
+                                                                                <th>Titular</th>
+                                                                                <th>Género</th>
+                                                                                <th>Talla</th>
+                                                                            </tr>
+                                                                            </template>
+                                                                            <template v-slot:item="{ item }">
+                                                                            <tr>
+                                                                                <td>{{ item.seat_catalogue.code }}</td>
+                                                                                <td>{{ item.seat_catalogue.seat_type.name }}</td>
+                                                                                <td>{{ formatPrice(item.final_price) }}</td>
+                                                                                <td>{{ item.promotion_id ? "Aplicada": '' }}</td>
+                                                                                <td>{{ `${item.holder_name} ${item.holder_middle_name} ${item.holder_last_name}` }}</td>
+                                                                                <td>{{ item.is_owner }}</td>
+                                                                                <td>{{ item.holder_jersey_type }}</td>
+                                                                                <td>{{ item.holder_jersey_size }}</td>
+                                                                            </tr>
+                                                                            </template>
+                                                                        </v-data-table>
+
+                                                                        <!-- Información del titular antes de la tabla -->
+                                                                        <v-card-title class="tw-mt-4">Información del Titular</v-card-title>
+                                                                        <v-card-subtitle class="tw-mb-4">
+                                                                            <v-row>
+                                                                                <v-col cols="12" md="4">
+                                                                                    <strong>Código Postal: </strong>{{ getHolderInfo('holder_zip_code') }}
+                                                                                </v-col>
+                                                                                <v-col cols="12" md="4">
+                                                                                    <strong>Teléfono: </strong>{{ getHolderInfo('holder_phone') }}
+                                                                                </v-col>
+                                                                                <v-col cols="12" md="4">
+                                                                                    <strong>Email: </strong>{{ getHolderInfo('holder_email') }}
+                                                                                </v-col>
+                                                                            </v-row>
+                                                                        </v-card-subtitle>
+
                                                                     <!-- <v-container v-if="viewVendorTopics(user_roles)">
                                                                         <v-row>
                                                                             <v-col xs12 sm6 md4>
@@ -2424,8 +2490,20 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                             </v-col>
                                                                         </v-row>
                                                                     </v-container> -->
-                                                                    <p class="tw-opacity-50 tw-mt-3 tw-text-xs lg:tw-text-base">Subtotal (precio en compra): {{ formatPrice(totalAmount) }}</p>
-                                                                    <p class="tw-font-semibold tw-text-gray-700">Total: {{ formatPrice(totalAmount) }}</p>
+                                                                    <div class="tw-text-right tw-mt-8">
+                                                                        <p class="tw-opacity-50 tw-mt-5 tw-text-xs lg:tw-text-base">
+                                                                            Subtotal (precio en compra): {{ formatPrice(totalAmount) }}
+                                                                        </p>
+                                                                        <p v-if="installmentSale" class="tw-font-semibold tw-text-gray-700 tw-mt-4">
+                                                                            Pago Inicial: {{ formatPrice((parseFloat(amountToPayCard) || 0) + (parseFloat(amountToPayCash) || 0)) }}
+                                                                        </p>
+                                                                        <p class="tw-font-semibold tw-text-gray-700 tw-mt-4">
+                                                                            {{ installmentSale ? 'Total de compra':'Total' }}: {{ formatPrice(totalAmount) }}
+                                                                        </p>
+                                                                        <p v-if="installmentSale" class="tw-font-semibold tw-text-gray-700 tw-mt-4">
+                                                                            Total restante : {{ formatPrice( parseFloat(totalAmount) - ((parseFloat(amountToPayCard) || 0) + (parseFloat(amountToPayCash) || 0))  ) }}
+                                                                        </p>
+                                                                    </div>
                                                                 </v-card-text>
 
                                                                 <v-card-actions class="tw-mb-2 tw-mr-2">

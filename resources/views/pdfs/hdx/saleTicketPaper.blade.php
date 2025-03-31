@@ -33,6 +33,9 @@
                             }}
                         </p>
                         <p>Fecha de compra: {{ Carbon::parse($data['ticket_created_at'])->translatedFormat('d F, Y h:i A') }}</p>
+                        @if ($data['promotion_ticket'])
+                            <p>Promoción aplicada: {{ $data['promotion_ticket']['name'].' - '. Str::ucfirst(str_replace('_', ' ', $data['promotion_ticket']['promotionType']['name'].(  $data['promotion_ticket']['percent_allow'] ? ' ('.$generic_data['promotion_ticket']['percent_allow'].'%)': '')))}}</p>
+                        @endif
                     </td>
                     <td class="w-half-right">
                         <p>Folio de Venta: {{ $data['ticket_id'] }}</p>
