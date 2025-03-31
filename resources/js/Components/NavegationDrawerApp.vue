@@ -4,6 +4,7 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { onMounted, ref } from 'vue';
 import AppNavLink from './AppNavLink.vue';
+import useUserPolicy from '@/composables/UserPolicy';
 
 
 const fav = ref(true);
@@ -14,6 +15,7 @@ const message = ref(false);
 const hints = ref(true);
 const open = ref([]);
 const page = usePage();
+const { viewAdminTopics } = useUserPolicy();
 
 onMounted(() => {
     const superAdmin = ['/create-users', '/indicadores-generales'];
@@ -128,8 +130,11 @@ const props = defineProps({
                                     <span class="material-symbols-outlined tw-text-xl">home</span>Mis boletos
                                 </AppNavLink>
                             </div>
-
-
+                            <div class="tw-w-full ">
+                                <AppNavLink :href="route('ticket-offices.index')" :active="route().current('ticket-offices.index')">
+                                    <span class="material-symbols-outlined tw-text-xl">confirmation_number</span>Taquillas
+                                </AppNavLink>
+                            </div>
                             <div class="tw-w-full ">
                                 <AppNavLink :href="route('events.index')" :active="route().current('events.index')">
                                     <span class="material-symbols-outlined tw-text-xl">note_stack</span>Eventos
@@ -149,7 +154,7 @@ const props = defineProps({
                         </div>
                     </div>
 
-                    <div class="tw-flex tw-flex-col tw-w-full">
+                    <div v-if="viewAdminTopics(user.user_roles)" class="tw-flex tw-flex-col tw-w-full">
                         <h2 class="tw-font-semibold tw-text-sm tw-mb-3">Accesos administrativos</h2>
                         <div class="tw-flex tw-flex-col tw-items-center tw-gap-0 tw-w-full">
 

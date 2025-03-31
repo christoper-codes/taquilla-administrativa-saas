@@ -28,7 +28,7 @@ class IndicatorController extends Controller
     public function index()
     {
         try {
-            $user = Auth::user()->load('globalImages');
+            $user = Auth::user()->load('globalImages', 'userRoles');
 
             $data = ['stadium_id' => 1];
 
@@ -66,7 +66,7 @@ class IndicatorController extends Controller
     public function show($slug, $id)
     {
         try {
-            $user = Auth::user()->load('globalImages');
+            $user = Auth::user()->load('globalImages', 'userRoles');
             $data = ['event_id' => $id];
 
             $history_per_event = $this->sale_ticket_service->getHistoryPerEvent($data);

@@ -96,7 +96,7 @@ class EventController extends Controller
     {
         try {
 
-            $user = Auth::user()->load('globalImages');
+            $user = Auth::user()->load('globalImages', 'userRoles');
 
             $event_types = $this->event_type_service->getAll();
             $series = $this->serie_service->getAll();

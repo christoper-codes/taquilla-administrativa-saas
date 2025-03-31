@@ -30,7 +30,7 @@ class PromotionController extends Controller
     {
         try {
 
-            $user = Auth::user()->load('globalImages');
+            $user = Auth::user()->load('globalImages', 'userRoles');
             $stadiums = $this->stadium_service->getAll();
             $promotion_types = $this->promotion_type_service->getAll();
             $promotions = $this->promotion_service->getAll();
