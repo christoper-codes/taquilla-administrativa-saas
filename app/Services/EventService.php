@@ -438,9 +438,10 @@ class EventService
                     */
                     if($data['purchase_type'] === 'abonado'){
                         $seat['is_owner'] = $seat['is_owner'] == 'Si' ? true : false;
-                        $this->season_ticket_service->save($seat);
+                        $season_ticket = $this->season_ticket_service->save($seat);
+                        $event_seat_catalogue->season_ticket_id = $season_ticket->id;
+                        $event_seat_catalogue->save();
                     }
-
 
                     /**
                      * Load Original Price
