@@ -417,7 +417,10 @@ class EventController extends Controller
                     'total_amount' => $request->total_amount,
                     'global_payment_types' => $response[0]['global_payment_types'],
                     'seller_user' => $response[0]['seller_user'],
-                    'payment_in_installments' => $response[0]['payment_in_installments']
+                    'payment_in_installments' => $response[0]['payment_in_installments'],
+                    'promotion_ticket' => $response[0]['promotion_ticket'],
+                    'sale_debtor' => $response[0]['sale_debtor'],
+                    'installment_payment_histories'=>$response[0]['installment_payment_histories']
                 ];
 
                 $pdf_response = Pdf::loadView('pdfs.hdx.saleTicket', [

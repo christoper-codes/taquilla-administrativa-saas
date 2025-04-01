@@ -12,9 +12,11 @@ import { useForm, useField } from 'vee-validate'
 import useTicketOfficeState from '@/composables/TicketOfficeState';
 import usePriceFormat from '@/composables/priceFormat';
 import useDateFormat from '@/composables/dateFormat';
+import useStringFormat from '@/composables/stringFormat'
 import axios from 'axios';
 import { toast } from 'vue3-toastify'
 
+const { formatFirstLetterUppercase } = useStringFormat();
 const { formatPrice } = usePriceFormat();
 const { dateFormat } = useDateFormat();
 const { handleSubmit } = useForm({validationSchema : cashRegisterSchema});
@@ -214,6 +216,7 @@ const cencellationPasswordEntered = ref('');
 const headers = [
     { title: 'Folio', key: 'Folio' },
     { title: 'Estatus', key: 'Estatus' },
+    { title: 'Promoción', key: 'Promotion' },
     { title: 'Fecha de venta', key: 'Fecha de venta' },
     { title: 'Fue transferido', key: 'Fue transferido' },
     { title: 'Asientos', key: 'Asientos' },
@@ -229,7 +232,7 @@ const headerProps = {
 if (props.cash_register_general_history && props.cash_register_general_history.cash_register) {
     props.cash_register_general_history.sale_tickets.forEach((saleTicket) => {
         const paymentTypes = saleTicket.global_payment_types.map(paymentType => {
-            return `${paymentType.name}: ${formatPrice(paymentType.pivot.amount)}`;
+            return `${paymentType.name}: ${paymentType.pivot.amount}`;
         }).join(', ');
         const seatCatalogues  = saleTicket.event_seat_catalogues.map(seatCatalogue => {
             return `${seatCatalogue.seat_catalogue.code}`
@@ -238,6 +241,7 @@ if (props.cash_register_general_history && props.cash_register_general_history.c
         items.value.push({
             'Folio': saleTicket.id,
             'Estatus': saleTicket.sale_ticket_status.name,
+            'Promotion': saleTicket.promotion,
             'Fecha de venta': dateFormat(saleTicket.created_at),
             'Fue transferido': saleTicket.is_transfer ? 'Si' : 'No',
             'Asientos': seatCatalogues,
@@ -566,6 +570,9 @@ const pdf = () => {
                                             <span class="tw-py-1 tw-px-4 tw-rounded-full" :class="item.Estatus === 'pagado' ? '!tw-text-green-600 tw-bg-green-100' : '!tw-text-red-600 tw-bg-red-100'">
                                                 {{ item.Estatus }}
                                             </span>
+                                        </template>
+                                        <template v-slot:item.Promotion="{ item }">
+                                            {{ item.Promotion ? `${item.Promotion.name} (${ formatFirstLetterUppercase(item.Promotion.promotion_type.name) })` : '' }}
                                         </template>
                                         <template v-slot:item.Acciones="{ item }">
                                             <div class="tw-flex tw-items-center tw-gap-3 tw-justify-between !tw-my-3">

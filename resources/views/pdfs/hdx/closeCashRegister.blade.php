@@ -43,7 +43,8 @@
             <thead>
                 <tr>
                     <th class="text-left">Tipo de Pago</th>
-                    <th class="text-right">Monto</th>
+                    <th class="text-right">Monto Inicial</th>
+                    <th class="text-right">Monto Total</th>
                     <th class="text-right">Transacciones</th>
                     <th class="text-right">Asientos</th>
                 </tr>
@@ -52,10 +53,18 @@
                 @foreach ($pdf_data['type_payments'] as $payment_type => $value)
                     <tr>
                         <td class="text-left">{{ $payment_type }}</td>
-
                         @if (isset($value['amount']) && $value['amount'])
+                            <td class="text-right">${{ number_format($value['initial_amount'], 2, '.', ',') }} MXN</td>
                             <td class="text-right">${{ number_format($value['amount'], 2, '.', ',') }} MXN</td>
                         @elseif (isset($value['amountList']) && $value['amountList'])
+                            <td class="text-right">
+                                @foreach ($value['initial_amount_list'] as $method => $amount_data)
+                                    @if (isset($amount_data['amount']) && $amount_data['amount'])
+                                        ${{ number_format($amount_data['amount'], 2, '.', ',') }} MXN ({{ ucfirst($method) }})
+                                        @if (!$loop->last) <br> @endif
+                                    @endif
+                                @endforeach
+                            </td>
                             <td class="text-right">
                                 @foreach ($value['amountList'] as $method => $amount_data)
                                     @if (isset($amount_data['amount']) && $amount_data['amount'])
@@ -74,17 +83,60 @@
 
         <div class="line"></div>
 
-        <table class="w-full" style="margin-top: 40px; border-collapse: collapse;">
+        <h4 style="margin-top: 40px;">Venta Normal</h4>
+        <table class="w-full" style="margin-top: 20px; border-collapse: collapse;">
             <thead>
                 <tr>
                     <th class="text-left">Tipo de venta</th>
                     <th class="text-right">Ventas</th>
+                    <th class="text-right">Asientos</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($pdf_data['type_sales'] as $type_sale => $value)
                     <tr>
                         <td class="text-left">{{ $type_sale }}</td>
+                        <td class="text-right">{{ $value['transaction'] }}</td>
+                        <td class="text-right">{{ $value['sales'] }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <h4 style="margin-top: 20px;">Venta Aplazos</h4>
+        <table class="w-full" style="margin-top: 20px; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th class="text-left">Tipo de venta</th>
+                    <th class="text-right">Ventas</th>
+                    <th class="text-right">Asientos</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($pdf_data['installment_sale'] as $type_sale => $value)
+                    <tr>
+                        <td class="text-left">{{ $type_sale }}</td>
+                        <td class="text-right">{{ $value['transaction'] }}</td>
+                        <td class="text-right">{{ $value['sales'] }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <h4 style="margin-top: 20px;">Venta con pago compuesto</h4>
+        <table class="w-full" style="margin-top: 20px; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th class="text-left">Tipo de venta</th>
+                    <th class="text-right">Ventas</th>
+                    <th class="text-right">Asientos</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($pdf_data['mixed_sale'] as $type_sale => $value)
+                    <tr>
+                        <td class="text-left">{{ $type_sale }}</td>
+                        <td class="text-right">{{ $value['transaction'] }}</td>
                         <td class="text-right">{{ $value['sales'] }}</td>
                     </tr>
                 @endforeach

@@ -417,13 +417,39 @@ class EventService
                         'is_active' => true,
                     ]);
 
+                    /**
+                     * Load Promotion
+                     */
+                    if ($saleTicket->promotion) {
+                        $saleTicket->promotion->loadMissing('promotionType');
+                        $event_seat_catalogue->load(['promotions' => function ($query) use ($saleTicket) {
+                            $query->where('promotion_id', $saleTicket->promotion_id);
+                        }]);
+                    }
+
+                    /**
+                     * Load debtor and details
+                     */
+                    $saleTicket->saleDebtor;
+                    $saleTicket->installmentPaymentHistories;
+
                     /*
                     * Validate if the sale is abonado
                     */
                     if($data['purchase_type'] === 'abonado'){
                         $seat['is_owner'] = $seat['is_owner'] == 'Si' ? true : false;
-                        $this->season_ticket_service->save($seat);
+                        $season_ticket = $this->season_ticket_service->save($seat);
+                        $event_seat_catalogue->season_ticket_id = $season_ticket->id;
+                        $event_seat_catalogue->save();
                     }
+
+                    /**
+                     * Load Original Price
+                     */
+                    $event_seat_catalogue->load(['priceTypes' => function ($query) use ($data) {
+                        $query->where('name', $data['purchase_type']);
+                    }]);
+
 
                     /*
                     * create qr
@@ -478,7 +504,12 @@ class EventService
                         'holder_jersey_type' => $seat['holder_jersey_type'] ?? null,
                         'holder_jersey_size' => $seat['holder_jersey_size'] ?? null,
                         'global_payment_types' => $saleTicket->globalPaymentTypes,
-                        'payment_in_installments' => $saleTicket->payment_in_installments
+                        'payment_in_installments' => $saleTicket->payment_in_installments,
+                        'promotion_ticket' => $saleTicket->promotion,
+                        'promotion' => $event_seat_catalogue->promotions,
+                        'original_price' => $event_seat_catalogue->priceTypes,
+                        'sale_debtor' => $saleTicket->saleDebtor,
+                        'installment_payment_histories'=>$saleTicket->installmentPaymentHistories
                     ];
                 }
             }
@@ -522,6 +553,9 @@ class EventService
             $sale_ticket = SaleTicket::find($sale_ticket_id);
             $cash_register_type = $sale_ticket->cashRegister->cash_register_type_id;
             $event_seat_catalogues = $sale_ticket->EventSeatCatalogues;
+            if ($sale_ticket->promotion) {
+                $sale_ticket->promotion->loadMissing('promotionType');
+            }
             $pdf_data = [];
 
             $event_seat_catalogues->each(function($event_seat_catalogue) use (&$sale_ticket, &$cash_register_type, &$pdf_data) {
@@ -562,7 +596,8 @@ class EventService
                     'final_price' => $event_seat_catalogue->price,
                     'ticket_id' => $sale_ticket->id,
                     'ticket_created_at' => $sale_ticket->created_at,
-                    'cash_register_type' => $cash_register_type
+                    'cash_register_type' => $cash_register_type,
+                    'promotion_ticket' => $sale_ticket->promotion
                 ];
 
             });
