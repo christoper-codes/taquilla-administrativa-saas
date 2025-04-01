@@ -75,6 +75,9 @@ Vendedor: {{ trim(implode(' ', array_filter([ $generic_data['seller_user']['firs
     <div class="ticket">
         <div class="line"></div>
         <h3 style="">Asientos 2025 | Precios aplicados</h3>
+        @if ($generic_data['promotion_ticket'])
+            <p><strong>Promoción aplicada:</strong> {{ $generic_data['promotion_ticket']['name'].' - '. Str::ucfirst(str_replace('_', ' ', $generic_data['promotion_ticket']['promotionType']['name'].(  $generic_data['promotion_ticket']['percent_allow'] ? ' ('.$generic_data['promotion_ticket']['percent_allow'].'%)': '')))}}</p>
+        @endif
         <table width="100%">
             <thead>
                 <tr>
@@ -86,7 +89,10 @@ Vendedor: {{ trim(implode(' ', array_filter([ $generic_data['seller_user']['firs
                     <th class="text-right">ASIENTO</th>
                     <th class="text-right">TIPO</th>
                     <th class="text-right">CASHBACK</th>
-                    <th class="text-right">PRECIO ABONADO</th>
+                    @if ($generic_data['promotion_ticket'])
+                        <th class="text-right">PRECIO   ORIGINAL</th>
+                    @endif
+                    <th class="text-right">PRECIO ABONO</th>
 
                     {{-- <th class="text-right">QR</th> --}}
                 </tr>
@@ -102,6 +108,9 @@ Vendedor: {{ trim(implode(' ', array_filter([ $generic_data['seller_user']['firs
                         <td class="text-right">{{ $data['seat']  }}</td>
                         <td class="text-right">{{ $data['seat_type']  }}</td>
                         <td class="text-right">{{ $data['percentage_cashback']  }}%</td>
+                        @if ($generic_data['promotion_ticket'])
+                            <td class="text-right">${{ number_format($data['original_price'][0]['pivot']['price'], 2, '.', '')?? ''}}</td>
+                        @endif
                         <td class="text-right">${{ $data['final_price'] }}</td>
                         {{-- <td class="text-right"><img src="{{ $data['qr_img'] }}" alt="QR Code"></td> --}}
                     </tr>
@@ -111,6 +120,12 @@ Vendedor: {{ trim(implode(' ', array_filter([ $generic_data['seller_user']['firs
         </table>
 
         <div style="margin-top: 30px; text-align: right">
+
+            <p><strong>Tipo de compra :</strong> {{ $generic_data['sale_debtor'] ? "Pago a plazos" : "Pago al contado" }}</p>
+            @if ($generic_data['sale_debtor'])
+                <p><strong>Pago inicial:</strong> {{ '$'.number_format($generic_data['installment_payment_histories'][0]['total_amount'], 2, '.', '') ?? null }}</p>
+            @endif
+
             @foreach($generic_data['global_payment_types'] as $data)
                 <p><strong>Tipo de pago:</strong> {{ $data['name']}} {{  count($generic_data['global_payment_types']) > 1 ? '$'.number_format($data['pivot']['amount'], 2, '.', ''):'' }}</p>
             @endforeach
@@ -118,6 +133,10 @@ Vendedor: {{ trim(implode(' ', array_filter([ $generic_data['seller_user']['firs
                 <p><strong>Pago MSI:</strong> {{ $generic_data['payment_in_installments']}} meses</p>
             @endif
             <p><strong>Importe del abono:</strong> ${{ number_format($generic_data['total_amount'], 2, '.', '') }}</p>
+
+            @if ($generic_data['sale_debtor'])
+                <p><strong>Total restante:</strong> {{ '$'.number_format((float) ($generic_data['total_amount'] ?? 0) - (float) ($generic_data['installment_payment_histories'][0]['total_amount'] ?? 0), 2, '.', '') }}</p>
+            @endif
         </div>
 
         <div style="font-size: 12px;  margin-top: 30px; background: #f2f2f2; padding-top:10px; padding-bottom: 10px; padding-left: 20px; padding-right: 20px; border-radius: 15px;">

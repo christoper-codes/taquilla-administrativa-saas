@@ -77,19 +77,19 @@ class EventSeatCatalogueService
                 'dorado'    =>
                 [
                     "id" => 5,
-                    "price" => 5090
+                    "price" => 5100
                 ],
                 'purpura'   => [
                     "id" => 6,
-                    "price" => 3490
+                    "price" => 3500
                 ],
                 'fan'       => [
                     "id" => 7,
-                    "price" => 1860
+                    "price" => 1900
                 ],
                 'publico'   => [
                     "id" => 8,
-                    "price" => 1860
+                    "price" => 1900
                 ],
             ];
 

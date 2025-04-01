@@ -17,7 +17,7 @@ class SeatTypesSeeder extends Seeder
             'stadium_id' => 1,
             'name' => 'courtside',
             'code' => 'AA',
-            'percentage_cashback' => 10,
+            'percentage_cashback' => 15,
             'description' => 'courtside',
             'is_active' => true,
         ]);
@@ -26,7 +26,7 @@ class SeatTypesSeeder extends Seeder
             'stadium_id' => 1,
             'name' => 'dorado',
             'code' => 'AB',
-            'percentage_cashback' => 5,
+            'percentage_cashback' => 15,
             'description' => 'dorado',
             'is_active' => true,
         ]);
@@ -35,7 +35,7 @@ class SeatTypesSeeder extends Seeder
             'stadium_id' => 1,
             'name' => 'purpura',
             'code' => 'AC',
-            'percentage_cashback' => 3,
+            'percentage_cashback' => 15,
             'description' => 'purpura',
             'is_active' => true,
         ]);
@@ -44,7 +44,7 @@ class SeatTypesSeeder extends Seeder
             'stadium_id' => 1,
             'name' => 'fan',
             'code' => 'AD',
-            'percentage_cashback' => 0,
+            'percentage_cashback' => 15,
             'description' => 'fan',
             'is_active' => true,
         ]);
@@ -53,7 +53,7 @@ class SeatTypesSeeder extends Seeder
             'stadium_id' => 1,
             'name' => 'publico',
             'code' => 'AE',
-            'percentage_cashback' => 0,
+            'percentage_cashback' => 15,
             'description' => 'publico',
             'is_active' => true,
         ]);
