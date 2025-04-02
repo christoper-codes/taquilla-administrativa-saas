@@ -211,6 +211,133 @@ class EventService
 
     /*
     * |--------------------------------------------------------------------------
+    * | Reserve seats to buy
+    */
+    public function printSubscriber(Int $id_ticket)
+    {
+            try {
+                /*
+                * Create sale ticket
+                */
+                $saleTicket = SaleTicket::find($id_ticket);
+
+                $saleTicket->globalPaymentTypes->each(function ($global_payment_type) {
+
+                    $global_payment_type->pivot->amount;
+
+                    if ($global_payment_type->pivot->global_card_payment_type_id) {
+
+                        $globalCardPaymentType = GlobalCardPaymentType::find($global_payment_type->pivot->global_card_payment_type_id);
+
+                        if ($globalCardPaymentType) {
+                            $global_payment_type->name .= " (".$globalCardPaymentType->name.")";
+                        }
+                    }
+                });
+
+                /**
+                 * Load debtor and details
+                 */
+                $saleTicket->saleDebtor;
+                $saleTicket->installmentPaymentHistories;
+
+                if ($saleTicket->promotion) {
+                    $saleTicket->promotion->loadMissing('promotionType');
+                }
+
+                $event = $saleTicket->events->first();
+
+                $pdf_data = [];
+
+                $saleTicket->EventSeatCatalogues->each(function ($data) use ($saleTicket, $event, &$pdf_data){
+
+                    /**
+                     * Load Promotion
+                     */
+                    if ($saleTicket->promotion) {
+                        $data->load(['promotions' => function ($query) use ($saleTicket) {
+                            $query->where('promotion_id', $saleTicket->promotion_id);
+                        }]);
+                    }
+
+                    /**
+                     * Load Original Price
+                     */
+                    $data->load(['priceTypes' => function ($query) {
+                        $query->where('name', "abonado");
+                    }]);
+
+                     /*
+                    * create qr
+                    */
+                    $builder = new Builder(
+                        writer: new PngWriter(),
+                        writerOptions: [],
+                        validateResult: false,
+                        data: $data->qr,
+                        encoding: new Encoding('UTF-8'),
+                        errorCorrectionLevel: ErrorCorrectionLevel::High,
+                        size: 300,
+                        margin: 10,
+                        roundBlockSizeMode: RoundBlockSizeMode::Margin,
+                        labelText: 'Asiento ' . $data->seatCatalogue->code,
+                        labelFont: new OpenSans(20),
+                        labelAlignment: LabelAlignment::Center
+                    );
+
+                    $result = $builder->build();
+
+                    $qr_img = $result->getDataUri();
+
+                    $data->seasonTicket;
+
+
+                    $pdf_data[] = [
+                        'event_name' => $event->name,
+                        'event_start_date' => $event->start_date,
+                        'seat_code' => $data->seatCatalogue->code,
+                        'zone_type' => $data->seatCatalogue->zone,
+                        'row' => $data->seatCatalogue->row,
+                        'seat' => $data->seatCatalogue->seat,
+                        'seat_type' => $data->seatCatalogue->seatType->name,
+                        'percentage_cashback' => $data->seatCatalogue->seatType->percentage_cashback,
+                        'qr_img' => $qr_img,
+                        'qr' => $data->qr,
+                        'final_price' => $data->price,
+                        'ticket_id' => $saleTicket->id,
+                        'seller_user' => $saleTicket->sellerUser,
+                        'ticket_created_at' => $saleTicket->created_at,
+                        'cash_register_type' => $saleTicket->cashRegister->cash_register_type_id,
+                        'is_owner' => $data->seasonTicket->is_owner ?? false,
+                        'description' => $data->seasonTicket->description ?? null,
+                        'holder_name' => $data->seasonTicket->holder_name ?? null,
+                        'holder_last_name' => $data->seasonTicket->holder_last_name ?? null,
+                        'holder_middle_name' => $data->seasonTicket->holder_middle_name ?? null,
+                        'holder_zip_code' => $data->seasonTicket->holder_zip_code ?? null,
+                        'holder_phone' => $data->seasonTicket->holder_phone ?? null,
+                        'holder_email' => $data->seasonTicket->holder_email ?? null,
+                        'holder_jersey_type' => $data->seasonTicket->holder_jersey_type ?? null,
+                        'holder_jersey_size' => $data->seasonTicket->holder_jersey_size ?? null,
+                        'global_payment_types' => $saleTicket->globalPaymentTypes,
+                        'payment_in_installments' => $saleTicket->payment_in_installments,
+                        'promotion_ticket' => $saleTicket->promotion,
+                        'promotion' => $event->promotions,
+                        'original_price' => $event->priceTypes,
+                        'sale_debtor' => $saleTicket->saleDebtor,
+                        'installment_payment_histories'=>$saleTicket->installmentPaymentHistories,
+                        'sale_ticket' =>$saleTicket
+                    ];
+                });
+
+                return $pdf_data;
+
+            } catch (\Exception $e) {
+                throw $e;
+            }
+    }
+
+    /*
+    * |--------------------------------------------------------------------------
     * | Get seat availablility by zone
     */
     public function getAvailability(array $data)
