@@ -220,10 +220,10 @@ const headers = [
     { title: 'Fecha de venta', key: 'Fecha de venta' },
     { title: 'Fue transferido', key: 'Fue transferido' },
     { title: 'Asientos', key: 'Asientos' },
-    { title: 'Monto recibido', key: 'Monto recibido' },
+    { title: 'Monto Pagado', key: 'Monto Pagado' },
     { title: 'Monto total', key: 'Monto total' },
-    { title: 'Monto de vuelto', key: 'Monto de vuelto' },
-    { title: 'Tipos de pago', key: 'Tipos de pago' },
+    { title: 'Adeudo', key: 'Monto restante' },
+    { title: 'Pagos realizados', key: 'Tipos de pago' },
     {title: 'Acciones', key: 'Acciones', sortable:false}
 ];
 const headerProps = {
@@ -245,9 +245,9 @@ if (props.cash_register_general_history && props.cash_register_general_history.c
             'Fecha de venta': dateFormat(saleTicket.created_at),
             'Fue transferido': saleTicket.is_transfer ? 'Si' : 'No',
             'Asientos': seatCatalogues,
-            'Monto recibido': formatPrice(saleTicket.amount_received),
             'Monto total': formatPrice(saleTicket.total_amount),
-            'Monto de vuelto': formatPrice(saleTicket.total_returned),
+            'Monto Pagado': formatPrice((Number(Number(saleTicket.amount_received)-Number(saleTicket.total_returned)))),
+            'Monto restante': formatPrice(saleTicket.remaining_amount),
             'Tipos de pago': paymentTypes
         });
     });
@@ -274,6 +274,26 @@ const printTicket = (item, isActive) => {
             loadingPrint.value = false;
             isActive.value = false;
         })
+};
+
+const printTicketAbonado = (item, isActive) => {
+
+loadingPrint.value = true;
+
+axios.get(route('events.printSubscriber', { id: item.Folio }))
+    .then(response => {
+        const pdfContent = atob(response.data.pdf);
+        const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
+        const pdfUrl = window.URL.createObjectURL(pdfBlob);
+        printInKioskMode(pdfUrl);
+    })
+    .catch(error => {
+        console.log(error);
+    })
+    .finally(() => {
+        loadingPrint.value = false;
+        isActive.value = false;
+    })
 };
 
 function printInKioskMode(url, close = true) {
@@ -594,6 +614,29 @@ const pdf = () => {
                                                                 <v-btn color="red" rounded="large" variant="tonal" class="text-none !tw-px-4" text="Cancelar" @click="isActive.value = false"></v-btn>
                                                                 <v-btn :loading="loadingPrint" @click="printTicket(item, isActive)" rounded="large" variant="elevated" class="text-none !tw-bg-purple-600 !tw-text-white">
                                                                     Imprimir ticket
+                                                                </v-btn>
+                                                            </v-card-actions>
+                                                            </v-card>
+                                                        </template>
+                                                </v-dialog>
+                                                    <v-dialog max-width="600">
+                                                        <template v-slot:activator="{ props: activatorProps }">
+                                                            <v-btn @click="updateSaleTicketsSelected(item)" v-bind="activatorProps" density="default" icon="mdi-printer" class="!tw-text-green-300 !tw-bg-green-800"></v-btn>
+                                                        </template>
+                                                        <template v-slot:default="{ isActive }">
+                                                            <v-card title="¿Estas seguro de reimprimir el abono?">
+                                                            <v-card-text>
+                                                                <p class="tw-opacity-50 tw-mt-3 tw-text-center">Preciona 'Imprimir abono' para ejecutar la acción.</p>
+                                                                <div class="tw-flex tw-items-center tw-justify-center tw-gap-3 mt-5">
+                                                                    <p v-for="code in saleTicketsSelected" :key="code" class="tw-py-2 tw-px-7 tw-bg-purple-200 tw-text-purple-700 tw-rounded-md tw-text-xl">{{ code }}</p>
+                                                                </div>
+                                                            </v-card-text>
+
+                                                            <v-card-actions class="tw-mb-4 tw-mr-4">
+                                                                <v-spacer></v-spacer>
+                                                                <v-btn color="red" rounded="large" variant="tonal" class="text-none !tw-px-4" text="Cancelar" @click="isActive.value = false"></v-btn>
+                                                                <v-btn :loading="loadingPrint" @click="printTicketAbonado(item, isActive)" rounded="large" variant="elevated" class="text-none !tw-bg-purple-600 !tw-text-white">
+                                                                    Imprimir abono
                                                                 </v-btn>
                                                             </v-card-actions>
                                                             </v-card>

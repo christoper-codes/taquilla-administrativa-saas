@@ -8,6 +8,7 @@ use App\Models\CashRegisterType;
 use App\Models\GlobalPaymentType;
 use App\Models\SeatCatalogueStatus;
 use App\Models\GlobalCardPaymentType;
+use Illuminate\Support\Str;
 
 class CashRegisterService
 {
@@ -70,9 +71,7 @@ class CashRegisterService
             $sale_tickets->each(function ($sale_ticket) use (&$type_payments) {
                 $sale_ticket->saleTicketStatus;
                 $sale_ticket->globalPaymentTypes;
-                $sale_ticket->EventSeatCatalogues->map(function ($event_seat_catalogue) {
-                    $event_seat_catalogue->seatCatalogue;
-                });
+                $sale_ticket->EventSeatCatalogues->map(fn($event_seat_catalogue) => $event_seat_catalogue->seatCatalogue );
 
                 /**
                  * Load debtor and details
@@ -87,6 +86,11 @@ class CashRegisterService
                     $sale_ticket->promotion->loadMissing('promotionType');
                 }
 
+                /**
+                 * Add remaining amount if it is a payment in installments
+                 */
+                $sale_ticket->setAttribute('remaining_amount', $sale_ticket->saleDebtor ? ($sale_ticket->total_amount - $sale_ticket->installmentPaymentHistories->sum('total_amount')) : 0);
+
                 /*
                 * Get all global payment types associated with the sale ticket
                 */
@@ -96,9 +100,10 @@ class CashRegisterService
 
                         $globalCardPaymentType = GlobalCardPaymentType::find($global_payment_type->pivot->global_card_payment_type_id);
 
-                        if ($globalCardPaymentType) {
-                            $global_payment_type->name .= " (".$globalCardPaymentType->name.")".($sale_ticket->saleDebtor ? " - Deuda a plazos" : '');
-                        }
+                        $global_payment_type->name .= " (".$globalCardPaymentType->name.")".($sale_ticket->saleDebtor ? " - Deuda a plazos" : '');
+
+                    }else{
+                        $global_payment_type->name .= ($sale_ticket->saleDebtor ? " - Deuda a plazos" : '');
                     }
 
                     if (!isset($type_payments[$global_payment_type->name])) {
@@ -108,13 +113,27 @@ class CashRegisterService
                     }
 
                     if ($sale_ticket->saleDebtor) {
+
                         $type_payments[$global_payment_type->name]['amount'] += ($sale_ticket->total_amount - $sale_ticket->installmentPaymentHistories->sum('total_amount'));
+
+                        $dataTemp = Str::replace(" - Deuda a plazos", '', $global_payment_type->name);
+
+                        if (!isset($type_payments[$dataTemp])) {
+                            $type_payments[$dataTemp] = ['amount' => 0];
+                        }
+
+                        $type_payments[$dataTemp]['amount'] += $sale_ticket->installmentPaymentHistories->sum('total_amount');
+
                     }else{
                         $type_payments[$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
                     }
 
+                    $global_payment_type->name = Str::replace(" - Deuda a plazos", '', $global_payment_type->name);
+
                 });
+                return  $sale_ticket->globalPaymentTypes;
             });
+
 
             $response = [
                 'cash_register' => $cash_register,
@@ -271,8 +290,7 @@ class CashRegisterService
             if(!$cash_register->is_open){
                 throw new \Exception('La caja actual ya ha sido cerrada');
             }
-            $seat_catalogue_status_id = SeatCatalogueStatus::where('name', 'vendido')->first()->id;
-            $global_payment_type_id = GlobalPaymentType::where('name', 'cortesia')->first()->id;
+
             /*
             * close cash register
             */
@@ -295,276 +313,7 @@ class CashRegisterService
                 // send emails and confimed closure
             }
 
-            $type_payments = [];
-            $type_sales = [
-                'normal' => ['transaction' => 0,'sales' => 0],
-                'promocion' => ['transaction' => 0,'sales' => 0],
-                'convenio' => ['transaction' => 0,'sales' => 0],
-                'cortesia' => ['transaction' => 0,'sales' => 0],
-                'total' => ['transaction' => 0,'sales' => 0],
-            ];
-            $installment_sale = [
-                'normal' => ['transaction' => 0,'sales' => 0],
-                'promocion' => ['transaction' => 0,'sales' => 0],
-                'convenio' => ['transaction' => 0,'sales' => 0],
-                'total' => ['transaction' => 0,'sales' => 0],
-            ];
-            $mixed_sale = [
-                'normal' => ['transaction' => 0,'sales' => 0],
-                'promocion' => ['transaction' => 0,'sales' => 0],
-                'convenio' => ['transaction' => 0,'sales' => 0],
-                'total' => ['transaction' => 0,'sales' => 0],
-            ];
-            /*
-            * Get all sale tickets associated with the cash register
-            */
-            $sale_tickets = $cash_register->saleTickets()->orderBy('created_at', 'desc')->get();
-
-            $sale_tickets->each(function ($sale_ticket) use (&$type_payments, &$seat_catalogue_status_id, &$global_payment_type_id, &$type_sales,  &$installment_sale, &$mixed_sale) {
-                $sale_ticket->saleTicketStatus;
-                $sale_ticket->globalPaymentTypes;
-                $sale_ticket->EventSeatCatalogues;
-                /*
-                * Get all sale types
-                */
-
-
-                if($sale_ticket->globalPaymentTypes->count() == 1){
-                    if($sale_ticket->saleTicketStatus->name == 'pagado' || $sale_ticket->saleTicketStatus->name == 'parcialmente cancelado'){
-
-                        $isAgreement = true;
-                        $isPromotion = true;
-                        $isCortesia = true;
-                        $isNormal = true;
-
-                        foreach ($sale_ticket->eventSeatCatalogs as $event_seat_catalog) {
-                            if($event_seat_catalog->seat_catalogue_status_id == $seat_catalogue_status_id){
-                                $type_sales['total']['sales']++;
-
-                                $has_agreement_promotion = $sale_ticket->eventSeatCatalogs->contains(function ($eventSeatCatalog) {
-                                    return $eventSeatCatalog->pivot->agreement_promotion_id !== null;
-                                });
-
-                                $has_cortesia = $sale_ticket->globalPaymentTypes->contains(function ($global_payment_type) use ($global_payment_type_id) {
-                                    return $global_payment_type->pivot->global_payment_type_id == $global_payment_type_id;
-                                });
-
-                                if ($has_agreement_promotion) {
-
-                                    $type_sales['convenio']['sales']++;
-
-                                    if ($isAgreement) {
-                                        $type_sales['convenio']['transaction']++;
-                                        $isAgreement = false;
-                                    }
-
-                                }else if($sale_ticket->promotion_id && !$has_agreement_promotion){
-
-                                    $type_sales['promocion']['sales']++;
-
-                                    if ($isPromotion) {
-                                        $type_sales['promocion']['transaction']++;
-                                        $isPromotion = false;
-                                    }
-
-                                }else if ($has_cortesia){
-
-                                    $type_sales['cortesia']['sales']++;
-
-                                    if ($isCortesia) {
-                                        $type_sales['cortesia']['transaction']++;
-                                        $isCortesia = false;
-                                    }
-
-                                }else{
-                                    $type_sales['normal']['sales']++;
-
-                                    if ($isNormal) {
-                                        $type_sales['normal']['transaction']++;
-                                        $isNormal = false;
-                                    }
-                                }
-                            }
-                        }
-                    }else{
-
-                        $isAgreementInstallment = true;
-                        $isPromotionInstallment = true;
-                        $isNormalInstallment = true;
-
-                       foreach ($sale_ticket->eventSeatCatalogs as $event_seat_catalog) {
-                            if($event_seat_catalog->seat_catalogue_status_id == $seat_catalogue_status_id){
-                                $installment_sale['total']['sales']++;
-
-                                $has_agreement_promotion = $sale_ticket->eventSeatCatalogs->contains(function ($eventSeatCatalog) {
-                                    return $eventSeatCatalog->pivot->agreement_promotion_id !== null;
-                                });
-
-                                if ($has_agreement_promotion) {
-
-                                    $installment_sale['convenio']['sales']++;
-
-                                    if ($isAgreementInstallment) {
-                                        $installment_sale['convenio']['transaction']++;
-                                        $isAgreementInstallment = false;
-                                    }
-
-                                }else if($sale_ticket->promotion_id && !$has_agreement_promotion){
-
-                                    $installment_sale['promocion']['sales']++;
-                                    if ($isPromotionInstallment) {
-                                        $installment_sale['promocion']['transaction']++;
-                                        $isPromotionInstallment = false;
-                                    }
-
-                                }else{
-                                    $installment_sale['normal']['sales']++;
-                                    if ($isNormalInstallment) {
-                                        $installment_sale['normal']['transaction']++;
-                                        $isNormalInstallment = false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }else{
-                    $isAgreementMixed = true;
-                    $isPromotionMixed = true;
-                    $isNormalMixed = true;
-
-                   foreach ($sale_ticket->eventSeatCatalogs as $event_seat_catalog) {
-                        if($event_seat_catalog->seat_catalogue_status_id == $seat_catalogue_status_id){
-                            $mixed_sale['total']['sales']++;
-
-                            $has_agreement_promotion = $sale_ticket->eventSeatCatalogs->contains(function ($eventSeatCatalog) {
-                                return $eventSeatCatalog->pivot->agreement_promotion_id !== null;
-                            });
-
-                            if ($has_agreement_promotion) {
-
-                                $mixed_sale['convenio']['sales']++;
-
-                                if ($isAgreementMixed) {
-                                    $mixed_sale['convenio']['transaction']++;
-                                    $isAgreementMixed = false;
-                                }
-
-                            }else if($sale_ticket->promotion_id && !$has_agreement_promotion){
-
-                                $mixed_sale['promocion']['sales']++;
-                                if ($isPromotionMixed) {
-                                    $mixed_sale['promocion']['transaction']++;
-                                    $isPromotionMixed = false;
-                                }
-
-                            }else{
-                                $mixed_sale['normal']['sales']++;
-                                if ($isNormalMixed) {
-                                    $mixed_sale['normal']['transaction']++;
-                                    $isNormalMixed = false;
-                                }
-                            }
-                        }
-                    }
-            }
-                /*
-                * Get all global payment types associated with the sale ticket
-                */
-                $sale_ticket->globalPaymentTypes->each(function ($global_payment_type) use ($sale_ticket) {
-
-                    if ($global_payment_type->pivot->global_card_payment_type_id) {
-
-                        $globalCardPaymentType = GlobalCardPaymentType::find($global_payment_type->pivot->global_card_payment_type_id);
-
-                        if ($globalCardPaymentType) {
-                            $global_payment_type->name .= " (".$globalCardPaymentType->name.")".($sale_ticket->payment_in_installments ? " a ".$sale_ticket->payment_in_installments." meses" : '').($sale_ticket->saleDebtor ? " Venta a plazos" : '');
-                        }
-                    }
-                });
-                $payment_types = $sale_ticket->globalPaymentTypes;
-                $payment_count = $payment_types->count();
-
-                if ($payment_count == 1) {
-                    /*
-                    * case with only one type payment
-                    */
-                    $global_payment_type = $payment_types->first();
-
-                    if (!isset($type_payments[$global_payment_type->name])) {
-                        $type_payments[$global_payment_type->name] = [
-                            'initial_amount' => 0,
-                            'amount' => 0,
-                            'transactions' => 0,
-                            'seats' => 0
-                        ];
-                    }
-
-                    if ($sale_ticket->saleDebtor) {
-                        $type_payments[$global_payment_type->name]['initial_amount'] += $global_payment_type->pivot->amount;
-                        $type_payments[$global_payment_type->name]['amount'] +=  $sale_ticket->total_amount;
-                    }else{
-                        $type_payments[$global_payment_type->name]['initial_amount'] += $global_payment_type->pivot->amount;
-                        $type_payments[$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
-                    }
-
-                    $type_payments[$global_payment_type->name]['transactions']++;
-                    $type_payments[$global_payment_type->name]['seats'] += $sale_ticket->EventSeatCatalogues->count();
-
-                } else {
-                    /*
-                    * case with multiple type payments
-                    */
-                    $composite_key = 'pago compuesto'.($sale_ticket->payment_in_installments ? " a ".$sale_ticket->payment_in_installments." meses" : '');
-                    if (!isset($type_payments[$composite_key])) {
-                        $type_payments[$composite_key] = [
-                            'initial_amount_list' => [],
-                            'amountList' => [],
-                            'transactions' => 0,
-                            'seats' => 0
-                        ];
-                    }
-
-                    foreach ($payment_types as $global_payment_type) {
-
-                        if (!isset($type_payments[$composite_key]['initial_amount_list'][$global_payment_type->name])) {
-                            $type_payments[$composite_key]['initial_amount_list'][$global_payment_type->name] = [
-                                'amount' => 0
-                            ];
-                        }
-
-                        if (!isset($type_payments[$composite_key]['amountList'][$global_payment_type->name])) {
-                            $type_payments[$composite_key]['amountList'][$global_payment_type->name] = [
-                                'amount' => 0
-                            ];
-                        }
-
-                        if ($sale_ticket->saleDebtor) {
-                            // $type_payments[$global_payment_type->name]['initial_amount'] += $global_payment_type->pivot->amount;
-                            // $type_payments[$global_payment_type->name]['amount'] +=  $sale_ticket->total_amount;
-                        }else{
-                            $type_payments[$composite_key]['initial_amount_list'][$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
-                            $type_payments[$composite_key]['amountList'][$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
-                        }
-
-
-                    }
-                    $type_payments[$composite_key]['transactions']++;
-                    $type_payments[$composite_key]['seats'] += $sale_ticket->EventSeatCatalogues->count();
-                }
-            });
-
-            $response = [
-                'ticket_office' => $cash_register->ticketOffice,
-                'cash_register' => $cash_register,
-                'sale_tickets' => $sale_tickets,
-                'type_payments' => $type_payments,
-                'type_sales' => $type_sales,
-                'installment_sale' => $installment_sale,
-                'mixed_sale' => $mixed_sale,
-            ];
-
-            return $response;
-
+            return $this->getCashRegisterSummary($data);
 
         } catch(\Exception $e){
             throw $e;
@@ -623,8 +372,6 @@ class CashRegisterService
                 /*
                 * Get all sale types
                 */
-
-
 
                 if($sale_ticket->globalPaymentTypes->count() == 1){
                     if($sale_ticket->saleTicketStatus->name == 'pagado' || $sale_ticket->saleTicketStatus->name == 'parcialmente cancelado'){
@@ -762,8 +509,6 @@ class CashRegisterService
                         }
                 }
 
-
-
                 /*
                 * Get all global payment types associated with the sale ticket
                 */
@@ -774,25 +519,25 @@ class CashRegisterService
                         $globalCardPaymentType = GlobalCardPaymentType::find($global_payment_type->pivot->global_card_payment_type_id);
 
                         if ($globalCardPaymentType) {
-                            $global_payment_type->name .= " (".$globalCardPaymentType->name.")".($sale_ticket->payment_in_installments ? " a ".$sale_ticket->payment_in_installments." meses" : '').($sale_ticket->saleDebtor ? " Venta a plazos" : '');
+                            $global_payment_type->name .= " (".$globalCardPaymentType->name.")".($sale_ticket->payment_in_installments ? " a ".$sale_ticket->payment_in_installments." meses" : '');
                         }
                     }
                 });
 
                 $payment_types = $sale_ticket->globalPaymentTypes;
-
                 $payment_count = $payment_types->count();
 
                 if ($payment_count == 1) {
-                    /*
-                    * case with only one type payment
-                    */
+                //     /*
+                //     * case with only one type payment
+                //     */
                     $global_payment_type = $payment_types->first();
 
                     if (!isset($type_payments[$global_payment_type->name])) {
                         $type_payments[$global_payment_type->name] = [
                             'initial_amount' => 0,
                             'amount' => 0,
+                            'remaining_amount' => 0,
                             'transactions' => 0,
                             'seats' => 0
                         ];
@@ -801,9 +546,12 @@ class CashRegisterService
                     if ($sale_ticket->saleDebtor) {
                         $type_payments[$global_payment_type->name]['initial_amount'] += $global_payment_type->pivot->amount;
                         $type_payments[$global_payment_type->name]['amount'] +=  $sale_ticket->total_amount;
-                    }else{
+                        $type_payments[$global_payment_type->name]['remaining_amount'] +=  ($sale_ticket->total_amount - $global_payment_type->pivot->amount);
+                    }
+                    else{
                         $type_payments[$global_payment_type->name]['initial_amount'] += $global_payment_type->pivot->amount;
                         $type_payments[$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
+                        $type_payments[$global_payment_type->name]['remaining_amount'] +=  ($global_payment_type->pivot->amount - $global_payment_type->pivot->amount);
                     }
 
                     $type_payments[$global_payment_type->name]['transactions']++;
@@ -816,6 +564,7 @@ class CashRegisterService
                     $composite_key = 'pago compuesto'.($sale_ticket->payment_in_installments ? " a ".$sale_ticket->payment_in_installments." meses" : '');
                     if (!isset($type_payments[$composite_key])) {
                         $type_payments[$composite_key] = [
+                            'remaining_amount_list' => [],
                             'initial_amount_list' => [],
                             'amountList' => [],
                             'transactions' => 0,
@@ -824,6 +573,12 @@ class CashRegisterService
                     }
 
                     foreach ($payment_types as $global_payment_type) {
+
+                        if (!isset($type_payments[$composite_key]['remaining_amount_list'][$global_payment_type->name])) {
+                            $type_payments[$composite_key]['remaining_amount_list'][$global_payment_type->name] = [
+                                'amount' => 0
+                            ];
+                        }
 
                         if (!isset($type_payments[$composite_key]['initial_amount_list'][$global_payment_type->name])) {
                             $type_payments[$composite_key]['initial_amount_list'][$global_payment_type->name] = [
@@ -838,14 +593,14 @@ class CashRegisterService
                         }
 
                         if ($sale_ticket->saleDebtor) {
-                            // $type_payments[$global_payment_type->name]['initial_amount'] += $global_payment_type->pivot->amount;
-                            // $type_payments[$global_payment_type->name]['amount'] +=  $sale_ticket->total_amount;
+                            $type_payments[$composite_key]['initial_amount_list'][$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
+                            $type_payments[$composite_key]['amountList'][$global_payment_type->name]['amount'] += $sale_ticket->total_amount;
+                            $type_payments[$composite_key]['remaining_amount_list'][$global_payment_type->name]['amount'] += ($sale_ticket->total_amount - $global_payment_type->pivot->amount);
                         }else{
                             $type_payments[$composite_key]['initial_amount_list'][$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
                             $type_payments[$composite_key]['amountList'][$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
+                            $type_payments[$composite_key]['remaining_amount_list'][$global_payment_type->name]['amount'] += ($global_payment_type->pivot->amount - $global_payment_type->pivot->amount);
                         }
-
-
                     }
 
                     $type_payments[$composite_key]['transactions']++;
