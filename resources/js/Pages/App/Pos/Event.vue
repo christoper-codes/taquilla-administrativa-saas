@@ -960,7 +960,8 @@ watch(() => installmentSale.value, () => {
         }
         if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'efectivo')) {
             if(amountReceivedCash.value){
-                amountReturned.value = parseFloat(totalAmount.value) - parseFloat(amountReceivedCash.value);
+                amountReceived.value = parseFloat(amountToPayCard.value) + parseFloat(amountReceivedCash.value);
+                amountReturned.value = parseFloat(amountReceived.value) - parseFloat(amountToPayCash.value);
             }
         }
     }
@@ -1123,6 +1124,10 @@ const onSubmit = () => {
     if(installmentSale.value){
         const amountToPay = amountReceived.value - amountReturned.value;
         const seatsTotal = seatsSelected.value.length;
+        console.log('seatsTotal', seatsTotal);
+        console.log('amountReceived', amountReceived.value);
+        console.log('amountReturned', amountReturned.value);
+        console.log('amountToPay', amountToPay);
         if((seatsTotal * 500) > amountToPay) {
             toast('El monto a pagar no puede ser menor a 500 por asiento', {
                 "theme": "auto",
@@ -1281,6 +1286,10 @@ axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
 const rules = {
     required: value => !!value || 'Campo requerido',
     isNumber: value => !isNaN(value) || 'Debe ser un número',
+    isEmail: value => {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailPattern.test(value) || 'Correo electrónico inválido';
+    },
     minChar: value => value.length >= 3 || 'Debe tener un mínimo de 3 caracteres',
     phoneNumber: value => {
         const phoneNumber = value.replace(/\D/g, '');
@@ -2376,7 +2385,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                                                                 autocomplete="email"
                                                                                                                 clearable
                                                                                                                 hint="Ingresa el email del titular"
-                                                                                                                :rules="[rules.required]"
+                                                                                                                :rules="[rules.required, rules.isEmail]"
                                                                                                                 v-model="seatsSelected[index].holder_email"
                                                                                                             ></v-text-field>
                                                                                                     </div>
