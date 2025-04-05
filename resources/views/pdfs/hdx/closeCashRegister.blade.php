@@ -43,8 +43,9 @@
             <thead>
                 <tr>
                     <th class="text-left">Tipo de Pago</th>
-                    <th class="text-right">Monto Inicial</th>
+                    <th class="text-right">Monto Pagado</th>
                     <th class="text-right">Monto Total</th>
+                    <th class="text-right">Adeudo</th>
                     <th class="text-right">Transacciones</th>
                     <th class="text-right">Asientos</th>
                 </tr>
@@ -56,6 +57,7 @@
                         @if (isset($value['amount']) && $value['amount'])
                             <td class="text-right">${{ number_format($value['initial_amount'], 2, '.', ',') }} MXN</td>
                             <td class="text-right">${{ number_format($value['amount'], 2, '.', ',') }} MXN</td>
+                            <td class="text-right">${{ number_format($value['remaining_amount'], 2, '.', ',') }} MXN</td>
                         @elseif (isset($value['amountList']) && $value['amountList'])
                             <td class="text-right">
                                 @foreach ($value['initial_amount_list'] as $method => $amount_data)
@@ -67,6 +69,14 @@
                             </td>
                             <td class="text-right">
                                 @foreach ($value['amountList'] as $method => $amount_data)
+                                    @if (isset($amount_data['amount']) && $amount_data['amount'])
+                                        ${{ number_format($amount_data['amount'], 2, '.', ',') }} MXN ({{ ucfirst($method) }})
+                                        @if (!$loop->last) <br> @endif
+                                    @endif
+                                @endforeach
+                            </td>
+                            <td class="text-right">
+                                @foreach ($value['remaining_amount_list'] as $method => $amount_data)
                                     @if (isset($amount_data['amount']) && $amount_data['amount'])
                                         ${{ number_format($amount_data['amount'], 2, '.', ',') }} MXN ({{ ucfirst($method) }})
                                         @if (!$loop->last) <br> @endif
