@@ -62,6 +62,12 @@ props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
         }).join(', ');
 
         const totalReturned = saleTicket.sale_ticket_status.name == 'cancelado' ? 0 : saleTicket.total_returned;
+        const adeudo = ref(0);
+        if(saleTicket.sale_ticket_status.name == 'pendiente'){
+            adeudo.value = Number(saleTicket.total_amount - (Number(saleTicket.amount_received)-Number(saleTicket.total_returned)));
+        } else {
+            adeudo.value = 0;
+        }
 
         items.value.push({
             'Folio': saleTicket.id,
@@ -74,11 +80,11 @@ props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
             'Promotion': saleTicket.promotion_id ? `${saleTicket.promotion.name}` : 'Sin promoción',
             'Venta a meses': saleTicket.payment_in_installments ? saleTicket.payment_in_installments : 'No aplica',
             'Venta a plazos': saleTicket.sale_debtor_id ? saleTicket.sale_debtor.first_name : 'No aplica',
-            'Adeudo': formatPrice(saleTicket.total_amount - (Number(saleTicket.amount_received)-Number(saleTicket.total_returned))),
+            'Adeudo': formatPrice(adeudo.value),
             'Fecha de venta': dateFormat(saleTicket.created_at),
         });
 
-        amountOwed.value += Number(saleTicket.total_amount - (Number(saleTicket.amount_received)-Number(saleTicket.total_returned)));
+        amountOwed.value += Number(adeudo.value);
     });
 </script>
 
