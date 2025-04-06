@@ -3,8 +3,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import SuccessSession from '@/Components/SuccessSession.vue';
 import ErrorSession from '@/Components/ErrorSession.vue';
 import BreadcrumbAppSecondary from '@/Components/BreadcrumbAppSecondary.vue';
-import { Head, usePage, useForm as useFormInertia } from '@inertiajs/vue3';
-import { useForm, useField } from 'vee-validate';
+import { Head } from '@inertiajs/vue3';
 import { onMounted, ref } from 'vue';
 import EventsIndex from '@/Components/IndicatorsCharts/EventsIndex.vue';
 import usePriceFormat from '@/composables/priceFormat';
@@ -31,6 +30,56 @@ const currentDay = today.getDate();
 const currentMonth = today.getMonth() + 1;
 const currentYear = today.getFullYear();
 
+// Headers for the data table
+
+const amountOwed = ref(0);
+const items = ref([]);
+const headerProps = {
+    class: '!tw-font-bold'
+};
+
+const headers = [
+    { title: 'Folio', key: 'Folio' },
+    { title: 'Estatus', key: 'Estatus' },
+    { title: 'Asientos', key: 'Asientos' },
+    { title: 'Monto total de venta', key: 'Monto total de venta' },
+    { title: 'Monto Pagado', key: 'Monto Pagado' },
+    { title: 'Cambio', key: 'Cambio' },
+    { title: 'Tipos de pago', key: 'Tipos de pago' },
+    { title: 'Promoción', key: 'Promotion' },
+    { title: 'Venta a meses', key: 'Venta a meses' },
+    { title: 'Venta a plazos', key: 'Venta a plazos' },
+    { title: 'Adeudo', key: 'Adeudo' },
+    { title: 'Fecha de venta', key: 'Fecha de venta' },
+];
+
+props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
+        const paymentTypes = saleTicket.global_payment_types.map(paymentType => {
+            return `${paymentType.name}: ${paymentType.pivot.amount}`;
+        }).join(', ');
+        const seatCatalogues  = saleTicket.event_seat_catalogs.map(seatCatalogue => {
+            return `${seatCatalogue.seat_catalogue.code}`
+        }).join(', ');
+
+        const totalReturned = saleTicket.sale_ticket_status.name == 'cancelado' ? 0 : saleTicket.total_returned;
+
+        items.value.push({
+            'Folio': saleTicket.id,
+            'Estatus': saleTicket.sale_ticket_status.name,
+            'Asientos': seatCatalogues,
+            'Monto total de venta': formatPrice(saleTicket.total_amount),
+            'Monto Pagado': formatPrice((Number(Number(saleTicket.amount_received)-Number(saleTicket.total_returned)))),
+            'Cambio': formatPrice(totalReturned),
+            'Tipos de pago': paymentTypes,
+            'Promotion': saleTicket.promotion_id ? `${saleTicket.promotion.name}` : 'Sin promoción',
+            'Venta a meses': saleTicket.payment_in_installments ? saleTicket.payment_in_installments : 'No aplica',
+            'Venta a plazos': saleTicket.sale_debtor_id ? saleTicket.sale_debtor.first_name : 'No aplica',
+            'Adeudo': formatPrice(saleTicket.total_amount - (Number(saleTicket.amount_received)-Number(saleTicket.total_returned))),
+            'Fecha de venta': dateFormat(saleTicket.created_at),
+        });
+
+        amountOwed.value += Number(saleTicket.total_amount - (Number(saleTicket.amount_received)-Number(saleTicket.total_returned)));
+    });
 </script>
 
 <template>
@@ -79,7 +128,7 @@ const currentYear = today.getFullYear();
                     <div data-aos="fade-left" data-aos-duration="2500" class="tw-p-5 tw-shadow-lg tw-rounded-2xl tw-bg-white tw-flex tw-flex-col tw-justify-between tw-gap-5">
                         <div class="tw-flex tw-items-center tw-justify-between tw-gap-3">
                             <h3>Ventas para este evento</h3>
-                            <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-full tw-bg-pink-100 tw-text-pink-600">payments</span>
+                            <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-full tw-bg-pink-100 tw-text-green-600">payments</span>
                         </div>
                         <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xl">
                             <div class="tw-flex tw-items-center tw-gap-2 tw-font-bold">
@@ -91,6 +140,22 @@ const currentYear = today.getFullYear();
                         <div>
                             <p class="tw-text-right tw-text-xs">Actualizado al dia: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
                         </div>
+                    </div>
+                </div>
+                <div data-aos="fade-left" data-aos-duration="2500" class="tw-p-5 tw-shadow-lg tw-rounded-2xl tw-bg-white tw-flex tw-flex-col tw-justify-between tw-gap-5">
+                    <div class="tw-flex tw-items-center tw-justify-between tw-gap-3">
+                        <h3>Adeudo para este evento</h3>
+                        <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-full tw-bg-pink-100 tw-text-red-600">payments</span>
+                    </div>
+                    <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xl">
+                        <div class="tw-flex tw-items-center tw-gap-2 tw-font-bold">
+                            <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-red-500 tw-text-white">bar_chart</span>
+                            <h3>Adeudo</h3>
+                        </div>
+                        <span class="tw-block tw-font-bold">{{ formatPrice(amountOwed) }} MXN</span>
+                    </div>
+                    <div>
+                        <p class="tw-text-right tw-text-xs">Actualizado al dia: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
                     </div>
                 </div>
             </div>
@@ -122,8 +187,23 @@ const currentYear = today.getFullYear();
                 </div>
             </div>
 
+            <div class="tw-w-full tw-mt-10 tw-px-0 lg:tw-px-10">
+                <v-data-table :items="items" :headers="headers" :header-props="headerProps">
+                    <template v-slot:item.Estatus="{ item }">
+                        <span
+                            class="tw-py-1 tw-px-4 tw-rounded-full"
+                            :class="{
+                                '!tw-text-green-600 tw-bg-green-100': item.Estatus === 'pagado',
+                                '!tw-text-red-600 tw-bg-red-100': item.Estatus === 'cancelado',
+                                '!tw-text-yellow-600 tw-bg-yellow-100': item.Estatus === 'pendiente'
+                            }"
+                        >
+                            {{ item.Estatus }}
+                        </span>
+                    </template>
+                </v-data-table>
+            </div>
         </div>
-
     </AppLayout>
 </template>
 
