@@ -18,6 +18,67 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\WalletAccountTemporalController;
 use App\Http\Controllers\PriceTypeController;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use App\Models\Event;
+use App\Models\EventSeatCatalog;
+use App\Models\SeasonTicket;
+Route::get('/add-subscriber-to-event-seat-catalog', function (Request $request) {
+
+    $event_seat_catalog_with_subscriber_test = EventSeatCatalog::where([
+        ['event_id', 1],
+        ['qr', '!=', NULL]
+    ])->get();
+
+    $event_seat_catalog_with_subscriber = EventSeatCatalog::where([
+        ['event_id', 2],
+        ['season_ticket_id','!=', NULL]
+    ])->get()->merge($event_seat_catalog_with_subscriber_test);
+
+    $season_ticket = SeasonTicket::whereNotIn('id', $event_seat_catalog_with_subscriber->pluck('season_ticket_id')->filter())->get();
+
+    $event_seat_catalog_without_subscriber = EventSeatCatalog::where([
+        ['event_id', 2],
+        ['season_ticket_id', NULL],
+        ['qr', '!=', NULL],
+    ])->get();
+
+    $result = $event_seat_catalog_without_subscriber->map(function ($item) use ($season_ticket) {
+        return collect([
+            'EventSeatCatalog' => $item,
+            'Subscribers' => $season_ticket->filter(function ($subscriber) use ($item) {
+                return $subscriber->created_at == $item->updated_at;
+            })->values(),
+        ]);
+    });
+
+    $simulatedUpdates = [];
+
+    $result->each(function ($item) use (&$simulatedUpdates) {
+
+        $subscriberTemp = $item['Subscribers']->filter(function ($subscriber){
+
+            return !$subscriber->is_use;
+
+        })->first();
+
+        if ($subscriberTemp) {
+
+            $simulatedUpdates[] = EventSeatCatalog::where('id', $item['EventSeatCatalog']['id'])->update(['season_ticket_id' => $subscriberTemp->id]);
+
+
+            $item['Subscribers']->each(function ($subscriber) use ($subscriberTemp) {
+
+                if ($subscriber['id'] == $subscriberTemp['id']) {
+                    $subscriber['is_use'] = true;
+                }
+            });
+        }
+    });
+
+    return $simulatedUpdates;
+});
+
+
 
 Route::get('/migrate-fresh', function () {
 
