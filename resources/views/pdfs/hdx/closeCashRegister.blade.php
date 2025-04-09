@@ -42,11 +42,11 @@
         <table class="w-full" style="margin-top: 40px; border-collapse: collapse;">
             <thead>
                 <tr>
-                    <th class="text-left">Tipo de Pago</th>
-                    <th class="text-right">Monto Pagado</th>
-                    <th class="text-right">Monto Total</th>
-                    <th class="text-right">Adeudo</th>
-                    <th class="text-right">Transacciones</th>
+                    <th class="text-left">Tipo</th>
+                    <th class="text-right">Pagado</th>
+                    <th class="text-right">Total</th>
+                    <th class="text-right">Deuda</th>
+                    <th class="text-right">Transacc.</th>
                     <th class="text-right">Asientos</th>
                 </tr>
             </thead>
@@ -54,14 +54,14 @@
                 @foreach ($pdf_data['type_payments'] as $payment_type => $value)
                     <tr>
                         <td class="text-left">{{ $payment_type }}</td>
-                        @if (isset($value['amount']) && $value['amount'])
-                            <td class="text-right">${{ number_format($value['initial_amount'], 2, '.', ',') }} MXN</td>
-                            <td class="text-right">${{ number_format($value['amount'], 2, '.', ',') }} MXN</td>
-                            <td class="text-right">${{ number_format($value['remaining_amount'], 2, '.', ',') }} MXN</td>
-                        @elseif (isset($value['amountList']) && $value['amountList'])
+                        @if (isset($value['amount']))
+                            <td class="text-right">${{ number_format($value['initial_amount'] ?? 0, 2, '.', ',') }} MXN</td>
+                            <td class="text-right">${{ number_format($value['amount'] ?? 0, 2, '.', ',') }} MXN</td>
+                            <td class="text-right">${{ number_format($value['remaining_amount'] ?? 0, 2, '.', ',') }} MXN</td>
+                        @elseif (isset($value['amountList']) && is_array($value['amountList']))
                             <td class="text-right">
                                 @foreach ($value['initial_amount_list'] as $method => $amount_data)
-                                    @if (isset($amount_data['amount']) && $amount_data['amount'])
+                                    @if (isset($amount_data['amount']))
                                         ${{ number_format($amount_data['amount'], 2, '.', ',') }} MXN ({{ ucfirst($method) }})
                                         @if (!$loop->last) <br> @endif
                                     @endif
@@ -69,7 +69,7 @@
                             </td>
                             <td class="text-right">
                                 @foreach ($value['amountList'] as $method => $amount_data)
-                                    @if (isset($amount_data['amount']) && $amount_data['amount'])
+                                    @if (isset($amount_data['amount']))
                                         ${{ number_format($amount_data['amount'], 2, '.', ',') }} MXN ({{ ucfirst($method) }})
                                         @if (!$loop->last) <br> @endif
                                     @endif
@@ -77,13 +77,14 @@
                             </td>
                             <td class="text-right">
                                 @foreach ($value['remaining_amount_list'] as $method => $amount_data)
-                                    @if (isset($amount_data['amount']) && $amount_data['amount'])
+                                    @if (isset($amount_data['amount']))
                                         ${{ number_format($amount_data['amount'], 2, '.', ',') }} MXN ({{ ucfirst($method) }})
                                         @if (!$loop->last) <br> @endif
                                     @endif
                                 @endforeach
                             </td>
                         @endif
+
                         <td class="text-right">{{ $value['transactions'] }}</td>
                         <td class="text-right">{{ $value['seats'] }}</td>
                     </tr>
@@ -113,7 +114,27 @@
             </tbody>
         </table>
 
-        <h4 style="margin-top: 20px;">Venta Aplazos</h4>
+        <h4 style="margin-top: 20px;">Venta Parcial</h4>
+        <table class="w-full" style="margin-top: 20px; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th class="text-left">Tipo de venta</th>
+                    <th class="text-right">Ventas</th>
+                    <th class="text-right">Asientos</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($pdf_data['partially_canceled'] as $type_sale => $value)
+                    <tr>
+                        <td class="text-left">{{ $type_sale }}</td>
+                        <td class="text-right">{{ $value['transaction'] }}</td>
+                        <td class="text-right">{{ $value['sales'] }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <h4 style="margin-top: 20px;">Ventas a plazos</h4>
         <table class="w-full" style="margin-top: 20px; border-collapse: collapse;">
             <thead>
                 <tr>
@@ -132,8 +153,7 @@
                 @endforeach
             </tbody>
         </table>
-
-        <h4 style="margin-top: 20px;">Venta con pago compuesto</h4>
+        <h4 style="margin-top: 20px;">Ventas Canceladas</h4>
         <table class="w-full" style="margin-top: 20px; border-collapse: collapse;">
             <thead>
                 <tr>
@@ -143,7 +163,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($pdf_data['mixed_sale'] as $type_sale => $value)
+                @foreach ($pdf_data['canceled'] as $type_sale => $value)
                     <tr>
                         <td class="text-left">{{ $type_sale }}</td>
                         <td class="text-right">{{ $value['transaction'] }}</td>
@@ -152,7 +172,6 @@
                 @endforeach
             </tbody>
         </table>
-
         <div class="footer">
             <p>
                 Este documento es un resumen del cierre de caja generado automáticamente. <br>
@@ -248,6 +267,9 @@
         th, td {
             padding: 8px;
             border: 1px solid #ddd;
+        }
+        td{
+            font-size: 15px;
         }
         th {
             background-color: #f2f2f2;
