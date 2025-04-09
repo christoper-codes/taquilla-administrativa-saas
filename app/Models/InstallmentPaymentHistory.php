@@ -24,7 +24,7 @@ class InstallmentPaymentHistory extends Model
     public function globalPaymentTypes()
     {
         return $this->belongsToMany(GlobalPaymentType::class, 'global_payment_type_sale_ticket', 'installment_payment_history_id', 'global_payment_type_id')
-            ->withPivot('amount', 'reason_courtesy', 'original_amount', 'payment_date', 'is_active')
+            ->withPivot('global_card_payment_type_id', 'amount', 'reason_courtesy', 'original_amount', 'payment_date', 'is_active')
             ->withTimestamps();
     }
 }

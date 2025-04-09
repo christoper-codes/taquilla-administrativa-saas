@@ -302,13 +302,13 @@ function printInKioskMode(url, close = true) {
         ventana.print();
         if (close){
             setTimeout(() => {
-                ventana.close();
+                //ventana.close();
             }, 4000);
         }
     };
 }
 
-const cancelTicket = (item) => {
+const cancelTicket = (item, isActive) => {
 
     if(cencellationPasswordEntered.value != cancelPassword.value) {
         toast('El password no coincide para ejecutar la cancelacion', {
@@ -362,6 +362,7 @@ const cancelTicket = (item) => {
         },
         onFinish: () => {
             loadingCancel.value = false;
+            isActive.value = false;
         }
     })
 
@@ -386,9 +387,6 @@ const pdf = () => {
             console.error('Error:', error);
         });
 };
-
-
-
 </script>
 
 <template>
@@ -555,7 +553,7 @@ const pdf = () => {
                                         <div class="tw-text-4xl tw-font-bold"> <span class="tw-text-purple-600">Apertura:</span> {{ dateFormat(active_cash_register.created_at) }}</div>
                                     </div>
                                     <div class="tw-p-5 tw-flex tw-items-end tw-justify-center tw-flex-col tw-gap-3">
-                                        <v-btn @click="getCashRegisterSummary()" :loading="loading" variant="elevated" class="text-none !tw-bg-blue-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Imprimir Corte</v-btn>
+                                        <v-btn @click="getCashRegisterSummary()" :loading="loading" variant="elevated" class="text-none !tw-bg-gradient-to-r !tw-from-purple-500 !tw-to-pink-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Imprimir Corte</v-btn>
                                     </div>
                                 </div>
 
@@ -621,7 +619,7 @@ const pdf = () => {
                                                 </v-dialog>
                                                     <v-dialog max-width="600">
                                                         <template v-slot:activator="{ props: activatorProps }">
-                                                            <v-btn @click="updateSaleTicketsSelected(item)" v-bind="activatorProps" density="default" icon="mdi-printer" class="!tw-text-green-300 !tw-bg-green-800"></v-btn>
+                                                            <v-btn @click="updateSaleTicketsSelected(item)" v-bind="activatorProps" density="default" icon="mdi-printer-settings" class="!tw-text-purple-600 !tw-bg-purple-300"></v-btn>
                                                         </template>
                                                         <template v-slot:default="{ isActive }">
                                                             <v-card title="¿Estas seguro de reimprimir el abono?">
