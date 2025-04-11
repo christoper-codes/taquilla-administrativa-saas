@@ -138,7 +138,7 @@ function priceFinal(seat, priceTypeName) {
 
 const addSeat = (seat) => {
     if(selectedPromotion.value){
-        toast('Una vez selecionada una promocion ya no es posible agregar mas asientos a la compra.', {
+        toast('Una vez selecionada una promoción ya no es posible agregar mas asientos a la compra.', {
             "theme": "auto",
             "type": "error",
             "autoClose": 10000,
@@ -147,7 +147,7 @@ const addSeat = (seat) => {
         return
     }
     if(selectedAgreementPromotion.value){
-        toast('Una vez selecionada una promocion ya no es posible agregar mas asientos a la compra.', {
+        toast('Una vez selecionada una promoción ya no es posible agregar mas asientos a la compra.', {
             "theme": "auto",
             "type": "error",
             "autoClose": 10000,
@@ -333,7 +333,7 @@ watch(selectedPromotion, () => {
 
     updateTotal();
 
-    toast('La promocion ha sido aplicada', {
+    toast('La promoción ha sido aplicada', {
         "theme": "auto",
         "type": "success",
         "dangerouslyHTMLString": true
@@ -390,7 +390,7 @@ watch(selectedAgreementPromotion, () => {
 
     updateTotal();
 
-    toast('La promocion ha sido aplicada', {
+    toast('La promoción ha sido aplicada', {
         "theme": "auto",
         "type": "success",
         "dangerouslyHTMLString": true
@@ -863,7 +863,7 @@ watch(() => amountReceivedCash.value, (newValue) => {
 watch(() => purchaseType.value, (newValue) => {
 
     if(newValue == 'abonado' && selectedPromotion.value) {
-        toast('Una vez seleccionada una promocion no sera posible la compra de abonos', {
+        toast('Una vez seleccionada una promoción no sera posible la compra de abonos', {
             "theme": "auto",
             "type": "error",
             "autoClose": 10000,
@@ -976,23 +976,23 @@ const onSubmit = () => {
             if(saleDeptorSelected.value == 1){
                 if(!firstNameSaleDeptor.value || !lastNameSaleDeptor.value || !phoneSaleDeptor.value){
                     valid.value = false;
-                    error.value = 'Debe de seleccionar un deudor para la venta a credito o llenar los campos de nombre, apellido y telefono';
+                    error.value = 'Debe de seleccionar un deudor para la venta a crédito o llenar los campos de nombre, apellido y teléfono';
                     return;
                 }
             }
         } else{
             valid.value = false;
-            error.value = 'Debe de seleccionar un deudor para la venta a credito';
+            error.value = 'Debe de seleccionar un deudor para la venta a crédito';
             return;
         }
         if(paymentTypesSelected.value.some(type => type.name === 'cortesia')){
             valid.value = false;
-            error.value = 'No se puede realizar una venta a credito con cortesia';
+            error.value = 'No se puede realizar una venta a crédito con cortesía';
             return;
         }
         if(paymentTypesSelected.value.length > 1){
             valid.value = false;
-            error.value = 'Por el momento no se puede realizar una venta a credito con mas de un tipo de pago';
+            error.value = 'Por el momento no se puede realizar una venta a crédito con mas de un tipo de pago';
             return;
         }
         form.value = true;
@@ -1039,7 +1039,7 @@ const onSubmit = () => {
     if(paymentTypesSelected.value.some(type => type.name === 'tarjeta') && installmentSale.value){
         if(!cardPaymentTypesSelected.value){
             valid.value = false;
-            error.value = 'Debe seleccionar un tipo de tarjeta para la venta a credito';
+            error.value = 'Debe seleccionar un tipo de tarjeta para la venta a crédito';
             return;
         }
     }
@@ -1950,13 +1950,13 @@ watch(() => paymentInstallmentSelected.value, () => {
 
                                                     <div v-if="paymentTypesSelected.some(type => type.name === 'cortesia')">
                                                         <h4 class="tw-text-xs tw-px-4 tw-py-1 tw-rounded-full tw-bg-purple-200 tw-text-purple-600 tw-text-center tw-mb-2">
-                                                            Complemento para pago en cortesia
+                                                            Complemento para pago en cortesía
                                                         </h4>
                                                         <v-select
                                                             v-if="viewVendorTopics(user_roles)"
                                                             color="purple"
-                                                            label="selecciona el complemento a cortesia"
-                                                            hint="Rason de la cortesia"
+                                                            label="selecciona el complemento a cortesía"
+                                                            hint="Rason de la cortesía"
                                                             :item-props="reasonAgreementsProps"
                                                             :items="reason_agreements"
                                                             v-model="reasonAgreementSelected"
@@ -1967,7 +1967,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                             <v-textarea
                                                                 class="tw-w-full"
                                                                 append-inner-icon="mdi-file-document"
-                                                                label="Rason especial de la cortesia"
+                                                                label="Rason especial de la cortesía"
                                                                 row-height="10"
                                                                 color="purple"
                                                                 clearable
@@ -2102,10 +2102,10 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                     <v-text-field
                                                                         class="tw-w-full"
                                                                         append-inner-icon="mdi-phone"
-                                                                        label="Numero de telefono"
+                                                                        label="Numero de teléfono"
                                                                         color="purple"
                                                                         v-model="phoneSaleDeptor"
-                                                                        hint="Numero de telefono para el pago a plazos"
+                                                                        hint="Numero de teléfono para el pago a plazos"
                                                                         :rules="[rules.required, rules.isNumber, rules.phoneNumber]"
                                                                         readonly
                                                                     ></v-text-field>
@@ -2358,10 +2358,10 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                                                         <v-text-field
                                                                                                             class="tw-w-full"
                                                                                                             append-inner-icon="mdi-phone"
-                                                                                                            label="Numero de telefono"
+                                                                                                            label="Numero de teléfono"
                                                                                                             color="purple"
                                                                                                             clearable
-                                                                                                            hint="Ingresa el numero de telefono del titular"
+                                                                                                            hint="Ingresa el numero de teléfono del titular"
                                                                                                             :rules="[rules.required, rules.isNumber]"
                                                                                                             v-model="seatsSelected[index].holder_phone"
                                                                                                         ></v-text-field>
@@ -2430,7 +2430,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                         </v-row>
                                                                         <v-row>
                                                                             <v-col cols="12" md="4">
-                                                                                <strong>Promocion: </strong>{{ selectedPromotion ? `${selectedPromotion.name} (${formatFirstLetterUppercase(selectedPromotion.type)})` :'' }}
+                                                                                <strong>Promoción: </strong>{{ selectedPromotion ? `${selectedPromotion.name} (${formatFirstLetterUppercase(selectedPromotion.type)})` :'' }}
                                                                             </v-col>
                                                                         </v-row>
                                                                     </v-card-subtitle>
@@ -2456,7 +2456,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                                 <td>{{ item.seat_catalogue.seat_type.name }}</td>
                                                                                 <td>{{ formatPrice(item.final_price) }}</td>
                                                                                 <td>{{ item.promotion_id ? "Aplicada": '' }}</td>
-                                                                                <td>{{ `${item.holder_name} ${item.holder_middle_name} ${item.holder_last_name}` }}</td>
+                                                                                <td>{{ `${item.holder_name} ${item.holder_last_name} ${item.holder_middle_name}` }}</td>
                                                                                 <td>{{ item.is_owner }}</td>
                                                                                 <td>{{ item.holder_jersey_type }}</td>
                                                                                 <td>{{ item.holder_jersey_size }}</td>

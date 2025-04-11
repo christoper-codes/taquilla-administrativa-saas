@@ -35,8 +35,8 @@ onMounted(() => {
         }
     })
 
-    const welcomeDialog = document.getElementById('welcome-dialog');
-    welcomeDialog.click();
+    // const welcomeDialog = document.getElementById('welcome-dialog');
+    // welcomeDialog.click();
 
 });
 
@@ -81,7 +81,7 @@ function handleImageError() {
             </div>
         </div>
 
-        <v-dialog max-width="700" max-height="300">
+        <!-- <v-dialog max-width="700" max-height="300">
             <template v-slot:activator="{ props: activatorProps }">
                 <v-btn id="welcome-dialog" v-bind="activatorProps" variant="elevated" class="!tw-hidden" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
             </template>
@@ -97,7 +97,7 @@ function handleImageError() {
                 </v-card-actions>
                 </v-card>
             </template>
-        </v-dialog>
+        </v-dialog> -->
 
         <div class="tw-w-full tw-relative tw-max-w-7xl tw-mx-auto tw-mt-36 lg:tw-mt-20 tw-px-4 lg:tw-px-0">
             <div class="tw-flex tw-flex-col tw-gap-7">

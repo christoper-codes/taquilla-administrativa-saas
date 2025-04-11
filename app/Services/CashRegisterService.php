@@ -394,6 +394,8 @@ class CashRegisterService
 
                 $sale_ticket->loadMissing(['saleTicketStatus', 'globalPaymentTypes', 'EventSeatCatalogues']);
 
+                $sale_ticket->setAttribute('remaining_amount', $sale_ticket->saleDebtor ? ($sale_ticket->total_amount - $sale_ticket->installmentPaymentHistories->sum('total_amount')) : 0);
+
                 /*
                 * Get all global payment types associated with the sale ticket
                 */
@@ -427,46 +429,65 @@ class CashRegisterService
                         $type_payments[$name] = $type_payments[$name] ?? [
                                 'initial_amount' => 0,
                                 'amount' => 0,
-                                'remaining_amount' => 0,
-                                'transactions' => 0,
-                                'seats' => 0
+                                'remaining_amount' => 0
+                                // 'transactions' => 0,
+                                // 'seats' => 0
                         ];
 
                         $type_payments[$name]['initial_amount'] += $amount;
                         $type_payments[$name]['amount'] += $has_debt ? $total_amount :  $amount;
                         $type_payments[$name]['remaining_amount'] += $has_debt ? ($total_amount - $amount) : ($amount - $amount);
-                        $type_payments[$name]['transactions']++;
-                        $type_payments[$name]['seats'] += $sale_ticket->EventSeatCatalogues->count();
+                        // $type_payments[$name]['transactions']++;
+                        // $type_payments[$name]['seats'] += $sale_ticket->EventSeatCatalogues->count();
 
                     }else {
 
-                        $name = 'pago compuesto'.($sale_ticket->payment_in_installments ? " a ".$sale_ticket->payment_in_installments." meses" : '');
+                        // $name = 'pago compuesto'.($sale_ticket->payment_in_installments ? " a ".$sale_ticket->payment_in_installments." meses" : '');
 
-                        $type_payments[$name] = $type_payments[$name] ?? [
-                            'remaining_amount_list' => [],
-                            'initial_amount_list' => [],
-                            'amountList' => [],
-                            'transactions' => 0,
-                            'seats' => 0
-                        ];
+                        // $type_payments[$name] = $type_payments[$name] ?? [
+                        //     'remaining_amount_list' => [],
+                        //     'initial_amount_list' => [],
+                        //     'amountList' => [],
+                        //     'transactions' => 0,
+                        //     'seats' => 0
+                        // ];
 
                         foreach ($payment_types as $global_payment_type) {
 
-                            $type_name = $global_payment_type->name;
-
-                            $type_payments[$name]['remaining_amount_list'][$type_name] = $type_payments[$name]['remaining_amount_list'][$type_name] ?? ['amount' => 0];
-                            $type_payments[$name]['initial_amount_list'][$type_name] = $type_payments[$name]['initial_amount_list'][$type_name] ?? ['amount' => 0];
-                            $type_payments[$name]['amountList'][$type_name] = $type_payments[$name]['amountList'][$type_name] ?? ['amount' => 0];
-
+                            $name = $global_payment_type->name;
+                            $has_debt = $sale_ticket->saleDebtor;
+                            $total_amount = $sale_ticket->total_amount;
                             $amount = $global_payment_type->pivot->amount;
 
-                            $type_payments[$name]['initial_amount_list'][$type_name]['amount'] += $amount;
-                            $type_payments[$name]['amountList'][$type_name]['amount'] +=  $sale_ticket->saleDebtor ? $sale_ticket->total_amount : $amount;
-                            $type_payments[$name]['remaining_amount_list'][$type_name]['amount'] += $sale_ticket->saleDebtor ? ($sale_ticket->total_amount - $amount) : ($amount - $amount);
+                            $type_payments[$name] = $type_payments[$name] ?? [
+                                    'initial_amount' => 0,
+                                    'amount' => 0,
+                                    'remaining_amount' => 0,
+                                    // 'transactions' => 0,
+                                    // 'seats' => 0
+                            ];
+
+                            $type_payments[$name]['initial_amount'] += $amount;
+                            $type_payments[$name]['amount'] += $has_debt ? $total_amount :  $amount;
+                            $type_payments[$name]['remaining_amount'] += $has_debt ? ($total_amount - $amount) : ($amount - $amount);
+                            // $type_payments[$name]['transactions']++;
+                            // $type_payments[$name]['seats'] += $sale_ticket->EventSeatCatalogues->count();
+
+                            // $type_name = $global_payment_type->name;
+
+                            // $type_payments[$name]['remaining_amount_list'][$type_name] = $type_payments[$name]['remaining_amount_list'][$type_name] ?? ['amount' => 0];
+                            // $type_payments[$name]['initial_amount_list'][$type_name] = $type_payments[$name]['initial_amount_list'][$type_name] ?? ['amount' => 0];
+                            // $type_payments[$name]['amountList'][$type_name] = $type_payments[$name]['amountList'][$type_name] ?? ['amount' => 0];
+
+                            // $amount = $global_payment_type->pivot->amount;
+
+                            // $type_payments[$name]['initial_amount_list'][$type_name]['amount'] += $amount;
+                            // $type_payments[$name]['amountList'][$type_name]['amount'] +=  $sale_ticket->saleDebtor ? $sale_ticket->total_amount : $amount;
+                            // $type_payments[$name]['remaining_amount_list'][$type_name]['amount'] += $sale_ticket->saleDebtor ? ($sale_ticket->total_amount - $amount) : ($amount - $amount);
                         }
 
-                        $type_payments[$name]['transactions']++;
-                        $type_payments[$name]['seats'] += $sale_ticket->EventSeatCatalogues->count();
+                        // $type_payments[$name]['transactions']++;
+                        // $type_payments[$name]['seats'] += $sale_ticket->EventSeatCatalogues->count();
                     }
                 }
 
