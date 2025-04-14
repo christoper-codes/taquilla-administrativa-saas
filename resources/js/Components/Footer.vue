@@ -63,7 +63,7 @@
           <p><a class="tw-inline-flex tw-gap-x-2 tw-text-gray-50 hover:tw-text-gray-300" href="#">Comunidad</a></p>
           <p><a class="tw-inline-flex tw-gap-x-2 tw-text-gray-50 hover:tw-text-gray-300" href="#">Ayuda y soporte</a></p>
           <p><a class="tw-inline-flex tw-gap-x-2 tw-text-gray-50 hover:tw-text-gray-300" href="#">Preguntas</a></p>
-          <p><a class="tw-inline-flex tw-gap-x-2 tw-text-gray-50 hover:tw-text-gray-300" href="#">Teminos</a></p>
+          <p><a class="tw-inline-flex tw-gap-x-2 tw-text-gray-50 hover:tw-text-gray-300" href="#">Términos</a></p>
           <p><a class="tw-inline-flex tw-gap-x-2 tw-text-gray-50 hover:tw-text-gray-300" href="#">Sugerencias</a></p>
         </div>
       </div>
@@ -72,7 +72,7 @@
       <div>
         <h4 class="tw-text-xs tw-font-semibold tw-text-gray-400 tw-uppercase">Partidos</h4>
         <div class="tw-mt-3 tw-grid tw-space-y-3 tw-text-sm">
-          <p><a class="tw-inline-flex tw-gap-x-2 tw-text-gray-50 hover:tw-text-gray-300" href="#">Proximos</a></p>
+          <p><a class="tw-inline-flex tw-gap-x-2 tw-text-gray-50 hover:tw-text-gray-300" href="#">Próximos</a></p>
           <p><a class="tw-inline-flex tw-gap-x-2 tw-text-gray-50 hover:tw-text-gray-300" href="#">Boletos</a></p>
           <p><a class="tw-inline-flex tw-gap-x-2 tw-text-gray-50 hover:tw-text-gray-300" href="#">Abonados</a> <span class="tw-inline tw-text-tw-primary-500">— Nuevo</span></p>
         </div>
@@ -91,7 +91,7 @@
       <div class="sm:tw-flex sm:tw-justify-between sm:tw-items-center">
         <div class="tw-flex tw-items-center tw-gap-x-3">
           <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xs md:tw-text-sm">
-            <a class="tw-inline-flex tw-gap-x-2 tw-text-gray-50 hover:tw-text-gray-700" href="#">Terminos</a>
+            <a class="tw-inline-flex tw-gap-x-2 tw-text-gray-50 hover:tw-text-gray-700" href="#">Términos</a>
             <a class="tw-inline-flex tw-gap-x-2 tw-text-gray-50 hover:tw-text-gray-700" href="#">Privacidad</a>
             <a class="tw-inline-flex tw-gap-x-2 tw-text-gray-50 hover:tw-text-gray-700" href="#">Status</a>
           </div>

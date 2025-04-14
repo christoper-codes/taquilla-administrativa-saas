@@ -20,8 +20,8 @@
                 <td class="w-half-left">
                     <p>Taquila: {{ $pdf_data['ticket_office']['name'] }}</p>
                     <p>Vendedor: {{ trim(implode(' ', array_filter([ $pdf_data['cash_register']['sellerUserOpening']['first_name'], $pdf_data['cash_register']['sellerUserOpening']['middle_name'], $pdf_data['cash_register']['sellerUserOpening']['last_name'] ]))) }}</p>
-                    <p>Fecha de apertura: {{ date('d/m/Y H:i', strtotime($pdf_data['cash_register']['opening_time'])) }}</p>
-                    <p>Fecha de cierre: {{ date('d/m/Y H:i', strtotime($pdf_data['cash_register']['closing_time'])) }}</p>
+                    <p>Fecha de apertura: {{ date('d/m/Y H:i', strtotime('-6 hours', strtotime($pdf_data['cash_register']['opening_time']))) }}</p>
+                    <p>Fecha de cierre: {{ date('d/m/Y H:i', strtotime('-6 hours', strtotime($pdf_data['cash_register']['closing_time']))) }}</p>
                 </td>
                 <td class="w-half-right">
                     <p>Lote: {{ $pdf_data['cash_register']['batch_cash_register'] }}</p>
@@ -46,8 +46,8 @@
                     <th class="text-right">Pagado</th>
                     <th class="text-right">Total</th>
                     <th class="text-right">Deuda</th>
-                    <th class="text-right">Transacc.</th>
-                    <th class="text-right">Asientos</th>
+                    {{-- <th class="text-right">Transacc.</th>
+                    <th class="text-right">Asientos</th> --}}
                 </tr>
             </thead>
             <tbody>
@@ -85,8 +85,8 @@
                             </td>
                         @endif
 
-                        <td class="text-right">{{ $value['transactions'] }}</td>
-                        <td class="text-right">{{ $value['seats'] }}</td>
+                        {{-- <td class="text-right">{{ $value['transactions'] }}</td>
+                        <td class="text-right">{{ $value['seats'] }}</td> --}}
                     </tr>
                 @endforeach
             </tbody>
@@ -157,8 +157,8 @@
         <table class="w-full" style="margin-top: 20px; border-collapse: collapse;">
             <thead>
                 <tr>
-                    <th class="text-left">Tipo de venta</th>
-                    <th class="text-right">Ventas</th>
+                    <th class="text-left"></th>
+                    <th class="text-right">Cancelaciones</th>
                     <th class="text-right">Asientos</th>
                 </tr>
             </thead>
@@ -172,6 +172,39 @@
                 @endforeach
             </tbody>
         </table>
+
+        <h4 style="margin-top: 20px;">Ventas</h4>
+        <table class="w-full" style="margin-top: 20px; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th class="text-left">Folio</th>
+                    <th class="text-left">Estatus</th>
+                    <th class="text-left">Asientos</th>
+
+                    <th class="text-left">Pagado</th>
+                    <th class="text-left">Total</th>
+                    <th class="text-left">Adeudo</th>
+                    <th class="text-left">Pagos</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($pdf_data['sale_tickets'] as $ticket)
+                    <tr>
+                        <td class="text-left">{{ $ticket['id'] }}</td>
+                        <td class="text-left">{{ $ticket['saleTicketStatus']['name']}}</td>
+                        <td class="text-left">{{ collect($ticket['eventSeatCatalogues'])->pluck('seatCatalogue.code')->implode(', ') }}</td>
+                        <td class="text-left">{{ number_format(floatval($ticket['amount_received']) - floatval($ticket['total_returned']), 2) }}</td>
+                        <td class="text-left">{{ number_format($ticket['total_amount'], 2) }}</td>
+                        <td class="text-left">{{ number_format($ticket['remaining_amount'], 2) }}</td>
+                        <td class="text-left">{{ collect($ticket['globalPaymentTypes'])->map(fn($paymentType) => "{$paymentType['name']}: {$paymentType['pivot']['amount']}" )->implode(', ') }}
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+
+
         <div class="footer">
             <p>
                 Este documento es un resumen del cierre de caja generado automáticamente. <br>

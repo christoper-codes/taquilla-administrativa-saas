@@ -144,7 +144,7 @@ props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
                             <span class="tw-block tw-font-bold">{{ formatPrice(amount.amount) }} MXN</span>
                         </div>
                         <div>
-                            <p class="tw-text-right tw-text-xs">Actualizado al dia: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
+                            <p class="tw-text-right tw-text-xs">Actualizado al día: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
                         </div>
                     </div>
                 </div>
@@ -161,7 +161,7 @@ props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
                         <span class="tw-block tw-font-bold">{{ formatPrice(amountOwed) }} MXN</span>
                     </div>
                     <div>
-                        <p class="tw-text-right tw-text-xs">Actualizado al dia: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
+                        <p class="tw-text-right tw-text-xs">Actualizado al día: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
                     </div>
                 </div>
             </div>
@@ -187,7 +187,7 @@ props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
                             <p class="tw-block tw-font-bold">{{ sales.sales }} <span class="tw-text-xs">(asientos)</span> </p>
                         </div>
                         <div>
-                            <p class="tw-text-right tw-text-xs">Actualizado al dia: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
+                            <p class="tw-text-right tw-text-xs">Actualizado al día: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
                         </div>
                     </div>
                 </div>

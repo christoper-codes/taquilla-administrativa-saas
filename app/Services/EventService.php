@@ -322,7 +322,7 @@ class EventService
                         'payment_in_installments' => $saleTicket->payment_in_installments,
                         'promotion_ticket' => $saleTicket->promotion,
                         'promotion' => $event->promotions,
-                        'original_price' => $event->priceTypes,
+                        'original_price' => $data->priceTypes,
                         'sale_debtor' => $saleTicket->saleDebtor,
                         'installment_payment_histories'=>$saleTicket->installmentPaymentHistories,
                         'sale_ticket' =>$saleTicket

@@ -70,7 +70,7 @@ const globalPayementTypeProps = (item) => {
                             <span class="tw-block tw-font-bold">{{ formatPrice(amount.amount) }} MXN</span>
                         </div>
                         <div>
-                            <p class="tw-text-right tw-text-xs">Actualizado al dia: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
+                            <p class="tw-text-right tw-text-xs">Actualizado al día: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
                         </div>
                     </div>
                 </div>
