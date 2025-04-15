@@ -12,12 +12,12 @@
             <td align="left" style="width: 40%;">
                 <h3>HALCONES DE XALAPA</h3>
                 <pre>
-Dia de compra: {{ $generic_data['sale_date'] }}
-Identificador: HDX-{{ $generic_data['folio'] }}
-Status: En proceso
-Folio: #{{ $generic_data['folio'] }}
-Vendedor: {{ trim(implode(' ', array_filter([ $generic_data['seller_user']['first_name'], $generic_data['seller_user']['middle_name'], $generic_data['seller_user']['last_name'] ]))) }}
-</pre>
+                Día de compra: {{ $generic_data['sale_date'] }}
+                Identificador: HDX-{{ $generic_data['folio'] }}
+                Estatus: En proceso
+                Folio: #{{ $generic_data['folio'] }}
+                Vendedor: {{ trim(implode(' ', array_filter([ $generic_data['seller_user']['first_name'], $generic_data['seller_user']['middle_name'], $generic_data['seller_user']['last_name'] ]))) }}
+                </pre>
 
 
             </td>
@@ -28,8 +28,8 @@ Vendedor: {{ trim(implode(' ', array_filter([ $generic_data['seller_user']['firs
 
                 <h3>Registro de abono varonil <br> temporada 2025 (FASE 1)</h3>
                 <pre>
-                    https://halconesdexalapa.com
-                    revisar terminos y condiciones
+                    https://halconesdexalapa.com.mx
+                    revisar términos y condiciones
                 </pre>
             </td>
         </tr>
@@ -50,7 +50,7 @@ Vendedor: {{ trim(implode(' ', array_filter([ $generic_data['seller_user']['firs
     <table width="100%">
         <thead>
             <tr>
-                <th class="text-right">CODIGO POSTAL</th>
+                <th class="text-right">CÓDIGO POSTAL</th>
                 <th class="text-right">CELULAR</th>
                 <th class="text-right">EMAIL</th>
                 <th class="text-right">TITULAR</th>
@@ -161,7 +161,7 @@ Vendedor: {{ trim(implode(' ', array_filter([ $generic_data['seller_user']['firs
             <td align="right" style="width: 50%;">
                 Halcones de Xalapa
                 <br>
-                Temporada 2025/2026
+                Temporada 2025
             </td>
         </tr>
 
