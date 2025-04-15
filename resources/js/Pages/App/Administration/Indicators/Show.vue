@@ -9,9 +9,14 @@ import EventsIndex from '@/Components/IndicatorsCharts/EventsIndex.vue';
 import usePriceFormat from '@/composables/priceFormat';
 import useDateFormat from '@/composables/dateFormat';
 import Eventshow from '@/Components/IndicatorsCharts/Eventshow.vue';
+import { toast } from 'vue3-toastify'
 
 const { formatPrice } = usePriceFormat();
 const { dateFormat } = useDateFormat();
+
+const dateToFindResume = ref(null);
+const itemsPerDate = ref([]);
+const salesPerDate = ref({efectivo: 0, tarjeta: 0, adeudo: 0, total: 0, venta: 0});
 
 const props = defineProps({
     "user": {
@@ -24,7 +29,6 @@ const props = defineProps({
     },
 })
 
-console.log(props.historyPerEvent);
 const today = new Date();
 const currentDay = today.getDate();
 const currentMonth = today.getMonth() + 1;
@@ -50,42 +54,90 @@ const headers = [
     { title: 'Venta a meses', key: 'Venta a meses' },
     { title: 'Venta a plazos', key: 'Venta a plazos' },
     { title: 'Adeudo', key: 'Adeudo' },
-    { title: 'Fecha de venta', key: 'Fecha de venta' },
+    { title: 'Fecha de venta', key: 'Fecha' },
 ];
 
 props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
-        const paymentTypes = saleTicket.global_payment_types.map(paymentType => {
-            return `${paymentType.name}: ${paymentType.pivot.amount}`;
-        }).join(', ');
-        const seatCatalogues  = saleTicket.event_seat_catalogs.map(seatCatalogue => {
-            return `${seatCatalogue.seat_catalogue.code}`
-        }).join(', ');
+    const paymentTypes = saleTicket.global_payment_types.map(paymentType => {
+        return `${paymentType.name}: ${paymentType.pivot.amount}`;
+    }).join(', ');
+    const seatCatalogues  = saleTicket.event_seat_catalogs.map(seatCatalogue => {
+        return `${seatCatalogue.seat_catalogue.code}`
+    }).join(', ');
 
-        const totalReturned = saleTicket.sale_ticket_status.name == 'cancelado' ? 0 : saleTicket.total_returned;
-        const adeudo = ref(0);
-        if(saleTicket.sale_ticket_status.name == 'pendiente'){
-            adeudo.value = Number(saleTicket.total_amount - (Number(saleTicket.amount_received)-Number(saleTicket.total_returned)));
-        } else {
-            adeudo.value = 0;
-        }
+    const totalReturned = saleTicket.sale_ticket_status.name == 'cancelado' ? 0 : saleTicket.total_returned;
+    const adeudo = ref(0);
+    if(saleTicket.sale_ticket_status.name == 'pendiente'){
+        adeudo.value = Number(saleTicket.total_amount - (Number(saleTicket.amount_received)-Number(saleTicket.total_returned)));
+    } else {
+        adeudo.value = 0;
+    }
 
-        items.value.push({
-            'Folio': saleTicket.id,
-            'Estatus': saleTicket.sale_ticket_status.name,
-            'Asientos': seatCatalogues,
-            'Monto total de venta': formatPrice(saleTicket.total_amount),
-            'Monto Pagado': formatPrice((Number(Number(saleTicket.amount_received)-Number(saleTicket.total_returned)))),
-            'Cambio': formatPrice(totalReturned),
-            'Tipos de pago': paymentTypes,
-            'Promotion': saleTicket.promotion_id ? `${saleTicket.promotion.name}` : 'Sin promoción',
-            'Venta a meses': saleTicket.payment_in_installments ? saleTicket.payment_in_installments : 'No aplica',
-            'Venta a plazos': saleTicket.sale_debtor_id ? saleTicket.sale_debtor.first_name : 'No aplica',
-            'Adeudo': formatPrice(adeudo.value),
-            'Fecha de venta': dateFormat(saleTicket.created_at),
-        });
-
-        amountOwed.value += Number(adeudo.value);
+    items.value.push({
+        'Folio': saleTicket.id,
+        'Estatus': saleTicket.sale_ticket_status.name,
+        'Asientos': seatCatalogues,
+        'Monto total de venta': formatPrice(saleTicket.total_amount),
+        'Monto Pagado': formatPrice((Number(Number(saleTicket.amount_received)-Number(saleTicket.total_returned)))),
+        'Cambio': formatPrice(totalReturned),
+        'Tipos de pago': paymentTypes,
+        'Promotion': saleTicket.promotion_id ? `${saleTicket.promotion.name}` : 'Sin promoción',
+        'Venta a meses': saleTicket.payment_in_installments ? saleTicket.payment_in_installments : 'No aplica',
+        'Venta a plazos': saleTicket.sale_debtor_id ? saleTicket.sale_debtor.first_name : 'No aplica',
+        'Adeudo': formatPrice(adeudo.value),
+        'Fecha': saleTicket.created_at,
     });
+
+    amountOwed.value += Number(adeudo.value);
+});
+
+const filterByDate = () => {
+    if (!dateToFindResume.value) {
+        itemsPerDate.value = [];
+        return;
+    }
+    const selectedDate = new Date(dateToFindResume.value).toISOString().split('T')[0];
+    itemsPerDate.value = items.value.filter(item => {
+        const itemDate = new Date(item['Fecha']).toISOString().split('T')[0];
+        return itemDate === selectedDate;
+    });
+
+    salesPerDate.value = {efectivo: 0, tarjeta: 0, adeudo: 0, total: 0, venta: 0};
+    amountOwed.value = 0;
+
+    itemsPerDate.value.forEach((item) => {
+        if (item.Estatus === 'pagado' || item.Estatus === 'pendiente') {
+            const paymentTypes = item['Tipos de pago'].split(',').reduce((acc, payment) => {
+                const [key, value] = payment.split(':').map(str => str.trim());
+                acc[key] = parseFloat(value);
+                return acc;
+            }, {});
+
+            const seatsSolt = item.Asientos.split(',').length;
+            salesPerDate.value.venta += seatsSolt;
+
+            if (paymentTypes.efectivo) {
+                salesPerDate.value.efectivo += paymentTypes.efectivo;
+            }
+
+            if (paymentTypes.tarjeta) {
+                salesPerDate.value.tarjeta += paymentTypes.tarjeta;
+            }
+
+            const adeudo = parseFloat(item['Adeudo'].replace('$', '').replace(',', ''));
+            salesPerDate.value.adeudo += adeudo;
+
+            const total = parseFloat(item['Monto Pagado'].replace('$', '').replace(',', ''));
+            salesPerDate.value.total += total;
+        }
+    });
+
+    toast('Datos obtenidos con exito!', {
+        "theme": "auto",
+        "type": "success",
+        "dangerouslyHTMLString": true
+    })
+};
 </script>
 
 <template>
@@ -94,47 +146,117 @@ props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
     <SuccessSession />
     <AppLayout >
         <ErrorSession />
-        <BreadcrumbAppSecondary>
-            <span>Indicadores / Resumen {{ historyPerEvent.event.name }} </span>
-        </BreadcrumbAppSecondary>
-
         <div class="tw-relative tw-w-full tw-block tw-overflow-hidden tw-px-4 tw-pt-10 lg:tw-px-0 lg:tw-pt-0 tw-mb-20 tw-bg-white tw-pb-10">
-            <section class=" lg:tw-p-10 tw-overflow-hidden tw-mt-0 tw-flex tw-flex-col lg:tw-flex-row tw-items-start tw-justify-between lg:tw-gap-10">
-                <div class="tw-w-full lg:tw-w-1/2">
-                    <img class="tw-w-full tw-rounded-xl" :src="`/storage/${historyPerEvent.event.global_image.file_path}`" alt="">
-                </div>
-                <div class="tw-w-full lg:tw-w-1/2 tw-shadow-lg tw-p-7 tw-rounded-lg tw-min-h-60 tw-mb-5">
-                    <h2 class="tw-font-bold tw-text-2xl lg:tw-text-4xl">
+            <section
+                class="tw-w-full tw-relative tw-bg-cover tw-bg-center lg:tw-h-[400px] tw-flex tw-flex-col tw-items-start tw-justify-center tw-rounded-xl"
+                :style="{ backgroundImage: `url(https://ta.absama.com/storage/event_images/67ea66fbc5758.jpg)` }"
+                >
+                <div class="tw-w-full tw-rounded-xl lg:tw-rounded-none tw-bg-black/40 tw-p-7 tw-text-white tw-backdrop-blur-md tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-6">
+                    <h2 data-aos="fade-left" data-aos-duration="2500" class="tw-font-bold tw-text-2xl lg:tw-text-4xl">
                         {{ historyPerEvent.event.name }}
                     </h2>
-                    <div class="tw-mt-5">
-                        <div v-for="(sales, type) in historyPerEvent.type_sales" :key="type">
-                            <div v-if="type == 'total'">
-                                <h4 class="tw-font-bold tw-text-xl tw-bg-clip-text tw-bg-gradient-to-r tw-from-purple-600 tw-to-yellow-500 tw-text-transparent">Aforo esperado: {{ sales.sales }} <span class="tw-text-base">(asistentes)</span> </h4>
-                            </div>
+                    <div>
+                    <div v-for="(sales, type) in historyPerEvent.type_sales" :key="type">
+                        <div v-if="type == 'total'">
+                        <h4 data-aos="fade-left" data-aos-duration="2500" class="tw-font-bold tw-text-xl">
+                            Aforo esperado: {{ sales.sales }}
+                            <span class="tw-text-base">(asistentes)</span>
+                        </h4>
                         </div>
                     </div>
-                    <div class="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-6 lg:tw-grid-cols-2">
-                        <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
-                            <span class="material-symbols-outlined tw-text-xl">calendar_today</span>{{ historyPerEvent.event.serie.global_season.name }}
-                        </div>
-                        <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
-                            <span class="material-symbols-outlined tw-text-xl">location_on</span>El nido del halcon
-                        </div>
-                        <div class="tw-inline-flex tw-items-center tw-gap-1.5 tw-py-1 tw-px-3 sm:tw-py-2 sm:tw-px-4 tw-rounded-full tw-text-xs sm:tw-text-sm tw-bg-gray-100 tw-text-gray-800 hover:tw-bg-gray-200 focus:tw-outline-none focus:tw-bg-gray-200">
-                            <span class="material-symbols-outlined tw-text-xl">calendar_clock</span>{{ dateFormat(historyPerEvent.event.start_date) }}
-                        </div>
                     </div>
 
+                    <div data-aos="fade-left" data-aos-duration="2500" class="tw-grid lg:tw-grid-cols-3 tw-gap-5 tw-w-full">
+                        <div class="tw-p-10 tw-bg-white/20 tw-rounded tw-text-center">
+                            <h3 class="tw-font-bold">Temporada</h3>
+                            <p>{{ historyPerEvent.event.serie.global_season.name }}</p>
+                        </div>
+                        <div class="tw-p-10 tw-bg-white/20 tw-rounded tw-text-center">
+                            <h3 class="tw-font-bold">Ubicación</h3>
+                            <p>{{ historyPerEvent.event.serie.global_season.name }}</p>
+                        </div>
+                        <div class="tw-p-10 tw-bg-white/20 tw-rounded tw-text-center">
+                            <h3 class="tw-font-bold">Fecha</h3>
+                            <p>{{ dateFormat(historyPerEvent.event.start_date) }}</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-3 tw-gap-8 tw-mt-10 lg:tw-mt-0  lg:tw-p-10">
+            <div class="tw-w-full lg:tw-px-10 tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-10 tw-mt-16">
+                <div class="tw-w-full lg:tw-w-1/3">
+                    <div class="tw-w-full">
+                        <v-date-picker v-model="dateToFindResume" class="!tw-w-full"></v-date-picker>
+                        <v-btn @click="filterByDate" variant="elevated" block class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" size="large">
+                            Buscar resumen
+                        </v-btn>
+                    </div>
+                </div>
+                <div class="tw-w-full lg:tw-w-2/3">
+                    <div v-if="itemsPerDate.length > 0">
+                        <div class="tw-mb-16">
+                            <div class="tw-mb-10 mt-2">
+                                <h2 class="tw-text-5xl">Venta</h2>
+                                <h3 class="tw-text-lg tw-mt-4">{{ formatPrice(salesPerDate.total) }} MXN</h3>
+                                <h3 class="tw-text-lg">{{ salesPerDate.venta }} asientos vendidos</h3>
+                            </div>
+                            <div class="tw-w-full tw-grid lg:tw-grid-cols-2 tw-gap-10">
+                                <div class="tw-p-5 tw-text-center tw-shadow-xl tw-border-b-8 tw-border-b-green-500 tw-rounded-lg w-full">
+                                    <p class="tw-font-bold tw-opacity-50">Efectivo</p>
+                                    <h3 class="tw-text-2xl tw-font-bold mt-2">{{ formatPrice(salesPerDate.efectivo) }} MXN</h3>
+                                </div>
+                                <div class="tw-p-5 tw-text-center tw-shadow-xl tw-border-b-8 tw-border-b-blue-500 tw-rounded-lg w-full">
+                                    <p class="tw-font-bold tw-opacity-50">Tarjeta</p>
+                                    <h3 class="tw-text-2xl tw-font-bold mt-2">{{ formatPrice(salesPerDate.tarjeta) }} MXN</h3>
+                                </div>
+                                <div class="tw-p-5 tw-text-center tw-shadow-xl tw-border-b-8 tw-border-b-red-500 tw-rounded-lg w-full">
+                                    <p class="tw-font-bold tw-opacity-50">Adeudo</p>
+                                    <h3 class="tw-text-2xl tw-font-bold mt-2">{{ formatPrice(salesPerDate.adeudo) }} MXN</h3>
+                                </div>
+                                <div class="tw-p-5 tw-text-center tw-shadow-xl tw-border-b-8 tw-border-b-yellow-500 tw-rounded-lg w-full">
+                                    <p class="tw-font-bold tw-opacity-50">Total</p>
+                                    <h3 class="tw-text-2xl tw-font-bold mt-2">{{ formatPrice(salesPerDate.total) }} MXN</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="tw-flex tw-items-center tw-justify-center tw-text-center tw-min-h-[500px] tw-shadow-lg tw-rounded-xl tw-opacity-50 tw-flex-col tw-gap-1">
+                        <h2 class="tw-font-bold tw-text-lg">Seleccione una fecha valida para un resumen de venta</h2>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="tw-fill-current tw-w-10 tw-h-auto" viewBox="0 0 24 24"><path d="m2.6 13.083 3.452 1.511L16 9.167l-6 7 8.6 3.916a1 1 0 0 0 1.399-.85l1-15a1.002 1.002 0 0 0-1.424-.972l-17 8a1.002 1.002 0 0 0 .025 1.822zM8 22.167l4.776-2.316L8 17.623z"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="itemsPerDate.length > 0" class="tw-w-full tw-mt-16 lg:tw-px-10">
+                <v-data-table :items="itemsPerDate" :headers="headers" :header-props="headerProps">
+                    <template v-slot:item.Estatus="{ item }">
+                        <span
+                            class="tw-py-1 tw-px-4 tw-rounded-full"
+                            :class="{
+                                '!tw-text-green-600 tw-bg-green-100': item.Estatus === 'pagado',
+                                '!tw-text-red-600 tw-bg-red-100': item.Estatus === 'cancelado',
+                                '!tw-text-yellow-600 tw-bg-yellow-100': item.Estatus === 'pendiente'
+                            }"
+                        >
+                            {{ item.Estatus }}
+                        </span>
+                    </template>
+
+                    <template v-slot:item.Fecha="{ item }">
+                        {{ dateFormat(item.Fecha) }}
+                    </template>
+                </v-data-table>
+            </div>
+
+            <div class="tw-mt-10 lg:tw-px-10">
+                <h2 class="tw-text-4xl tw-font-bold">Venta general</h2>
+            </div>
+            <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-3 tw-gap-8 lg:tw-px-10 tw-mt-5 tw-mb-16">
                 <div v-for="(amount, type) in historyPerEvent.type_payments" :key="type">
-                    <div data-aos="fade-left" data-aos-duration="2500" class="tw-p-5 tw-shadow-lg tw-rounded-2xl tw-bg-white tw-flex tw-flex-col tw-justify-between tw-gap-5">
+                    <div  class="tw-p-5 tw-shadow-lg tw-rounded-2xl tw-bg-white tw-flex tw-flex-col tw-justify-between tw-gap-5">
                         <div class="tw-flex tw-items-center tw-justify-between tw-gap-3">
                             <h3>Ventas para este evento</h3>
-                            <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-full tw-bg-pink-100 tw-text-green-600">payments</span>
+                            <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-full tw-bg-green-100 tw-text-green-600">payments</span>
                         </div>
                         <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xl">
                             <div class="tw-flex tw-items-center tw-gap-2 tw-font-bold">
@@ -148,7 +270,7 @@ props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
                         </div>
                     </div>
                 </div>
-                <div data-aos="fade-left" data-aos-duration="2500" class="tw-p-5 tw-shadow-lg tw-rounded-2xl tw-bg-white tw-flex tw-flex-col tw-justify-between tw-gap-5">
+                <div  class="tw-p-5 tw-shadow-lg tw-rounded-2xl tw-bg-white tw-flex tw-flex-col tw-justify-between tw-gap-5">
                     <div class="tw-flex tw-items-center tw-justify-between tw-gap-3">
                         <h3>Adeudo para este evento</h3>
                         <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-full tw-bg-pink-100 tw-text-red-600">payments</span>
@@ -166,13 +288,13 @@ props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
                 </div>
             </div>
 
-            <div class="tw-w-full lg:tw-px-10">
+            <div class="tw-w-full lg:tw-px-10 tw-mt-10">
                 <Eventshow v-bind:salesPerDay="historyPerEvent.sales_per_day" />
             </div>
 
-            <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-3 tw-gap-8 tw-mt-10 lg:tw-mt-0  lg:tw-p-10">
+            <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-3 tw-gap-8 tw-mt-10  lg:tw-p-10">
                 <div v-for="(sales, type) in historyPerEvent.type_sales" :key="type">
-                    <div data-aos="fade-left" data-aos-duration="2500" class="tw-p-5 tw-shadow-lg tw-rounded-2xl tw-bg-white tw-flex tw-flex-col tw-justify-between tw-gap-5">
+                    <div  class="tw-p-5 tw-shadow-lg tw-rounded-2xl tw-bg-white tw-flex tw-flex-col tw-justify-between tw-gap-5">
                         <div class="tw-flex tw-items-center tw-justify-between tw-gap-3">
                             <h3 v-if="type != 'total'">Tipos de asientos vendidos</h3>
                             <h3 v-else class="tw-text-2xl tw-font-bold">Ventas totales</h3>
@@ -193,7 +315,8 @@ props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
                 </div>
             </div>
 
-            <div class="tw-w-full tw-mt-10 tw-px-0 lg:tw-px-10">
+            <div class="tw-w-full tw-mt-16 tw-px-0 lg:tw-px-10">
+                <h2 class="tw-font-bold tw-text-3xl tw-mb-5">Historial de ventas</h2>
                 <v-data-table :items="items" :headers="headers" :header-props="headerProps">
                     <template v-slot:item.Estatus="{ item }">
                         <span
@@ -206,6 +329,9 @@ props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
                         >
                             {{ item.Estatus }}
                         </span>
+                    </template>
+                    <template v-slot:item.Fecha="{ item }">
+                        {{ dateFormat(item.Fecha) }}
                     </template>
                 </v-data-table>
             </div>
