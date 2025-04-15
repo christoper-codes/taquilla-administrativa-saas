@@ -61,31 +61,36 @@ props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
     const paymentTypes = saleTicket.global_payment_types.map(paymentType => {
         return `${paymentType.name}: ${paymentType.pivot.amount}`;
     }).join(', ');
-    const seatCatalogues  = saleTicket.event_seat_catalogs.map(seatCatalogue => {
-        return `${seatCatalogue.seat_catalogue.code}`
+
+    const seatCatalogues = saleTicket.event_seat_catalogs.map(seatCatalogue => {
+        return `${seatCatalogue.seat_catalogue.code}`;
     }).join(', ');
 
-    const totalReturned = saleTicket.sale_ticket_status.name == 'cancelado' ? 0 : saleTicket.total_returned;
+    const totalReturned = saleTicket.sale_ticket_status.name === 'cancelado' ? 0 : saleTicket.total_returned;
     const adeudo = ref(0);
-    if(saleTicket.sale_ticket_status.name == 'pendiente'){
-        adeudo.value = Number(saleTicket.total_amount - (Number(saleTicket.amount_received)-Number(saleTicket.total_returned)));
+    if (saleTicket.sale_ticket_status.name === 'pendiente') {
+        adeudo.value = Number(saleTicket.total_amount - (Number(saleTicket.amount_received) - Number(saleTicket.total_returned)));
     } else {
         adeudo.value = 0;
     }
+
+    const originalDate = new Date(saleTicket.created_at);
+    originalDate.setHours(originalDate.getHours() - 6);
+    const adjustedDate = originalDate.toISOString();
 
     items.value.push({
         'Folio': saleTicket.id,
         'Estatus': saleTicket.sale_ticket_status.name,
         'Asientos': seatCatalogues,
         'Monto total de venta': formatPrice(saleTicket.total_amount),
-        'Monto Pagado': formatPrice((Number(Number(saleTicket.amount_received)-Number(saleTicket.total_returned)))),
+        'Monto Pagado': formatPrice((Number(Number(saleTicket.amount_received) - Number(saleTicket.total_returned)))),
         'Cambio': formatPrice(totalReturned),
         'Tipos de pago': paymentTypes,
         'Promotion': saleTicket.promotion_id ? `${saleTicket.promotion.name}` : 'Sin promoción',
         'Venta a meses': saleTicket.payment_in_installments ? saleTicket.payment_in_installments : 'No aplica',
         'Venta a plazos': saleTicket.sale_debtor_id ? saleTicket.sale_debtor.first_name : 'No aplica',
         'Adeudo': formatPrice(adeudo.value),
-        'Fecha': saleTicket.created_at,
+        'Fecha': adjustedDate,
     });
 
     amountOwed.value += Number(adeudo.value);
@@ -138,6 +143,26 @@ const filterByDate = () => {
         "dangerouslyHTMLString": true
     })
 };
+
+const allowedDates = ref([]);
+
+const generateAllowedDates = () => {
+    allowedDates.value = items.value
+        .filter(item => item.Estatus === 'pagado' || item.Estatus === 'pendiente')
+        .map(item => {
+            const date = new Date(item.Fecha);
+            return date.toISOString().split('T')[0];
+        });
+};
+
+const isAllowedDate = (val) => {
+    const formattedDate = val.toISOString().split('T')[0];
+    return allowedDates.value.includes(formattedDate);
+};
+
+onMounted(() => {
+    generateAllowedDates();
+});
 </script>
 
 <template>
@@ -186,7 +211,11 @@ const filterByDate = () => {
             <div class="tw-w-full lg:tw-px-10 tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-10 tw-mt-16">
                 <div class="tw-w-full lg:tw-w-1/3">
                     <div class="tw-w-full">
-                        <v-date-picker v-model="dateToFindResume" class="!tw-w-full"></v-date-picker>
+                        <v-date-picker
+                            v-model="dateToFindResume"
+                            :allowed-dates="isAllowedDate"
+                            class="!tw-w-full"
+                        ></v-date-picker>
                         <v-btn @click="filterByDate" variant="elevated" block class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" size="large">
                             Buscar resumen
                         </v-btn>
@@ -339,6 +368,11 @@ const filterByDate = () => {
     </AppLayout>
 </template>
 
-<style scoped>
-
+<style>
+.fecha-venta {
+  background-color: #b3e5fc; /* Color azul claro */
+  color: #01579b; /* Texto en azul oscuro */
+  border-radius: 50%; /* Círculo para resaltar */
+  font-weight: bold; /* Negrita */
+}
 </style>
