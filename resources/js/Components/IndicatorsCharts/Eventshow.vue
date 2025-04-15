@@ -32,7 +32,7 @@ const chartOptions = ref({
   plugins: {
     title: {
       display: true,
-      text: 'Boletos Vendidos por dia',
+      text: 'Boletos Vendidos por día',
     },
     tooltip: {
       enabled: true,
