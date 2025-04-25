@@ -15,6 +15,8 @@ import useDateFormat from '@/composables/dateFormat';
 import useStringFormat from '@/composables/stringFormat'
 import axios from 'axios';
 import { toast } from 'vue3-toastify'
+import InstallmentPayment from '@/Pages/App/Pos/InstallmentPayment.vue'
+
 
 const { formatFirstLetterUppercase } = useStringFormat();
 const { formatPrice } = usePriceFormat();
@@ -168,6 +170,14 @@ const props = defineProps({
         type: Object,
         required: false,
     },
+    'global_payment_types': {
+        type: Array,
+        required: true,
+    },
+    'global_card_payment_types': {
+        type: Array,
+        required: true,
+    },
 })
 
 onMounted(() => {
@@ -195,6 +205,7 @@ const ticketOfficeProps = (item) => {
 };
 
 const dialog = ref(false);
+const dialogPayInstallment = ref(false);
 const notifications = ref(false);
 const sound = ref(true);
 const widgets = ref(false);
@@ -231,6 +242,7 @@ const headerProps = {
 };
 if (props.cash_register_general_history && props.cash_register_general_history.cash_register) {
     props.cash_register_general_history.sale_tickets.forEach((saleTicket) => {
+
         const paymentTypes = saleTicket.global_payment_types.map(paymentType => {
             return `${paymentType.name}: ${paymentType.pivot.amount}`;
         }).join(', ');
@@ -248,7 +260,8 @@ if (props.cash_register_general_history && props.cash_register_general_history.c
             'Monto total': formatPrice(saleTicket.total_amount),
             'Monto Pagado': formatPrice((Number(Number(saleTicket.amount_received)-Number(saleTicket.total_returned)))),
             'Monto restante': formatPrice(saleTicket.remaining_amount),
-            'Tipos de pago': paymentTypes
+            'Tipos de pago': paymentTypes,
+            'Deudor': saleTicket.sale_debtor
         });
     });
 }
@@ -280,21 +293,43 @@ const printTicketAbonado = (item, isActive) => {
 
 loadingPrint.value = true;
 
-axios.get(route('events.printSubscriber', { id: item.Folio }))
-    .then(response => {
-        const pdfContent = atob(response.data.pdf);
-        const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
-        const pdfUrl = window.URL.createObjectURL(pdfBlob);
-        printInKioskMode(pdfUrl);
-    })
-    .catch(error => {
-        console.log(error);
-    })
-    .finally(() => {
-        loadingPrint.value = false;
-        isActive.value = false;
-    })
-};
+    if(item.Deudor){
+        axios.get(route('events.subscribers.installment.receipt', { id: item.Folio }))
+            .then(response => {
+                const pdfContent = atob(response.data.pdf);
+                const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
+                const pdfUrl = window.URL.createObjectURL(pdfBlob);
+                printInKioskMode(pdfUrl);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+            .finally(() => {
+                loadingPrint.value = false;
+                isActive.value = false;
+            })
+
+    }else{
+        axios.get(route('events.printSubscriber', { id: item.Folio }))
+            .then(response => {
+                const pdfContent = atob(response.data.pdf);
+                const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
+                const pdfUrl = window.URL.createObjectURL(pdfBlob);
+                printInKioskMode(pdfUrl);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+            .finally(() => {
+                loadingPrint.value = false;
+                isActive.value = false;
+            })
+    };
+}
+
+
+
+
 
 function printInKioskMode(url, close = true) {
     const ventana = window.open(url, '_blank', 'fullscreen=yes,kiosk=yes');
@@ -571,18 +606,30 @@ const pdf = () => {
                                         <div class="tw-text-4xl tw-font-bold">{{ formatPrice(active_cash_register.opening_balance) }}</div>
                                     </div>
                                     <div class="tw-p-5 tw-rounded-xl tw-bg-green-100 tw-shadow-xl tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-3">
-                                        <div class="tw-bg-green-200 tw-text-green-600 tw-py-2 tw-px-4 tw-rounded-full tw-text-sm">Saldo actual</div>
+                                        <div class="tw-bg-green-200 tw-text-green-600 tw-py-2 tw-px-4 tw-rounded-full tw-text-sm">Saldo actual (Efectivo + Tarjeta)</div>
                                         <div class="tw-text-4xl tw-font-bold tw-text-green-600">{{ formatPrice(active_cash_register.current_balance) }}</div>
                                     </div>
                                     <div v-for="(amount, type) in cash_register_general_history.type_payments" :key="type">
-                                        <div class="tw-p-5 tw-rounded-xl tw-shadow-xl tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-3">
-                                            <div class="tw-bg-gray-100 tw-py-2 tw-px-4 tw-rounded-full tw-text-sm">Ventas con <span class="tw-text-purple-600 tw-font-bold">{{ type }}</span> </div>
-                                            <div class="tw-text-4xl tw-font-bold">{{ formatPrice(amount.amount) }}</div>
+                                        <div :class="{'tw-p-5 tw-rounded-xl tw-shadow-xl tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-3':true, 'tw-bg-green-100 ':['efectivo - Total','tarjeta - Total'].includes(type)}">
+                                            <div :class="{ 'tw-bg-gray-100':!['efectivo - Total','tarjeta - Total'].includes(type), 'tw-py-2 tw-px-4 tw-rounded-full tw-text-sm':true, 'tw-text-green-600':['efectivo - Total','tarjeta - Total'].includes(type)}">
+                                                Ventas con
+                                            <span :class="{'tw-text-purple-600 tw-font-bold':!['efectivo - Total','tarjeta - Total'].includes(type), 'tw-text-green-600':['efectivo - Total','tarjeta - Total'].includes(type)}">{{ type }}</span> </div>
+                                            <div :class="{'tw-text-4xl tw-font-bold':true, 'tw-text-green-600':['efectivo - Total','tarjeta - Total'].includes(type)}">{{ formatPrice(amount.amount) }}</div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="my-10 cash-register-history">
+                                <!-- :class="{
+                                    'tw-border-2 tw-border-green-500': type === 'efectivo',
+                                    'tw-border-2 tw-border-blue-500': type.includes('tarjeta'),
+                                    'tw-border-2 tw-border-yellow-500': type.includes('transferencia'),
+                                    }" -->
+
+                                <div class="tw-font-bold tw-text-4xl tw-text-center tw-inline-flex tw-pt-10 tw-pb-5 tw-text-gray-600">
+                                    Historial de transacciones de caja
+                                </div>
+
+                                <div class="mb-10 cash-register-history">
                                     <v-data-table :items="items" :headers="headers" :header-props="headerProps">
                                         <template v-slot:item.Estatus="{ item }">
                                             <span class="tw-py-1 tw-px-4 tw-rounded-full" :class="item.Estatus === 'pagado' ? '!tw-text-green-600 tw-bg-green-100' : '!tw-text-red-600 tw-bg-red-100'">
@@ -594,7 +641,7 @@ const pdf = () => {
                                         </template>
                                         <template v-slot:item.Acciones="{ item }">
                                             <div class="tw-flex tw-items-center tw-gap-3 tw-justify-between !tw-my-3">
-                                                    <v-dialog max-width="600">
+                                                    <!-- <v-dialog max-width="600">
                                                         <template v-slot:activator="{ props: activatorProps }">
                                                             <v-btn @click="updateSaleTicketsSelected(item)" v-bind="activatorProps" density="default" icon="mdi-printer" class="!tw-text-blue-600 !tw-bg-blue-200"></v-btn>
                                                         </template>
@@ -616,7 +663,7 @@ const pdf = () => {
                                                             </v-card-actions>
                                                             </v-card>
                                                         </template>
-                                                </v-dialog>
+                                                </v-dialog> -->
                                                     <v-dialog max-width="600">
                                                         <template v-slot:activator="{ props: activatorProps }">
                                                             <v-btn @click="updateSaleTicketsSelected(item)" v-bind="activatorProps" density="default" icon="mdi-printer-settings" class="!tw-text-purple-600 !tw-bg-purple-300"></v-btn>
@@ -752,11 +799,33 @@ const pdf = () => {
                         <v-btn variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400 !tw-h-20 !tw-w-[335px]" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">credit_score</span>Vender entradas</v-btn>
                     </Link>
                 </div>
-            </div>
 
+                <div class="tw-h-60 tw-w-full lg:tw-w-96 tw-bg-white/10 tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-gap-5 tw-px-5 py-14 tw-flex-col hover:tw-scale-105 tw-transition-all tw-duration-500  tw-z-20 tw-relative">
+                    <h3 class="text-white tw-text-2xl">Liquidar abonos</h3>
+                    <div class="text-center pa-4">
+                        <v-dialog v-model="dialogPayInstallment" transition="dialog-bottom-transition" fullscreen>
+                            <template v-slot:activator="{ props: activatorProps }">
+                                <v-btn v-bind="activatorProps" variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400 !tw-h-20 !tw-w-[335px]" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">credit_score</span>Liquidar Abonos</v-btn>
+                            </template>
+                            <v-card>
+                                <v-toolbar class="!tw-bg-gradient-to-r !tw-from-slate-950 !tw-via-purple-950 !tw-to-slate-950">
+                                    <v-btn class="!tw-text-white" icon="mdi-close" @click="dialogPayInstallment = false"></v-btn>
+                                    <v-toolbar-title>
+                                        <div class="tw-font-bold tw-text-white">Liquidar abonos</div>
+                                    </v-toolbar-title>
+                                    <v-spacer></v-spacer>
+                                    <v-toolbar-items>
+                                    <v-btn color="white" text="Aceptar" variant="tonal" @click="dialogPayInstallment = false"></v-btn>
+                                    </v-toolbar-items>
+                                </v-toolbar>
+                                <InstallmentPayment :stadium_id="ticket_office.stadium_id" :active_cash_register="active_cash_register" :global_payment_types="global_payment_types" :global_card_payment_types="global_card_payment_types" />
+                            </v-card>
+                        </v-dialog>
+                    </div>
+                </div>
+            </div>
             <div class="tw-absolute tw-left-1/2 tw-top-[80%] tw-h-[1280px] tw-w-[800px] tw--translate-x-1/2 tw-rounded-full tw-bg-gradient-to-t tw-blur-[250px] tw-from-tw-primary-800 tw-to-tw-primary-600">
             </div>
-
         </div>
 
         <Footer />

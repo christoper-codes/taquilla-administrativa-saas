@@ -12,6 +12,7 @@ use App\Models\SaleTicket;
 use App\Models\SaleTicketStatus;
 use App\Models\GlobalCardPaymentType;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
@@ -211,7 +212,7 @@ class EventService
 
     /*
     * |--------------------------------------------------------------------------
-    * | Reserve seats to buy
+    * | print subscriber
     */
     public function printSubscriber(Int $id_ticket)
     {
@@ -338,6 +339,84 @@ class EventService
 
     /*
     * |--------------------------------------------------------------------------
+    * | print subscriber
+    */
+    public function printSubscriberInstallmentReceipt(Int $id)
+    {
+            try {
+                /*
+                * Create sale ticket
+                */
+                $saleTicket = SaleTicket::with([
+                    'saleDebtor',
+                    'installmentPaymentHistories.globalPaymentTypes',
+                    'installmentPaymentHistories.cashRegister.sellerUserOpening',
+                    'promotion.promotionType',
+                    'EventSeatCatalogues.seatCatalogue.seatType',
+                    'events'
+                ])->find($id);
+
+                $globalCardPaymentType = GlobalCardPaymentType::all();
+
+                $saleTicket->installmentPaymentHistories->each(function ($installment_payment_history) use ($globalCardPaymentType){
+                    $installment_payment_history->globalPaymentTypes->each(function ($global_payment_type) use ($globalCardPaymentType) {
+                        if ($global_payment_type->pivot->global_card_payment_type_id) {
+                            $globalCardPaymentType = $globalCardPaymentType->where('id', $global_payment_type->pivot->global_card_payment_type_id)->first();
+                            if ($globalCardPaymentType) {
+                                $global_payment_type->name .= " (".$globalCardPaymentType->name.")";
+                            }
+                        }
+                    });
+                });
+
+                $saleTicket->EventSeatCatalogues->each(function ($data) use ($saleTicket){
+                    /**
+                     * Load Promotion
+                     */
+                    if ($saleTicket->promotion) {
+                        $data->load(['promotions' => function ($query) use ($saleTicket) {
+                            $query->where('promotion_id', $saleTicket->promotion_id);
+                        }]);
+                    }
+
+                    /**
+                     * Load Original Price
+                     */
+                    $data->load(['priceTypes' => function ($query) {
+                        $query->where('name', "abonado");
+                    }]);
+
+                    $data->seasonTicket;
+                });
+
+                $owner = $saleTicket->EventSeatCatalogues->filter(fn($item) => $item->seasonTicket->is_owner)->first();
+
+                $total_amount_installment_payment_histories = $saleTicket->installmentPaymentHistories->sum('total_amount');
+
+                return  [
+                    'folio' => $saleTicket->id,
+                    'sale_date' => Carbon::now()->format('d/m/Y'),
+                    'status' => $saleTicket->total_amount > $total_amount_installment_payment_histories ? 'Pendiente' : 'Pagado',
+                    'event_name' => $saleTicket->events->first()->name,
+                    'owner' => $owner,
+                    'seller_user' => $saleTicket->sellerUser,
+                    'promotion_ticket' => $saleTicket->promotion,
+                    'sale_debtor' => $saleTicket->saleDebtor,
+                    'seats' => $saleTicket->EventSeatCatalogues,
+                    'payment_in_installments' => $saleTicket->payment_in_installments,
+                    'installment_payment_histories'=>$saleTicket->installmentPaymentHistories,
+                    'total_amount' => $saleTicket->total_amount,
+                    'total_amount_installment_payment_histories' => $total_amount_installment_payment_histories,
+                    'remaining_total' => $saleTicket->total_amount - $total_amount_installment_payment_histories
+                ];
+
+            } catch (\Exception $e) {
+                throw $e;
+            }
+    }
+
+    /*
+    * |--------------------------------------------------------------------------
     * | Get seat availablility by zone
     */
     public function getAvailability(array $data)
@@ -434,6 +513,7 @@ class EventService
                     'total_amount' => $data['amount_received'] - $data['total_returned'],
                     'total_returned' => $data['total_returned'],
                     'is_active' => true,
+                    'cash_register_id' => $data['cash_register_id']
                 ]);
             }
 

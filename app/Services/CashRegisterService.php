@@ -8,6 +8,7 @@ use App\Models\CashRegisterType;
 use App\Models\GlobalPaymentType;
 use App\Models\SeatCatalogueStatus;
 use App\Models\GlobalCardPaymentType;
+use App\Models\SaleTicketStatus;
 use Illuminate\Support\Str;
 
 class CashRegisterService
@@ -18,10 +19,14 @@ class CashRegisterService
     */
 
     protected $cash_register_repository;
+    protected $cash_register_movement_service;
+    protected $cash_register_movement_type_Service;
 
-    public function __construct(CashRegisterRepositoryInterface $cash_register_repository)
+    public function __construct(CashRegisterRepositoryInterface $cash_register_repository, CashRegisterMovementService $cash_register_movement_service, CashRegisterMovementTypeService $cash_register_movement_type_Service)
     {
         $this->cash_register_repository = $cash_register_repository;
+        $this->cash_register_movement_service = $cash_register_movement_service;
+        $this->cash_register_movement_type_Service = $cash_register_movement_type_Service;
     }
 
     /*
@@ -72,18 +77,28 @@ class CashRegisterService
             */
             $sale_tickets = $cash_register->saleTickets()->orderBy('created_at', 'desc')->get();
 
-            $sale_tickets->each(function ($sale_ticket) use (&$type_payments, $status, $globalCardPaymentType) {
+            $sale_tickets_installment_payment_to_ignore = collect([]);
+
+            $sale_tickets->each(function ($sale_ticket) use (&$type_payments, $status, $globalCardPaymentType, &$sale_tickets_installment_payment_to_ignore) {
+
+                    $sale_tickets_installment_payment_to_ignore->push($sale_ticket->globalPaymentTypes->first()->installment_payment_history_id);
 
                     $sale_ticket->loadMissing(['saleTicketStatus', 'globalPaymentTypes', 'EventSeatCatalogues.seatCatalogue', 'saleDebtor', 'installmentPaymentHistories', 'promotion.promotionType']);
                     /**
                      * Add remaining amount if it is a payment in installments
                      */
 
-                    $sale_ticket->setAttribute('remaining_amount', $sale_ticket->saleDebtor ? ($sale_ticket->total_amount - $sale_ticket->installmentPaymentHistories->sum('total_amount')) : 0);
+                    $sale_ticket->setAttribute('remaining_amount', $sale_ticket->saleDebtor ? ($sale_ticket->total_amount - $sale_ticket->installmentPaymentHistories->sortBy('created_at')->first()->total_amount) : 0);
+
+                    if($sale_ticket->saleTicketStatus->name == 'pagado' && $sale_ticket->remaining_amount > 0){
+                        $sale_ticket->setRelation('saleTicketStatus',  SaleTicketStatus::where('name', 'pendiente')->first());
+                    }
+
 
                     /*
                     * Get all global payment types associated with the sale ticket
                     */
+
                     $sale_ticket->globalPaymentTypes->each(function ($global_payment_type) use (&$type_payments, &$sale_ticket, $globalCardPaymentType, $status) {
 
                         if ($global_payment_type->pivot->global_card_payment_type_id) {
@@ -109,15 +124,14 @@ class CashRegisterService
                         if($status->contains($sale_ticket->saleTicketStatus->name)){
                             if ($sale_ticket->saleDebtor) {
 
-                                $type_payments[$global_payment_type->name]['amount'] += ($sale_ticket->total_amount - $sale_ticket->installmentPaymentHistories->sum('total_amount'));
+                                $type_payments[$global_payment_type->name]['amount'] += ($sale_ticket->total_amount - $sale_ticket->installmentPaymentHistories->sortBy('created_at')->first()->total_amount);
 
                                 $dataTemp = Str::replace(" - Deuda a plazos", '', $global_payment_type->name);
 
                                 if (!isset($type_payments[$dataTemp])) {
                                     $type_payments[$dataTemp] = ['amount' => 0];
                                 }
-
-                                $type_payments[$dataTemp]['amount'] += $sale_ticket->installmentPaymentHistories->sum('total_amount');
+                                $type_payments[$dataTemp]['amount'] += $sale_ticket->installmentPaymentHistories->sortBy('created_at')->first()->total_amount;
 
                             }else{
                                 $type_payments[$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
@@ -129,9 +143,98 @@ class CashRegisterService
                     });
             });
 
+
+            /*
+            * Get all sale tickets associated with the cash register
+            */
+
+            $cash_register->loadMissing(['installmentPaymentHistories.saleTicket', 'installmentPaymentHistories.globalPaymentTypes']);
+
+            $sale_tickets_intallment_payment = $cash_register->installmentPaymentHistories->whereNotIn('id',$sale_tickets_installment_payment_to_ignore)->map(function ($installmentPaymentHistory) use (&$type_payments, $globalCardPaymentType) {
+
+                $saleTicket =  clone $installmentPaymentHistory->saleTicket;
+
+                $saleTicket->loadMissing([
+                    'saleTicketStatus',
+                    'globalPaymentTypes',
+                    'EventSeatCatalogues.seatCatalogue',
+                    'saleDebtor',
+                    'installmentPaymentHistories',
+                    'promotion.promotionType'
+                ]);
+
+
+                /**
+                 * Add remaining amount if it is a payment in installments
+                 */
+                $saleTicket->setRelation('globalPaymentTypes',  $installmentPaymentHistory->globalPaymentTypes);
+                $saleTicket->setAttribute('remaining_amount',  $saleTicket->total_amount - $saleTicket->installmentPaymentHistories->sum('total_amount') );
+                $saleTicket->setAttribute('amount_received',  $installmentPaymentHistory->total_amount);
+                $saleTicket->setAttribute('total_amount',  $saleTicket->total_amount);
+                $saleTicket->setAttribute('total_returned',  0);
+                $saleTicket->setAttribute('created_at',  $installmentPaymentHistory->created_at);
+
+                /*
+                * Get all global payment types associated with the sale ticket
+                */
+                $saleTicket->globalPaymentTypes->each(function ($global_payment_type) use (&$type_payments, $globalCardPaymentType) {
+
+                    if ($global_payment_type->pivot->global_card_payment_type_id) {
+
+                        $globalCardPaymentTypeTemp = $globalCardPaymentType->firstWhere('id', $global_payment_type->pivot->global_card_payment_type_id);
+
+                        $global_payment_type->name .= " (".$globalCardPaymentTypeTemp->name.")"." - Abonos a Deuda";
+                    }else{
+                        $global_payment_type->name .= " - Abonos a Deuda";
+                    }
+
+                    if (!isset($type_payments[$global_payment_type->name])) {
+                        $type_payments[$global_payment_type->name] = [
+                            'amount' => 0,
+                        ];
+                    }
+
+                    /**
+                     * sum the amount of the sale ticket for payments
+                     */
+                    $type_payments[$global_payment_type->name]['amount'] += $global_payment_type['pivot']['amount'];
+                });
+
+                return $saleTicket;
+            });
+
+            $totals = [
+                'efectivo' => [
+                    'keys' => ['efectivo', 'efectivo - Abonos a Deuda'],
+                    'total_key' => 'efectivo - Total',
+                ],
+                'tarjeta ' => [
+                    'keys' => ['tarjeta (credito)', 'tarjeta (credito) - Abonos a Deuda', 'tarjeta (debito)', 'tarjeta (debito) - Abonos a Deuda'],
+                    'total_key' => 'tarjeta - Total',
+                ],
+            ];
+
+            foreach ($totals as $group) {
+                $type_payments[$group['total_key']] = ['amount' => 0];
+                foreach ($group['keys'] as $key) {
+                    if (isset($type_payments[$key])) {
+                        $type_payments[$group['total_key']]['amount'] += $type_payments[$key]['amount'];
+                    }
+                }
+            }
+
+            $last_two = array_slice($type_payments, -2, 2, true);
+            $rest = array_slice($type_payments, 0, -2, true);
+
+            $type_payments = $last_two + $rest;
+
+            $type_payments = collect($type_payments)->filter(function ($value, $key) {
+                return !str_contains($key, ' - Deuda a plazos');
+            });
+
             $response = [
                 'cash_register' => $cash_register,
-                'sale_tickets' => $sale_tickets,
+                'sale_tickets' => $sale_tickets->concat($sale_tickets_intallment_payment)->sortByDesc('created_at')->values(),
                 'type_payments' => $type_payments,
             ];
 
@@ -365,6 +468,7 @@ class CashRegisterService
                 'total' => ['transaction' => 0,'sales' => 0],
             ];
 
+
             function updateSales(&$sales, $type, $isFlag, &$isFlagVariable, $transactionType) {
                 $sales[$type]['sales']++;
                 if ($isFlag) {
@@ -390,7 +494,12 @@ class CashRegisterService
             */
             $sale_tickets = $cash_register->saleTickets()->orderBy('created_at', 'desc')->get();
 
-            $sale_tickets->each(function ($sale_ticket) use (&$type_payments, $global_card_payment_type,$status,&$seat_catalogue_status_id, &$global_payment_type_id, &$type_sales, $partially_canceled, &$installment_sale, &$canceled) {
+
+            $sale_tickets_installment_payment_to_ignore = collect([]);
+
+            $sale_tickets->each(function ($sale_ticket) use (&$type_payments, $global_card_payment_type,$status,&$seat_catalogue_status_id, &$global_payment_type_id, &$type_sales, $partially_canceled, &$installment_sale, &$canceled, &$sale_tickets_installment_payment_to_ignore) {
+
+                $sale_tickets_installment_payment_to_ignore->push($sale_ticket->globalPaymentTypes->first()->installment_payment_history_id);
 
                 $sale_ticket->loadMissing(['saleTicketStatus', 'globalPaymentTypes', 'EventSeatCatalogues']);
 
@@ -414,80 +523,53 @@ class CashRegisterService
                         }
                     });
 
+                    $sale_ticket->installmentPaymentHistories->each(function ($installmentPaymentHistory) use ($sale_ticket, $global_card_payment_type) {
+                        $installmentPaymentHistory->globalPaymentTypes->each(function ($global_payment_type) use ($sale_ticket, $global_card_payment_type) {
+
+                            if ($global_payment_type->pivot->global_card_payment_type_id) {
+
+                                $globalCardPaymentType = $global_card_payment_type->firstWhere('id', $global_payment_type->pivot->global_card_payment_type_id);
+
+                                if ($globalCardPaymentType) {
+                                    $global_payment_type->name .= " (".$globalCardPaymentType->name.")".($sale_ticket->payment_in_installments ? " a ".$sale_ticket->payment_in_installments." meses" : '');
+                                }
+                            }
+                        });
+                    });
+
                     $payment_types = $sale_ticket->globalPaymentTypes;
                     $payment_count = $payment_types->count();
-
+                    $total_amount = $sale_ticket->total_amount;
+                    $has_debt = $sale_ticket->saleDebtor;
 
                     if ($payment_count == 1) {
 
                         $global_payment_type = $payment_types->first();
                         $name = $global_payment_type->name;
-                        $has_debt = $sale_ticket->saleDebtor;
-                        $total_amount = $sale_ticket->total_amount;
                         $amount = $global_payment_type->pivot->amount;
-
                         $type_payments[$name] = $type_payments[$name] ?? [
                                 'initial_amount' => 0,
                                 'amount' => 0,
-                                'remaining_amount' => 0
-                                // 'transactions' => 0,
-                                // 'seats' => 0
                         ];
 
                         $type_payments[$name]['initial_amount'] += $amount;
                         $type_payments[$name]['amount'] += $has_debt ? $total_amount :  $amount;
-                        $type_payments[$name]['remaining_amount'] += $has_debt ? ($total_amount - $amount) : ($amount - $amount);
-                        // $type_payments[$name]['transactions']++;
-                        // $type_payments[$name]['seats'] += $sale_ticket->EventSeatCatalogues->count();
 
                     }else {
-
-                        // $name = 'pago compuesto'.($sale_ticket->payment_in_installments ? " a ".$sale_ticket->payment_in_installments." meses" : '');
-
-                        // $type_payments[$name] = $type_payments[$name] ?? [
-                        //     'remaining_amount_list' => [],
-                        //     'initial_amount_list' => [],
-                        //     'amountList' => [],
-                        //     'transactions' => 0,
-                        //     'seats' => 0
-                        // ];
 
                         foreach ($payment_types as $global_payment_type) {
 
                             $name = $global_payment_type->name;
-                            $has_debt = $sale_ticket->saleDebtor;
-                            $total_amount = $sale_ticket->total_amount;
                             $amount = $global_payment_type->pivot->amount;
-
                             $type_payments[$name] = $type_payments[$name] ?? [
                                     'initial_amount' => 0,
                                     'amount' => 0,
-                                    'remaining_amount' => 0,
-                                    // 'transactions' => 0,
-                                    // 'seats' => 0
+
                             ];
 
                             $type_payments[$name]['initial_amount'] += $amount;
                             $type_payments[$name]['amount'] += $has_debt ? $total_amount :  $amount;
-                            $type_payments[$name]['remaining_amount'] += $has_debt ? ($total_amount - $amount) : ($amount - $amount);
-                            // $type_payments[$name]['transactions']++;
-                            // $type_payments[$name]['seats'] += $sale_ticket->EventSeatCatalogues->count();
-
-                            // $type_name = $global_payment_type->name;
-
-                            // $type_payments[$name]['remaining_amount_list'][$type_name] = $type_payments[$name]['remaining_amount_list'][$type_name] ?? ['amount' => 0];
-                            // $type_payments[$name]['initial_amount_list'][$type_name] = $type_payments[$name]['initial_amount_list'][$type_name] ?? ['amount' => 0];
-                            // $type_payments[$name]['amountList'][$type_name] = $type_payments[$name]['amountList'][$type_name] ?? ['amount' => 0];
-
-                            // $amount = $global_payment_type->pivot->amount;
-
-                            // $type_payments[$name]['initial_amount_list'][$type_name]['amount'] += $amount;
-                            // $type_payments[$name]['amountList'][$type_name]['amount'] +=  $sale_ticket->saleDebtor ? $sale_ticket->total_amount : $amount;
-                            // $type_payments[$name]['remaining_amount_list'][$type_name]['amount'] += $sale_ticket->saleDebtor ? ($sale_ticket->total_amount - $amount) : ($amount - $amount);
                         }
-
-                        // $type_payments[$name]['transactions']++;
-                        // $type_payments[$name]['seats'] += $sale_ticket->EventSeatCatalogues->count();
                     }
                 }
 
@@ -561,14 +643,122 @@ class CashRegisterService
                 }
             });
 
+
+            $remaining_amount = $sale_tickets->sum('remaining_amount');
+
+            $cash_register->loadMissing(['installmentPaymentHistories.saleTicket', 'installmentPaymentHistories.globalPaymentTypes']);
+
+            $sale_tickets_intallment_payment = $cash_register->installmentPaymentHistories->whereNotIn('id',$sale_tickets_installment_payment_to_ignore)->map(function ($installmentPaymentHistory) use (&$type_payments, $global_card_payment_type) {
+
+                $saleTicket =  clone $installmentPaymentHistory->saleTicket;
+
+                $saleTicket->loadMissing([
+                    'saleTicketStatus',
+                    'globalPaymentTypes',
+                    'EventSeatCatalogues.seatCatalogue',
+                    'saleDebtor',
+                    'installmentPaymentHistories',
+                    'promotion.promotionType'
+                ]);
+
+                /**
+                 * Add remaining amount if it is a payment in installments
+                 */
+                $saleTicket->setRelation('globalPaymentTypes',  $installmentPaymentHistory->globalPaymentTypes);
+                $saleTicket->setAttribute('remaining_amount',  $saleTicket->total_amount - $saleTicket->installmentPaymentHistories->sum('total_amount') );
+                $saleTicket->setAttribute('amount_received',  $installmentPaymentHistory->total_amount);
+                $saleTicket->setAttribute('total_amount',  $saleTicket->total_amount);
+                $saleTicket->setAttribute('total_returned',  0);
+                $saleTicket->setAttribute('created_at',  $installmentPaymentHistory->created_at);
+
+                /*
+                * Get all global payment types associated with the sale ticket
+                */
+                $saleTicket->globalPaymentTypes->each(function ($global_payment_type) use (&$type_payments, $global_card_payment_type, $saleTicket) {
+
+                    if ($global_payment_type->pivot->global_card_payment_type_id) {
+
+                        $globalCardPaymentType = $global_card_payment_type->firstWhere('id', $global_payment_type->pivot->global_card_payment_type_id);
+
+                        $global_payment_type->name .= " (".$globalCardPaymentType->name.")"." - Abonos a Deuda";
+                    }else{
+                        $global_payment_type->name .= " - Abonos a Deuda";
+                    }
+
+                    $payment_types = $saleTicket->globalPaymentTypes;
+                    $payment_count = $payment_types->count();
+
+                    if ($payment_count == 1) {
+
+                        $global_payment_type = $payment_types->first();
+                        $name = $global_payment_type->name;
+                        $amount = $global_payment_type->pivot->amount;
+                        $type_payments[$name] = $type_payments[$name] ?? [
+                                'initial_amount' => 0,
+                                'amount' => 0,
+                        ];
+
+                        $type_payments[$name]['initial_amount'] += $amount;
+                        $type_payments[$name]['amount'] += 0;
+
+                    }else {
+
+                        foreach ($payment_types as $global_payment_type) {
+
+                            $name = $global_payment_type->name;
+                            $amount = $global_payment_type->pivot->amount;
+                            $type_payments[$name] = $type_payments[$name] ?? [
+                                    'initial_amount' => 0,
+                                    'amount' => 0,
+
+                            ];
+
+                            $type_payments[$name]['initial_amount'] += $amount;
+                            $type_payments[$name]['amount'] += 0;
+                        }
+                    }
+                });
+
+
+
+                return $saleTicket;
+            });
+
+            $type_payments_default = [
+                'tarjeta',
+                'efectivo',
+            ];
+
+            $type_payments_sales = [];
+
+            collect($type_payments)->each(function ($value, $key) use (&$type_payments_sales, $type_payments_default) {
+
+                foreach ($type_payments_default as $default) {
+                    if (Str::contains($key, $default)) {
+
+                        $type_payments_sales[$default] = $type_payments_sales[$default] ?? [
+                            'initial_amount' => 0,
+                            'amount' => 0,
+                        ];
+                        $type_payments_sales[$default]['initial_amount'] += $value['initial_amount'] ?? 0;
+                        $type_payments_sales[$default]['amount'] += $value['amount'] ?? 0;
+                    }
+                }
+            });
+            $type_payments_sales['tarjeta (debito + credito)'] = $type_payments_sales['tarjeta'];
+            unset($type_payments_sales['tarjeta']);
+
             $response = [
                 'ticket_office' => $cash_register->ticketOffice,
                 'cash_register' => $cash_register,
-                'sale_tickets' => $sale_tickets,
+                'sale_tickets' => $sale_tickets->concat($sale_tickets_intallment_payment)->sortByDesc('created_at')->values(),
                 'type_payments' => $type_payments,
+                'type_payments_sales' => $type_payments_sales,
+                'remaining_amount' => $remaining_amount,
                 'type_sales' => $type_sales,
                 'partially_canceled'=> $partially_canceled,
                 'installment_sale' => $installment_sale,
+                'installment_payment_sale' => $sale_tickets_intallment_payment->count(),
                 'canceled'=> $canceled
             ];
 
@@ -576,6 +766,32 @@ class CashRegisterService
 
 
         } catch(\Exception $e){
+            throw $e;
+        }
+    }
+
+
+    public function updateCashRegister(array $data)
+    {
+        try {
+            $cash_register = $this->getById($data['cash_register_id']);
+
+            $cash_register_movement = $this->cash_register_movement_service->save([
+                'cash_register_id' => $data['cash_register_id'],
+                'cash_register_movement_type_id' => $this->cash_register_movement_type_Service->getByName($data['cash_register_movement_type'])->id,
+                'sale_ticket_id' => $data['sale_ticket_id'],
+                'previous_balance' => $cash_register->current_balance,
+                'movement_amount' => $data['total_amount'],
+                'new_balance' => $cash_register->current_balance + $data['total_amount'],
+            ]);
+
+            /*
+            * Update cash register balance
+            */
+            $cash_register->current_balance = $cash_register_movement->new_balance;
+            $cash_register->save();
+
+        } catch (\Exception $e) {
             throw $e;
         }
     }

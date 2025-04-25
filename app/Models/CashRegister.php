@@ -59,4 +59,9 @@ class CashRegister extends Model
         return $this->hasMany(CashRegisterMovement::class);
     }
 
+    public function installmentPaymentHistories()
+    {
+        return $this->hasMany(InstallmentPaymentHistory::class);
+    }
+
 }
