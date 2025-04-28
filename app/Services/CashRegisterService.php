@@ -81,7 +81,12 @@ class CashRegisterService
 
             $sale_tickets->each(function ($sale_ticket) use (&$type_payments, $status, $globalCardPaymentType, &$sale_tickets_installment_payment_to_ignore) {
 
-                    $sale_tickets_installment_payment_to_ignore->push($sale_ticket->globalPaymentTypes->first()->installment_payment_history_id);
+                    if($sale_ticket->globalPaymentTypes->first()->installment_payment_history_id){
+                        $sale_tickets_installment_payment_to_ignore->push($sale_ticket->globalPaymentTypes->first()->installment_payment_history_id);
+                    }
+                    if($sale_ticket->installmentPaymentHistories->count() === 1){
+                        $sale_tickets_installment_payment_to_ignore->push($sale_ticket->installmentPaymentHistories->first()->id);
+                    }
 
                     $sale_ticket->loadMissing(['saleTicketStatus', 'globalPaymentTypes', 'EventSeatCatalogues.seatCatalogue', 'saleDebtor', 'installmentPaymentHistories', 'promotion.promotionType']);
                     /**
@@ -494,12 +499,16 @@ class CashRegisterService
             */
             $sale_tickets = $cash_register->saleTickets()->orderBy('created_at', 'desc')->get();
 
-
             $sale_tickets_installment_payment_to_ignore = collect([]);
 
             $sale_tickets->each(function ($sale_ticket) use (&$type_payments, $global_card_payment_type,$status,&$seat_catalogue_status_id, &$global_payment_type_id, &$type_sales, $partially_canceled, &$installment_sale, &$canceled, &$sale_tickets_installment_payment_to_ignore) {
 
-                $sale_tickets_installment_payment_to_ignore->push($sale_ticket->globalPaymentTypes->first()->installment_payment_history_id);
+                if($sale_ticket->globalPaymentTypes->first()->installment_payment_history_id){
+                    $sale_tickets_installment_payment_to_ignore->push($sale_ticket->globalPaymentTypes->first()->installment_payment_history_id);
+                }
+                if($sale_ticket->installmentPaymentHistories->count() === 1){
+                    $sale_tickets_installment_payment_to_ignore->push($sale_ticket->installmentPaymentHistories->first()->id);
+                }
 
                 $sale_ticket->loadMissing(['saleTicketStatus', 'globalPaymentTypes', 'EventSeatCatalogues']);
 
@@ -643,7 +652,6 @@ class CashRegisterService
                 }
             });
 
-
             $remaining_amount = $sale_tickets->sum('remaining_amount');
 
             $cash_register->loadMissing(['installmentPaymentHistories.saleTicket', 'installmentPaymentHistories.globalPaymentTypes']);
@@ -745,8 +753,11 @@ class CashRegisterService
                     }
                 }
             });
-            $type_payments_sales['tarjeta (debito + credito)'] = $type_payments_sales['tarjeta'];
-            unset($type_payments_sales['tarjeta']);
+
+            if (isset($type_payments_sales['tarjeta'])) {
+                $type_payments_sales['tarjeta (debito + credito)'] = $type_payments_sales['tarjeta'];
+                unset($type_payments_sales['tarjeta']);
+            }
 
             $response = [
                 'ticket_office' => $cash_register->ticketOffice,

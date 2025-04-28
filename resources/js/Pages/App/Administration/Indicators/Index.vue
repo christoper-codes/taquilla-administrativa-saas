@@ -9,9 +9,11 @@ import { onMounted, ref } from 'vue';
 import EventsIndex from '@/Components/IndicatorsCharts/EventsIndex.vue';
 import usePriceFormat from '@/composables/priceFormat';
 import useDateFormat from '@/composables/dateFormat';
+import useStringFormat from '@/composables/stringFormat';
 
 const { formatPrice } = usePriceFormat();
 const { dateFormat } = useDateFormat();
+const { formatFirstLetterUppercase } = useStringFormat();
 
 
 const props = defineProps({
@@ -65,7 +67,7 @@ const globalPayementTypeProps = (item) => {
                         <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xl">
                             <div class="tw-flex tw-items-center tw-gap-1 tw-font-bold">
                                 <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-green-500 tw-text-white">bar_chart</span>
-                                <h3>{{ type }}</h3>
+                                <h3>{{ formatFirstLetterUppercase(type) }}</h3>
                             </div>
                             <span class="tw-block tw-font-bold">{{ formatPrice(amount.amount) }} MXN</span>
                         </div>

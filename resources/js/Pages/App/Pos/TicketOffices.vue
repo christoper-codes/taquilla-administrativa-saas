@@ -6,6 +6,7 @@ import Footer from '@/Components/Footer.vue';
 import { ref } from 'vue';
 import ErrorSession from '@/Components/ErrorSession.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
+import useStringFormat from '@/composables/stringFormat';
 
 const props =  defineProps({
     'ticket_offices': {
@@ -13,6 +14,8 @@ const props =  defineProps({
         required: true,
     }
 })
+
+const { formatFirstLetterUppercase } = useStringFormat();
 
 </script>
 
@@ -52,9 +55,9 @@ const props =  defineProps({
                             <Link :href="route('ticket-offices.check')">
                             <v-btn variant="elevated" class="text-none !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Verificar</v-btn>
                             </Link>
-                            <Link :href="route('ticket-offices.search')">
+                            <!-- <Link :href="route('ticket-offices.search')">
                             <v-btn variant="elevated" class="text-none !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Buscar Boletos</v-btn>
-                            </Link>
+                            </Link> -->
                         </div>
                     </div>
                     <!-- End Title -->
@@ -68,16 +71,16 @@ const props =  defineProps({
                                 <div class="tw-relative tw-pt-[50%] sm:tw-pt-[70%] tw-rounded-xl tw-overflow-hidden">
                                     <img class="tw-size-full tw-absolute tw-top-0 tw-start-0 tw-object-cover tw-group-hover:tw-scale-105 tw-group-focus:tw-scale-105 tw-transition-transform tw-duration-500 tw-ease-in-out tw-rounded-xl" src="https://i.pinimg.com/564x/4a/04/11/4a04110cc00a352c8c8bc63c4731db1c.jpg" alt="Blog Image">
                                     <span class="tw-absolute tw-top-0 tw-end-0 tw-rounded-se-xl tw-rounded-es-xl tw-text-xs tw-font-medium tw-bg-purple-600 tw-text-white tw-py-1.5 tw-px-3">
-                                        {{ ticketOffice.name }}
+                                        {{ formatFirstLetterUppercase(ticketOffice.name) }}
                                     </span>
                                 </div>
 
                                 <div class="tw-mt-7">
                                     <h3 class="tw-text-xl tw-font-semibold tw-text-gray-800 tw-group-hover:tw-text-gray-600">
-                                        {{ ticketOffice.name }}
+                                        {{ formatFirstLetterUppercase(ticketOffice.name) }}
                                     </h3>
                                     <p class="tw-mt-3 tw-text-gray-800">
-                                        {{ ticketOffice.description }}
+                                        {{ formatFirstLetterUppercase(ticketOffice.description) }}
                                     </p>
                                     <p class="tw-mt-5 tw-inline-flex tw-items-center tw-gap-x-1 tw-text-sm tw-text-purple-600 tw-decoration-2 tw-group-hover:tw-underline tw-group-focus:tw-underline tw-font-medium">
                                         ver mas

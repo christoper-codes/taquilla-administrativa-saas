@@ -248,6 +248,17 @@ class SaleTicketService
                              }
                          }
 
+
+                        /**
+                         * Remplace the global payment types with the ones from the installment payment history
+                         * to get the correct amount of each payment type
+                         */
+                        if($sale_ticket->saleDebtor){
+                            $sale_ticket->setRelation('globalPaymentTypes',  $sale_ticket->installmentPaymentHistories->flatMap(function ($installment_payment_history) {
+                                return $installment_payment_history->globalPaymentTypes;
+                            }));
+                        }
+
                          /*
                         * Get all global payment types associated with the sale ticket
                         */
@@ -513,6 +524,17 @@ class SaleTicketService
             ) {
                 $sale_ticket->load('globalPaymentTypes');
 
+                /**
+                 * Remplace the global payment types with the ones from the installment payment history
+                 * to get the correct amount of each payment type
+                 */
+                if($sale_ticket->saleDebtor){
+                    $sale_ticket->setRelation('globalPaymentTypes',  $sale_ticket->installmentPaymentHistories->flatMap(function ($installment_payment_history) {
+                        return $installment_payment_history->globalPaymentTypes;
+                    }));
+                }
+
+
                 foreach ($sale_ticket->globalPaymentTypes as $global_payment_type) {
                     $name = $global_payment_type->name;
 
@@ -576,7 +598,7 @@ class SaleTicketService
     * |--------------------------------------------------------------------------
     * | Get all pending sale tickets
     */
-    public function saleTicketsSaleDevtor($status)
+    public function saleTicketsSaleDebtor($status)
     {
         try {
 
@@ -624,7 +646,7 @@ class SaleTicketService
     {
         try {
 
-            return $this->saleTicketsSaleDevtor('pendiente');
+            return $this->saleTicketsSaleDebtor('pendiente');
 
         } catch (\Exception $e) {
 
@@ -640,7 +662,7 @@ class SaleTicketService
     {
         try {
 
-            return $this->saleTicketsSaleDevtor('pagado');
+            return $this->saleTicketsSaleDebtor('pagado');
 
         } catch (\Exception $e) {
 
