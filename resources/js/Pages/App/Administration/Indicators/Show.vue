@@ -9,10 +9,12 @@ import EventsIndex from '@/Components/IndicatorsCharts/EventsIndex.vue';
 import usePriceFormat from '@/composables/priceFormat';
 import useDateFormat from '@/composables/dateFormat';
 import Eventshow from '@/Components/IndicatorsCharts/Eventshow.vue';
-import { toast } from 'vue3-toastify'
+import { toast } from 'vue3-toastify';
+import useStringFormat from '@/composables/stringFormat';
 
 const { formatPrice } = usePriceFormat();
 const { dateFormat } = useDateFormat();
+const { formatFirstLetterUppercase } = useStringFormat();
 
 const dateToFindResume = ref(null);
 const itemsPerDate = ref([]);
@@ -59,7 +61,7 @@ const headers = [
 
 props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
     const paymentTypes = saleTicket.global_payment_types.map(paymentType => {
-        return `${paymentType.name}: ${paymentType.pivot.amount}`;
+        return `${formatFirstLetterUppercase(paymentType.name)}: ${paymentType.pivot.amount}`;
     }).join(', ');
 
     const seatCatalogues = saleTicket.event_seat_catalogs.map(seatCatalogue => {
@@ -69,7 +71,7 @@ props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
     const totalReturned = saleTicket.sale_ticket_status.name === 'cancelado' ? 0 : saleTicket.total_returned;
     const adeudo = ref(0);
     if (saleTicket.sale_ticket_status.name === 'pendiente') {
-        adeudo.value = Number(saleTicket.total_amount - (Number(saleTicket.amount_received) - Number(saleTicket.total_returned)));
+        adeudo.value = Number(saleTicket.total_amount - (Number(saleTicket.installment_payment_histories.reduce((sum, item) => sum + parseFloat(item.total_amount), 0))));
     } else {
         adeudo.value = 0;
     }
@@ -87,8 +89,8 @@ props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
         'Cambio': formatPrice(totalReturned),
         'Tipos de pago': paymentTypes,
         'Promotion': saleTicket.promotion_id ? `${saleTicket.promotion.name}` : 'Sin promoción',
-        'Venta a meses': saleTicket.payment_in_installments ? saleTicket.payment_in_installments : 'No aplica',
-        'Venta a plazos': saleTicket.sale_debtor_id ? saleTicket.sale_debtor.first_name : 'No aplica',
+        'Venta a meses': saleTicket.payment_in_installments ? saleTicket.payment_in_installments : '',
+        'Venta a plazos': saleTicket.sale_debtor_id ? saleTicket.sale_debtor.first_name : '',
         'Adeudo': formatPrice(adeudo.value),
         'Fecha': adjustedDate,
     });
@@ -211,7 +213,7 @@ onMounted(() => {
             <div class="tw-w-full lg:tw-px-10 tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-10 tw-mt-16">
                 <div class="tw-w-full lg:tw-w-1/3">
                     <div class="tw-w-full">
-                        <v-date-picker
+                        <v-date-picker header="Selecciona una fecha" title=""
                             v-model="dateToFindResume"
                             :allowed-dates="isAllowedDate"
                             class="!tw-w-full"
@@ -290,7 +292,7 @@ onMounted(() => {
                         <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xl">
                             <div class="tw-flex tw-items-center tw-gap-2 tw-font-bold">
                                 <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-green-500 tw-text-white">bar_chart</span>
-                                <h3>{{ type }}</h3>
+                                <h3>{{ formatFirstLetterUppercase(type) }}</h3>
                             </div>
                             <span class="tw-block tw-font-bold">{{ formatPrice(amount.amount) }} MXN</span>
                         </div>
@@ -333,7 +335,7 @@ onMounted(() => {
                             <div class="tw-flex tw-items-center tw-gap-2 tw-font-bold">
                                 <span v-if="type != 'total'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-yellow-500 tw-text-white">confirmation_number</span>
                                 <span v-else class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-red-500 tw-text-white">confirmation_number</span>
-                                <h3>{{ type }}</h3>
+                                <h3>{{ formatFirstLetterUppercase(type) }}</h3>
                             </div>
                             <p class="tw-block tw-font-bold">{{ sales.sales }} <span class="tw-text-xs">(asientos)</span> </p>
                         </div>
@@ -353,10 +355,11 @@ onMounted(() => {
                             :class="{
                                 '!tw-text-green-600 tw-bg-green-100': item.Estatus === 'pagado',
                                 '!tw-text-red-600 tw-bg-red-100': item.Estatus === 'cancelado',
+                                '!tw-text-orange-600 tw-bg-orange-100': item.Estatus === 'parcialmente cancelado',
                                 '!tw-text-yellow-600 tw-bg-yellow-100': item.Estatus === 'pendiente'
                             }"
                         >
-                            {{ item.Estatus }}
+                            {{ formatFirstLetterUppercase(item.Estatus) }}
                         </span>
                     </template>
                     <template v-slot:item.Fecha="{ item }">

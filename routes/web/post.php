@@ -14,9 +14,11 @@ use App\Http\Controllers\SeatCatalogueStatusController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\TicketOfficeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\InstallmentPaymentHistoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PriceCatalogueController;
+use App\Http\Controllers\SaleTicketController;
 
 /*
 * |--------------------------------------------------------------------------
@@ -29,8 +31,9 @@ Route::middleware('auth')->group(function() {
     Route::post('/caja-registradora/store', [CashRegisterController::class, 'store'])->name('cash-registers.store');
     Route::post('/caja-registradora/close', [CashRegisterController::class, 'closeCashRegister'])->name('cash-registers.close');
     Route::post('/caja-registradora/resumen', [CashRegisterController::class, 'getCashRegisterSummary'])->name('cash-registers.summary');
-
-
+    Route::post('/estadios/caja-registradora/tickets/pendientes', [SaleTicketController::class, 'getSaleTicketStatusPending'])->name('cash-registers.ticket-office.status.pending');
+    Route::post('/estadios/caja-registradora/tickets/pagados', [SaleTicketController::class, 'getTicketsWithInstallmentPaymentsCompleted'])->name('cash-registers.tickets.with.installment.payments.completed');
+    Route::post('/pago-a-plazos/guardar', [InstallmentPaymentHistoryController::class, 'store'])->name('installment.payment.store');
 });
 
 /*

@@ -18,7 +18,7 @@
         <table class="w-full" style="margin-top: 40px;">
             <tr>
                 <td class="w-half-left">
-                    <p>Taquila: {{ $pdf_data['ticket_office']['name'] }}</p>
+                    <p>Taquila: {{ Str::ucfirst($pdf_data['ticket_office']['name']) }}</p>
                     <p>Vendedor: {{ trim(implode(' ', array_filter([ $pdf_data['cash_register']['sellerUserOpening']['first_name'], $pdf_data['cash_register']['sellerUserOpening']['middle_name'], $pdf_data['cash_register']['sellerUserOpening']['last_name'] ]))) }}</p>
                     <p>Fecha de apertura: {{ date('d/m/Y H:i', strtotime('-6 hours', strtotime($pdf_data['cash_register']['opening_time']))) }}</p>
                     <p>Fecha de cierre: {{ date('d/m/Y H:i', strtotime('-6 hours', strtotime($pdf_data['cash_register']['closing_time']))) }}</p>
@@ -39,13 +39,34 @@
 
         <h2 style="margin-top: 40px;">Fondo inicial: ${{ number_format($pdf_data['cash_register']['opening_balance'], 2, '.', ',') }}</h2>
 
+        <h4 style="margin-top: 40px;">Dinero Total por Metodo de Pagos</h4>
         <table class="w-full" style="margin-top: 40px; border-collapse: collapse;">
             <thead>
                 <tr>
                     <th class="text-left">Tipo</th>
                     <th class="text-right">Pagado</th>
                     <th class="text-right">Total</th>
-                    <th class="text-right">Deuda</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($pdf_data['type_payments_sales'] as $payment_type => $value)
+                    <tr>
+                        <td class="text-left">{{ Str::ucfirst($payment_type) }}</td>
+                            <td class="text-right">${{ number_format($value['initial_amount'] ?? 0, 2, '.', ',') }} MXN</td>
+                            <td class="text-right">${{ number_format($value['amount'] ?? 0, 2, '.', ',') }} MXN</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <h4 style="margin-top: 40px;">Dinero por Metodos de Pago</h4>
+        <table class="w-full" style="margin-top: 40px; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th class="text-left">Tipo</th>
+                    <th class="text-right">Pagado</th>
+                    <th class="text-right">Total</th>
+                    {{-- <th class="text-right">Deuda</th> --}}
                     {{-- <th class="text-right">Transacc.</th>
                     <th class="text-right">Asientos</th> --}}
                 </tr>
@@ -53,11 +74,11 @@
             <tbody>
                 @foreach ($pdf_data['type_payments'] as $payment_type => $value)
                     <tr>
-                        <td class="text-left">{{ $payment_type }}</td>
+                        <td class="text-left">{{ Str::ucfirst($payment_type )}}</td>
                         @if (isset($value['amount']))
                             <td class="text-right">${{ number_format($value['initial_amount'] ?? 0, 2, '.', ',') }} MXN</td>
                             <td class="text-right">${{ number_format($value['amount'] ?? 0, 2, '.', ',') }} MXN</td>
-                            <td class="text-right">${{ number_format($value['remaining_amount'] ?? 0, 2, '.', ',') }} MXN</td>
+                            {{-- <td class="text-right">${{ number_format($value['remaining_amount'] ?? 0, 2, '.', ',') }} MXN</td> --}}
                         @elseif (isset($value['amountList']) && is_array($value['amountList']))
                             <td class="text-right">
                                 @foreach ($value['initial_amount_list'] as $method => $amount_data)
@@ -92,6 +113,25 @@
             </tbody>
         </table>
 
+        <h4 style="margin-top: 40px;">Dinero por cobrar</h4>
+        <table class="w-full" style="margin-top: 20px; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th class="text-left"></th>
+                    <th class="text-right">Monto</th>
+                </tr>
+            </thead>
+            <tbody>
+                    <tr>
+                        <td class="text-left">Total</td>
+                        <td class="text-right">${{ number_format($pdf_data['remaining_amount'], 2, '.', ',') }} MXN</td>
+                    </tr>
+            </tbody>
+        </table>
+        <p style="font-size: 12px; color: #555;">
+            <strong>Nota:</strong> Para los tickets que fueron apartados a plazos, los registros de cobro se encuentran distribuidos en distintas cajas, según el historial de pagos realizados.
+        </p>
+
         <div class="line"></div>
 
         <h4 style="margin-top: 40px;">Venta Normal</h4>
@@ -106,7 +146,7 @@
             <tbody>
                 @foreach ($pdf_data['type_sales'] as $type_sale => $value)
                     <tr>
-                        <td class="text-left">{{ $type_sale }}</td>
+                        <td class="text-left">{{ Str::ucfirst($type_sale) }}</td>
                         <td class="text-right">{{ $value['transaction'] }}</td>
                         <td class="text-right">{{ $value['sales'] }}</td>
                     </tr>
@@ -126,7 +166,7 @@
             <tbody>
                 @foreach ($pdf_data['partially_canceled'] as $type_sale => $value)
                     <tr>
-                        <td class="text-left">{{ $type_sale }}</td>
+                        <td class="text-left">{{ Str::ucfirst($type_sale) }}</td>
                         <td class="text-right">{{ $value['transaction'] }}</td>
                         <td class="text-right">{{ $value['sales'] }}</td>
                     </tr>
@@ -146,7 +186,7 @@
             <tbody>
                 @foreach ($pdf_data['installment_sale'] as $type_sale => $value)
                     <tr>
-                        <td class="text-left">{{ $type_sale }}</td>
+                        <td class="text-left">{{ Str::ucfirst($type_sale) }}</td>
                         <td class="text-right">{{ $value['transaction'] }}</td>
                         <td class="text-right">{{ $value['sales'] }}</td>
                     </tr>
@@ -165,11 +205,26 @@
             <tbody>
                 @foreach ($pdf_data['canceled'] as $type_sale => $value)
                     <tr>
-                        <td class="text-left">{{ $type_sale }}</td>
+                        <td class="text-left">{{ Str::ucfirst($type_sale) }}</td>
                         <td class="text-right">{{ $value['transaction'] }}</td>
                         <td class="text-right">{{ $value['sales'] }}</td>
                     </tr>
                 @endforeach
+            </tbody>
+        </table>
+        <h4 style="margin-top: 20px;">Abonos a Deuda</h4>
+        <table class="w-full" style="margin-top: 20px; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th class="text-left"></th>
+                    <th class="text-right">Abonos a Deuda</th>
+                </tr>
+            </thead>
+            <tbody>
+                    <tr>
+                        <td class="text-left">Total</td>
+                        <td class="text-right">{{ $pdf_data['installment_payment_sale'] }}</td>
+                    </tr>
             </tbody>
         </table>
 
@@ -191,12 +246,12 @@
                 @foreach ($pdf_data['sale_tickets'] as $ticket)
                     <tr>
                         <td class="text-left">{{ $ticket['id'] }}</td>
-                        <td class="text-left">{{ $ticket['saleTicketStatus']['name']}}</td>
+                        <td class="text-left">{{ Str::ucfirst($ticket['saleTicketStatus']['name'])}}</td>
                         <td class="text-left">{{ collect($ticket['eventSeatCatalogues'])->pluck('seatCatalogue.code')->implode(', ') }}</td>
                         <td class="text-left">{{ number_format(floatval($ticket['amount_received']) - floatval($ticket['total_returned']), 2) }}</td>
                         <td class="text-left">{{ number_format($ticket['total_amount'], 2) }}</td>
                         <td class="text-left">{{ number_format($ticket['remaining_amount'], 2) }}</td>
-                        <td class="text-left">{{ collect($ticket['globalPaymentTypes'])->map(fn($paymentType) => "{$paymentType['name']}: {$paymentType['pivot']['amount']}" )->implode(', ') }}
+                        <td class="text-left">{{ collect($ticket['globalPaymentTypes'])->map(fn($paymentType) => Str::ucfirst("{$paymentType['name']}: {$paymentType['pivot']['amount']}") )->implode(', ') }}
                         </td>
                     </tr>
                 @endforeach
