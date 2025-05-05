@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Services\CashRegisterService;
 use App\Services\EventService;
 use App\Models\SalesTicketCancellationCode;
+use App\Services\GlobalCardPaymentTypeService;
+use App\Services\GlobalPaymentTypeService;
 use App\Services\TicketOfficeService;
 use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Http\Request;
@@ -23,12 +25,17 @@ class TicketOfficeController extends Controller
     protected $ticket_office_service;
     protected $event_service;
     protected $cash_register_service;
+    protected $global_payment_type_service;
+    protected $global_card_payment_type_service;
 
-    public function __construct(TicketOfficeService $ticket_office_service, EventService $event_service, CashRegisterService $cash_register_service)
+    public function __construct(TicketOfficeService $ticket_office_service, EventService $event_service, CashRegisterService $cash_register_service, GlobalPaymentTypeService $global_payment_type_service,
+                                GlobalCardPaymentTypeService $global_card_payment_type_service)
     {
         $this->ticket_office_service = $ticket_office_service;
         $this->event_service = $event_service;
         $this->cash_register_service = $cash_register_service;
+        $this->global_payment_type_service = $global_payment_type_service;
+        $this->global_card_payment_type_service = $global_card_payment_type_service;
     }
 
     /**
@@ -218,13 +225,18 @@ class TicketOfficeController extends Controller
                 $cash_register_general_history = $this->cash_register_service->getCashRegisterGeneralHistory($active_cash_register->id);
             }
 
+            $global_payment_types = $this->global_payment_type_service->getAll()->whereNotIn('name', ['cortesia', 'plazos']);
+            $global_card_payment_types = $this->global_card_payment_type_service->getAll();
+
             return Inertia::render('App/Pos/TicketOffice', [
                 'ticket_office' => $ticket_office,
                 'events' => $events,
                 'auth_user' => $auth_user,
                 'active_cash_register' => $active_cash_register,
                 'cash_register_general_history' => $cash_register_general_history,
-                'sale_tickets_cancellation_code' => $sale_tickets_cancellation_code
+                'sale_tickets_cancellation_code' => $sale_tickets_cancellation_code,
+                'global_payment_types' => $global_payment_types,
+                'global_card_payment_types' => $global_card_payment_types
             ]);
 
         } catch (\Exception $e) {

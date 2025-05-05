@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\CashRegisterMovement;
 use App\Models\CashRegisterMovementType;
 use App\Models\Event;
+use App\Models\GlobalCardPaymentType;
 use App\Models\GlobalPaymentType;
 use App\Models\SaleTicket;
 use App\Models\SaleTicketStatus;
@@ -247,6 +248,17 @@ class SaleTicketService
                              }
                          }
 
+
+                        /**
+                         * Remplace the global payment types with the ones from the installment payment history
+                         * to get the correct amount of each payment type
+                         */
+                        if($sale_ticket->saleDebtor){
+                            $sale_ticket->setRelation('globalPaymentTypes',  $sale_ticket->installmentPaymentHistories->flatMap(function ($installment_payment_history) {
+                                return $installment_payment_history->globalPaymentTypes;
+                            }));
+                        }
+
                          /*
                         * Get all global payment types associated with the sale ticket
                         */
@@ -383,6 +395,13 @@ class SaleTicketService
                     /*
                     * Get all global payment types associated with the sale ticket
                     */
+
+                    if($sale_ticket->saleDebtor){
+                        $sale_ticket->setRelation('globalPaymentTypes',  $sale_ticket->installmentPaymentHistories->flatMap(function ($installment_payment_history) {
+                            return $installment_payment_history->globalPaymentTypes;
+                        }));
+                    }
+
                     $sale_ticket->globalPaymentTypes->each(function ($global_payment_type) use (&$type_payments) {
                         if (!isset($type_payments[$global_payment_type->name])) {
                             $type_payments[$global_payment_type->name] = [
@@ -456,6 +475,7 @@ class SaleTicketService
         try {
             $event = Event::find($data['event_id']);
             $event->saleTickets->each(function ($sale_ticket) {
+                $sale_ticket->installmentPaymentHistories;
                 $sale_ticket->eventSeatCatalogs;
                 $sale_ticket->globalPaymentTypes;
                 $sale_ticket->globalPaymentTypes->each(function ($global_payment_type) {
@@ -503,6 +523,17 @@ class SaleTicketService
                 &$global_payment_type_cortesia_id
             ) {
                 $sale_ticket->load('globalPaymentTypes');
+
+                /**
+                 * Remplace the global payment types with the ones from the installment payment history
+                 * to get the correct amount of each payment type
+                 */
+                if($sale_ticket->saleDebtor){
+                    $sale_ticket->setRelation('globalPaymentTypes',  $sale_ticket->installmentPaymentHistories->flatMap(function ($installment_payment_history) {
+                        return $installment_payment_history->globalPaymentTypes;
+                    }));
+                }
+
 
                 foreach ($sale_ticket->globalPaymentTypes as $global_payment_type) {
                     $name = $global_payment_type->name;
@@ -557,6 +588,109 @@ class SaleTicketService
                 'type_sales' => $type_sales,
             ];
         } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+
+
+    /*
+    * |--------------------------------------------------------------------------
+    * | Get all pending sale tickets
+    */
+    public function saleTicketsSaleDebtor($status)
+    {
+        try {
+
+            $pending_status_id = SaleTicketStatus::where('name', $status)->first()->id;
+            $global_card_payment_type = GlobalCardPaymentType::all();
+
+            return $this->sale_ticket_repository->getAll()->filter(function ($sale_ticket) use ($pending_status_id) {
+                return $sale_ticket->sale_ticket_status_id == $pending_status_id && $sale_ticket->sale_debtor_id != null;;
+            })->each(function ($sale_ticket) use ($global_card_payment_type) {
+
+                $sale_ticket->loadMissing([
+                    'sellerUser','saleTicketStatus', 'globalPaymentTypes', 'EventSeatCatalogues.seatCatalogue', 'saleDebtor',
+                    'installmentPaymentHistories.globalPaymentTypes','installmentPaymentHistories.cashRegister.sellerUserOpening','promotion.promotionType']);
+
+                $sale_ticket->installmentPaymentHistories->each(function ($installment_payment_history) use ($global_card_payment_type){
+                    $installment_payment_history->globalPaymentTypes->each(function ($global_payment_type) use ($global_card_payment_type) {
+                        if ($global_payment_type->pivot->global_card_payment_type_id) {
+                            $global_card_payment_type_temp = $global_card_payment_type->where('id', $global_payment_type->pivot->global_card_payment_type_id)->first();
+                            if ($global_card_payment_type_temp) {
+                                $global_payment_type->name .= " (".$global_card_payment_type_temp->name.")";
+                            }
+                        }
+                    });
+                });
+
+                /**
+                 * Add remaining amount if it is a payment in installments
+                 */
+
+                $sale_ticket->setAttribute('remaining_amount', $sale_ticket->total_amount - $sale_ticket->installmentPaymentHistories->sum('total_amount'));
+
+            })->values();
+
+        } catch (\Exception $e) {
+
+            throw $e;
+        }
+    }
+
+    /*
+    * |--------------------------------------------------------------------------
+    * | Get all pending sale tickets
+    */
+    public function pendingSaleTickets()
+    {
+        try {
+
+            return $this->saleTicketsSaleDebtor('pendiente');
+
+        } catch (\Exception $e) {
+
+            throw $e;
+        }
+    }
+
+    /*
+    * |--------------------------------------------------------------------------
+    * | Get all pending sale tickets
+    */
+    public function ticketsWithInstallmentPaymentsCompleted()
+    {
+        try {
+
+            return $this->saleTicketsSaleDebtor('pagado');
+
+        } catch (\Exception $e) {
+
+            throw $e;
+        }
+    }
+
+    /*
+    * |--------------------------------------------------------------------------
+    * | update sale ticket status
+    */
+    public function updatedSaleTicketStatusForInstallmentPaymentHistories($ticket_id)
+    {
+        try {
+
+            $sale_ticket = $this->sale_ticket_repository->getById($ticket_id);
+
+            $sale_ticket->loadMissing(['installmentPaymentHistories.globalPaymentTypes']);
+
+            $isPaid = $sale_ticket->total_amount == $sale_ticket->installmentPaymentHistories->sum('total_amount');
+
+            if ($isPaid) {
+                $sale_ticket->sale_ticket_status_id = SaleTicketStatus::where('name', 'pagado')->first()->id;
+                $sale_ticket->save();
+            }
+
+        } catch (\Exception $e) {
+
             throw $e;
         }
     }

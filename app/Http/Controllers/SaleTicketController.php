@@ -117,5 +117,53 @@ class SaleTicketController extends Controller
         }
     }
 
+    public function getSaleTicketStatusPending (Request $request)
+    {
+        try {
 
+            $request->validate([
+                'id' => 'required',
+            ]);
+
+            $response = $this->sale_ticket_service->pendingSaleTickets($request->get('id'));
+
+            return response()->json([
+                'data' => $response,
+                'message' => 'Tickets pendientes consultados con exito',
+                'success' => true,
+            ], 200);
+
+        } catch(\Exception $e){
+            return response()->json([
+                'data' => null,
+                'message' => $e->getMessage(),
+                'success' => false,
+            ], 500);
+        }
+    }
+
+    public function getTicketsWithInstallmentPaymentsCompleted(Request $request)
+    {
+        try {
+
+            $request->validate([
+                'id' => 'required',
+            ]);
+
+            $response = $this->sale_ticket_service->ticketsWithInstallmentPaymentsCompleted($request->get('id'));
+
+            return response()->json([
+                'data' => $response,
+                'message' => 'Tickets pagados consultados con exito',
+                'success' => true,
+            ], 200);
+
+        } catch(\Exception $e){
+            return response()->json([
+                'data' => null,
+                'message' => $e->getMessage(),
+                'success' => false,
+            ], 500);
+        }
+    }
 }

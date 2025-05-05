@@ -6,6 +6,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventSeatCatalogPromotionController;
 use App\Http\Controllers\IndicatorController;
+use App\Http\Controllers\InstallmentPaymentHistoryController;
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SerieController;
@@ -80,11 +81,11 @@ Route::get('/add-subscriber-to-event-seat-catalog', function (Request $request) 
 
 
 
-Route::get('/migrate-fresh', function () {
+Route::get('/migrate', function () {
 
-    Artisan::call('migrate:fresh');
+    Artisan::call('migrate');
 
-    return "migrate-fresh";
+    return "migrate";
 
 });
 
@@ -246,3 +247,4 @@ Route::get('/tipos-de-precio', [PriceTypeController::class, 'getAll'])->name('ge
 */
 Route::get('/tipos-de-precio', [PriceTypeController::class, 'getAll'])->name('get.all.price.types');
 Route::get('/eventos/abonados/{id}/recibo', [EventController::class, 'printSubscriber'])->name('events.printSubscriber');
+Route::get('/eventos/ticket/{id}/recibo-pago-plazos', [InstallmentPaymentHistoryController::class, 'printSubscriberInstallmentReceipt'])->name('events.subscribers.installment.receipt');
