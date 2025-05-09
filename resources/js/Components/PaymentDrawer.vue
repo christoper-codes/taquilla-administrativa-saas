@@ -2,12 +2,11 @@
 import { drawerPaymentState } from '@/composables/drawersStates';
 import { loadScript } from '@paypal/paypal-js';
 import { onMounted, ref } from 'vue';
-import { router, usePage } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import CountdownTimer from '@/Components/CountdownTimer.vue';
-import { useForm as useFormInertia} from '@inertiajs/vue3';
+import CyberSoruce from '@/Components/CyberSoruce.vue';
 import axios from 'axios';
 import { toast } from 'vue3-toastify'
-import { jwtDecode } from 'jwt-decode';
 
 
 const CLIENT_ID = 'AVvNWWNci4r1r8VQUZ919IvcgLmDbPHCSktDNXcwQMaNHNdfqMCDKWdsR4SDs93oNYJQYw6q87Z4mHql';
@@ -88,219 +87,9 @@ const props = defineProps({
     saleDebtorData: {
         type: Object,
         required: false,
+        default: null,
     },
-})
-
-const user = usePage().props.auth.user;
-let payButton;
-let flexResponse;
-let expMonth;
-let expYear;
-let flex;
-
-let micro;
-let errorsOutput;
-var loadingPaymentFlex = ref(false);
-var contextCapture = ref(false);
-var disabledButtonBuyFlex = ref(false);
-var state = ref('');
-var municipality = ref('');
-var cp = ref('');
-var numPhone = ref('');
-var address = ref('');
-const generalError = ref('');
-var dialog = ref(false);
-
-
-
-const script = document.createElement('script');
-script.src = "https://flex.cybersource.com/microform/bundle/v2/flex-microform.min.js";
-script.async = true;
-
-script.onload = () => {
-  console.log("Script de Microform cargado correctamente");
-};
-
-script.onerror = () => {
-  console.error("Error al cargar el script de Microform");
-};
-
-document.body.appendChild(script);
-
-const generaateContextCapture = async () => {
-
-    await axios.get(route('capture.context')).
-        then((response)=>{
-            //if (response.data.data[0]) {
-                console.log(response.data.datos[0]);
-                //console.log(response.data.datos.jti);
-                initMicroform(response.data.datos[0])
-            //}
-        }).
-        catch((error) => {
-            console.log(error);
-        }
-    );
-}
-
-
-const initMicroform = (jwt) => {
-    try {
-
-        state.value = ''
-        municipality.value = ''
-        cp.value = ''
-        address.value = ''
-        numPhone.value = ''
-        payButton = document.querySelector('#pay-button');
-        flexResponse = document.querySelector('#flexresponse');
-        expMonth = document.querySelector('#expMonth');
-        expYear = document.querySelector('#expYear');
-        errorsOutput = document.querySelector('#errors-output');
-
-        const estilosMicroforma = {
-            'input': {
-                'font-size': '14px',
-                'font-family': 'helvetica, tahoma, calibri, sans-serif',
-                'color': '#811484'
-              },
-              ':focus': { 'color': 'blue' },
-              ':disabled': { 'cursor': 'not-allowed' },
-              'valid': { 'color': '#3c763d' },
-              'invalid': { 'color': '#a94442' }
-        };
-
-
-
-        flex = new Flex(jwt);
-        micro = flex.microform({styles:estilosMicroforma});
-        var number = micro.createField("number", { placeholder: "Número de tarjeta" });
-        var securityCode = micro.createField("securityCode", { placeholder: "CVV" });
-        number.load("#number-container");
-        securityCode.load("#securityCode-container");
-
-        contextCapture.value = !contextCapture.value
-
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-var deecodedjwt = ref();
-
-const buy = async () => {
-    console.log('entro al buy')
-    generalError.value = '';
-    loadingPaymentFlex.value = !loadingPaymentFlex.value;
-    disabledButtonBuyFlex.value = !disabledButtonBuyFlex.value
-
-    var options = {
-        expirationMonth: document.querySelector('#expMonth').value,
-        expirationYear: document.querySelector('#expYear').value
-    };
-
-    if (!micro) {
-        console.error('Microform no inicializado');
-        return;
-    }
-
-    micro.createToken(options, function (err, token) {
-        if (err) {
-            console.log(err);
-            loadingPaymentFlex.value = !loadingPaymentFlex.value;
-            disabledButtonBuyFlex.value = !disabledButtonBuyFlex.value
-            generalError.value = err.message;
-            if (err.reason == "CREATE_TOKEN_CAPTURE_CONTEXT_USED_TOO_MANY_TIMES") {
-                dialog.value = !dialog.value
-            }
-        } else {
-            console.log(JSON.stringify(token));
-            flexResponse.value = JSON.stringify(token);
-            deecodedjwt.value = jwtDecode(JSON.stringify(token))
-            console.log(deecodedjwt.value);
-            paymentFlexMicroForm(deecodedjwt.value);
-        }
-    });
-}
-
-
-const paymentFlexMicroForm = async (jwt) => {
-
-    const data = {
-        amount: props.totalAmount,
-        token: jwt.jti,
-        expirationMonth: jwt.content.paymentInformation.card.expirationMonth.value,
-        expirationYear: jwt.content.paymentInformation.card.expirationYear.value,
-        cardType: jwt.content.paymentInformation.card.number.detectedCardTypes[0],
-        user: user,
-        state: state.value,
-        municipality: municipality.value,
-        cp: cp.value,
-        numPhone: numPhone.value,
-        address: address.value
-    };
-
-    await axios.post(route('payment.payed.aut.setup'), data)
-        .then((response) => {
-            console.log(response);
-        })
-        .catch((error) => {
-            generalError.value = 'Ocurrió un error al enviar el formulario. Intenta nuevamente.';
-            disabledButtonBuyFlex.value = !disabledButtonBuyFlex.value
-            loadingPaymentFlex.value = !loadingPaymentFlex.value;
-            console.log(error);
-        }
-    );
-
-}
-
-const xy = ()=>{
-    if (response.data.response[1] && response.data.response[2]['X-RequestID']) {
-                const seatsSelectedData = {
-                    purchase_type: props.purchaseType,
-                    event_id: props.eventId,
-                    cash_register_id: props.cashRegisterId,
-                    member_user_id: props.memberUserId,
-                    seller_user_id: props.sellerUserId,
-                    price_type_id: props.priceTypeId,
-                    seats: props.seats,
-                    amount_received: props.amountReceived,
-                    total_amount: props.totalAmount,
-                    total_returned: props.amountReturned,
-                    global_payment_types: props.globalPaymentTypes,
-                    is_online: props.isOnline,
-                    serie_id: props.serieId,
-                }
-                axios.post(route('events.confirm-seats-purchase'), seatsSelectedData)
-                    .then((response) => {
-                        if(response.data.success) {
-                            toast(response.data.message, {
-                                "theme": "auto",
-                                "type": "default",
-                                "dangerouslyHTMLString": true
-                            })
-                            disabledButtonBuyFlex.value = !disabledButtonBuyFlex.value
-                            router.visit('/pago-exitoso');
-                        }
-                    }
-                ).catch((error) => {
-                    toast(error.response.data.message, {
-                            "theme": "auto",
-                            "type": "error",
-                            "autoClose": 10000,
-                            "dangerouslyHTMLString": true
-                        })
-                    }
-                )
-           }
-}
-
-const refresh = () => {
-    window.location.reload();
-}
-
-
-
+});
 
 onMounted(async () => {
   try {
@@ -320,89 +109,23 @@ onMounted(async () => {
                 {
                     amount: {
                         value: props.totalAmount,
-                        currency_code: 'MXN'
+                        currency_code: currency
                     },
-                    custom_id: 123,
+                    custom_id: props.ticketOfficeId,
                 }
             ]
           })
         },
         onApprove: async (data, actions) => {
             return actions.order.capture().then(details => {
-
-                loading.value = true;
-
-                const seatsSelectedData = {
-                    purchase_type: props.purchaseType,
-                    stadium_id: props.stadiumId,
-                    ticket_office_id: props.ticketOfficeId,
-                    event_id: props.eventId,
-                    cash_register_id: props.cashRegisterId,
-                    member_user_id: props.memberUserId,
-                    seller_user_id: props.sellerUserId,
-                    price_type_id: props.priceTypeId,
-                    seats: props.seats,
-                    amount_received: props.amountReceived,
-                    total_amount: props.totalAmount,
-                    total_returned: props.amountReturned,
-                    global_payment_types: props.globalPaymentTypes,
-                    is_online: props.isOnline,
-                    serie_id: props.serieId,
-                    sale_debtor: saleDebtorData,
-                }
-
-                axios.post(route('events.confirm-seats-purchase'), seatsSelectedData)
-                    .then((response) => {
-                        if(response.data.success) {
-                            toast(response.data.message, {
-                                "theme": "auto",
-                                "type": "default",
-                                "dangerouslyHTMLString": true
-                            })
-
-                            document.getElementById('result-message').innerText = `Transaction completed by ${details.payer.name.given_name}`;
-                            console.log('Transaction details:', details);
-                            router.visit('/pago-exitoso');
-                        }
-                    })
-                    .catch((error) => {
-                        toast(error.response.data.message, {
-                            "theme": "auto",
-                            "type": "error",
-                            "autoClose": 10000,
-                            "dangerouslyHTMLString": true
-                        })
-                    })
-                    .finally(() => {
-                        loading.value = false;
-                        drawerPaymentState.value = false;
-                    });
-
-               /*  seatsSelectedData.post(route('events.confirm-seats-purchase'), {
-                    onSuccess: (response) => {
-                        if(!response.props.flash.error) {
-                            document.getElementById('result-message').innerText = `Transaction completed by ${details.payer.name.given_name}`;
-                            console.log('Transaction details:', details);
-                            router.visit('/pago-exitoso');
-                        }
-                    },
-                    onFinish: () => {
-                        drawerPaymentState.value = false;
-                    }
-                }); */
-
-
+                confirmSeatsPurchase();
             });
         },
         onCancel: (data) => {
-
-            document.getElementById('result-message').innerText = 'Payment was cancelled.';
             router.visit('/eventos');
-
         },
         onError: (err) => {
             console.error('An error occurred during the transaction:', err);
-            document.getElementById('result-message').innerText = 'An error occurred during the transaction.';
         }
       }).render('#paypal-button-container');
     }
@@ -411,8 +134,67 @@ onMounted(async () => {
   }
 })
 
-</script>
+const responseCyberSource = (value) => {
+    if(value['status']){
+        confirmSeatsPurchase('Cyber Source');
+    }
+};
 
+const cancelPayment = (data) => {
+    if(data['status']){
+        router.visit('/eventos');
+    }
+}
+
+const confirmSeatsPurchase = () =>{
+
+    loading.value = true;
+
+    const seatsSelectedData = {
+        purchase_type: props.purchaseType,
+        stadium_id: props.stadiumId,
+        ticket_office_id: props.ticketOfficeId,
+        event_id: props.eventId,
+        cash_register_id: props.cashRegisterId,
+        member_user_id: props.memberUserId,
+        seller_user_id: props.sellerUserId,
+        price_type_id: props.priceTypeId,
+        seats: props.seats,
+        amount_received: props.amountReceived,
+        total_amount: props.totalAmount,
+        total_returned: props.amountReturned,
+        global_payment_types: props.globalPaymentTypes,
+        is_online: props.isOnline,
+        serie_id: props.serieId,
+        sale_debtor: props.saleDebtorData
+    }
+
+    axios.post(route('events.confirm-seats-purchase'), seatsSelectedData)
+        .then((response) => {
+            if(response.data.success) {
+                toast(response.data.message, {
+                    "theme": "auto",
+                    "type": "default",
+                    "dangerouslyHTMLString": true
+                })
+                router.visit('/pago-exitoso');
+            }
+        })
+        .catch((error) => {
+            toast(error.data.message, {
+                "theme": "auto",
+                "type": "error",
+                "autoClose": 10000,
+                "dangerouslyHTMLString": true
+            })
+        })
+        .finally(() => {
+            loading.value = false;
+            drawerPaymentState.value = false;
+        });
+}
+
+</script>
 <template>
   <div class="tw-z-50">
     <v-layout >
@@ -442,150 +224,25 @@ onMounted(async () => {
             </div>
             <div class="tw-p-4">
 
-                <div>
-
-                </div>
+                <CyberSoruce  :seats="seats" :client-reference-information="{ code: ticketOfficeId}" :order-information-amount-details="{totalAmount: totalAmount, currency: currency}"
+                :orderInformationBillTo="{
+                    firstName: 'RTS',
+                    lastName: 'VDP',
+                    address1: '201 S. Division St.',
+                    locality: 'Ann Arbor',
+                    administrativeArea: 'MI',
+                    postalCode: '48104-2201',
+                    country: 'US',
+                    district: 'MI',
+                    buildingNumber: '123',
+                    email: 'test@cybs.com',
+                    phoneNumber: '999999999'
+                }"
+                @response-payment="responseCyberSource" @cancel-payment="cancelPayment"/>
 
                 <div id="paypal-button-container"></div>
-                <p id="result-message"></p>
-
-                <v-btn v-if="!contextCapture" @click="generaateContextCapture" class="button-banbajio">Banbajio</v-btn>
-
-                <form>
-                    <p v-if="contextCapture" class="tw-font-bold tw-text-xs lg:tw-text-base tw-my-2">Datos de pago</p>
-                    <div id="number-container" :class="{ 'form-control-available': contextCapture, 'form-control-not-available': !contextCapture }"></div>
-                    <div class="form-group col-md-6">
-                        <div class="form-group col-md-6">
-                            <v-select
-                                 v-if="contextCapture"
-                                id="expMonth"
-                                :class="{'form-control-not-available': !contextCapture}"
-                                label="Mes de expiración"
-                                :items="['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']"
-                                variant="outlined"
-                            ></v-select>
-                            <v-select
-                                 v-if="contextCapture"
-                                :class="{'form-control-not-available': !contextCapture }"
-                                id="expYear"
-                                label="Año de expiración"
-                                :items="['2024', '2025', '2026', '2027', '2028', '2029', '2030', '2031', '2032']"
-                                variant="outlined"
-                            ></v-select>
-                        </div>
-                    </div>
-                    <div id="securityCode-container" :class="{ 'form-control-available': contextCapture, 'form-control-not-available': !contextCapture }"></div>
-                    <p v-if="contextCapture" class="tw-font-bold tw-text-xs lg:tw-text-base tw-my-2">Dirección de pago</p>
-
-                    <v-container  v-if="contextCapture">
-                        <v-row>
-                          <v-col
-                            cols="12"
-                            md="6"
-                          >
-                            <v-text-field
-                              v-model="state"
-                              :class="{'form-control-not-available': !contextCapture }"
-                              label="Estado"
-                              required
-                            ></v-text-field>
-                          </v-col>
-
-                          <v-col
-                            cols="12"
-                            md="6"
-                          >
-                            <v-text-field
-                              v-model="municipality"
-                              :class="{'form-control-not-available': !contextCapture }"
-                              label="Municipio"
-                              required
-                            ></v-text-field>
-                          </v-col>
-                        </v-row>
-                      </v-container>
-
-                      <v-container  v-if="contextCapture">
-                        <v-row>
-
-                          <v-col
-                            cols="12"
-                            md="6"
-                          >
-                            <v-text-field
-                              v-model="cp"
-                              :class="{'form-control-not-available': !contextCapture }"
-                              label="C.P."
-                              required
-                            ></v-text-field>
-                          </v-col>
-
-                          <v-col
-                            cols="12"
-                            md="6"
-                          >
-                            <v-text-field
-                              v-model="numPhone"
-                              :class="{'form-control-not-available': !contextCapture }"
-                              :counter="10"
-                              label="Núm. Telefonico"
-                              required
-                            ></v-text-field>
-                          </v-col>
-
-                        </v-row>
-                      </v-container>
-
-                      <v-container  v-if="contextCapture">
-                        <v-row>
-                          <v-col
-                            cols="12"
-                            md="6"
-                          >
-                            <v-text-field
-                              v-model="address"
-                              :class="{'form-control-not-available': !contextCapture }"
-                              label="Direccion"
-                              required
-                            ></v-text-field>
-                          </v-col>
-                        </v-row>
-                      </v-container>
-
-                    <v-btn :disabled="disabledButtonBuyFlex" type="button"  @click.prevent="buy" id="pay-button" :class="{ 'button-banbajio': contextCapture, 'form-control-not-available': !contextCapture }">Pagar</v-btn>
-                    <input type="hidden" id="flexresponse" name="flexresponse">
-                    <p v-if="generalError" class="error">{{ generalError }}</p>
-                </form>
-
-                <v-dialog
-                    v-model="dialog"
-                    width="auto"
-                >
-                    <v-card
-                        max-width="400"
-                        prepend-icon="mdi-update"
-                        text="CREATE_TOKEN_CAPTURE_CONTEXT_USED_TOO_MANY_TIMES"
-                        title="Update in progress"
-                    >
-                        <template v-slot:actions>
-                            <v-btn
-                                class="ms-auto"
-                                text="Ok"
-                                @click="refresh"
-                            ></v-btn>
-                        </template>
-                    </v-card>
-                </v-dialog>
-
-                <div v-if="loadingPaymentFlex" class="tw-flex tw-flex-col tw-items-center tw-justify-center tw-mt-5 tw-animate-pulse">
-                    <v-progress-linear indeterminate :height="6"></v-progress-linear>
-                    <p class="tw-font-bold tw-text-xs lg:tw-text-base">Completando compra en el sistema...</p>
-                </div>
-
-
                 <div class="tw-mt-10">
                     <CountdownTimer :initialMinutes="10" />
-
                     <div v-if="loading" class="tw-flex tw-flex-col tw-items-center tw-justify-center tw-mt-5 tw-animate-pulse">
                         <p class="tw-font-bold tw-text-xs lg:tw-text-base">Completando compra en el sistema...</p>
                         <iframe class="tw-size-32 lg:tw-size-40 tw-rotate-45" src="https://lottie.host/embed/bf6d5e1b-537a-436b-8464-3d074f070d76/SAdIq1oqT7.json"></iframe>
@@ -597,58 +254,5 @@ onMounted(async () => {
     </v-layout>
   </div>
 </template>
-
 <style scoped>
-
-
-.error {
-    color: red;
-    margin-top: 10px;
-    font-size: 1em;
-  }
-
-
-.button-banbajio{
-    width: 100%;
-    background-color: purple;
-    color: white;
-
-}
-
-.form-row {
-    display: flex;
-}
-
-
-
-
-.form-control-available {
-    height: 50px;
-    margin-bottom: 20px;
-    border: 2px solid #787578;
-    padding: 10px;
-    width: 100%;
-
-}
-
-.form-control-not-available{
-    height: 50px;
-    border: 2px solid #ffffff;
-    padding: 10px;
-    margin-top: 10px;
-    width: 100%;
-    color: white;
-    box-shadow: none !important;
-}
-
-
-    .v-navigation-drawer--temporary.v-navigation-drawer--active {
-        width: 85% !important;
-    }
-
-    @media (min-width: 768px) {
-        .v-navigation-drawer--temporary.v-navigation-drawer--active {
-            width: 40% !important;
-        }
-    }
 </style>

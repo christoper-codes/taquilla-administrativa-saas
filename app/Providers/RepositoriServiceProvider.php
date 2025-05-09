@@ -15,6 +15,7 @@ use App\Repositories\CashRegisterRepository;
 use App\Interfaces\CardPaymentDetailRepositoryInterface;
 use App\Interfaces\CashRegisterMovementRepositoryInterface;
 use App\Interfaces\CashRegisterMovementTypeRepositoryInterface;
+use App\Interfaces\CyberSourceRepositoryInterface;
 use App\Interfaces\UserRepositoryInterface;
 use App\Interfaces\EventSeatCatalogPromotionRepositoryInterface;
 use App\Interfaces\EventSeatCatalogueRepositoryInterface;
@@ -46,6 +47,7 @@ use App\Repositories\TicketOfficeRepository;
 use App\Repositories\CardPaymentDetailRepository;
 use App\Repositories\CashRegisterMovementRepository;
 use App\Repositories\CashRegisterMovementTypeRepository;
+use App\Repositories\CyberSourceRepository;
 use App\Repositories\EventSeatCatalogPromotionRepository;
 use App\Repositories\EventSeatCatalogueRepository;
 use App\Repositories\EventTypeRepository;
@@ -108,6 +110,7 @@ class RepositoriServiceProvider extends ServiceProvider
         $this->app->bind(InstallmentPaymentHistoryRepositoryInterface::class, InstallmentPaymentHistoryRepository::class);
         $this->app->bind(CashRegisterMovementRepositoryInterface::class, CashRegisterMovementRepository::class);
         $this->app->bind(CashRegisterMovementTypeRepositoryInterface::class, CashRegisterMovementTypeRepository::class);
+        $this->app->bind(CyberSourceRepositoryInterface::class, CyberSourceRepository::class);
 
     }
 

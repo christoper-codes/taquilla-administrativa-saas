@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cde6b81fb440c3cc0ca01c779f1b3d21",
+    "content-hash": "dde6971f2df747412f7204f861064810",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -268,16 +268,16 @@
         },
         {
             "name": "cybersource/rest-client-php",
-            "version": "0.0.55",
+            "version": "0.0.60",
             "source": {
                 "type": "git",
                 "url": "https://github.com/CyberSource/cybersource-rest-client-php.git",
-                "reference": "a9ddad7807068cd9b84caaca6345dc1387c8a54c"
+                "reference": "09cfdd78a59b1341e040770192c339f7d5cb8345"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CyberSource/cybersource-rest-client-php/zipball/a9ddad7807068cd9b84caaca6345dc1387c8a54c",
-                "reference": "a9ddad7807068cd9b84caaca6345dc1387c8a54c",
+                "url": "https://api.github.com/repos/CyberSource/cybersource-rest-client-php/zipball/09cfdd78a59b1341e040770192c339f7d5cb8345",
+                "reference": "09cfdd78a59b1341e040770192c339f7d5cb8345",
                 "shasum": ""
             },
             "require": {
@@ -328,9 +328,9 @@
             ],
             "support": {
                 "issues": "https://github.com/CyberSource/cybersource-rest-client-php/issues",
-                "source": "https://github.com/CyberSource/cybersource-rest-client-php/tree/0.0.55"
+                "source": "https://github.com/CyberSource/cybersource-rest-client-php/tree/0.0.60"
             },
-            "time": "2024-09-30T08:45:22+00:00"
+            "time": "2025-04-04T10:23:58+00:00"
         },
         {
             "name": "dasprid/enum",

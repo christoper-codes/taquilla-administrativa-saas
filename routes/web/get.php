@@ -3,6 +3,7 @@
 use App\Http\Controllers\AgreementController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CyberSourceController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventSeatCatalogPromotionController;
 use App\Http\Controllers\IndicatorController;
@@ -248,3 +249,6 @@ Route::get('/tipos-de-precio', [PriceTypeController::class, 'getAll'])->name('ge
 Route::get('/tipos-de-precio', [PriceTypeController::class, 'getAll'])->name('get.all.price.types');
 Route::get('/eventos/abonados/{id}/recibo', [EventController::class, 'printSubscriber'])->name('events.printSubscriber');
 Route::get('/eventos/ticket/{id}/recibo-pago-plazos', [InstallmentPaymentHistoryController::class, 'printSubscriberInstallmentReceipt'])->name('events.subscribers.installment.receipt');
+
+
+Route::get('/cyber-source/captura-de-contexto', [CyberSourceController::class, 'getCaptureContext'])->name('cyber.source.capture.context');
