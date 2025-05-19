@@ -16,6 +16,7 @@ const hints = ref(true);
 const open = ref([]);
 const page = usePage();
 const { viewAdminTopics } = useUserPolicy();
+const { viewVendorTopics } = useUserPolicy();
 
 onMounted(() => {
     const superAdmin = ['/create-users', '/indicadores-generales'];
@@ -38,6 +39,8 @@ const props = defineProps({
         required: true,
     },
 });
+
+console.log(props.user.user_roles)
 
 </script>
 
@@ -130,7 +133,7 @@ const props = defineProps({
                                     <span class="material-symbols-outlined tw-text-xl">home</span>Mis boletos
                                 </AppNavLink>
                             </div>
-                            <div class="tw-w-full ">
+                            <div class="tw-w-full " v-if="viewVendorTopics(user.user_roles)">
                                 <AppNavLink :href="route('ticket-offices.index')" :active="route().current('ticket-offices.index')">
                                     <span class="material-symbols-outlined tw-text-xl">confirmation_number</span>Taquillas
                                 </AppNavLink>

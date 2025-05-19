@@ -8,11 +8,16 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
+    $user_roles = null;
+    if(Auth::user()){
+        $user_roles = Auth::user()->userRoles;
+    }
     return Inertia::render('Guest/Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
+        'user_roles' => $user_roles
     ]);
 })->name('welcome');
 

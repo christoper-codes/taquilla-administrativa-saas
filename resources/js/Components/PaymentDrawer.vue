@@ -314,7 +314,6 @@ onMounted(async () => {
           label: 'paypal'
         },
         createOrder: async (data, actions) => {
-
           return actions.order.create({
             purchase_units: [
                 {
@@ -330,6 +329,8 @@ onMounted(async () => {
         onApprove: async (data, actions) => {
             return actions.order.capture().then(details => {
 
+
+                console.log(details)
                 loading.value = true;
 
                 const seatsSelectedData = {
@@ -348,7 +349,7 @@ onMounted(async () => {
                     global_payment_types: props.globalPaymentTypes,
                     is_online: props.isOnline,
                     serie_id: props.serieId,
-                    sale_debtor: saleDebtorData,
+                    sale_debtor: props.saleDebtorData,
                 }
 
                 axios.post(route('events.confirm-seats-purchase'), seatsSelectedData)

@@ -16,6 +16,10 @@ const props = defineProps({
     seatsAutoClic: {
         type: Array
     },
+    purchaseOnline:{
+        type: Boolean,
+        required: true
+    }
 });
 
 const emit = defineEmits(['add-seat']);
@@ -89,37 +93,55 @@ onMounted(() => {
         }else{
 
             if (seat.seat_catalogue_status.name === 'disponible' || seat.seat_catalogue_status.name === 'reservado') {
-                if(seat.seat_catalogue_status.name === 'reservado'){
-                    elemento.classList.add('tw-cursor-pointer', 'tw-fill-pink-500');
-                } else {
-                    elemento.classList.add('tw-cursor-pointer', 'tw-fill-yellow-500');
-                }
-                elemento.classList.remove('tw-cursor-not-allowed', 'tw-fill-purple-500', 'tw-fill-red-500');
-                const handleClick = () => {
-                const existSeat = props.seatsSelected.find(s => s.seat_catalogue.code === seat.seat_catalogue.code);
-                if (existSeat) {
-                    if(existSeat.seat_catalogue_status.name === 'reservado') {
-                        elemento.classList.remove('tw-fill-green-500');
-                        elemento.classList.add('tw-fill-pink-500');
-                    } else {
-                        elemento.classList.remove('tw-fill-green-500');
-                        elemento.classList.add('tw-fill-yellow-500');
-                    }
+                if(seat.seat_catalogue_status.name === 'reservado' && !props.purchaseOnline){
+                        elemento.classList.add('tw-cursor-pointer', 'tw-fill-purple-500');
+                    }else if (seat.seat_catalogue_status.name === 'reservado' && props.purchaseOnline){
 
-                    emit('add-seat', seat);
-                } else {
-                    if(seat.seat_catalogue_status.name === 'reservado') {
-                        elemento.classList.remove('tw-fill-pink-500');
-                        elemento.classList.add('tw-fill-green-500');
-                    } else {
-                        elemento.classList.remove('tw-fill-yellow-500');
-                        elemento.classList.add('tw-fill-green-500');
+                        elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-purple-500');
+                    }else{
+                        elemento.classList.add('tw-cursor-pointer', 'tw-fill-yellow-500');
                     }
-                    emit('add-seat', seat);
-                }
-                };
-                elemento.addEventListener('click', handleClick);
-                elemento.addEventListener('touchstart', handleClick);
+                    //elemento.classList.remove('tw-cursor-not-allowed', 'tw-fill-purple-500', 'tw-fill-red-500');
+                    const handleClick = () => {
+                    const existSeat = props.seatsSelected.find(s => s.seat_catalogue.code === seat.seat_catalogue.code);
+                    if (existSeat) {
+                        if(existSeat.seat_catalogue_status.name === 'reservado') {
+
+                            elemento.classList.remove('tw-fill-green-500');
+                            elemento.classList.add('tw-fill-pink-500');
+                        } else {
+                            elemento.classList.remove('tw-fill-green-500');
+                            elemento.classList.add('tw-fill-yellow-500');
+                        }
+
+                        emit('add-seat', seat);
+                    } else {
+                        if(seat.seat_catalogue_status.name === 'reservado') {
+                            console.log('reservado no existe' )
+                            elemento.classList.remove('tw-fill-pink-500');
+                            elemento.classList.add('tw-fill-green-500');
+                        } else {
+                            console.log('disponible no existe' )
+                            elemento.classList.remove('tw-fill-yellow-500');
+                            elemento.classList.add('tw-fill-green-500');
+                        }
+                        emit('add-seat', seat);
+                    }
+                    };
+                    //elemento.addEventListener('click', handleClick);
+                    //elemento.addEventListener('touchstart', handleClick);
+
+                    if(seat.seat_catalogue_status.name === 'reservado'){
+
+                        if (!props.purchaseOnline) {
+                            elemento.addEventListener('click', handleClick);
+                            elemento.addEventListener('touchstart', handleClick);
+                        }
+                        // elemento.classList.add('tw-cursor-pointer', 'tw-fill-pink-500');
+                    } else {
+                        elemento.addEventListener('click', handleClick);
+                        elemento.addEventListener('touchstart', handleClick);
+                    }
             } else if (seat.seat_catalogue_status.name === 'vendido') {
                 elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-purple-500');
             } else if (seat.seat_catalogue_status.name === 'inhabilitado') {

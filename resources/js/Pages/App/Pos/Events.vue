@@ -48,8 +48,8 @@ onMounted(() => {
 
 <template>
     <Head title="Welcome" />
-    <GuestLayout />
-    <NavigationDrawer />
+    <GuestLayout v-bind:user_roles="user_roles" />
+    <NavigationDrawer v-bind:user_roles="user_roles" />
 
     <section class="tw-overflow-hidden">
         <v-parallax

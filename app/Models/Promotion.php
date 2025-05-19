@@ -19,7 +19,8 @@ class Promotion extends Model
         'maximun_promotions_allowed',
         'percent_allow',
         'is_active',
-        'is_active_online'
+        'is_active_online',
+        'availability_sale'
     ];
 
     public function promotionType()
