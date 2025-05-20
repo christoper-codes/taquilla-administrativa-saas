@@ -6,8 +6,10 @@ import { drawerNavState } from '@/composables/drawersStates';
 import useTicketOfficeState from '@/composables/TicketOfficeState';
 import ErrorSession from '@/Components/ErrorSession.vue';
 import GuestNavLink from '@/Components/GuestNavLink.vue';
+import useUserPolicy from '@/composables/UserPolicy';
 
 const { cashRegisterPresent } = useTicketOfficeState();
+const user = usePage().props.auth.user;
 
 const fav = ref(true);
 const menu = ref(false);
@@ -16,13 +18,29 @@ const hints = ref(true);
 const toggleFav = () => {
   fav.value = !fav.value;
 };
+const { viewVendorTopics } = useUserPolicy();
+const isMember = ref(true)
 
 const props = defineProps({
     isEventsShow: {
         type: Boolean,
         required: false,
+    },
+    user_roles: {
+        type: Object,
+        required: false
     }
 });
+
+console.log('guest')
+
+console.log(props.user_roles)
+
+if (props.user_roles && !viewVendorTopics(props.user_roles)) {
+    isMember.value = false
+
+    console.log(isMember.value)
+}
 
 </script>
 
@@ -175,11 +193,11 @@ const props = defineProps({
                             >
                             <v-btn variant="elevated" class="text-none !tw-bg-tw-primary-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Dashboard</v-btn>
                         </Link>
-                        <Link
-                            :href="route('ticket-offices.index')"
-                            >
-                            <v-btn variant="tonal" class="text-none !tw-bg-tw-primary-100 !tw-text-tw-primary-600 !tw-px-7" size="large" rounded="xl">Taquillas</v-btn>
-                        </Link>
+                        <div v-if="isMember">
+                            <Link :href="route('ticket-offices.index')">
+                                <v-btn variant="tonal" class="text-none !tw-bg-tw-primary-100 !tw-text-tw-primary-600 !tw-px-7" size="large" rounded="xl">Taquillas</v-btn>
+                            </Link>
+                        </div>
                     </div>
                     <div v-else-if="!$page.props.auth.user" class="tw-flex tw-items-center tw-gap-3">
                         <Link

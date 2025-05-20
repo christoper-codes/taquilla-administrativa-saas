@@ -463,11 +463,6 @@ class EventController extends Controller
      */
     public function confirmSeatsPurchase(Request $request)
     {
-        return response()->json([
-            'data' => $request,
-            'message' => 'Compra de asientos confirmada correctamente',
-            'success' => true
-        ], 200);
 
         $request->validate([
             'stadium_id' => 'required',

@@ -254,6 +254,7 @@ watch(filteredPaymentTypes, updateTotal);
 * handle promotions
 */
 const promotionTypes = ref([]);
+const promotionTypesCo = ref([]);
 const selectedPromotion = ref(null);
 const selectedAgreementPromotion = ref(null);
 const seatsSelectedCopy = ref([]);
@@ -261,8 +262,24 @@ const showPromotionToast = ref(false);
 const finalPromotion = ref({id: null, quantity:null});
 
 watch(promotionTypes, () => {
+    promotionTypesCo.value = []
+    promotionTypes.value.forEach(promotionType => {
+
+        if (viewVendorTopics(props.user_roles) &&  (promotionType.availability_sale == 1 || promotionType.availability_sale == 3)) {
+            promotionTypesCo.value.push(promotionType);
+        }
+
+        if(!viewVendorTopics(props.user_roles) &&  (promotionType.availability_sale == 2 || promotionType.availability_sale == 3)){
+            promotionTypesCo.value.push(promotionType);
+        }
+
+        console.log(promotionTypesCo.value)
+
+    });
+
+
     if(!showPromotionToast.value){
-        promotionTypes.value.forEach(promotionType => {
+        promotionTypesCo.value.forEach(promotionType => {
             if(promotionType.quantity > promotionType.generic_seats_allowed || promotionType.percent_allow > 0){
                 showPromotionToast.value = true;
                 toast('Tienes promociones que puedes aplicar!!', {
@@ -283,51 +300,67 @@ watch(selectedPromotion, () => {
     finalPromotion.value.quantity = 0;
 
     if(selectedPromotion.value.type == 'descuento_por_compra_multiple') {
+        console.log(seatsSelected.value)
+        console.log(selectedPromotion.value)
         let seatsTopay = selectedPromotion.value.generic_seats_allowed;
         let seatsToGift = selectedPromotion.value.promotional_seats_allowed;
         let applicableIndex = 0;
 
+        console.log(seatsTopay)
+        console.log(seatsToGift)
+
         seatsSelected.value.forEach((seat) => {
+            const promotion = seat.promotions.find((promo) => promo.name === selectedPromotion.value.name);
 
-            if(seat.final_price == selectedPromotion.value.final_price){
-                if(applicableIndex % (seatsTopay + seatsToGift) < seatsTopay){
-                    seat.is_promotion = false;
-                } else {
-                    finalPromotion.value.quantity++;
-                    seat.is_promotion = true;
-                    seat.promotion_id = selectedPromotion.value.id;
-                    seat.is_gift = true;
-                    seat.price_types.forEach(priceType => {
+            if (promotion) {
+                if(seat.final_price == selectedPromotion.value.final_price){
 
-                        if(priceType.name == 'regular'){
-                            priceType.pivot.price = parseFloat(0);
+                    if(applicableIndex % (seatsTopay + seatsToGift) < seatsTopay){
+                        seat.is_promotion = false;
+                    } else {
+                        finalPromotion.value.quantity++;
+                        seat.is_promotion = true;
+                        seat.promotion_id = selectedPromotion.value.id;
+                        seat.is_gift = true;
+                        seat.price_types.forEach(priceType => {
 
-                        }else if(priceType.name == 'abonado'){
-                            priceType.pivot.price = parseFloat(0);
-                        }
-                    })
+                            if(priceType.name == 'regular'){
+                                priceType.pivot.price = parseFloat(0);
+
+                            }else if(priceType.name == 'abonado'){
+                                priceType.pivot.price = parseFloat(0);
+                            }
+                        })
+                    }
+                    applicableIndex++;
                 }
-                applicableIndex++;
             }
         });
 
     } else if(selectedPromotion.value.type == 'descuento_por_porcentaje_por_boleto'){
+        console.log(seatsSelected.value)
+        console.log(selectedPromotion.value)
         seatsSelected.value.forEach((seat) => {
-            seat.price_types.forEach(priceType => {
-                if(seat.final_price == selectedPromotion.value.final_price){
-                    finalPromotion.value.quantity++;
-                    seat.promotion_id = selectedPromotion.value.id;
+            const promotion = seat.promotions.find((promo) => promo.name === selectedPromotion.value.name);
 
-                    if(priceType.name == 'regular'){
-                        const discount = priceType.pivot.price * (selectedPromotion.value.percent_allow / 100);
-                        priceType.pivot.price = priceType.pivot.price - discount;
+            if (promotion) {
 
-                    }else if(priceType.name == 'abonado'){
-                        const discount = priceType.pivot.price * (selectedPromotion.value.percent_allow / 100);
-                        priceType.pivot.price = priceType.pivot.price - discount;
+                seat.price_types.forEach(priceType => {
+                    if(seat.final_price == selectedPromotion.value.final_price){
+                        finalPromotion.value.quantity++;
+                        seat.promotion_id = selectedPromotion.value.id;
+
+                        if(priceType.name == 'regular'){
+                            const discount = priceType.pivot.price * (selectedPromotion.value.percent_allow / 100);
+                            priceType.pivot.price = priceType.pivot.price - discount;
+
+                        }else if(priceType.name == 'abonado'){
+                            const discount = priceType.pivot.price * (selectedPromotion.value.percent_allow / 100);
+                            priceType.pivot.price = priceType.pivot.price - discount;
+                        }
                     }
-                }
-            })
+                })
+            }
         });
     }
 
@@ -373,7 +406,6 @@ watch(selectedAgreementPromotion, () => {
         });
 
     } else if(selectedAgreementPromotion.value.promotion_type.name == 'descuento_por_porcentaje_por_compra'){
-
         seatsSelected.value.forEach((seat) => {
             seat.price_types.forEach(priceType => {
                 finalPromotion.value.quantity++;
@@ -469,6 +501,7 @@ function updateTotal() {
                         'maximun_promotions_allowed': promotion.maximun_promotions_allowed,
                         'promotional_seats_allowed': promotion.promotional_seats_allowed,
                         'percent_allow': promotion.percent_allow,
+                        'availability_sale': promotion.availability_sale
                     });
                 }
             });
@@ -730,6 +763,10 @@ const users_list = [];
 const sale_debtors_list = [];
 const userToTransfer = ref(null);
 const saleDeptorSelected = ref(null);
+
+if(viewVendorTopics(props.user_roles)) {
+    purchaseOnline.value = false;
+}
 
 props.users.forEach(element => {
     users_list.push(
@@ -1203,7 +1240,7 @@ const onSubmitConfirm = (isActive) => {
     loadingg.value = true;
     loading.value = true;
     const isTransfer = userToTransfer.value ? true : false;
-    const saleDebtorData = {
+    saleDebtorData.value = {
         id: saleDeptorSelected.value,
         first_name: firstNameSaleDeptor.value,
         last_name: lastNameSaleDeptor.value,
@@ -1231,11 +1268,11 @@ const onSubmitConfirm = (isActive) => {
         is_transfer: isTransfer,
         user_to_transfer: userToTransfer.value,
         final_promotion: finalPromotion.value,
-        sale_debtor: saleDebtorData,
+        sale_debtor: saleDebtorData.value,
     };
 
-    /* console.log(seatsSelectedData);
-    return */
+    /*console.log(seatsSelectedData);
+    return*/
 
 axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
     .then(response => {
@@ -1387,8 +1424,8 @@ watch(() => paymentInstallmentSelected.value, () => {
 
 <template>
     <Head title="Evento" />
-    <GuestLayout v-bind:isEventsShow="isEventsShow"/>
-    <NavigationDrawer />
+    <GuestLayout  v-bind:user_roles="user_roles" v-bind:isEventsShow="isEventsShow"/>
+    <NavigationDrawer v-bind:user_roles="user_roles"/>
     <SuccessSession />
     <v-dialog max-width="700" max-height="300">
         <template v-slot:activator="{ props: activatorProps }">
@@ -1444,7 +1481,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                 <v-col v-if="showPromotionToast" cols="12">
                     <h3 class="tw-text-center tw-font-bold tw-text-lg tw-mb-3 tw-text-gray-700">Selecciona una promoción:</h3>
                     <v-radio-group v-model="selectedPromotion" inline>
-                        <div v-for="(promotion, index) in promotionTypes" :key="index">
+                        <div v-for="(promotion, index) in promotionTypesCo" :key="index">
                                 <div v-if="promotion.percent_allow > 0">
                                     <div class="tw-border-4 tw-border-yellow-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
                                         <v-radio color="yellow" :key="index" :value="promotion">
@@ -1539,10 +1576,10 @@ watch(() => paymentInstallmentSelected.value, () => {
                                         v-bind:isOnline="purchaseOnline"
                                         v-bind:serieId="event.serie_id"
                                         v-bind:finalPromotion="finalPromotion"
-                                        v-bind:saleDeptor="saleDebtorData"
+                                        v-bind:saleDebtorData="saleDebtorData"
                                     />
 
-                                    <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-4 tw-items-center tw-gap-2 tw-mt-7">
+                                    <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-3 tw-items-center tw-gap-2 tw-mt-7">
                                         <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                             <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-yellow-500 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">done_outline</span>
@@ -1561,13 +1598,13 @@ watch(() => paymentInstallmentSelected.value, () => {
                                             </div>
                                             <p class="tw-text-xs lg:tw-text-base">Seleccionado</p>
                                         </div>
-                                        <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
+                                        <div v-if="viewVendorTopics(props.user_roles)" class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                             <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-pink-600 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
                                             <p class="tw-text-xs lg:tw-text-base">Reservado para abonado</p>
                                         </div>
-                                        <!-- <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
+                                        <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                             <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-gray-600 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
@@ -1578,7 +1615,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
                                             <p class="tw-text-xs lg:tw-text-base">En transito</p>
-                                        </div> -->
+                                        </div>
                                      </div>
                                 </div>
                                 <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-w-full tw-gap-3 tw-my-3">
@@ -1653,22 +1690,22 @@ watch(() => paymentInstallmentSelected.value, () => {
                                         <EstadioHdx  @handle-section-click="handleSectionClick"/>
                                     </div>
                                     <div v-if="selectedSection == 'zonaA'" class="">
-                                        <ZonaA @add-seat="addSeat" v-bind:seats="seatsASection" v-bind:seatsSelected="seatsSelected" />
+                                        <ZonaA v-bind:purchaseOnline="purchaseOnline" @add-seat="addSeat" v-bind:seats="seatsASection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                     <div v-if="selectedSection == 'zonaB'" class="">
-                                        <ZonaB @add-seat="addSeat" v-bind:seats="seatsBSection" v-bind:seatsSelected="seatsSelected" />
+                                        <ZonaB @add-seat="addSeat" v-bind:purchaseOnline="purchaseOnline" v-bind:seats="seatsBSection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                     <div v-if="selectedSection == 'zonaC'" class="">
-                                        <ZonaC @add-seat="addSeat" v-bind:seats="seatsCSection" v-bind:seatsSelected="seatsSelected" />
+                                        <ZonaC @add-seat="addSeat" v-bind:purchaseOnline="purchaseOnline" v-bind:seats="seatsCSection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                     <div v-if="selectedSection == 'zonaE'" class="">
-                                        <ZonaE @add-seat="addSeat" v-bind:seats="seatsESection" v-bind:seatsSelected="seatsSelected" />
+                                        <ZonaE @add-seat="addSeat" v-bind:purchaseOnline="purchaseOnline" v-bind:seats="seatsESection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                     <div v-if="selectedSection == 'zonaF'" class="">
-                                        <ZonaF @add-seat="addSeat" v-bind:seats="seatsFSection" v-bind:seatsSelected="seatsSelected" />
+                                        <ZonaF @add-seat="addSeat" v-bind:purchaseOnline="purchaseOnline" v-bind:seats="seatsFSection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                     <div v-if="selectedSection == 'zonaH'" class="">
-                                        <ZonaH @add-seat="addSeat" v-bind:seats="seatsHSection" v-bind:seatsSelected="seatsSelected" />
+                                        <ZonaH @add-seat="addSeat" v-bind:purchaseOnline="purchaseOnline" v-bind:seats="seatsHSection" v-bind:seatsSelected="seatsSelected" />
                                     </div>
                                 </div>
                             </div>
@@ -2366,8 +2403,8 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                                                             v-model="seatsSelected[index].holder_phone"
                                                                                                         ></v-text-field>
                                                                                                     </div>
-                                                                                                    <div class="tw-flex tw-items-center tw-justify-between tw-gap-10">
-                                                                                                        <v-select
+                                                                                                    <div class="tw-flex tw-items-start tw-justify-between tw-gap-5">
+                                                                                                        <!--<v-select
                                                                                                             class="tw-w-full"
                                                                                                             append-inner-icon="mdi-cash"
                                                                                                             color="purple"
@@ -2376,9 +2413,9 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                                                             clearable
                                                                                                             :items="payment_installments"
                                                                                                             v-model="paymentInstallmentSelected"
-                                                                                                        ></v-select>
+                                                                                                        ></v-select> -->
                                                                                                             <v-text-field
-                                                                                                                class="tw-w-full"
+                                                                                                                class="margin-input-right"
                                                                                                                 append-inner-icon="mdi-email"
                                                                                                                 label="Email"
                                                                                                                 color="purple"
@@ -2636,6 +2673,9 @@ watch(() => paymentInstallmentSelected.value, () => {
     .tw-animate-bounce {
     animation: tw-bounce 1.5s infinite;
     }
+}
+.margin-input-right {
+    margin-right: 51.8%;
 }
 
 .v-dialog--fullscreen > .v-overlay__content > .v-card, .v-dialog--fullscreen > .v-overlay__content > .v-sheet, .v-dialog--fullscreen > .v-overlay__content > form > .v-card, .v-dialog--fullscreen > .v-overlay__content > form > .v-sheet {

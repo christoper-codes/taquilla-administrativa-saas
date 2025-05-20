@@ -18,6 +18,8 @@ const props = defineProps({
     promotions: { type: Array, required: true }
 })
 
+console.log(props.promotions)
+
 const headersPromotions = [
     { title: 'Tipo Prom.', align: 'start', sortable: true, key: 'promotion_type.name' },
     { title: 'Nombre', align: 'start', sortable: true, key: 'name' },
@@ -28,6 +30,7 @@ const headersPromotions = [
     { title: 'Prom. Permit.', align: 'start', sortable: true, key: 'maximun_promotions_allowed' },
     { title: '% Desc.', align: 'start', sortable: true, key: 'percent_allow' },
     { title: 'Aplica', align: 'start', sortable: true, key: 'is_active_online' },
+    { title: 'Para', align: 'start', sortable: true, key: 'availability_sale' },
     { title: 'Acciones', key: 'actions', sortable: false }
 ];
 
@@ -46,6 +49,7 @@ const { handleSubmit, resetForm } = useForm({
         promotional_seats_allowed:null,
         maximun_promotions_allowed:null,
         percent_allow:null,
+        availability_sale: 1
     },
 });
 
@@ -60,7 +64,8 @@ const promotion = {
     maximun_promotions_allowed: useField('maximun_promotions_allowed'),
     percent_allow: useField('percent_allow'),
     is_active_online: useField('is_active_online'),
-    is_active: useField('is_active')
+    is_active: useField('is_active'),
+    availability_sale: useField('availability_sale'),
 }
 
 const dataFormPromotion = useFormInertia({
@@ -74,7 +79,8 @@ const dataFormPromotion = useFormInertia({
     maximun_promotions_allowed: '',
     percent_allow: '',
     is_active_online: '',
-    is_active: ''
+    is_active: '',
+    availability_sale: 1
 });
 
 const saveDataPromotion = handleSubmit((dataForm) => {
@@ -90,6 +96,7 @@ const saveDataPromotion = handleSubmit((dataForm) => {
     dataFormPromotion.percent_allow = dataForm.percent_allow;
     dataFormPromotion.is_active_online = dataForm.is_active_online;
     dataFormPromotion.is_active = dataForm.is_active;
+    dataFormPromotion.availability_sale = dataForm.availability_sale;
 
     if (editedPromotionIndex.value > -1) {
 
@@ -160,6 +167,7 @@ const editPromotion = (selectedPromotion) => {
     promotion.percent_allow.setValue(selectedPromotion.percent_allow);
     promotion.is_active.setValue(selectedPromotion.is_active ? true : false);
     promotion.is_active_online.setValue(selectedPromotion.is_active_online === null ? null : ( selectedPromotion.is_active_online ? true : false));
+    promotion.availability_sale.setValue(selectedPromotion.availability_sale);
 
     editedPromotionIndex.value = props.promotions.indexOf(selectedPromotion);
     dialogFormPromotion.value = true;
@@ -345,6 +353,18 @@ watch(promotion.promotion_type_id.value, (id) => {
                                                     </div>
                                                     <div class="tw-w-full">
                                                         <p class="tw-font-medium tw-mb-1"><span
+                                                                class="tw-text-red-500">*</span> Para
+                                                        </p>
+                                                        <v-radio-group v-model="promotion.availability_sale.value.value"
+                                                            inline>
+                                                            <v-radio label="Taquilla" :value="1"></v-radio>
+                                                            <v-radio label="En linea" :value="2"></v-radio>
+                                                            <v-radio label="Ambas" :value="3"></v-radio>
+                                                        </v-radio-group>
+
+                                                    </div>
+                                                    <div class="tw-w-full">
+                                                        <p class="tw-font-medium tw-mb-1"><span
                                                                 class="tw-text-red-500">*</span> Estatus
                                                         </p>
                                                         <v-switch
@@ -409,6 +429,11 @@ watch(promotion.promotion_type_id.value, (id) => {
                 <template v-slot:item.is_active_online="{ item }">
                     <v-chip :color="item.is_active_online == null ? 'primary' : ( item.is_active_online ? 'Secondary' : 'green' )">
                         {{ item.is_active_online == null ?  "Web y Mobil" : ( item.is_active_online ? 'Web' : 'Mobil' )}}
+                    </v-chip>
+                </template>
+                <template v-slot:item.availability_sale="{ item }">
+                    <v-chip :color="item.availability_sale == 1 ? 'primary' : ( item.availability_sale == 2 ? 'Secondary' : 'green' )">
+                        {{ item.availability_sale == 1 ?  "Taquilla" : ( item.availability_sale == 2 ? 'En linea' : 'Ambas' )}}
                     </v-chip>
                 </template>
                 <template v-slot:item.actions="{ item }">

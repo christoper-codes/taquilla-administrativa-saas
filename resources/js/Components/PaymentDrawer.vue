@@ -103,7 +103,6 @@ onMounted(async () => {
           label: 'paypal'
         },
         createOrder: async (data, actions) => {
-
           return actions.order.create({
             purchase_units: [
                 {
