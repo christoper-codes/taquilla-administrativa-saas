@@ -368,6 +368,7 @@ class SaleTicketService
                 'cortesia' => ['sales' => 0],
                 'abonado' => ['sales' => 0],
                 'regular' => ['sales' => 0],
+                'online' => ['sales' => 0],
             ];
 
             $current_date = Carbon::now();
@@ -439,6 +440,10 @@ class SaleTicketService
                                 } else {
                                     $type_sales['regular']['sales']++;
                                 }
+
+                                if($sale_ticket->is_online){
+                                    $type_sales['online']['sales']++;
+                                }
                             }
                         }
                     }
@@ -503,6 +508,7 @@ class SaleTicketService
                 'cortesia' => ['sales' => 0],
                 'abonado' => ['sales' => 0],
                 'regular' => ['sales' => 0],
+                'online' => ['sales' => 0],
             ];
 
             $sale_tickets = $event->saleTickets()
@@ -575,6 +581,10 @@ class SaleTicketService
                                 $type_sales['abonado']['sales']++;
                             } else {
                                 $type_sales['regular']['sales']++;
+                            }
+
+                            if($sale_ticket->is_online){
+                                $type_sales['online']['sales']++;
                             }
                         }
                     }

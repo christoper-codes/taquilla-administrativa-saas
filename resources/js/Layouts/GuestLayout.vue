@@ -32,14 +32,8 @@ const props = defineProps({
     }
 });
 
-console.log('guest')
-
-console.log(props.user_roles)
-
 if (props.user_roles && !viewVendorTopics(props.user_roles)) {
     isMember.value = false
-
-    console.log(isMember.value)
 }
 
 </script>

@@ -185,12 +185,6 @@ const addSeat = (seat) => {
         seatsSelected.value.push(seat);
         snackbar.value = true;
 
-        if(viewVendorTopics(props.user_roles)) {
-           // vendedor
-
-        } else {
-            /* amountReceived.value = totalAmount.value; */
-        }
         const regularPrice = priceFinal(seat, priceFinalType);
         totalAmount.value = (parseFloat(totalAmount.value || 0) + parseFloat(regularPrice));
     } else {
@@ -198,19 +192,10 @@ const addSeat = (seat) => {
         if(seatsSelected.value.length == 0) {
             snackbar.value = false;
         }
-
-        if(viewVendorTopics(props.user_roles)) {
-            // vendedor
-        } else {
-           /* amountReceived.value = totalAmount.value; */
-        }
         const regularPrice = priceFinal(seat, priceFinalType);
         totalAmount.value = (parseFloat(totalAmount.value || 0) - parseFloat(regularPrice));
     }
 
-    if (paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
-        //amountReceived.value = totalAmount.value;
-    }
     amountToPayCash.value = totalAmount.value;
     amountToPayCard.value = totalAmount.value;
     updateTotal();
@@ -230,7 +215,6 @@ const purchaseOnline = ref(true);
 const priceTypeId = ref(1);
 
 const panel = ref([0,1]);
-const purchaseType = ref('abonado');
 const paymentTypesSelected = ref([]); //
 
 const filteredPaymentTypes = computed(() => {
@@ -272,9 +256,6 @@ watch(promotionTypes, () => {
         if(!viewVendorTopics(props.user_roles) &&  (promotionType.availability_sale == 2 || promotionType.availability_sale == 3)){
             promotionTypesCo.value.push(promotionType);
         }
-
-        console.log(promotionTypesCo.value)
-
     });
 
 
@@ -300,14 +281,9 @@ watch(selectedPromotion, () => {
     finalPromotion.value.quantity = 0;
 
     if(selectedPromotion.value.type == 'descuento_por_compra_multiple') {
-        console.log(seatsSelected.value)
-        console.log(selectedPromotion.value)
         let seatsTopay = selectedPromotion.value.generic_seats_allowed;
         let seatsToGift = selectedPromotion.value.promotional_seats_allowed;
         let applicableIndex = 0;
-
-        console.log(seatsTopay)
-        console.log(seatsToGift)
 
         seatsSelected.value.forEach((seat) => {
             const promotion = seat.promotions.find((promo) => promo.name === selectedPromotion.value.name);
@@ -338,8 +314,6 @@ watch(selectedPromotion, () => {
         });
 
     } else if(selectedPromotion.value.type == 'descuento_por_porcentaje_por_boleto'){
-        console.log(seatsSelected.value)
-        console.log(selectedPromotion.value)
         seatsSelected.value.forEach((seat) => {
             const promotion = seat.promotions.find((promo) => promo.name === selectedPromotion.value.name);
 
@@ -763,6 +737,7 @@ const users_list = [];
 const sale_debtors_list = [];
 const userToTransfer = ref(null);
 const saleDeptorSelected = ref(null);
+const purchaseType = props.event.enabled_for_season_tickets ? ref('abonado') : ref('partido');
 
 if(viewVendorTopics(props.user_roles)) {
     purchaseOnline.value = false;
@@ -1161,10 +1136,6 @@ const onSubmit = () => {
     if(installmentSale.value){
         const amountToPay = amountReceived.value - amountReturned.value;
         const seatsTotal = seatsSelected.value.length;
-        console.log('seatsTotal', seatsTotal);
-        console.log('amountReceived', amountReceived.value);
-        console.log('amountReturned', amountReturned.value);
-        console.log('amountToPay', amountToPay);
         if((seatsTotal * 500) > amountToPay) {
             toast('El monto a pagar no puede ser menor a 500 por asiento', {
                 "theme": "auto",
@@ -1604,13 +1575,13 @@ watch(() => paymentInstallmentSelected.value, () => {
                                             </div>
                                             <p class="tw-text-xs lg:tw-text-base">Reservado para abonado</p>
                                         </div>
-                                        <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
+                                        <div v-if="viewVendorTopics(props.user_roles)" class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                             <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-gray-600 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
                                             <p class="tw-text-xs lg:tw-text-base">Inhabilitado</p>
                                         </div>
-                                        <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
+                                        <div v-if="viewVendorTopics(props.user_roles)" class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                             <div class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-cyan-500 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                                 <span class="material-symbols-outlined tw-text-sm tw-text-white">block</span>
                                             </div>
@@ -1845,17 +1816,11 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                 <td class="tw-size-px tw-whitespace-nowrap  tw-p-2">
                                                                     <span class="tw-text-sm tw-text-green-600">
                                                                         <div v-for="priceType in seat.price_types" :key="priceType.id">
-                                                                            <div v-if="viewVendorTopics(user_roles) && priceType.name == 'abonado'">
-                                                                                {{ formatPrice(priceType.pivot.price) }}
-                                                                            </div>
-                                                                            <!-- <div v-if="viewVendorTopics(user_roles) && priceType.name == 'abonado'">
-                                                                                {{ priceType.name }}: {{ formatPrice(priceType.pivot.price) }}
-                                                                            </div> -->
-                                                                            <!-- <div v-else>
-                                                                                <span v-if="priceType.name === 'regular'">
-                                                                                    {{ formatPrice(priceType.pivot.price) }}
+                                                                            <div>
+                                                                                <span v-if="priceType.name === (purchaseType == 'abonado' ? 'abonado' : 'regular')">
+                                                                                   {{ formatPrice(priceType.pivot.price) }}
                                                                                 </span>
-                                                                            </div> -->
+                                                                            </div>
                                                                         </div>
                                                                     </span>
                                                                 </td>
@@ -2071,16 +2036,20 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                     <p v-if="!valid" class="tw-py-2 tw-px-4 tw-bg-red-100 tw-border-l-4 tw-border-l-red-500 tw-text-red-500 tw-text-xs tw-my-4">{{ error }}</p>
 
                                                     <div class="tw-mt-5"> <!-- :disabled="!form" -->
-                                                       <!--  <v-radio-group  inline label="Tipo de compra a realizar" v-model="purchaseType">
-                                                            <v-radio
-                                                            v-for="(type, index) in purchase_types"
-                                                            :key="index"
-                                                            :color="'purple'"
-                                                            :label="type"
-                                                            :value="type"
-                                                            ></v-radio>
-                                                        </v-radio-group> -->
-                                                        <div class="tw-flex tw-items-center tw-justify-between">
+                                                       <div v-if="!viewVendorTopics(user_roles)" class="tw-flex tw-items-center tw-justify-between">
+                                                            <v-radio-group inline label="Tipo de compra a realizar" v-model="purchaseType">
+                                                                <v-radio
+                                                                    v-for="(type, index) in purchase_types"
+                                                                    :disabled="!!(event.enabled_for_season_tickets && type == 'partido')"
+                                                                    :key="index"
+                                                                    :color="'purple'"
+                                                                    :label="type"
+                                                                    :value="type"
+                                                                ></v-radio>
+                                                            </v-radio-group>
+                                                            <v-btn v-if="purchaseType == 'abonado'" @click="seasonTicketsDialogOpen" class="!tw-mt-2" color="purple" variant="tonal" rounded="xl">Tomar datos</v-btn>
+                                                        </div>
+                                                        <div v-if="viewVendorTopics(user_roles)" class="tw-flex tw-items-center tw-justify-between">
                                                             <v-radio-group inline label="Tipo de compra a realizar" v-model="purchaseType">
                                                                 <v-radio
                                                                     :color="'purple'"
