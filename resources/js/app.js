@@ -10,6 +10,7 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import 'vuetify/styles';
 import { createVuetify } from 'vuetify';
 import { VDateInput } from 'vuetify/labs/VDateInput';
+import { VFileUpload } from 'vuetify/labs/VFileUpload';
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 import Toast from 'vue3-toastify';
@@ -22,6 +23,7 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const vuetify = createVuetify({
     components: {
         VDateInput,
+        VFileUpload,
         ...components,
     },
     directives,

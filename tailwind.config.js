@@ -15,8 +15,13 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                bebas: ['Bebas Neue', ...defaultTheme.fontFamily.sans],
+                metal: ['Metal Mania', ...defaultTheme.fontFamily.sans],
             },
             colors: {
+
+                'primary': '#9333ea',
+                'secondary': '#facc15',
 
                 /*
                 * |--------------------------------------------------------------------------

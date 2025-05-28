@@ -48,9 +48,7 @@ console.log(props.user.user_roles)
   <div class="">
     <v-layout>
       <v-navigation-drawer v-model="draweAppNavState" temporary class="">
-        <div class="!tw-text-gray-100 tw-bg-slate-950 tw-min-h-screen tw-relative tw-overflow-hidden">
-            <div class="tw-absolute tw-left-1/2 tw-top-[80%] tw-h-[700px] tw-w-[500px] tw--translate-x-1/2 tw-rounded-full tw-bg-gradient-to-t tw-blur-[250px] tw-from-tw-primary-800 tw-to-tw-primary-600">
-            </div>
+        <div class="tw-bg-white tw-min-h-screen tw-relative tw-overflow-hidden tw-border-r-2">
             <div class="tw-w-full tw-relative">
                 <div class="w-full tw-py-3 lg:tw-py-4 tw-px-4">
 
@@ -62,8 +60,7 @@ console.log(props.user.user_roles)
                         >
                             <template v-slot:activator="{ props }">
                                 <v-btn
-                                    :class="fav ? 'text-purple' : '!tw-text-purple-500'"
-                                    class="!tw-rounded-full !tw-size-40 bg-profile !tw-bg-slate-800"
+                                    class="!tw-rounded-full !tw-size-40 bg-profile !tw-bg-slate-300 !tw-shadow-none"
                                     v-bind="props"
                                     @click="fav = !fav"
                                     >
@@ -80,6 +77,10 @@ console.log(props.user.user_roles)
                                         >
                                     </div>
                                 </v-btn>
+                                <div class="tw-flex tw-flex-col tw-items-center tw-mt-4">
+                                    <p class="tw-text-center tw-font-bebas tw-text-2xl tw-font-bold">{{ user.first_name + ' ' + user.last_name }}</p>
+                                    <p class="tw-text-center tw-text-xs">@{{ user.username }}</p>
+                                </div>
                             </template>
 
                             <v-card min-width="350" rounded="lg" class="!tw-bg-white tw-backdrop-blur-sm">
@@ -110,7 +111,7 @@ console.log(props.user.user_roles)
                                         <p class="tw-text-xs tw-font-normal tw-mb-1">@{{ user.username }}</p>
                                         <Link :href="route('logout')" method="post" as="button">
                                             <v-btn  color="red" variant="tonal" block class="text-none" rounded="lg">
-                                                Cerrar sesion
+                                                Cerrar sesión
                                         </v-btn>
                                         </Link>
                                     </div>
@@ -126,7 +127,7 @@ console.log(props.user.user_roles)
 
             <div class="tw-flex tw-flex-col tw-items-center tw-justify-between tw-gap-10 tw-p-4">
                     <div class="tw-flex tw-flex-col tw-w-full">
-                        <h2 class="tw-font-semibold tw-text-sm tw-mb-3">Dashboard</h2>
+                        <h2 class="tw-font-semibold tw-text-2xl tw-mb-3 tw-font-bebas">Dashboard</h2>
                         <div class="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-w-full">
                             <div class="tw-w-full ">
                                 <AppNavLink :href="route('dashboard')" :active="route().current('dashboard')">
@@ -158,10 +159,10 @@ console.log(props.user.user_roles)
                     </div>
 
                     <div v-if="viewAdminTopics(user.user_roles)" class="tw-flex tw-flex-col tw-w-full">
-                        <h2 class="tw-font-semibold tw-text-sm tw-mb-3">Accesos administrativos</h2>
+                        <h2 class="tw-font-semibold tw-text-2xl tw-mb-3 tw-font-bebas">Accesos administrativos</h2>
                         <div class="tw-flex tw-flex-col tw-items-center tw-gap-0 tw-w-full">
 
-                            <v-card class="mx-auto !tw-bg-transparent !tw-text-white !tw-shadow-none" width="100%">
+                            <v-card class="mx-auto !tw-bg-transparent !tw-shadow-none" width="100%">
                                 <v-list v-model:opened="open">
                                     <v-list-group value="super_admin" >
                                         <template v-slot:activator="{ props }">
@@ -186,7 +187,7 @@ console.log(props.user.user_roles)
                                     </v-list-group>
                                 </v-list>
                             </v-card>
-                            <v-card class="mx-auto !tw-bg-transparent !tw-text-white !tw-shadow-none" width="100%">
+                            <v-card class="mx-auto !tw-bg-transparent !tw-shadow-none" width="100%">
                                 <v-list v-model:opened="open">
                                     <v-list-group value="admin" >
                                         <template v-slot:activator="{ props }">
@@ -264,28 +265,24 @@ console.log(props.user.user_roles)
                         </div>
                     </div>
 
-                    <div class="tw-w-full tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-overflow-hidden tw-shadow-xl tw-relative tw-bg-white/10">
-                        <div class="tw-w-[55%] tw-p-3 tw-pr-0 tw-text-sm tw-font-semibold tw-text-gray-200">
-                            <p class="tw-mb-4">{{ user.first_name + ' ' + user.last_name }}</p>
+                    <div class="tw-w-full tw-p-5 tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-overflow-hidden tw-shadow-xl tw-border tw-relative tw-bg-white/10">
+                        <div class="tw-w-full">
 
                             <v-dialog max-width="500">
                                     <template v-slot:activator="{ props: activatorProps }">
-                                        <v-btn v-bind="activatorProps" color="red" variant="tonal" block class="text-none" rounded="lg">
-                                            Cerrar sesion
+                                        <v-btn  v-bind="activatorProps" color="red" variant="tonal" block class="text-none !tw-h-[50px] !tw-rounded-2xl">
+                                            Cerrar sesión
                                         </v-btn>
                                     </template>
                                     <template v-slot:default="{ isActive }">
-                                        <v-card title="¿Estas seguro de finalizar tu sesion ?">
-                                        <v-card-text>
-                                            <p class="tw-opacity-50 tw-mt-3">Oprime 'cerrar sesion' para finalizar la autenticacion.</p>
-                                        </v-card-text>
+                                        <v-card title="¿Estas seguro de finalizar tu sesión?">
 
-                                        <v-card-actions>
+                                        <v-card-actions class="!tw-my-4 !tw-px-4">
                                             <v-spacer></v-spacer>
-                                            <v-btn color="red" rounded="xl" variant="tonal" class="text-none !tw-px-4" text="Cancelar" @click="isActive.value = false"></v-btn>
+                                            <v-btn color="red" variant="tonal" rounded="lg" class="text-none !tw-h-[50px] !tw-px-4" text="Cancelar" @click="isActive.value = false"></v-btn>
                                             <Link :href="route('logout')" method="post" as="button">
-                                                <v-btn rounded="xl" variant="elevated" class="text-none !tw-bg-purple-500 !tw-text-white tw-mb-2 !tw-px-4" @click="isActive.value = false">
-                                                    <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">person</span> Cerrar sesion
+                                                <v-btn variant="elevated" rounded="lg" class="text-none !tw-h-[50px] !tw-bg-purple-500 !tw-text-white !tw-px-4" @click="isActive.value = false">
+                                                    <span class="material-symbols-outlined tw-text-xl !tw-w-1/2">person</span> Cerrar sesión
                                                 </v-btn>
                                             </Link>
                                         </v-card-actions>
@@ -294,7 +291,6 @@ console.log(props.user.user_roles)
                                     </template>
                             </v-dialog>
                         </div>
-                        <img class="tw-w-[60%] tw-absolute tw-top-0 -tw-right-5" src="https://modernize-nuxt3-main.netlify.app/images/backgrounds/unlimited-bg.png" alt="">
                     </div>
                 </div>
         </div>
@@ -325,7 +321,7 @@ console.log(props.user.user_roles)
 
 @media (min-width: 768px) {
     .v-navigation-drawer--temporary.v-navigation-drawer--active {
-        width: 270px !important;
+        width: 290px !important;
         box-shadow: none !important;
     }
 }

@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 import confetti from 'canvas-confetti';
 import SuccessSession from '@/Components/SuccessSession.vue';
+import PrimaryButton from '@/Components/buttons/PrimaryButton.vue';
 
 const count = 200;
 const defaults = {
@@ -61,44 +62,21 @@ onMounted(() => {
 
     <div>
         <!-- Hero -->
-        <div class="tw-relative tw-overflow-hidden before:tw-absolute before:tw-top-0 before:tw-start-1/2 before:tw-bg-[url('https://preline.co/assets/svg/examples/squared-bg-element.svg')] before:tw-bg-no-repeat before:tw-bg-top before:tw-size-full before:-tw-z-[1] before:tw-transform before:-tw-translate-x-1/2">
-            <div class="tw-max-w-[85rem] tw-mx-auto tw-px-4 sm:tw-px-6 lg:tw-px-8 tw-pt-24 tw-pb-10">
-                <!-- Announcement Banner -->
-                <div class="tw-flex tw-justify-center">
-                <a class="tw-inline-flex tw-items-center tw-gap-x-2 tw-bg-white tw-border tw-border-gray-200 tw-text-xs tw-text-gray-600 tw-p-2 tw-px-3 tw-rounded-full tw-transition hover:tw-border-gray-300 focus:tw-outline-none focus:tw-border-gray-300" href="#">
-                    Seguir comprando entradas
-                    <Link :href="route('events.index')">
-                        <span class="tw-flex tw-items-center tw-gap-x-1">
-                        <span class="tw-border-s tw-border-gray-200 tw-text-purple-600 tw-ps-2">Explorar</span>
-                        <svg class="tw-shrink-0 tw-size-4 tw-text-purple-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                        </span>
-                    </Link>
-                </a>
-                </div>
-                <!-- End Announcement Banner -->
-
-                <!-- Title -->
-                <div class="tw-mt-5 tw-max-w-xl tw-text-center tw-mx-auto">
-                <h1 class="tw-block tw-font-bold tw-text-gray-800 tw-text-4xl md:tw-text-5xl lg:tw-text-6xl">
+        <div class="tw-relative tw-h-screen tw-overflow-hidden tw-flex tw-items-center tw-flex-col tw-justify-center tw-gap-10">
+            <div class="tw-absolute -tw-right-40 lg:-tw-right-96 -tw-top-52 lg:-tw-top-52 tw-h-[480px] tw-w-[300px] lg:tw-h-[680px] lg:tw-w-[500px] tw-rounded-full tw-blur-[120px] lg:tw-blur-[220px] tw-bg-primary">
+            </div>
+            <div class="tw-text-center tw-z-20 tw-relative">
+                <h1 class="tw-font-bold tw-text-4xl md:tw-text-5xl lg:tw-text-7xl tw-font-bebas">
                     ¡Boletos adquiridos con éxito!
                 </h1>
-                </div>
-                <!-- End Title -->
-
-                <div class="tw-mt-5 tw-max-w-3xl tw-text-center tw-mx-auto">
-                <p class="tw-text-lg tw-text-gray-600"> ¡Gracias por su compra! Puede ver sus boletos adquiridos en la seccion 'dashboard'. </p>
-                </div>
-
-                <!-- Buttons -->
-                <div class="tw-mt-8 tw-gap-3 tw-flex tw-justify-center">
-                <Link :href="route('dashboard')">
-                    <v-btn variant="elevated" class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">confirmation_number</span>Ver mis boletos</v-btn>
-                </Link>
-                </div>
-                <!-- End Buttons -->
+                <p>Gracias por su compra! Puede ver sus boletos adquiridos en la seccion 'dashboard'.</p>
             </div>
+            <Link :href="route('dashboard')">
+                <PrimaryButton heightbtn="!tw-h-[70px] !tw-text-base !tw-w-full md:!tw-w-auto" paddingbtn="!tw-px-14">
+                    <span class="material-symbols-outlined tw-text-2xl tw-mr-2">confirmation_number</span>Ver mis boletos
+                </PrimaryButton>
+            </Link>
         </div>
-        <!-- End Hero -->
     </div>
 </template>
 

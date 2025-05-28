@@ -29,8 +29,6 @@ const props = defineProps({
 if (props.user_roles && !viewVendorTopics(props.user_roles)) {
     isMember.value = false
 }
-
-
 </script>
 
 <template>

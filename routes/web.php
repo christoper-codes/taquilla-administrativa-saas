@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
+    return redirect()->route('events.index');
     $user_roles = null;
     if(Auth::user()){
         $user_roles = Auth::user()->userRoles;

@@ -1,0 +1,21 @@
+.v-theme--light {
+ /*  backdrop-filter: blur(5px); */
+}
+
+.v-dialog > .v-overlay__content > .v-card,
+.v-dialog > .v-overlay__content > .v-sheet,
+.v-dialog > .v-overlay__content > form > .v-card,
+.v-dialog > .v-overlay__content > form > .v-sheet {
+  border-radius: 5px !important;
+}
+
+.v-btn.v-btn {
+  text-transform: capitalize !important;
+}
+
+.v-text-field .v-field {
+  border-radius: 12px !important;
+}
+.v-file-input {
+  border-radius: 12px !important;
+}

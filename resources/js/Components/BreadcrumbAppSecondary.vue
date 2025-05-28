@@ -3,11 +3,11 @@
 </script>
 
 <template>
-    <div class="tw-w-full tw-py-5 tw-px-10 tw-bg-gradient-to-r tw-from-slate-900 tw-via-slate-900 tw-to-purple-950">
-        <h2 class="tw-font-bold tw-text-2xl tw-text-white">
+    <section class="tw-mt-10">
+       <h2 class="tw-font-bold tw-font-bebas tw-text-4xl lg:tw-text-5xl tw-text-left tw-w-full">
             <slot />
         </h2>
-    </div>
+    </section>
 </template>
 
 <style scoped>
