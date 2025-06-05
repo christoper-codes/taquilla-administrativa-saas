@@ -13,6 +13,7 @@ import GuestNav from '@/Components/navs/GuestNav.vue';
 import GuestNavSocial from '@/Components/navs/GuestNavSocial.vue';
 import { menuStateSocialMedia, menuStateApp } from '@/composables/nav/menu-state.js'
 import AppNav from '@/Components/navs/AppNav.vue';
+import CashRegisterNav from '@/Components/navs/CashRegisterNav.vue';
 
 const { dateFormat } = useDateFormat();
 const loading = ref(false);
@@ -86,6 +87,7 @@ const closeImageModal = () => {
     <Head title="Welcome" />
    <!--  <GuestLayout v-bind:user_roles="user_roles" /> -->
     <!-- <NavigationDrawer v-bind:user_roles="user_roles" /> -->
+    <CashRegisterNav v-bind:user_roles="user_roles"/>
     <GuestNavSocial />
     <AppNav />
     <transition name="fade">

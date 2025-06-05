@@ -31,6 +31,9 @@ import ZonaH from '@/Components/SectionsHdx/ZonaH.vue';
 import useStringFormat from '@/composables/stringFormat';
 import GuestNav from '@/Components/navs/GuestNav.vue';
 import AppNav from '@/Components/navs/AppNav.vue';
+import CashRegisterNav from '@/Components/navs/CashRegisterNav.vue';
+import SecondaryButton from '@/Components/buttons/SecondaryButton.vue';
+import PrimaryButton from '@/Components/buttons/PrimaryButton.vue';
 
 const { dateFormat } = useDateFormat();
 const { formatFirstLetterUppercase } = useStringFormat();
@@ -249,6 +252,17 @@ const filteredPaymentTypes = computed(() => {
 
     return paymentTypesSelected.value;
 });
+
+const paymentInInstallments = () => {
+    if(installmentSale.value == false){
+        paymentTypesSelected.value = props.global_payment_types.filter(item => item.name === 'plazos');
+        installmentSale.value = true;
+    } else {
+        paymentTypesSelected.value = [];
+        paymentTypesSelected.value.push(props.global_payment_types.find((item) => item.name === 'tarjeta'));
+        installmentSale.value = false;
+    }
+}
 
 watch(filteredPaymentTypes, updateTotal);
 
@@ -657,7 +671,7 @@ const selectZones = () => {
     valid.value = true;
     purchaseStatus.value = 'process';
     viewSelectedSection.value = 'Zonas HDX';
-    purchaseType.value = 'abonado';
+    purchaseType.value = props.event.enabled_for_season_tickets ? 'abonado' : 'partido';
     loadingg.value = false;
     loading.value = false;
     userToTransfer.value = null;
@@ -981,10 +995,17 @@ watch(() => installmentSale.value, () => {
             }
         }
         saleDeptorSelected.value = 1;
-        const owner = seatsSelected.value.find(seat => seat.is_owner == 'Si');
-        firstNameSaleDeptor.value = owner.holder_name;
-        lastNameSaleDeptor.value = owner.holder_last_name;
-        phoneSaleDeptor.value = owner.holder_phone;
+
+        if(purchaseType.value == 'abonado'){
+            const owner = seatsSelected.value.find(seat => seat.is_owner == 'Si');
+            firstNameSaleDeptor.value = owner.holder_name;
+            lastNameSaleDeptor.value = owner.holder_last_name;
+            phoneSaleDeptor.value = owner.holder_phone;
+        } else {
+            amountToPayCard.value = 0;
+            amountToPayCash.value = 0;
+        }
+
         if(paymentTypesSelected.value.length == 1 && paymentTypesSelected.value.some(type => type.name === 'tarjeta')) {
             amountReturned.value = 0;
         }
@@ -1151,7 +1172,7 @@ const onSubmit = () => {
         }
     }
 
-    if(installmentSale.value){
+    if(installmentSale.value && purchaseType.value == 'abonado') {
         const amountToPay = amountReceived.value - amountReturned.value;
         const seatsTotal = seatsSelected.value.length;
         if((seatsTotal * 500) > amountToPay) {
@@ -1419,7 +1440,8 @@ watch(() => paymentInstallmentSelected.value, () => {
     <!-- <GuestLayout  v-bind:user_roles="user_roles" v-bind:isEventsShow="isEventsShow"/> -->
    <!--  <NavigationDrawer v-bind:user_roles="user_roles"/> -->
    <!--  <SuccessSession /> -->
-    <AppNav />
+    <AppNav/>
+    <CashRegisterNav v-bind:user_roles="user_roles"/>
     <transition name="fade">
         <div
             v-if="showImageModal"
@@ -1431,24 +1453,26 @@ watch(() => paymentInstallmentSelected.value, () => {
             </div>
         </div>
     </transition>
-    <v-dialog max-width="700" max-height="300">
+    <v-dialog max-width="500" max-height="300">
         <template v-slot:activator="{ props: activatorProps }">
             <v-btn id="seller-dialog" v-bind="activatorProps" variant="elevated" class="!tw-hidden" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
         </template>
         <template v-slot:default="{ isActive }">
             <v-card>
-            <v-card-text class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-text-center">
-                <h2 class="tw-bg-gray-100 tw-rounded-full tw-px-4 tw-py-1 tw-inline">Taquilla activa</h2>
-                <h1 class="tw-font-bold tw-text-xl lg:tw-text-2xl tw-mt-3 tw-text-gray-600">Se debe abrir una caja para usar esta seccion como taquilla.</h1>
+            <v-card-text class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-text-center tw-mt-1">
+                <h1 class="tw-text-xl">Se debe abrir una caja para usar esta seccion como taquilla.</h1>
             </v-card-text>
-
-            <v-card-actions>
                 <Link
                     :href="route('ticket-offices.index')"
                     >
-                    <v-btn variant="tonal" class="text-none !tw-bg-tw-primary-100 !tw-text-tw-primary-600 !tw-px-7 tw-mb-2 tw-mr-2" size="large" rounded="xl" @click="isActive.value = false">Abrir caja</v-btn>
+                    <div class="tw-w-full tw-flex tw-items-center tw-justify-center tw-mb-5">
+                        <PrimaryButton>
+                            <div class="tw-flex tw-items-center tw-justify-center tw-gap-1">
+                                <p>Abrir caja</p>
+                            </div>
+                        </PrimaryButton>
+                    </div>
                 </Link>
-            </v-card-actions>
             </v-card>
         </template>
     </v-dialog>
@@ -1830,16 +1854,22 @@ watch(() => paymentInstallmentSelected.value, () => {
 
                                                     <v-expansion-panel class="lg:!tw-px-10 !tw-rounded-2xl !tw-py-2 !tw-bg-transparent !tw-mt-9">
                                                         <v-expansion-panel-title expand-icon="mdi-menu-down">
-                                                            Tipos de pago
+                                                            Proceso de compra
                                                         </v-expansion-panel-title>
                                                         <v-form v-model="form" @submit.prevent="onSubmit" lazy-validation>
                                                             <v-expansion-panel-text>
+                                                            <div v-if="viewVendorTopics(user_roles)">
+                                                               <div>
+                                                                    <v-switch inset  label="¿Se requiere venta a cuotas?" color="purple" @click="paymentInInstallments"></v-switch>
+                                                                </div>
+                                                            </div>
+
                                                             <v-select
                                                                 v-if="viewVendorTopics(user_roles) && !paymentInstallmentSelected"
                                                                 color="purple"
                                                                 label="selecciona el tipo de pago"
                                                                 :item-props="globalPayementTypeProps"
-                                                                :items="global_payment_types"
+                                                                :items="global_payment_types.filter(type => type.name !== 'plazos')"
                                                                 chips
                                                                 multiple
                                                                 clearable
@@ -2061,11 +2091,11 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                             :value="purchaseType"
                                                                         ></v-radio>
                                                                     </v-radio-group>
-                                                                    <v-btn @click="seasonTicketsDialogOpen" class="!tw-mt-2 !tw-px-8 !tw-h-[50px] !tw-rounded-xl" color="purple" variant="tonal">Tomar datos</v-btn>
+                                                                    <v-btn v-if="purchaseType == 'abonado'" @click="seasonTicketsDialogOpen" class="!tw-mt-2 !tw-px-8 !tw-h-[50px] !tw-rounded-xl" color="purple" variant="tonal">Tomar datos</v-btn>
                                                                 </div>
                                                                 <div v-if="viewVendorTopics(user_roles)">
                                                                     <div v-if="seatsSelected.filter(seat => seat.is_owner == 'Si').length > 0">
-                                                                        <v-switch v-if="!paymentInstallmentSelected" label="¿Se requiere venta a plazos?" color="purple" value="1" v-model="installmentSale"></v-switch>
+                                                                        <v-switch inset v-if="!paymentInstallmentSelected" label="¿Se requiere venta a plazos?" color="purple" value="1" v-model="installmentSale"></v-switch>
                                                                     </div>
 
                                                                     <div v-if="installmentSale">
@@ -2097,7 +2127,6 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                                 v-model="firstNameSaleDeptor"
                                                                                 hint="Nombre de para el abonado"
                                                                                 :rules="[rules.required]"
-                                                                                readonly
                                                                                 variant="outlined"
                                                                             ></v-text-field>
                                                                             <v-text-field
@@ -2108,7 +2137,6 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                                 v-model="lastNameSaleDeptor"
                                                                                 hint="Apellido paterno de para el abonado"
                                                                                 :rules="[rules.required]"
-                                                                                readonly
                                                                                 variant="outlined"
                                                                             ></v-text-field>
                                                                             <v-text-field
@@ -2119,7 +2147,6 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                                 v-model="phoneSaleDeptor"
                                                                                 hint="Numero de teléfono para el pago a plazos"
                                                                                 :rules="[rules.required, rules.isNumber, rules.phoneNumber]"
-                                                                                readonly
                                                                                 variant="outlined"
                                                                             ></v-text-field>
 
@@ -2141,8 +2168,8 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                     <p class="tw-py-4 tw-px-4 tw-rounded-lg tw-bg-yellow-100 tw-border-l-[6px] tw-border-l-yellow-500 tw-text-yellow-600 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para la temporada a la que pertenece este evento.</p>
                                                                 </div>
 
-                                                                <p class="tw-opacity-50 tw-text-right tw-mb-3 tw-text-xs">Subtotal (tipos de precios selecionados): {{ formatPrice(totalAmount) }}</p>
-                                                                <p class="tw-font-semibold tw-text-right tw-mb-3">Total: {{ formatPrice(totalAmount) }}</p>
+                                                                <p class="tw-opacity-50 tw-text-right tw-mb-3">Subtotal (tipos de precios selecionados): {{ formatPrice(totalAmount) }}</p>
+                                                                <p class="tw-font-bold tw-text-3xl tw-text-right tw-mb-3">Total: {{ formatPrice(totalAmount) }}</p>
                                                                 <v-btn
                                                                     v-if="showButtonPayment"
                                                                     @click="showPaymentDrawer"

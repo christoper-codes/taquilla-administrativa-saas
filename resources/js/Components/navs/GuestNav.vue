@@ -6,7 +6,7 @@ import GuestNavSocial from './GuestNavSocial.vue';
 </script>
 
 <template>
-    <div>
+    <div class="tw-w-full">
         <div class="lg:tw-hidden">
             <div class="tw-flex tw-items-center tw-w-full tw-pr-8 tw-justify-between tw-relative tw-z-10">
                 <Link :href="route('welcome')">

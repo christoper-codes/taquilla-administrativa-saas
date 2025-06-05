@@ -196,7 +196,7 @@ class EventController extends Controller
             $user = Auth::user();
             $users = User::all();
             $user_roles = Auth::user()->userRoles;
-            $global_payment_types = GlobalPaymentType::all();
+            $global_payment_types = GlobalPaymentType::where('is_active', true)->get();
             $global_card_payment_types = GlobalCardPaymentType::all();
             $sale_debtors = $this->sale_debtor_service->getAll(1);
 

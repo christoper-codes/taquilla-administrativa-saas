@@ -101,6 +101,11 @@ class EventSeatCatalogueService
                 $abono = $seatingPrices[$eventSeatCatalog->seatCatalogue->seatType->name];
 
                 $eventSeatCatalog->priceTypes()->attach([
+                    1 => [
+                        'price_catalogue_id' => 1,
+                        'price' => '100.00',
+                        'is_active' => true
+                    ],
                     3 => [
                         'price_catalogue_id' => $abono["id"],
                         'price' => $abono["price"],
