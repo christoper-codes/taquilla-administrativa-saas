@@ -15,6 +15,7 @@ use App\Http\Controllers\SerieController;
 use App\Http\Controllers\TicketOfficeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CyberSourceController;
+use App\Http\Controllers\EventSeatCatalogPriceTypeController;
 use App\Http\Controllers\InstallmentPaymentHistoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
@@ -124,3 +125,11 @@ Route::post('/catalogo-de-status-para-asientos', [SeatCatalogueStatusController:
 */
 Route::post('/precios-de-estadio', [PriceCatalogueController::class, 'getAllForStadium'])->name('get.all.for.stadium');
 Route::post('/precio-de-estadio', [PriceCatalogueController::class, 'firstOrCreate'])->name('first.or.create.for.stadium');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* | Wallets | ROUTES
+*/
+Route::post('/precio-de-asientos', [EventSeatCatalogPriceTypeController::class, 'update'])->name('update.seat.price');

@@ -14,6 +14,7 @@ import SuccessSession from '@/Components/SuccessSession.vue';
 import useDateFormat from '@/composables/dateFormat';
 import useStringFormat from '@/composables/stringFormat';
 import useObjectsFormat from '@/composables/objectsFormat';
+import { toast } from 'vue3-toastify'
 
 const { cloneObject, detectChangesInArraysOrObjects } = useObjectsFormat();
 
@@ -222,15 +223,6 @@ const windowScreenWidth = ref(window.innerWidth);
 const updateWindowWidth = () => {
     windowScreenWidth.value = window.innerWidth;
 };
-
-
-
-
-
-
-
-
-
 
 const rows = ref([]);
 const availableRows = ((index) => {
@@ -535,21 +527,76 @@ function addZone() {
     viewSelectedSeat.value.rows.push(addRowsForSelectTemp);
 }
 
+const loadUpdateSeatPrice = ref(false);
+
 const savePricesForSeat = () => {
+
+    loadUpdateSeatPrice.value = true;
 
     axios.post(route('update.seat.price'), {
         seats: seatsSelected.value
     }).then((response) => {
-
-        console.log(response);
+        updateSeats(response.data);
+        toast('Precios actualizados con exito!', {
+            "theme": "auto",
+            "type": "success",
+            "dangerouslyHTMLString": true
+        })
     })
     .catch((error) => {
         console.error('Error:', error);
+        toast(`${error.response.data.message}`, {
+            "theme": "auto",
+            "type": "error",
+            "dangerouslyHTMLString": true
+        })
     })
     .finally(() => {
+        loadUpdateSeatPrice.value = false;
     });
 };
 
+const updateSeats = (zones) => {
+
+    const updateZone = (currentZone, receivedZone) => {
+
+        const seatsModified = [];
+
+        const newData = currentZone.map((seat) => {
+
+            let seatTemp = receivedZone.find((receivedSeat) => receivedSeat.seat_catalogue.code === seat.seat_catalogue.code);
+
+            if (seatTemp) {
+                seat.price_types = seatTemp.price_types;
+                seat.isUpdate = true;
+                seatsModified.push(seat);
+            }
+
+            return seat;
+        });
+
+        return {
+            newData: newData,
+            seatsModified: seatsModified
+        }
+    };
+
+    ["c_zone","a_zone", "b_zone", "e_zone", "f_zone", "h_zone"].forEach((zone) => {
+        if (zones[zone].length) {
+            const data = updateZone(dataEvent.value[zone], zones[zone]);
+
+            dataEvent.value[zone] = data.newData;
+            data.seatsModified.forEach((seat) => addSeat(seat));
+        };
+    });
+
+    resetSelectedSeats();
+};
+
+const resetSelectedSeats = () => {
+    viewSelectedSeat.value.rows = [];
+    addZone();
+}
 
 </script>
 
@@ -565,7 +612,7 @@ const savePricesForSeat = () => {
             <div class="tw-flex tw-justify-start tw-items-start 2xl:tw-w-[70%] lg:tw-w-[70%] md:tw-w-full">
                 <div class="tw-grid tw-gap-10 md:tw-gap-8 lg:tw-gap-5 tw-w-full tw-p-4">
                     <div class="tw-h-[2vh] tw-flex tw-justify-start tw-items-center">
-                        <p class="tw-font-bold tw-text-xl">Mapa de asignación de promociones</p>
+                        <p class="tw-font-bold tw-text-xl">Mapa de asignación de Precios</p>
                     </div>
                     <div class="tw-h-[10vh] tw-flex tw-justify-start tw-items-center">
                         <div
@@ -582,7 +629,7 @@ const savePricesForSeat = () => {
                                     class="tw-h-7 lg:tw-h-9 tw-w-full tw-bg-purple-500 tw-flex tw-items-center tw-justify-center tw-rounded-md">
                                     <span class="material-symbols-outlined tw-text-sm tw-text-white">star</span>
                                 </div>
-                                <p class="tw-text-xs lg:tw-text-base">Con Promoción</p>
+                                <p class="tw-text-xs lg:tw-text-base">Precio Asignado</p>
                             </div>
                             <div class="tw-flex tw-items-center tw-flex-col tw-gap-2">
                                 <div
@@ -739,7 +786,7 @@ const savePricesForSeat = () => {
 
                     <div class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-7 tw-my-4">
                         <div class="text-center">
-                            <v-btn @click="savePricesForSeat"> Guardar Precios</v-btn>
+                            <v-btn @click="savePricesForSeat" :loading="loadUpdateSeatPrice"> Guardar Precios</v-btn>
                         </div>
                     </div>
 

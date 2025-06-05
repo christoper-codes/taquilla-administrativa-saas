@@ -7,6 +7,7 @@ use App\Models\EventSeatCatalogPriceType;
 use App\Services\EventSeatCatalogPriceTypeService;
 use App\Services\PriceCatalogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class EventSeatCatalogPriceTypeController extends Controller
 {
@@ -81,7 +82,11 @@ class EventSeatCatalogPriceTypeController extends Controller
 
                 $event_seat_catalog_id = $seat['id'];
 
-                return collect($seat['price_types_update'])->map(function ($price_types_update) use ($prices_catalog, $event_seat_catalog_id) {
+                return collect($seat['price_types_update'])->filter(function($price_types_update){
+
+                    return filled($price_types_update['id']) && filled($price_types_update['price']);
+
+                })->map(function ($price_types_update) use ($prices_catalog, $event_seat_catalog_id) {
 
                     $price = $prices_catalog->where('price', $price_types_update['price'])->first();
 
@@ -94,6 +99,10 @@ class EventSeatCatalogPriceTypeController extends Controller
                 });
 
             })->toArray();
+
+            if (empty($seats)) {
+                return response()->json(['message' => 'No hay actualizaciones de precios para los asientos seleccionados.'], 422);
+            }
 
             $data =  $this->event_seat_catalog_price_type_service->updateInBulk($seats);
 

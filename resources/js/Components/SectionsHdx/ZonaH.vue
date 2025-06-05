@@ -178,8 +178,14 @@ watch(() => props.seatsSelected, (newSeatsSelected, oldSeatsSelected) => {
                     elemento.classList.add('tw-fill-purple-500');
                 }
             } else if (props.action === "price") {
-                elemento.classList.remove('tw-fill-green-500');
-                elemento.classList.add('tw-fill-yellow-500');
+                if(seat.isUpdate){
+                    elemento.classList.add('tw-fill-purple-500');
+                    seat.isUpdate = false;
+                }else{
+                    elemento.classList.remove('tw-fill-green-500');
+                    elemento.classList.remove('tw-fill-purple-500');
+                    elemento.classList.add('tw-fill-yellow-500');
+                }
             }else{
                     if(seat.seat_catalogue_status.name === 'reservado') {
                         elemento.classList.remove('tw-fill-green-500');

@@ -564,7 +564,6 @@ class EventController extends Controller
                 'event_type_id' => 'required|exists:event_types,id',
                 'serie_id' => 'required|exists:series,id',
                 'name' => 'required|string|max:255',
-                'slug' => 'required|string|max:255',
                 'description' => 'required|string|max:255',
                 'start_date' => 'required|date',
                 'end_date' => 'required|date',
@@ -573,7 +572,8 @@ class EventController extends Controller
 
             $request->merge([
                 'start_date' => Carbon::parse($request->start_date)->format('Y-m-d'),
-                'end_date' => Carbon::parse($request->end_date)->format('Y-m-d')
+                'end_date' => Carbon::parse($request->end_date)->format('Y-m-d'),
+                'slug' => Str::of($request->name)->slug('_')
             ]);
 
             if($request->global_image){

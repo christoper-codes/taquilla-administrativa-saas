@@ -46,7 +46,41 @@ class EventSeatCatalogPriceTypeService
 
             $event_seat_catalog_price_type = $this->event_seat_catalog_price_type_repository_interface->updateInBulk($data);
 
-            return $event_seat_catalog_price_type;
+            $a_zone = [];
+            $b_zone = [];
+            $c_zone = [];
+            $f_zone = [];
+            $e_zone = [];
+            $h_zone = [];
+
+            $event_seat_catalog_price_type->groupBy(function ($item) {
+                return $item->seatCatalogue->zone;
+            })->each(function ($item, $key) use (&$a_zone, &$b_zone, &$c_zone, &$f_zone, &$e_zone, &$h_zone) {
+                if ($key === 'A') {
+                    $a_zone = $item;
+                } elseif ($key === 'B') {
+                    $b_zone = $item;
+                } elseif ($key === 'C') {
+                    $c_zone = $item;
+                } elseif ($key === 'F') {
+                    $f_zone = $item;
+                } elseif ($key === 'E') {
+                    $e_zone = $item;
+                } elseif ($key === 'H') {
+                    $h_zone = $item;
+                }
+            });
+
+            $response = [
+                'a_zone' => $a_zone,
+                'b_zone' => $b_zone,
+                'c_zone' => $c_zone,
+                'f_zone' => $f_zone,
+                'e_zone' => $e_zone,
+                'h_zone' => $h_zone
+            ];
+
+            return $response;
 
         } catch (\Exception $e) {
 
