@@ -439,7 +439,6 @@ class EventController extends Controller
 
             $generic_data = [];
             if($response[0]['promotion_ticket']){
-
                 $generic_data = [
                     'promotion_ticket' => $response[0]['promotion_ticket'],
                 ];
