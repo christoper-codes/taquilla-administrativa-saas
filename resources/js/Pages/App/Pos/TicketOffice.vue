@@ -585,7 +585,7 @@ const pdf = () => {
                                             <div class="tw-text-4xl tw-font-bold"> <span class="tw-text-purple-600">Apertura:</span> {{ dateFormat(active_cash_register.created_at) }}</div>
                                         </div>
                                         <div class="tw-p-5 tw-flex tw-items-end tw-justify-center tw-flex-col tw-gap-3">
-                                            <v-btn @click="getCashRegisterSummary()" :loading="loading" variant="elevated" class="text-none !tw-bg-gradient-to-r !tw-from-purple-500 !tw-to-pink-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Imprimir Corte</v-btn>
+                                            <v-btn @click="getCashRegisterSummary()" :loading="loading" variant="elevated" class="text-none !tw-bg-gradient-to-r !tw-from-purple-500 !tw-to-pink-500 !tw-text-white !tw-px-10 !tw-h-[60px] !tw-rounded-2xl">Imprimir Corte</v-btn>
                                         </div>
                                     </div>
 

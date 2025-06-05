@@ -437,7 +437,14 @@ class EventController extends Controller
                 ], 200);
             }
 
-            $pdf_response = Pdf::loadView('pdfs.hdx.saleTicketPaper', ['pdf_data' => $response]);
+            $generic_data = [];
+            if($response[0]['promotion_ticket']){
+
+                $generic_data = [
+                    'promotion_ticket' => $response[0]['promotion_ticket'],
+                ];
+            }
+            $pdf_response = Pdf::loadView('pdfs.hdx.saleTicketPaper', ['pdf_data' => $response, 'generic_data' => $generic_data]);
             $pdfContent = $pdf_response->output();
 
             return response()->json([
