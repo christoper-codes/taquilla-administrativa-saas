@@ -26,6 +26,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);
 
+        $middleware->api(prepend: [
+            \App\Http\Middleware\XAuthorizationHeader::class,
+        ]);
+
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
