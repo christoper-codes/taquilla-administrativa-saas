@@ -72,6 +72,7 @@ class AuthController extends Controller
 
                 $user->userRoles()->attach($request->user_rol_id ?? 1);
                 $user->stadiums()->attach($request->stadium_id ?? 1);
+                $user->userRoles;
 
                 if($request->global_image){
                     $global_image = $this->global_image_service->save($request->all(), 'profile_images');
@@ -112,7 +113,7 @@ class AuthController extends Controller
             throw new \Exception('Credenciales inválidas');
         }
 
-        $user = Auth::user();
+        $user = Auth::user()->load(['userRoles']);
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
