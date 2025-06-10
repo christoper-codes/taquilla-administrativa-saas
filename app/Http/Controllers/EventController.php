@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PaymentInstallments;
+use App\Enums\PurchaseTypes;
 use App\Helpers\WebResponseHelper;
 use App\Interfaces\EventRepositoryInterface;
 use App\Models\Event;
@@ -200,13 +201,13 @@ class EventController extends Controller
             $global_card_payment_types = GlobalCardPaymentType::all();
             $sale_debtors = $this->sale_debtor_service->getAll(1);
 
-            $purchase_types = ['partido'];
+            $purchase_types = [PurchaseTypes::MATCH->value];
             $events_by_serie = $this->event_repository->getEventsBySerie($event->serie_id);
             if ($events_by_serie->count() > 1) {
-                $purchase_types[] = 'serie';
+                $purchase_types[] = PurchaseTypes::SERIE->value;
             }
             if($event->enabled_for_season_tickets){
-                $purchase_types[] = 'abonado';
+                $purchase_types[] = PurchaseTypes::SEASON_TICKET->value;
                 $payment_installments = PaymentInstallments::toArray();
             }
 
@@ -408,7 +409,7 @@ class EventController extends Controller
                 ], 200);
             }
 
-            if($request->purchase_type === 'abonado') {
+            if($request->purchase_type == PurchaseTypes::SEASON_TICKET->value) {
 
                 $generic_data = [
                     'sale_date' => Carbon::now()->format('d/m/Y'),
