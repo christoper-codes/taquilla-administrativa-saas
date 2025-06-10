@@ -103,4 +103,9 @@ class SaleTicket extends Model
     {
         return $this->hasMany(InstallmentPaymentHistory::class);
     }
+
+    public function onlinePaymentTransactions()
+    {
+        return $this->hasMany(OnlinePaymentTransaction::class);
+    }
 }

@@ -12,6 +12,7 @@ use App\Models\PriceTypeSeatCatalogue;
 use App\Models\SaleTicket;
 use App\Models\SaleTicketStatus;
 use App\Models\GlobalCardPaymentType;
+use App\Models\OnlinePaymentTransaction;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -38,11 +39,13 @@ class EventService
     protected $season_ticket_service;
     protected $sale_debtor_service;
     protected $installment_payment_history_service;
+    protected $online_payment_transaction_service;
 
     public function __construct(EventRepositoryInterface $event_repository, GlobalPaymentTypeService $global_payment_type_service,
                     GlobalCardPaymentTypeService $global_card_payment_type_service, CashRegisterService $cash_register_service,
                     SeasonTicketService $season_ticket_service, SaleDebtorService $sale_debtor_service,
-                    InstallmentPaymentHistoryService $installment_payment_history_service )
+                    InstallmentPaymentHistoryService $installment_payment_history_service,
+                    OnlinePaymentTransactionService $online_payment_transaction_service)
     {
         $this->event_repository = $event_repository;
         $this->global_payment_type_service = $global_payment_type_service;
@@ -51,6 +54,7 @@ class EventService
         $this->season_ticket_service = $season_ticket_service;
         $this->sale_debtor_service = $sale_debtor_service;
         $this->installment_payment_history_service = $installment_payment_history_service;
+        $this->online_payment_transaction_service = $online_payment_transaction_service;
     }
 
 
@@ -745,6 +749,9 @@ class EventService
             if(!$data['is_online']){
                 return $pdf_data;
             }
+
+            $data['sale_ticket_id'] = $saleTicket->id;
+            $this->online_payment_transaction_service->save($data);
 
             return true;
 

@@ -31,11 +31,10 @@ use App\Interfaces\SeatCatalogueStatusesRepositoryInterface;
 use App\Interfaces\SerieRepositoryInterface;
 use App\Interfaces\StadiumRepositoryInterface;
 use App\Interfaces\EventSeatCatalogPriceTypeRepositoryInterface;
+use App\Interfaces\OnlinePaymentTransactionRepositoryInterface;
 use App\Interfaces\PriceCatalogRepositoryInterface;
 use App\Interfaces\PriceTypeRepositoryInterface;
-use App\Models\Agreement;
-use App\Models\Institution;
-use App\Models\PromotionType;
+
 use App\Repositories\AgreementRepository;
 use App\Repositories\EventRepository;
 use App\Repositories\GlobalCardPaymentTypeRepository;
@@ -63,6 +62,7 @@ use App\Repositories\SerieRepository;
 use App\Repositories\StadiumRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\EventSeatCatalogPriceTypeRepository;
+use App\Repositories\OnlinePaymentTransactionRepository;
 use App\Repositories\PriceCatalogRepository;
 use App\Repositories\PriceTypeRepository;
 use Illuminate\Support\ServiceProvider;
@@ -111,7 +111,7 @@ class RepositoriServiceProvider extends ServiceProvider
         $this->app->bind(CashRegisterMovementRepositoryInterface::class, CashRegisterMovementRepository::class);
         $this->app->bind(CashRegisterMovementTypeRepositoryInterface::class, CashRegisterMovementTypeRepository::class);
         $this->app->bind(CyberSourceRepositoryInterface::class, CyberSourceRepository::class);
-
+        $this->app->bind(OnlinePaymentTransactionRepositoryInterface::class, OnlinePaymentTransactionRepository::class);
     }
 
     /**

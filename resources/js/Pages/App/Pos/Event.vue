@@ -2074,7 +2074,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                     <v-radio-group inline label="Tipo de compra a realizar" v-model="purchaseType">
                                                                         <v-radio
                                                                             v-for="(type, index) in purchase_types"
-                                                                            :disabled="!!(event.enabled_for_season_tickets && type == 'partido')"
+                                                                            :disabled="(!!(event.enabled_for_season_tickets && type == 'partido') || type == 'serie')"
                                                                             :key="index"
                                                                             :color="'purple'"
                                                                             :label="type"
@@ -2086,6 +2086,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                 <div v-if="viewVendorTopics(user_roles)" class="tw-flex tw-items-center tw-justify-between">
                                                                     <v-radio-group inline label="Tipo de compra a realizar" v-model="purchaseType">
                                                                         <v-radio
+                                                                            :disabled="type == 'serie'"
                                                                             :color="'purple'"
                                                                             :label="purchaseType"
                                                                             :value="purchaseType"

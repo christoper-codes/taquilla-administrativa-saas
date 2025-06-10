@@ -500,6 +500,7 @@ class EventController extends Controller
             'is_owner' => 'nullable',
             'final_promotion' => 'nullable',
             'sale_deptor' => 'nullable',
+            'online_payment_transaction' => 'nullable',
         ]);
 
         DB::beginTransaction();

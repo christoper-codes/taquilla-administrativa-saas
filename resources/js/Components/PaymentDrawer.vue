@@ -110,14 +110,35 @@ onMounted(async () => {
                         value: props.totalAmount,
                         currency_code: currency
                     },
-                    custom_id: props.ticketOfficeId,
+                    custom_id: props.memberUserId ? props.memberUserId : null,
                 }
             ]
           })
         },
         onApprove: async (data, actions) => {
             return actions.order.capture().then(details => {
-                confirmSeatsPurchase();
+                const transaction = {
+                    source: 'paypal',
+
+                    order_id: data.orderID ?? null,
+                    payment_id: data.paymentID ?? null,
+                    payer_id: data.payerID ?? null,
+
+                    status: details?.status ?? null,
+                    intent: details?.intent ?? null,
+
+                    amount: details?.purchase_units?.[0]?.amount?.value ?? null,
+                    currency: details?.purchase_units?.[0]?.amount?.currency_code ?? null,
+
+                    capture_id: details?.purchase_units?.[0]?.payments?.captures?.[0]?.id ?? null,
+
+                    payer_email: details?.payer?.email_address ?? null,
+                    payee_email: details?.purchase_units?.[0]?.payee?.email_address ?? null,
+
+                    create_time: details?.create_time ?? null,
+                    update_time: details?.update_time ?? null,
+                }
+                confirmSeatsPurchase(transaction);
             });
         },
         onCancel: (data) => {
@@ -146,7 +167,7 @@ const cancelPayment = (data) => {
     }
 }
 
-const confirmSeatsPurchase = () =>{
+const confirmSeatsPurchase = (transaction = {}) =>{
 
     loading.value = true;
 
@@ -166,7 +187,8 @@ const confirmSeatsPurchase = () =>{
         global_payment_types: props.globalPaymentTypes,
         is_online: props.isOnline,
         serie_id: props.serieId,
-        sale_debtor: props.saleDebtorData
+        sale_debtor: props.saleDebtorData,
+        online_payment_transaction: transaction,
     }
 
     axios.post(route('events.confirm-seats-purchase'), seatsSelectedData)
