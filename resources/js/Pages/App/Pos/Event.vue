@@ -2121,12 +2121,12 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                             <div v-if="!viewVendorTopics(user_roles)" class="tw-flex tw-items-center tw-justify-between">
                                                                     <v-radio-group inline label="Tipo de compra a realizar" v-model="purchaseType">
                                                                         <v-radio
-                                                                            v-for="(type, index) in purchase_types"
-                                                                            :disabled="(!!(event.enabled_for_season_tickets && type == 'partido') || type == 'serie')"
+                                                                            v-for="(option, index) in purchase_types"
+                                                                            :disabled="(!!(event.enabled_for_season_tickets && option == 'partido') || option == 'serie')"
                                                                             :key="index"
                                                                             :color="'purple'"
-                                                                            :label="type"
-                                                                            :value="type"
+                                                                            :label="option"
+                                                                            :value="option"
                                                                         ></v-radio>
                                                                     </v-radio-group>
                                                                     <v-btn v-if="purchaseType == 'abonado'" @click="seasonTicketsDialogOpen" class="!tw-mt-2 !tw-px-8 !tw-h-[50px] !tw-rounded-xl" color="purple" variant="tonal">Tomar datos</v-btn>
@@ -2134,7 +2134,6 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                 <div v-if="viewVendorTopics(user_roles)" class="tw-flex tw-items-center tw-justify-between">
                                                                     <v-radio-group inline label="Tipo de compra a realizar" v-model="purchaseType">
                                                                         <v-radio
-                                                                            :disabled="type == 'serie'"
                                                                             :color="'purple'"
                                                                             :label="purchaseType"
                                                                             :value="purchaseType"
