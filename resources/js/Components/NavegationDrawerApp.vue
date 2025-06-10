@@ -141,7 +141,7 @@ console.log(props.user.user_roles)
                             </div>
                             <div class="tw-w-full ">
                                 <AppNavLink :href="route('events.index')" :active="route().current('events.index')">
-                                    <span class="material-symbols-outlined tw-text-xl">note_stack</span>Eventos
+                                    <span class="material-symbols-outlined tw-text-xl">note_stack</span>Partidos
                                 </AppNavLink>
                             </div>
 

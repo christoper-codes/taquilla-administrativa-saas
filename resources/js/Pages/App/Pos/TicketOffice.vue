@@ -343,10 +343,6 @@ loadingPrint.value = true;
     };
 }
 
-
-
-
-
 function printInKioskMode(url, close = true) {
     const ventana = window.open(url, '_blank', 'fullscreen=yes,kiosk=yes');
     ventana.onload = () => {

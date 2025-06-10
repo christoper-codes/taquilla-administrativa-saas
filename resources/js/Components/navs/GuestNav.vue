@@ -3,6 +3,8 @@ import { Link, usePage } from '@inertiajs/vue3';
 import SecondaryButton from '../buttons/SecondaryButton.vue';
 import { menuStateSocialMedia, menuStateApp } from '@/composables/nav/menu-state.js'
 import GuestNavSocial from './GuestNavSocial.vue';
+
+const user = usePage().props.auth.user;
 </script>
 
 <template>
@@ -34,11 +36,17 @@ import GuestNavSocial from './GuestNavSocial.vue';
                     <span class="block">Redes sociales</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="tw-w-5 tw-fill-current" viewBox="0 0 24 24"><path d="M16.293 9.293 12 13.586 7.707 9.293l-1.414 1.414L12 16.414l5.707-5.707z"></path></svg>
                 </div>
-                <div class="tw-inline-block">
+                <div v-if="!user" class="tw-inline-block">
                     <Link :href="route('register')" class="tw-relative tw-inline-block tw-transition-colors tw-duration-300 after:tw-content-[''] after:tw-absolute after:tw-left-0 after:tw-bottom-0 after:tw-h-[2px] after:tw-w-0 after:tw-bg-current after:tw-transition-all after:tw-duration-500 hover:after:tw-w-full">Registrarse</Link>
                 </div>
-                <div class="tw-inline-block">
+                <div v-if="!user" class="tw-inline-block">
                     <Link :href="route('login')" class="tw-relative tw-inline-block tw-transition-colors tw-duration-300 after:tw-content-[''] after:tw-absolute after:tw-left-0 after:tw-bottom-0 after:tw-h-[2px] after:tw-w-0 after:tw-bg-current after:tw-transition-all after:tw-duration-500 hover:after:tw-w-full">Iniciar sesión</Link>
+                </div>
+                <div v-if="user" class="tw-inline-block">
+                    <Link :href="route('events.index')" class="tw-relative tw-inline-block tw-transition-colors tw-duration-300 after:tw-content-[''] after:tw-absolute after:tw-left-0 after:tw-bottom-0 after:tw-h-[2px] after:tw-w-0 after:tw-bg-current after:tw-transition-all after:tw-duration-500 hover:after:tw-w-full">Partidos</Link>
+                </div>
+                <div v-if="user" class="tw-inline-block">
+                    <Link :href="route('dashboard')" class="tw-relative tw-inline-block tw-transition-colors tw-duration-300 after:tw-content-[''] after:tw-absolute after:tw-left-0 after:tw-bottom-0 after:tw-h-[2px] after:tw-w-0 after:tw-bg-current after:tw-transition-all after:tw-duration-500 hover:after:tw-w-full">Dashboard</Link>
                 </div>
             </div>
             <Link :href="route('dashboard')" >

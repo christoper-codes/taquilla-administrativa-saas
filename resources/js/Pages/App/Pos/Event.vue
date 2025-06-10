@@ -1478,7 +1478,55 @@ watch(() => paymentInstallmentSelected.value, () => {
     </v-dialog>
 
     <transition name="slide">
-        <div v-if="seatsSelected.length > 0 && tab == 'seats'" @click="scrollTopaymentSection" class="tw-fixed tw-bottom-5 lg:tw-bottom-16 tw-right-3 tw-z-[60]">
+        <div  v-if="seatsSelected.length > 0 && tab == 'seats'" class="tw-hidden tw-fixed lg:tw-top-7 tw-rounded-lg tw-shadow-xl tw-p-2 tw-right-3 tw-max-h-60 tw-overflow-y-auto tw-w-60 tw-bg-white tw-z-[60] lg:tw-flex tw-items-center tw-justify-center">
+            <table class="tw-min-w-full tw-divide-y tw-divide-gray-200">
+                <thead>
+                    <tr>
+                    <th scope="col" class=" tw-p-2 tw-text-start tw-whitespace-nowrap">
+                        <span class="tw-text-xs tw-uppercase">
+                            asiento
+                        </span>
+                    </th>
+
+                    <th scope="col" class=" tw-p-2 tw-text-start tw-whitespace-nowrap">
+                        <span class="tw-text-xs tw-uppercase">
+                        precio
+                        </span>
+                    </th>
+                    <th scope="col" class=" tw-p-2 tw-text-start tw-whitespace-nowrap">
+                        <span class="tw-text-xs tw-uppercase">
+                            Acción
+                        </span>
+                    </th>
+                    </tr>
+                </thead>
+
+                <tbody class="tw-divide-y tw-divide-gray-200">
+                    <tr v-for="seat in seatsSelected" :key="seat.seat_catalogue.code">
+                    <td class="tw-size-px tw-whitespace-nowrap  tw-p-2">
+                        <span class="tw-text-sm tw-text-gray-800">{{ seat.seat_catalogue.zone }}{{ seat.seat_catalogue.row }}{{ seat.seat_catalogue.seat }}</span>
+                    </td>
+                    <td class="tw-size-px tw-whitespace-nowrap  tw-p-2">
+                        <span class="tw-text-sm tw-text-green-600">
+                            <div v-for="priceType in seat.price_types" :key="priceType.id">
+                                <div>
+                                    <span v-if="priceType.name === (purchaseType == 'abonado' ? 'abonado' : 'regular')">
+                                    {{ formatPrice(priceType.pivot.price) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </span>
+                    </td>
+                    <td class="tw-size-px tw-whitespace-nowrap  tw-p-2">
+                        <span @click="addSeat(seat)" class="material-symbols-outlined tw-text-xl tw-text-red-500 tw-cursor-pointer">delete</span>
+                    </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </transition>
+    <transition name="slide">
+        <div  v-if="seatsSelected.length > 0 && tab == 'seats'" @click="scrollTopaymentSection" class="tw-fixed tw-bottom-5 lg:tw-bottom-16 tw-right-3 tw-z-[60]">
             <div class="tw-flex tw-items-center tw-text-xs lg:tw-text-base tw-gap-2 tw-justify-center tw-bg-gradient-to-r tw-from-green-500 tw-to-cyan-500 tw-text-white tw-cursor-pointer hover:tw-scale-105 tw-transition-transform tw-duration-500 tw-px-4 lg:tw-px-6 tw-py-3 lg:tw-py-4 tw-rounded-2xl">
                 <span class="material-symbols-outlined tw-z-20 tw-text-xl lg:tw-text-xl">arrow_forward</span>Procesar Compra
             </div>
@@ -1561,7 +1609,7 @@ watch(() => paymentInstallmentSelected.value, () => {
     </div>
 
     <div
-        class="tw-flex tw-bg-cover tw-relative tw-min-h-screen lg:tw-min-h-[600px] tw-aspect-3/4 tw-object-cover tw-bg-center tw-w-full tw-p-4 lg:tw-p-7 tw-shadow-xl tw-overflow-hidden tw-transition-all tw-duration-500"
+        class="tw-flex tw-bg-cover tw-relative tw-min-h-screen lg:tw-min-h-[700px] tw-aspect-3/4 tw-object-cover tw-bg-center tw-w-full tw-p-4 lg:tw-p-7 tw-shadow-xl tw-overflow-hidden tw-transition-all tw-duration-500"
         :style="`background-image: url(/storage/${event.global_image.file_path})`"
         >
         <div class="tw-absolute tw-top-10 tw-mx-auto tw-w-full tw-text-white tw-z-20 tw-px-1">
@@ -2579,7 +2627,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                 </v-expansion-panels>
 
                                                 <div class="tw-my-5">
-                                                    <div v-if="viewVendorTopics(user_roles)" class="text-center">
+                                                    <div v-if="viewVendorTopics(user_roles) && tab == 'payment'" class="text-center">
                                                         <v-snackbar
                                                             v-model="snackbar"
                                                             variant="elevated"
