@@ -1858,7 +1858,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                         </v-expansion-panel-title>
                                                         <v-form v-model="form" @submit.prevent="onSubmit" lazy-validation>
                                                             <v-expansion-panel-text>
-                                                            <div v-if="viewVendorTopics(user_roles)">
+                                                            <div v-if="viewVendorTopics(user_roles) && purchaseType != 'abonado'">
                                                                <div>
                                                                     <v-switch inset  label="¿Se requiere venta a cuotas?" color="purple" @click="paymentInInstallments"></v-switch>
                                                                 </div>
