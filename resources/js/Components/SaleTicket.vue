@@ -16,12 +16,12 @@ const props = defineProps({
 const qrValue = computed(() => {
     return props.ticket.qr;
 })
-
+console.log(props.ticket);
 </script>
 
 <template>
       <div class="tw-inline-flex tw-flex-col tw-items-center tw-w-full lg:tw-w-96 tw-justify-center tw-bg-center tw-bg-cover tw-text-gray-600">
-        <div class="tw-w-full lg:tw-w-96 tw-bg-tw-primary-500 tw-rounded-3xl">
+        <div :class="ticket.purchase_type == 'abonado' ? 'tw-from-yellow-500 tw-to-pink-400' : 'tw-from-primary tw-to-blue-500'" class="tw-bg-gradient-to-r tw-w-full lg:tw-w-96 tw-rounded-3xl">
             <div class="tw-flex tw-flex-col">
                 <div class="tw-bg-white tw-relative tw-drop-shadow-2xl tw-rounded-3xl tw-p-4 tw-m-4">
                 <div class="tw-flex-none sm:tw-flex">
@@ -36,25 +36,25 @@ const qrValue = computed(() => {
                         </svg>
                         </button>
                     </div>
-                    <div class="tw-flex tw-items-center tw-justify-center tw-mt-1 tw-mb-3 tw-font-bold">
+                    <div class="tw-flex tw-items-center tw-justify-center tw-mt-3 tw-mb-5 tw-font-bold tw-text-lg">
                         {{ ticket.event.name }}
                     </div>
-                    <div class="tw-border-dashed tw-border-b-2 tw-mb-5"></div>
                     <div class="tw-flex tw-items-center">
                         <div class="tw-flex tw-flex-col">
                         <div class="tw-flex-auto tw-text-xs tw-text-gray-400 tw-my-1">
-                            <span class="tw-mr-1">2025 -</span><span>2026</span>
+                            <div class="tw-text-xs">Estado</div>
                         </div>
-                        <div class="tw-w-full tw-flex-none tw-text-lg tw-text-tw-primary-700 tw-font-bold tw-leading-none">{{ ticket.is_verified ? 'Expiro' : 'Valido' }}</div>
-                        <div class="tw-text-xs">Estatus</div>
+                        <div :class="ticket.purchase_type == 'abonado' ? 'tw-text-yellow-500' : 'tw-text-primary'" class=" tw-my-1 tw-w-full tw-flex-none tw-text-lg tw-font-bold tw-leading-none">{{ ticket.is_verified ? 'Expiro' : 'Valido' }}</div>
+                        <span class="tw-text-xs">Aperturado</span>
                         </div>
                         <div class="tw-flex tw-flex-col tw-mx-auto">
 
                            <v-btn
                                 v-if="!ticket.is_verified"
-                                class="text-green"
+                                class="!tw-text-green-600 !tw-bg-green-100"
                                 icon="mdi-check-bold"
                                 variant="tonal"
+                                size="large"
                             ></v-btn>
                            <v-btn
                                 v-else
@@ -64,16 +64,16 @@ const qrValue = computed(() => {
                             ></v-btn>
                         </div>
                         <div class="tw-flex tw-flex-col">
-                        <div class="tw-flex-auto tw-text-xs tw-text-gray-400 tw-my-1">
-                            <span class="tw-mr-1">2025 -</span><span>2026</span>
+                        <div class="tw-flex-auto tw-text-xs tw-text-gray-400">
+                           <div class="tw-text-xs">Tipo</div>
                         </div>
-                        <div class="tw-w-full tw-flex-none tw-text-lg tw-text-tw-primary-700 tw-font-bold tw-leading-none">{{ ticket.is_verified ? 'Expiro' : 'Valido' }}</div>
-                        <div class="tw-text-xs">Estatus</div>
+                        <div :class="ticket.purchase_type == 'abonado' ? 'tw-text-yellow-500' : 'tw-text-primary'" class="tw-my-1 tw-w-full tw-flex-none tw-text-lg tw-font-bold tw-leading-none">{{ ticket.purchase_type }}</div>
+                            <span class="tw-text-xs">2025 - 2026</span>
                         </div>
                     </div>
-                    <div class="tw-border-dashed tw-border-b-2 tw-my-1 tw-pt-5">
-                        <div class="tw-absolute tw-rounded-full tw-w-5 tw-h-5 tw-bg-tw-primary-500 -tw-mt-2 -tw-left-2"></div>
-                        <div class="tw-absolute tw-rounded-full tw-w-5 tw-h-5 tw-bg-tw-primary-500 -tw-mt-2 -tw-right-2"></div>
+                    <div class="tw-border-dashed tw-border-b-[6px] tw-my-1 tw-pt-5">
+                        <div :class="ticket.purchase_type == 'abonado' ? 'tw-bg-yellow-500' : 'tw-bg-primary'" class="tw-absolute tw-rounded-full tw-w-5 tw-h-5 -tw-mt-2 -tw-left-2"></div>
+                        <div :class="ticket.purchase_type == 'abonado' ? 'tw-bg-pink-400' : 'tw-bg-blue-500'" class="tw-absolute tw-rounded-full tw-w-5 tw-h-5 -tw-mt-2 -tw-right-2"></div>
                     </div>
                     <div class="tw-mt-5 tw-text-sm tw-h-[130px] tw-overflow-y-auto">
                         <div class="tw-w-full">
@@ -98,9 +98,9 @@ const qrValue = computed(() => {
                         </div>
                         </div>
                     </div>
-                    <div class="tw-border-dashed tw-border-b-2 tw-my-1 tw-pt-5">
-                        <div class="tw-absolute tw-rounded-full tw-w-5 tw-h-5 tw-bg-tw-primary-500 -tw-mt-2 -tw-left-2"></div>
-                        <div class="tw-absolute tw-rounded-full tw-w-5 tw-h-5 tw-bg-tw-primary-500 -tw-mt-2 -tw-right-2"></div>
+                    <div class="tw-border-dashed tw-border-b-[6px] tw-my-1 tw-pt-5">
+                        <div :class="ticket.purchase_type == 'abonado' ? 'tw-bg-yellow-500' : 'tw-bg-primary'" class="tw-absolute tw-rounded-full tw-w-5 tw-h-5 -tw-mt-2 -tw-left-2"></div>
+                        <div :class="ticket.purchase_type == 'abonado' ? 'tw-bg-pink-400' : 'tw-bg-blue-500'" class="tw-absolute tw-rounded-full tw-w-5 tw-h-5 -tw-mt-2 -tw-right-2"></div>
                     </div>
                     <div class="tw-flex tw-items-center tw-px-5 tw-pt-3 tw-text-sm tw-justify-between tw-flex-col tw-gap-2">
                         <div class="tw-text-xs">Fecha del evento</div>
