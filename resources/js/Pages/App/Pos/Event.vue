@@ -2609,8 +2609,8 @@ watch(() => paymentInstallmentSelected.value, () => {
 
                                                                         <v-card-actions class="tw-mr-3 tw-mb-5">
                                                                             <v-spacer></v-spacer>
-                                                                            <v-btn color="red" variant="tonal" class="text-none !tw-px-8 tw-mr-2 !tw-h-[70px] !tw-rounded-2xl" text="Cancelar" @click="isActive.value = false"></v-btn>
-                                                                            <v-btn :loading="loading" variant="elevated" class="text-none !tw-px-8 !tw-h-[70px] !tw-rounded-2xl !tw-bg-green-500 !tw-text-white" text="Reservar y comprar" @click="onSubmitConfirm(isActive)"></v-btn>
+                                                                            <v-btn color="red" variant="tonal" class="text-none !tw-px-4 lg:!tw-px-8 tw-mr-2 !tw-h-[50px] lg:!tw-h-[70px] !tw-rounded-2xl" text="Cancelar" @click="isActive.value = false"></v-btn>
+                                                                            <v-btn :loading="loading" variant="elevated" class="text-none !tw-px-4 lg:!tw-px-8 !tw-h-[50px] lg:!tw-h-[70px] !tw-rounded-2xl !tw-bg-green-500 !tw-text-white" text="Reservar y comprar" @click="onSubmitConfirm(isActive)"></v-btn>
                                                                         </v-card-actions>
 
                                                                         </v-card>

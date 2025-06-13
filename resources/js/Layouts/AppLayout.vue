@@ -28,7 +28,7 @@ const isMobile = ref(window.innerWidth < 1024);
        <div class="tw-w-full tw-bg-transparent tw-py-5 lg:tw-py-5 tw-px-4 lg:tw-px-10 tw-flex tw-items-center tw-justify-between lg:tw-pl-[295px]">
             <div class="tw-flex tw-items-center tw-gap-3">
                 <Link :href="route('welcome')" class="tw-flex tw-gap-1 tw-flex-col">
-                    <h1 class="tw-bg-clip-text lg:tw-ml-9 tw-bg-gradient-to-r tw-from-purple-600 tw-to-yellow-300 tw-text-transparent tw-font-bebas tw-text-xl md:tw-text-4xl tw-font-bold">Halcones de xalapa</h1>
+                    <h1 class="tw-bg-clip-text lg:tw-ml-9 tw-bg-gradient-to-r tw-from-primary tw-to-secondary tw-text-transparent tw-font-bebas tw-text-xl md:tw-text-4xl tw-font-bold">Halcones de xalapa</h1>
                 </Link>
             </div>
             <div class="lg:tw-flex tw-items-center tw-gap-4 lg:tw-gap-10 tw-text-gray-500 tw-hidden">
