@@ -16,7 +16,6 @@ const props = defineProps({
 const qrValue = computed(() => {
     return props.ticket.qr;
 })
-console.log(props.ticket);
 </script>
 
 <template>

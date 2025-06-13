@@ -9,6 +9,7 @@ import { ref } from 'vue';
 import SaleTicket from '@/Components/SaleTicket.vue';
 import { shareTicketSchema } from '@/validation/Administration/share-tickets-schema';
 import InputError from '@/Components/InputError.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
 
 const { handleSubmit } = useForm({validationSchema : shareTicketSchema});
 
@@ -37,7 +38,7 @@ const eventsWithTickets = ref(Object.values(props.events_with_tickets));
 const tab = ref('tab-0');
 
 const users_list = [];
-let tickets_list_v = [];
+const tickets_list_v = ref([]);
 
 let dialog = ref(false);
 
@@ -59,7 +60,6 @@ const alert = ()=> {
 }
 
 const selection = ref([])
-
 const messageErrorreceiverUserName = ref('Debes seleccionar a un amigo');
 
 const send_tickets = (values)=>{
@@ -67,10 +67,9 @@ const send_tickets = (values)=>{
     data.senderUserName = props.user['id'];
     data.receiverUserName = selected_value.value['id'];
 
-    tickets_list_v.forEach(element => {
+    tickets_list_v.value.forEach(element => {
         data.ticketListOfSender.push(element['id']);
     });
-
 
     data.post(route('ticket-offices.change'), {
         onFinish: () => {
@@ -78,31 +77,27 @@ const send_tickets = (values)=>{
             data.get(route('ticket-offices.share'),{});
         }
     });
-
-
 };
 
-
-const tickets_select = (tickets) => {
+const tickets_select = (ticket) => {
     let contain = false;
 
-    if (tickets_list_v.length == 0) {
-        tickets_list_v.push(tickets)
-    }else{
-
-        tickets_list_v.forEach(element => {
-            if (tickets['id'] == element['id']) {
+    if (tickets_list_v.value.length == 0) {
+        tickets_list_v.value.push(ticket)
+    } else {
+        tickets_list_v.value.forEach(element => {
+            if (ticket['id'] == element['id']) {
                 contain = true
-                tickets_list_v = tickets_list_v.filter(item => item['id'] !== tickets['id'])
+                tickets_list_v.value = tickets_list_v.value.filter(item => item['id'] !== ticket['id'])
             }
         });
 
         if (!contain) {
-            contain = false
-            tickets_list_v.push(tickets)
+            tickets_list_v.value.push(ticket)
         }
-
     }
+
+    selection.value = tickets_list_v.value;
 }
 
 
@@ -118,7 +113,6 @@ props.users.forEach(element => {
     }
 
 });
-
 </script>
 
 <template>
@@ -128,7 +122,7 @@ props.users.forEach(element => {
     <AppLayout >
         <ErrorSession />
         <BreadcrumbAppSecondary>
-            <span>Compartir Tickets</span>
+            <span>Compartir Boletos</span>
         </BreadcrumbAppSecondary>
 
         <v-dialog
@@ -190,60 +184,50 @@ props.users.forEach(element => {
 
             </v-container>
 
-            <div class="tw-mt-1 tw-gap-5 tw-w-full tw-flex tw-flex-col-reverse lg:tw-flex-row tw-items-start tw-justify-betwee">
-                <div class="tw-w-full tw-shadow-lg tw-bg-gray-200 tw-px-5 tw-overflow-x-scroll tw-rounded-2xl tw-border tw-flex tw-flex-col tw-items-center tw-justify-center tw-text-center">
-                    <div class="tw-mt-5">
-                        <v-tabs v-model="tab" align-tabs="center" color="deep-purple-accent-4">
-                            <v-tab v-for="(event, index) in eventsWithTickets" :key="event.event.id" :value="`tab-${index}`">
-                                {{ event.event.name }}
-                            </v-tab>
-                        </v-tabs>
+            <div class="tw-mt-10">
+                <template v-if="eventsWithTickets.some(event => event.tickets.length > 0)">
+                    <div v-for="event in eventsWithTickets" :key="event.event.id" class="tw-mb-10 last:tw-mb-0">
+                        <div v-if="event.tickets.length > 0">
+                            <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto tw-pb-5">
+                                <div v-for="ticket in event.tickets" :key="ticket.id" class="tw-flex tw-flex-col tw-items-center">
+                                    <SaleTicket :ticket="ticket" />
+                                    <v-btn
+                                        v-if="ticket.purchase_type == 'partido' || ticket.purchase_type == 'serie'"
+                                        :class="tickets_list_v.some(t => t.id === ticket.id) ? '!tw-bg-red-500' : '!tw-bg-primary'" class="!tw-mt-3 !tw-rounded-2xl !tw-h-[60px] !tw-px-6 !tw-shadow-none !tw-text-white"
+                                        block
+                                        @click="tickets_select(ticket)"
+                                    >
+                                        {{ tickets_list_v.some(t => t.id === ticket.id) ? 'Cancelar selección' : 'Compartir boleto' }}
+                                    </v-btn>
+
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    <div v-if="tickets_list_v.length > 0" class="tw-flex tw-justify-center tw-mt-8">
+                        <v-btn @click="alert" text="Enviar" color="green" height="65">Compartir seleccionados</v-btn>
+                    </div>
+                </template>
+                <template v-else>
+                    <div class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-5 tw-mt-10">
+                        <div class="tw-text-center tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-5">
+                            <img class="tw-w-40 lg:tw-w-72 tw-h-auto" src="/storage/public/emty-cart.webp" alt="">
+                            <span>No cuentas con boletos disponibles. ¡Compra tus boletos para el próximo partido!</span>
+                        </div>
+                        <div>
+                            <Link :href="route('events.index')">
+                                <SecondaryButton
+                                    heightbtn="!tw-h-[70px]"
+                                    paddingbtn="!tw-px-14"
+                                >
+                                    Comprar boletos
+                                </SecondaryButton>
+                            </Link>
+                        </div>
                 </div>
-            </div>
-            <div class="tw-mt-10 tw-bg-white">
-                <InputError class="" :message="data.errors.receiverUserName" />
-                <v-tabs-window v-model="tab">
-                    <v-tabs-window-item v-for="(event, index) in eventsWithTickets" :key="event.event.id" :value="`tab-${index}`">
-                        <div v-if="event.tickets.length > 0" class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto">
-                            <v-item-group
-                                v-model="selection"
-                                multiple
-                            >
-                            <v-row>
-                            <div class="tw-px-5 tw-py-5" v-for="ticket in event.tickets" :key="ticket.id">
-                                <v-row align="center" justify="space-between">
-                                    <v-col  cols="12" sm="6" md="4" lg="3">
-                                        <SaleTicket v-bind:ticket="ticket"/>
-                                    </v-col>
+    </template>
+</div>
 
-                                    <v-col  cols="12" sm="6" md="4" lg="3">
-                                        <div @click="tickets_select(ticket)" >
-                                            <v-item v-slot="{ isSelected , toggle}">
-                                            <v-btn @click="toggle" :color="isSelected ? 'blue': 'green' "  :icon="isSelected ? 'mdi-cancel' : 'mdi-share'"></v-btn>
-                                            </v-item>
-                                        </div>
-                                    </v-col>
-
-
-                                </v-row>
-                            </div>
-                            </v-row>
-                            </v-item-group>
-                        </div>
-                        <div v-else class="tw-flex tw-items-center tw-flex-col tw-gap-5">
-                            <div class="tw-p-5 tw-text-center tw-text-gray-500">
-                                <span>No cuenta con boletos disponibles para este partido.</span>
-                            </div>
-                            <div>
-                                <Link :href="route('events.index')">
-                                    <v-btn variant="tonal" color="purple" size="large" rounded="xl" class="text-none"><span class="material-symbols-outlined tw-text-lg">note_stack</span>Obtener boletos</v-btn>
-                                </Link>
-                            </div>
-                        </div>
-                    </v-tabs-window-item>
-                </v-tabs-window>
-            </div>
         </div>
 
     </AppLayout>
