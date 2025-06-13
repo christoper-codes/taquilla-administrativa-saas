@@ -11,6 +11,7 @@ class SaleTicket extends Model
 
     protected $fillable = [
         'stadium_id',
+        'event_id',
         'ticket_office_id',
         'seller_user_id',
         'cash_register_id',
@@ -22,6 +23,7 @@ class SaleTicket extends Model
         'payment_in_installments',
         'promotion_id',
         'promotion_quantity',
+        'purchase_type',
         'is_transfer',
         'is_online',
     ];
@@ -100,5 +102,10 @@ class SaleTicket extends Model
     public function installmentPaymentHistories()
     {
         return $this->hasMany(InstallmentPaymentHistory::class);
+    }
+
+    public function onlinePaymentTransactions()
+    {
+        return $this->hasMany(OnlinePaymentTransaction::class);
     }
 }

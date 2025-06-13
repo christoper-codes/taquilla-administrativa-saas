@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch } from 'vue';
+import { onMounted, watch, ref } from 'vue';
 
 const props = defineProps({
     action: {
@@ -16,11 +16,16 @@ const props = defineProps({
     seatsAutoClic: {
         type: Array
     },
+    purchaseOnline:{
+        type: Boolean,
+        required: true
+    }
 });
 
 const emit = defineEmits(['add-seat']);
 
 onMounted(() => {
+  console.log(props);
   props.seats.forEach(seat => {
     const elemento = document.getElementById(seat.seat_catalogue.code);
     if (elemento) {
@@ -28,7 +33,11 @@ onMounted(() => {
             if (seat.seat_catalogue_status.name === 'disponible') {
                 elemento.classList.add('tw-fill-yellow-500');
             } else if (seat.seat_catalogue_status.name === 'reservado') {
-                elemento.classList.add('tw-fill-pink-600');
+                if (props.purchaseOnline) {
+                    elemento.classList.add('tw-fill-gray-600');
+                } else {
+                    elemento.classList.add('tw-fill-pink-600');
+                }
             } else if (seat.seat_catalogue_status.name === 'inhabilitado') {
                 elemento.classList.add('tw-fill-gray-600');
             }
@@ -88,16 +97,20 @@ onMounted(() => {
 
         }else{
                 if (seat.seat_catalogue_status.name === 'disponible' || seat.seat_catalogue_status.name === 'reservado') {
-                    if(seat.seat_catalogue_status.name === 'reservado'){
+                    if(seat.seat_catalogue_status.name === 'reservado' && !props.purchaseOnline){
                         elemento.classList.add('tw-cursor-pointer', 'tw-fill-pink-500');
-                    } else {
+                    }else if (seat.seat_catalogue_status.name === 'reservado' && props.purchaseOnline){
+
+                        elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-purple-500');
+                    }else{
                         elemento.classList.add('tw-cursor-pointer', 'tw-fill-yellow-500');
                     }
-                    elemento.classList.remove('tw-cursor-not-allowed', 'tw-fill-purple-500', 'tw-fill-red-500');
+                    //elemento.classList.remove('tw-cursor-not-allowed', 'tw-fill-purple-500', 'tw-fill-red-500');
                     const handleClick = () => {
                     const existSeat = props.seatsSelected.find(s => s.seat_catalogue.code === seat.seat_catalogue.code);
                     if (existSeat) {
                         if(existSeat.seat_catalogue_status.name === 'reservado') {
+
                             elemento.classList.remove('tw-fill-green-500');
                             elemento.classList.add('tw-fill-pink-500');
                         } else {
@@ -108,17 +121,31 @@ onMounted(() => {
                         emit('add-seat', seat);
                     } else {
                         if(seat.seat_catalogue_status.name === 'reservado') {
+                            console.log('reservado no existe' )
                             elemento.classList.remove('tw-fill-pink-500');
                             elemento.classList.add('tw-fill-green-500');
                         } else {
+                            console.log('disponible no existe' )
                             elemento.classList.remove('tw-fill-yellow-500');
                             elemento.classList.add('tw-fill-green-500');
                         }
                         emit('add-seat', seat);
                     }
                     };
-                    elemento.addEventListener('click', handleClick);
-                    elemento.addEventListener('touchstart', handleClick);
+                    //elemento.addEventListener('click', handleClick);
+                    //elemento.addEventListener('touchstart', handleClick);
+
+                    if(seat.seat_catalogue_status.name === 'reservado'){
+
+                        if (!props.purchaseOnline) {
+                            elemento.addEventListener('click', handleClick);
+                            elemento.addEventListener('touchstart', handleClick);
+                        }
+                        // elemento.classList.add('tw-cursor-pointer', 'tw-fill-pink-500');
+                    } else {
+                        elemento.addEventListener('click', handleClick);
+                        elemento.addEventListener('touchstart', handleClick);
+                    }
                 } else if (seat.seat_catalogue_status.name === 'vendido') {
                     elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-purple-500');
                 } else if (seat.seat_catalogue_status.name === 'inhabilitado') {
@@ -156,8 +183,14 @@ watch(() => props.seatsSelected, (newSeatsSelected, oldSeatsSelected) => {
                     elemento.classList.add('tw-fill-purple-500');
                 }
             } else if (props.action === "price") {
-                elemento.classList.remove('tw-fill-green-500');
-                elemento.classList.add('tw-fill-yellow-500');
+                if(seat.isUpdate){
+                    elemento.classList.add('tw-fill-purple-500');
+                    seat.isUpdate = false;
+                }else{
+                    elemento.classList.remove('tw-fill-green-500');
+                    elemento.classList.remove('tw-fill-purple-500');
+                    elemento.classList.add('tw-fill-yellow-500');
+                }
             }else{
                 if(seat.seat_catalogue_status.name === 'reservado') {
                     elemento.classList.remove('tw-fill-green-500');

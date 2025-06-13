@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\PurchaseTypes;
 use App\Models\CashRegisterMovement;
 use App\Models\CashRegisterMovementType;
 use App\Models\Event;
@@ -368,6 +369,7 @@ class SaleTicketService
                 'cortesia' => ['sales' => 0],
                 'abonado' => ['sales' => 0],
                 'regular' => ['sales' => 0],
+                'online' => ['sales' => 0],
             ];
 
             $current_date = Carbon::now();
@@ -434,10 +436,14 @@ class SaleTicketService
                                     $type_sales['promocion']['sales']++;
                                 } else if ($has_cortesia) {
                                     $type_sales['cortesia']['sales']++;
-                                } else if($event_seat_catalog->purchase_type == 'abonado'){
+                                } else if($event_seat_catalog->purchase_type == PurchaseTypes::SEASON_TICKET->value){
                                     $type_sales['abonado']['sales']++;
                                 } else {
                                     $type_sales['regular']['sales']++;
+                                }
+
+                                if($sale_ticket->is_online){
+                                    $type_sales['online']['sales']++;
                                 }
                             }
                         }
@@ -503,6 +509,7 @@ class SaleTicketService
                 'cortesia' => ['sales' => 0],
                 'abonado' => ['sales' => 0],
                 'regular' => ['sales' => 0],
+                'online' => ['sales' => 0],
             ];
 
             $sale_tickets = $event->saleTickets()
@@ -571,10 +578,14 @@ class SaleTicketService
                                 $type_sales['promocion']['sales']++;
                             } elseif ($has_cortesia) {
                                 $type_sales['cortesia']['sales']++;
-                            } elseif ($event_seat_catalog->purchase_type == 'abonado') {
+                            } elseif ($event_seat_catalog->purchase_type == PurchaseTypes::SEASON_TICKET->value) {
                                 $type_sales['abonado']['sales']++;
                             } else {
                                 $type_sales['regular']['sales']++;
+                            }
+
+                            if($sale_ticket->is_online){
+                                $type_sales['online']['sales']++;
                             }
                         }
                     }

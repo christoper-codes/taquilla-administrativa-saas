@@ -5,18 +5,30 @@ import { Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import AppNavLink from '@/Components/AppNavLink.vue';
 import GuestNavLink from '@/Components/GuestNavLink.vue';
+import useUserPolicy from '@/composables/UserPolicy';
 
 
 const fav = ref(true);
 const menu = ref(false);
 const message = ref(false);
 const hints = ref(true);
+const { viewVendorTopics } = useUserPolicy();
+const isMember = ref(true)
 
 const toggleFav = () => {
   fav.value = !fav.value;
 };
 
+const props = defineProps({
+    user_roles: {
+        type: Object,
+        required: false
+    }
+});
 
+if (props.user_roles && !viewVendorTopics(props.user_roles)) {
+    isMember.value = false
+}
 </script>
 
 <template>
@@ -38,7 +50,7 @@ const toggleFav = () => {
                                 <span class="material-symbols-outlined tw-text-lg">home</span>Inicio
                             </GuestNavLink>
                         </div>
-                        <div class="tw-w-full ">
+                        <div v-if="isMember" class="tw-w-full ">
                             <GuestNavLink :href="route('ticket-offices.index')" :active="route().current('ticket-offices.index')">
                                 <span class="material-symbols-outlined tw-text-lg">mp</span>Taquillas
                             </GuestNavLink>

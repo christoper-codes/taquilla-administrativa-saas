@@ -36,12 +36,14 @@ class EventSeatCatalogPromotionService
             $b_zone = [];
             $c_zone = [];
             $f_zone = [];
+            $e_zone = [];
+            $h_zone = [];
 
             $seats_updated->groupBy(function ($item) {
 
                 return $item->seatCatalogue->zone;
 
-            })->each(function ($item, $key) use (&$a_zone, &$b_zone, &$c_zone, &$f_zone) {
+            })->each(function ($item, $key) use (&$a_zone, &$b_zone, &$c_zone, &$f_zone, &$e_zone, &$h_zone) {
                 if ($key === 'A') {
                     $a_zone = $item;
                 } elseif ($key === 'B') {
@@ -50,6 +52,10 @@ class EventSeatCatalogPromotionService
                     $c_zone = $item;
                 } elseif ($key === 'F') {
                     $f_zone = $item;
+                } elseif ($key === 'E') {
+                    $e_zone = $item;
+                } elseif ($key === 'H') {
+                    $h_zone = $item;
                 }
             });
 
@@ -57,7 +63,9 @@ class EventSeatCatalogPromotionService
                 'a_zone' => $a_zone,
                 'b_zone' => $b_zone,
                 'c_zone' => $c_zone,
-                'f_zone' => $f_zone
+                'f_zone' => $f_zone,
+                'e_zone' => $e_zone,
+                'h_zone' => $h_zone
             ];
 
             return $response;

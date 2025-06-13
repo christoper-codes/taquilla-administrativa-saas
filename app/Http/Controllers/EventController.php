@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PaymentInstallments;
+use App\Enums\PurchaseTypes;
 use App\Helpers\WebResponseHelper;
 use App\Interfaces\EventRepositoryInterface;
 use App\Models\Event;
@@ -196,17 +197,17 @@ class EventController extends Controller
             $user = Auth::user();
             $users = User::all();
             $user_roles = Auth::user()->userRoles;
-            $global_payment_types = GlobalPaymentType::all();
+            $global_payment_types = GlobalPaymentType::where('is_active', true)->get();
             $global_card_payment_types = GlobalCardPaymentType::all();
             $sale_debtors = $this->sale_debtor_service->getAll(1);
 
-            $purchase_types = ['partido'];
+            $purchase_types = [PurchaseTypes::MATCH->value];
             $events_by_serie = $this->event_repository->getEventsBySerie($event->serie_id);
             if ($events_by_serie->count() > 1) {
-                $purchase_types[] = 'serie';
+                $purchase_types[] = PurchaseTypes::SERIE->value;
             }
             if($event->enabled_for_season_tickets){
-                $purchase_types[] = 'abonado';
+                $purchase_types[] = PurchaseTypes::SEASON_TICKET->value;
                 $payment_installments = PaymentInstallments::toArray();
             }
 
@@ -408,7 +409,7 @@ class EventController extends Controller
                 ], 200);
             }
 
-            if($request->purchase_type === 'abonado') {
+            if($request->purchase_type == PurchaseTypes::SEASON_TICKET->value) {
 
                 $generic_data = [
                     'sale_date' => Carbon::now()->format('d/m/Y'),
@@ -437,7 +438,13 @@ class EventController extends Controller
                 ], 200);
             }
 
-            $pdf_response = Pdf::loadView('pdfs.hdx.saleTicketPaper', ['pdf_data' => $response]);
+            $generic_data = [];
+            if($response[0]['promotion_ticket']){
+                $generic_data = [
+                    'promotion_ticket' => $response[0]['promotion_ticket'],
+                ];
+            }
+            $pdf_response = Pdf::loadView('pdfs.hdx.saleTicketPaper', ['pdf_data' => $response, 'generic_data' => $generic_data]);
             $pdfContent = $pdf_response->output();
 
             return response()->json([
@@ -463,11 +470,6 @@ class EventController extends Controller
      */
     public function confirmSeatsPurchase(Request $request)
     {
-        return response()->json([
-            'data' => $request,
-            'message' => 'Compra de asientos confirmada correctamente',
-            'success' => true
-        ], 200);
 
         $request->validate([
             'stadium_id' => 'required',
@@ -498,6 +500,7 @@ class EventController extends Controller
             'is_owner' => 'nullable',
             'final_promotion' => 'nullable',
             'sale_deptor' => 'nullable',
+            'online_payment_transaction' => 'nullable',
         ]);
 
         DB::beginTransaction();
@@ -569,7 +572,6 @@ class EventController extends Controller
                 'event_type_id' => 'required|exists:event_types,id',
                 'serie_id' => 'required|exists:series,id',
                 'name' => 'required|string|max:255',
-                'slug' => 'required|string|max:255',
                 'description' => 'required|string|max:255',
                 'start_date' => 'required|date',
                 'end_date' => 'required|date',
@@ -578,7 +580,8 @@ class EventController extends Controller
 
             $request->merge([
                 'start_date' => Carbon::parse($request->start_date)->format('Y-m-d'),
-                'end_date' => Carbon::parse($request->end_date)->format('Y-m-d')
+                'end_date' => Carbon::parse($request->end_date)->format('Y-m-d'),
+                'slug' => Str::of($request->name)->slug('_')
             ]);
 
             if($request->global_image){

@@ -795,11 +795,9 @@ onMounted(() => {
         </v-dialog>
     </div>
     <div v-else class="tw-flex tw-items-center tw-justify-center tw-mt-20 tw-flex-col tw-gap-10">
-        <div class="tw-font-bold tw-text-center tw-bg-gray-200 tw-rounded-full tw-inline-flex tw-px-7 tw-py-3 tw-text-gray-600">
+        <div class="tw-font-bold tw-text-center">
             No hay cajas abiertas para este usuario en esta taquilla
         </div>
-        <img class="tw-w-96" src="../../../../../public/img/seats-no-selected-img.svg" alt="">
+        <img class="tw-w-40 lg:tw-w-72 tw-h-auto" src="/storage/public/emty-cart.webp" alt="">
     </div>
 </template>
-<style scoped>
-</style>

@@ -31,6 +31,8 @@ const props = defineProps({
     },
 })
 
+console.log(props.historyPerEvent);
+
 const today = new Date();
 const currentDay = today.getDate();
 const currentMonth = today.getMonth() + 1;
@@ -47,6 +49,7 @@ const headerProps = {
 const headers = [
     { title: 'Folio', key: 'Folio' },
     { title: 'Estatus', key: 'Estatus' },
+    { title: 'Tipo de venta', key: 'Tipo de venta' },
     { title: 'Asientos', key: 'Asientos' },
     { title: 'Monto total de venta', key: 'Monto total de venta' },
     { title: 'Monto Pagado', key: 'Monto Pagado' },
@@ -59,7 +62,10 @@ const headers = [
     { title: 'Fecha de venta', key: 'Fecha' },
 ];
 
-props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
+props.historyPerEvent.new_data.sale_tickets
+    .slice()
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .forEach((saleTicket) => {
     const paymentTypes = saleTicket.global_payment_types.map(paymentType => {
         return `${formatFirstLetterUppercase(paymentType.name)}: ${paymentType.pivot.amount}`;
     }).join(', ');
@@ -83,6 +89,7 @@ props.historyPerEvent.new_data.sale_tickets.forEach((saleTicket) => {
     items.value.push({
         'Folio': saleTicket.id,
         'Estatus': saleTicket.sale_ticket_status.name,
+        'Tipo de venta': saleTicket.is_online ? 'En linea' : 'Taquilla',
         'Asientos': seatCatalogues,
         'Monto total de venta': formatPrice(saleTicket.total_amount),
         'Monto Pagado': formatPrice((Number(Number(saleTicket.amount_received) - Number(saleTicket.total_returned)))),

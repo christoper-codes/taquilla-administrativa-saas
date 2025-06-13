@@ -83,9 +83,10 @@ class PromotionController extends Controller
                 'percent_allow' => 'nullable|numeric',
                 'is_active_online' => 'nullable|boolean',
                 'is_active' => 'required|boolean',
+                'availability_sale' => 'nullable|numeric'
             ]);
 
-            $data = $request->only(['promotion_type_id','stadium_id','name','description','generic_seats_allowed','promotional_seats_allowed','maximun_promotions_allowed','percent_allow','is_active_online','is_active']);
+            $data = $request->only(['promotion_type_id','stadium_id','name','description','generic_seats_allowed','promotional_seats_allowed','maximun_promotions_allowed','percent_allow','is_active_online','is_active', 'availability_sale']);
 
             $promotion = $this->promotion_service->save( $data );
 
@@ -117,9 +118,10 @@ class PromotionController extends Controller
                 'percent_allow' => 'nullable|numeric',
                 'is_active_online' => 'nullable|boolean',
                 'is_active' => 'required|boolean',
+                'availability_sale' => 'nullable|numeric'
             ]);
 
-            $data = $request->only(['promotion_type_id','stadium_id','name','description','generic_seats_allowed','promotional_seats_allowed','maximun_promotions_allowed','percent_allow','is_active_online','is_active']);
+            $data = $request->only(['promotion_type_id','stadium_id','name','description','generic_seats_allowed','promotional_seats_allowed','maximun_promotions_allowed','percent_allow','is_active_online','is_active', 'availability_sale']);
 
             $agreement = $this->promotion_service->update($request->id, $data);
 

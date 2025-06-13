@@ -27,6 +27,12 @@ export const promotionSchema = {
 
         return true;
     },
+    availability_sale(value){
+        if (!value) {
+            return 'Este campo es obligatorio';
+          }
+          return true;
+    },
     description(value) {
         if (!value) {
           return 'Este campo es obligatorio';

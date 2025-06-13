@@ -40,7 +40,7 @@ onMounted(() => {
 
 });
 
-defineProps({
+const props = defineProps({
     canLogin: {
         type: Boolean,
     },
@@ -55,6 +55,11 @@ defineProps({
         type: String,
         required: true,
     },
+    user_roles: {
+        type: Array,
+        required: false,
+    }
+
 });
 
 function handleImageError() {
@@ -67,8 +72,8 @@ function handleImageError() {
 
 <template>
     <Head title="Welcome" />
-    <GuestLayout />
-    <NavigationDrawer />
+    <GuestLayout  v-bind:user_roles="user_roles" />
+    <NavigationDrawer  v-bind:user_roles="user_roles" />
     <ClubDrawer />
 
     <section class="tw-overflow-hidden tw-h-[730px] lg:tw-h-[650px] tw-mt-[0px] lg:tw-mt-[-30px]">

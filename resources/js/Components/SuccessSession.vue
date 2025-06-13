@@ -25,7 +25,7 @@ watch(showTostify, (value) => {
 </script>
 
 <template>
-    <div  v-if="$page.props.flash && $page.props.flash.success" class="">
+    <div  v-if="$page.props.flash && $page.props.flash.success" class="tw-z-50 tw-relative">
         <span class="tw-hidden">
             {{ showTostify = true }}
             {{ message = $page.props.flash.success.message }}

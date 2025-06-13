@@ -25,9 +25,10 @@ class EventSeatCatalogPriceTypeRepository implements EventSeatCatalogPriceTypeRe
 
             $findByEventSeatCatalog = $this->findByEventSeatCatalog($seat['event_seat_catalog_id'], $seat['price_type_id']);
 
-            if ($findByEventSeatCatalog) {
-                $findByEventSeatCatalog->is_active = false;
-                $findByEventSeatCatalog->save();
+            if ($findByEventSeatCatalog->isNotEmpty()) {
+                foreach ($findByEventSeatCatalog as $findByEventSeatCatalogUpdate) {
+                    $findByEventSeatCatalogUpdate->update(['is_active' => false]);
+                }
             }
 
             $seatUpdate = EventSeatCatalogPriceType::create([
@@ -38,7 +39,9 @@ class EventSeatCatalogPriceTypeRepository implements EventSeatCatalogPriceTypeRe
                 'is_active' => true,
             ]);
 
-            $seatsUpdate->push($seatUpdate);
+            $seatUpdate->eventSeatCatalog->priceTypes;
+
+            $seatsUpdate->push($seatUpdate->eventSeatCatalog);
         }
 
         return $seatsUpdate;
@@ -49,7 +52,7 @@ class EventSeatCatalogPriceTypeRepository implements EventSeatCatalogPriceTypeRe
         return  EventSeatCatalogPriceType::where('event_seat_catalog_id', $event_seat_catalog_id)
                                          ->where('price_type_id', $price_type_id)
                                          ->where('is_active', true)
-                                         ->first();
+                                         ->get();
 
     }
 }

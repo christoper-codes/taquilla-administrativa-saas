@@ -14,6 +14,8 @@ use App\Http\Controllers\SeatCatalogueStatusController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\TicketOfficeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\CyberSourceController;
+use App\Http\Controllers\EventSeatCatalogPriceTypeController;
 use App\Http\Controllers\InstallmentPaymentHistoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
@@ -34,6 +36,7 @@ Route::middleware('auth')->group(function() {
     Route::post('/estadios/caja-registradora/tickets/pendientes', [SaleTicketController::class, 'getSaleTicketStatusPending'])->name('cash-registers.ticket-office.status.pending');
     Route::post('/estadios/caja-registradora/tickets/pagados', [SaleTicketController::class, 'getTicketsWithInstallmentPaymentsCompleted'])->name('cash-registers.tickets.with.installment.payments.completed');
     Route::post('/pago-a-plazos/guardar', [InstallmentPaymentHistoryController::class, 'store'])->name('installment.payment.store');
+    Route::post('/cyber-source/pago-con-token-transitorio-flex', [CyberSourceController::class, 'paymentWithFlexTransientToken'])->name('cyber.source.payment.with.flex.transient.token');
 });
 
 /*
@@ -122,3 +125,11 @@ Route::post('/catalogo-de-status-para-asientos', [SeatCatalogueStatusController:
 */
 Route::post('/precios-de-estadio', [PriceCatalogueController::class, 'getAllForStadium'])->name('get.all.for.stadium');
 Route::post('/precio-de-estadio', [PriceCatalogueController::class, 'firstOrCreate'])->name('first.or.create.for.stadium');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* | Wallets | ROUTES
+*/
+Route::post('/precio-de-asientos', [EventSeatCatalogPriceTypeController::class, 'update'])->name('update.seat.price');

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\PaymentInstallments;
+use App\Enums\PurchaseTypes;
 use App\Interfaces\EventRepositoryInterface;
 use App\Models\CashRegisterMovement;
 use App\Models\CashRegisterMovementType;
@@ -11,6 +12,7 @@ use App\Models\PriceTypeSeatCatalogue;
 use App\Models\SaleTicket;
 use App\Models\SaleTicketStatus;
 use App\Models\GlobalCardPaymentType;
+use App\Models\OnlinePaymentTransaction;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -37,11 +39,13 @@ class EventService
     protected $season_ticket_service;
     protected $sale_debtor_service;
     protected $installment_payment_history_service;
+    protected $online_payment_transaction_service;
 
     public function __construct(EventRepositoryInterface $event_repository, GlobalPaymentTypeService $global_payment_type_service,
                     GlobalCardPaymentTypeService $global_card_payment_type_service, CashRegisterService $cash_register_service,
                     SeasonTicketService $season_ticket_service, SaleDebtorService $sale_debtor_service,
-                    InstallmentPaymentHistoryService $installment_payment_history_service )
+                    InstallmentPaymentHistoryService $installment_payment_history_service,
+                    OnlinePaymentTransactionService $online_payment_transaction_service)
     {
         $this->event_repository = $event_repository;
         $this->global_payment_type_service = $global_payment_type_service;
@@ -50,6 +54,7 @@ class EventService
         $this->season_ticket_service = $season_ticket_service;
         $this->sale_debtor_service = $sale_debtor_service;
         $this->installment_payment_history_service = $installment_payment_history_service;
+        $this->online_payment_transaction_service = $online_payment_transaction_service;
     }
 
 
@@ -102,13 +107,13 @@ class EventService
             /*
             * purchase types available
             */
-            $purchase_types = ['partido'];
+            $purchase_types = [PurchaseTypes::MATCH->value];
             $events_by_serie = $this->event_repository->getEventsBySerie($event->serie_id);
             if ($events_by_serie->count() > 1) {
-                $purchase_types[] = 'serie';
+                $purchase_types[] = PurchaseTypes::SERIE->value;
             }
             if($event->enabled_for_season_tickets){
-                $purchase_types[] = 'abonado';
+                $purchase_types[] = PurchaseTypes::SEASON_TICKET->value;
                 $payment_installments = PaymentInstallments::toArray();
             }
 
@@ -157,7 +162,7 @@ class EventService
             /*
             * Verify if the purchase types is 'partido' or 'serie'
             */
-            if($data['purchase_type'] === 'serie') {
+            if($data['purchase_type'] == PurchaseTypes::SERIE->value) {
                 $events_by_serie = $this->event_repository->getEventsBySerie($data['serie_id']);
                 if ($events_by_serie->count() === 1) {
                     throw new \Exception('No se puede realizar la compra de una serie de eventos con un solo evento');
@@ -485,6 +490,7 @@ class EventService
             * Create sale ticket
             */
             $saleTicket = new SaleTicket();
+            $saleTicket->event_id = $data['event_id'];
             $saleTicket->stadium_id = $data['stadium_id'];
             $saleTicket->ticket_office_id = $data['ticket_office_id'];
             $saleTicket->seller_user_id = $data['seller_user_id'];
@@ -498,6 +504,7 @@ class EventService
             $saleTicket->payment_in_installments = $data['payment_in_installments'] ?? null;
             $saleTicket->promotion_id = $data['final_promotion']['id'] ?? null;
             $saleTicket->promotion_quantity = $data['final_promotion']['quantity'] ?? null;
+            $saleTicket->purchase_type = $data['purchase_type'];
             $saleTicket->is_online = $data['is_online'];
             $saleTicket->is_transfer = $data['is_transfer'] ?? false;
             $saleTicket->save();
@@ -542,11 +549,11 @@ class EventService
             /*
             * Get events by serie if purchase type is serie
             */
-            $events = ($data['purchase_type'] === 'serie')
+            $events = ($data['purchase_type'] == PurchaseTypes::SERIE->value)
                 ? $this->event_repository->getEventsBySerie($data['serie_id'])
                 : collect([$this->event_repository->getById($data['event_id'])]);
 
-            if ($events->count() === 1 && $data['purchase_type'] === 'serie') {
+            if ($events->count() === 1 && $data['purchase_type'] == PurchaseTypes::SERIE->value) {
                 throw new \Exception('No se puede realizar la compra de una serie de eventos con un solo evento');
             }
 
@@ -554,7 +561,7 @@ class EventService
             * Generate QR codes for seats if purchase type is serie
             */
             $seat_qrs = [];
-            if ($data['purchase_type'] === 'serie') {
+            if ($data['purchase_type'] == PurchaseTypes::SERIE->value) {
                 foreach ($data['seats'] as $seat) {
                     $seat_qrs[$seat['seat_catalogue']['code']] = 'qr_serie_' . $data['serie_id'] . '_asiento_' . $seat['seat_catalogue']['code'] . '_ticket_' . $saleTicket->id . '_key_' . uniqid();
                 }
@@ -593,7 +600,7 @@ class EventService
                 });
 
                 foreach ($data['seats'] as $seat) {
-                    $qr = $data['purchase_type'] === 'serie' ? $seat_qrs[$seat['seat_catalogue']['code']] : 'qr_evento_' . $event->id . '_asiento_' . $seat['seat_catalogue']['code'] . '_ticket_' . $saleTicket->id . '_key_' . uniqid();
+                    $qr = $data['purchase_type'] == PurchaseTypes::SERIE->value ? $seat_qrs[$seat['seat_catalogue']['code']] : 'qr_evento_' . $event->id . '_asiento_' . $seat['seat_catalogue']['code'] . '_ticket_' . $saleTicket->id . '_key_' . uniqid();
 
                     /*
                     * Verify if the seat is available to buy
@@ -643,7 +650,7 @@ class EventService
                     /*
                     * Validate if the sale is abonado
                     */
-                    if($data['purchase_type'] === 'abonado'){
+                    if($data['purchase_type'] == PurchaseTypes::SEASON_TICKET->value){
                         $seat['is_owner'] = $seat['is_owner'] == 'Si' ? true : false;
                         $season_ticket = $this->season_ticket_service->save($seat);
                         $event_seat_catalogue->season_ticket_id = $season_ticket->id;
@@ -742,6 +749,9 @@ class EventService
             if(!$data['is_online']){
                 return $pdf_data;
             }
+
+            $data['sale_ticket_id'] = $saleTicket->id;
+            $this->online_payment_transaction_service->save($data);
 
             return true;
 

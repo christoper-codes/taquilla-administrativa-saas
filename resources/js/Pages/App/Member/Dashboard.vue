@@ -9,6 +9,7 @@ import { onMounted, ref, watch } from 'vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import SuccessSession from '@/Components/SuccessSession.vue';
 import BreadcrumbApp from '@/Components/BreadcrumbApp.vue';
+import SecondaryButton from '@/Components/buttons/SecondaryButton.vue';
 
 const page = usePage().props;
 
@@ -86,95 +87,42 @@ const tab = ref('tab-0');
         <SuccessSession />
 
         <BreadcrumbApp>
-                <template #title>
-                    <span>Mis boletos</span>
-                </template>
+            <template #title>
+                <span>Mis boletos</span>
+            </template>
         </BreadcrumbApp>
 
-        <div class="tw-px-4 tw-py-10 lg:tw-p-10">
-
-            <div class="tw-flex tw-flex-wrap lg:tw-flex-row lg:tw-items-center tw-gap-2 lg:tw-gap-5">
-                <div class="tw-px-4 lg:tw-px-7 tw-py-2 tw-bg-gray-200 tw-text-xs lg:tw-text-base tw-rounded-full">
-                    <span>!Bienvenido a la nueva plataforma!</span>
-                </div>
-                <div class="tw-px-4 lg:tw-px-7 tw-py-2 tw-bg-gradient-to-tr tw-from-tw-primary-500 tw-to-pink-400 tw-text-white tw-text-xs lg:tw-text-base tw-rounded-full">
-                    <span>Mis boletos</span>
-                </div>
-                <div class="tw-px-4 lg:tw-px-7 tw-py-2 tw-bg-gray-200 tw-text-xs lg:tw-text-base tw-rounded-full">
-                    <span>Valipor por un partido</span>
-                </div>
-                <div class="tw-px-4 lg:tw-px-7 tw-py-2 tw-bg-gray-200 tw-text-xs lg:tw-text-base tw-rounded-full">
-                    <span>Halcones de xalapa</span>
-                </div>
-            </div>
-
-            <div class="tw-mt-10 tw-gap-5 tw-w-full tw-flex tw-flex-col-reverse lg:tw-flex-row tw-items-start tw-justify-between">
-                <div class="tw-w-full tw-shadow-lg tw-bg-gray-200 tw-px-5 tw-py-7 tw-overflow-x-scroll tw-rounded-2xl tw-border tw-flex tw-flex-col tw-items-center tw-justify-center tw-text-center">
-                    <span class="tw-text-sm tw-font-bold tw-text-gray-500 tw-text-center tw-inline-flex tw-bg-white tw-px-5 tw-py-2 tw-rounded-full">Desliza y seleciona un partido para ver tus boletos</span>
-
-                    <div class="tw-mt-5 tw-hidden lg:tw-block">
-                        <v-tabs v-model="tab" align-tabs="center" color="deep-purple-accent-4">
-                            <v-tab v-for="(event, index) in eventsWithTickets" :key="event.event.id" :value="`tab-${index}`">
-                                {{ event.event.name }}
-                            </v-tab>
-                        </v-tabs>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lg:tw-hidden tw-w-full tw-mt-5">
-                <v-tabs v-model="tab" align-tabs="center" class="tw-relative" color="deep-purple-accent-4">
-                    <v-tab v-for="(event, index) in eventsWithTickets" :key="event.event.id" :value="`tab-${index}`">
-                        <span class="!tw-text-xs">{{ event.event.name }}</span>
-                    </v-tab>
-                    <span class="material-symbols-outlined tw-text-3xl tw-text-gray-600 tw-absolute tw-top-1 -tw-left-2">chevron_right</span>
-                </v-tabs>
-                <div class="tw-flex tw-w-full tw-items-center tw-justify-center tw-flex-col tw-mt-2">
-                    <div class="tw-flex tw-items-center tw-justify-center tw-relative">
-                        <div class="tw-animate-ping tw-absolute -tw-right-1 tw-top-5 tw-inline-flex tw-h-4 tw-w-4 tw-rounded-full tw-bg-purple-500 tw-opacity-80"></div>
-                        <span class="material-symbols-outlined tw-rotate-90 tw-text-6xl tw-text-gray-500 tw-relative tw-z-10">swipe_down</span>
-                    </div>
-                    <p class="tw-text-xs">Desliza hacia la izquierda para ver y selecionar los partidos</p>
-                </div>
-            </div>
-
-            <div class="tw-mt-10 tw-bg-white">
-                <v-tabs-window v-model="tab">
-                    <v-tabs-window-item v-for="(event, index) in eventsWithTickets" :key="event.event.id" :value="`tab-${index}`">
-                        <div v-if="event.tickets.length > 0" class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto tw-pb-5">
+        <div class="tw-mt-10">
+            <template v-if="eventsWithTickets.some(event => event.tickets.length > 0)">
+                <div v-for="event in eventsWithTickets" :key="event.event.id" class="tw-mb-10 last:tw-mb-0">
+                    <div v-if="event.tickets.length > 0">
+                        <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto tw-pb-5">
                             <SaleTicket v-for="ticket in event.tickets" :key="ticket.id" v-bind:ticket="ticket" />
                         </div>
-                        <div v-else class="tw-flex tw-items-center tw-flex-col tw-gap-5">
-                            <div class="tw-p-5 tw-text-center tw-text-gray-500">
-                                <span>No cuenta con boletos disponibles para este partido.</span>
-                            </div>
-                            <div>
-                                <Link :href="route('events.index')">
-                                    <v-btn variant="tonal" color="purple" size="large" rounded="xl" class="text-none"><span class="material-symbols-outlined tw-text-lg">note_stack</span>Obtener boletos</v-btn>
-                                </Link>
-                            </div>
-                        </div>
-                    </v-tabs-window-item>
-                </v-tabs-window>
-            </div>
+                    </div>
+                </div>
+            </template>
+            <template v-else>
+                <div class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-5 tw-mt-10">
+                    <div class="tw-text-center tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-5">
+                        <img class="tw-w-40 lg:tw-w-72 tw-h-auto" src="/storage/public/emty-cart.webp" alt="">
+                        <span>No cuentas con boletos disponibles. ¡Compra tus boletos para el próximo partido!</span>
+                    </div>
+                    <div>
+                        <Link :href="route('events.index')">
+                            <SecondaryButton
+                                heightbtn="!tw-h-[70px]"
+                                paddingbtn="!tw-px-14"
+                            >
+                                Comprar boletos
+                            </SecondaryButton>
+                        </Link>
+                    </div>
+                </div>
+            </template>
         </div>
 
     </AppLayout>
-
-
-    <!-- <AuthenticatedLayout>
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
-        </template>
-
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">You're logged in!</div>
-                </div>
-            </div>
-        </div>
-    </AuthenticatedLayout> -->
 </template>
 
 <style scoped>
