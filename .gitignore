@@ -22,3 +22,4 @@ yarn-error.log
 /.vscode
 /.zed
 idcompany_1730761460.p12
+app/Log/*.log

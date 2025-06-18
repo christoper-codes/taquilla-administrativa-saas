@@ -146,6 +146,7 @@ props.users.forEach(element => {
 
                 <template v-slot:actions>
                     <v-btn
+                        v-if="selection.length > 0"
                         class="ms-auto"
                         color="green"
                         text="Aceptar"
@@ -156,56 +157,52 @@ props.users.forEach(element => {
         </v-dialog>
 
 
-        <div class="tw-px-4 tw-py-10 lg:tw-p-10">
-
-            <v-container>
-                <v-row class="tw-w-full">
-                    <v-col>
-                        <v-autocomplete
-                            v-model="selected_value"
-                            clearable
-                            chips
-                            label="Busca a tu amigo..."
-                            :items="users_list"
-                            variant="solo-filled"
-                            item-title="name"
-                            item-value="value"
-                        ></v-autocomplete>
-                    </v-col>
-                    <div v-if="selection.length > 0">
-                        <v-col>
-                            <v-btn @click="alert"  text="Enviar" color="green" height="65" ></v-btn>
-                        </v-col>
+        <div class="tw-pt-5 lg:tw-pt-10">
+            <div class="tw-flex tw-flex-col tw-w-full tw-justify-between">
+                <v-autocomplete
+                    class="!tw-w-full"
+                    v-model="selected_value"
+                    clearable
+                    chips
+                    label="Busca a tu amigo..."
+                    :items="users_list"
+                    variant="solo-filled"
+                    item-title="name"
+                    item-value="value"
+                ></v-autocomplete>
+                <div>
+                    <v-btn
+                        class="!tw-rounded-2xl !tw-h-[70px] !tw-px-6 !tw-shadow-none !tw-text-white !tw-bg-green-500"
+                        @click="alert"
+                    >
+                        Compartir boletos
+                    </v-btn>
+                    <div v-if="dialog === true" class="tw-mt-2">
+                        <InputError class="" :message="messageErrorreceiverUserName" />
                     </div>
-                </v-row>
-                <div v-if="dialog === true">
-                    <InputError class="" :message="messageErrorreceiverUserName" />
                 </div>
+            </div>
 
-            </v-container>
 
-            <div class="tw-mt-10">
+            <div>
                 <template v-if="eventsWithTickets.some(event => event.tickets.length > 0)">
                     <div v-for="event in eventsWithTickets" :key="event.event.id" class="tw-mb-10 last:tw-mb-0">
                         <div v-if="event.tickets.length > 0">
                             <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto tw-pb-5">
                                 <div v-for="ticket in event.tickets" :key="ticket.id" class="tw-flex tw-flex-col tw-items-center">
-                                    <SaleTicket :ticket="ticket" />
-                                    <v-btn
-                                        v-if="ticket.purchase_type == 'partido' || ticket.purchase_type == 'serie'"
-                                        :class="tickets_list_v.some(t => t.id === ticket.id) ? '!tw-bg-red-500' : '!tw-bg-primary'" class="!tw-mt-3 !tw-rounded-2xl !tw-h-[60px] !tw-px-6 !tw-shadow-none !tw-text-white"
-                                        block
-                                        @click="tickets_select(ticket)"
-                                    >
-                                        {{ tickets_list_v.some(t => t.id === ticket.id) ? 'Cancelar selección' : 'Compartir boleto' }}
-                                    </v-btn>
-
+                                    <div v-if="ticket.purchase_type == 'partido' || ticket.purchase_type == 'serie'">
+                                        <SaleTicket :ticket="ticket" />
+                                        <v-btn
+                                            :class="tickets_list_v.some(t => t.id === ticket.id) ? '!tw-bg-red-500' : '!tw-bg-primary'" class="!tw-mt-3 !tw-rounded-2xl !tw-h-[60px] !tw-px-6 !tw-shadow-none !tw-text-white"
+                                            block
+                                            @click="tickets_select(ticket)"
+                                        >
+                                            {{ tickets_list_v.some(t => t.id === ticket.id) ? 'Cancelar selección' : 'Compartir boleto' }}
+                                        </v-btn>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div v-if="tickets_list_v.length > 0" class="tw-flex tw-justify-center tw-mt-8">
-                        <v-btn @click="alert" text="Enviar" color="green" height="65">Compartir seleccionados</v-btn>
                     </div>
                 </template>
                 <template v-else>
@@ -224,14 +221,11 @@ props.users.forEach(element => {
                                 </SecondaryButton>
                             </Link>
                         </div>
-                </div>
-    </template>
-</div>
-
+                    </div>
+            </template>
         </div>
-
-    </AppLayout>
-
+    </div>
+</AppLayout>
 
 </template>
 
