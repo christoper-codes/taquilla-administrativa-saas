@@ -190,7 +190,7 @@ props.users.forEach(element => {
                         <div v-if="event.tickets.length > 0">
                             <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-10 lg:tw-overflow-y-auto tw-pb-5">
                                 <div v-for="ticket in event.tickets" :key="ticket.id" class="tw-flex tw-flex-col tw-items-center">
-                                    <div v-if="ticket.purchase_type == 'partido' || ticket.purchase_type == 'serie'">
+                                    <div v-if="ticket.purchase_type != 'abonado' && !ticket.is_verified">
                                         <SaleTicket :ticket="ticket" />
                                         <v-btn
                                             :class="tickets_list_v.some(t => t.id === ticket.id) ? '!tw-bg-red-500' : '!tw-bg-primary'" class="!tw-mt-3 !tw-rounded-2xl !tw-h-[60px] !tw-px-6 !tw-shadow-none !tw-text-white"

@@ -3,7 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\SaleController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\TicketController;
 use Illuminate\Support\Facades\Route;
 
 Route::controller(EventController::class)->group(function () {
@@ -20,4 +20,8 @@ Route::controller(AuthController::class)->group(function () {
 
 Route::middleware('auth:sanctum')->controller(SaleController::class)->group(function () {
     Route::get('/tickets-purchased', 'ticketsPurchased')->name('api.sale.tickets.purchased');
+});
+
+Route::middleware('auth:sanctum')->controller(TicketController::class)->group(function () {
+    Route::post('/check-ticket', 'checkTicket')->name('api.ticket.check');
 });

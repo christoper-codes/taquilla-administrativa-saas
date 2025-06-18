@@ -43,7 +43,15 @@ const qrValue = computed(() => {
                         <div class="tw-flex-auto tw-text-xs tw-text-gray-400 tw-my-1">
                             <div class="tw-text-xs">Estado</div>
                         </div>
-                        <div :class="ticket.purchase_type == 'abonado' ? 'tw-text-yellow-500' : 'tw-text-primary'" class=" tw-my-1 tw-w-full tw-flex-none tw-text-lg tw-font-bold tw-leading-none">{{ ticket.is_verified ? 'Expiro' : 'Valido' }}</div>
+                        <div
+                        :class="[
+                            ticket.purchase_type == 'abonado' ? 'tw-text-yellow-500' : 'tw-text-primary',
+                            ticket.is_verified ? '!tw-text-red-500' : '',
+                            'tw-my-1 tw-w-full tw-flex-none tw-text-lg tw-font-bold tw-leading-none'
+                        ]"
+                        >
+                        {{ ticket.is_verified ? 'Expiro' : 'Valido' }}
+                        </div>
                         <span class="tw-text-xs">Aperturado</span>
                         </div>
                         <div class="tw-flex tw-flex-col tw-mx-auto">
@@ -66,8 +74,16 @@ const qrValue = computed(() => {
                         <div class="tw-flex-auto tw-text-xs tw-text-gray-400">
                            <div class="tw-text-xs">Tipo</div>
                         </div>
-                        <div :class="ticket.purchase_type == 'abonado' ? 'tw-text-yellow-500' : 'tw-text-primary'" class="tw-my-1 tw-w-full tw-flex-none tw-text-lg tw-font-bold tw-leading-none">{{ ticket.purchase_type }}</div>
-                            <span class="tw-text-xs">2025 - 2026</span>
+                        <div
+                            :class="[
+                                ticket.purchase_type == 'abonado' ? 'tw-text-yellow-500' : 'tw-text-primary',
+                                ticket.is_verified ? '!tw-text-red-500' : '',
+                                'tw-my-1 tw-w-full tw-flex-none tw-text-lg tw-font-bold tw-leading-none'
+                            ]"
+                            >
+                            {{ ticket.purchase_type }}
+                        </div>
+                        <span class="tw-text-xs">2025 - 2026</span>
                         </div>
                     </div>
                     <div class="tw-border-dashed tw-border-b-[6px] tw-my-1 tw-pt-5">
