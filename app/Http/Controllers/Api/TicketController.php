@@ -17,6 +17,9 @@ class TicketController extends Controller
             ]);
 
             $ticket = EventSeatCatalog::where('id', $request->tikcet_id)->first();
+            if($ticket->is_verified) {
+                throw new \Exception('El boleto ya ha sido verificado');
+            }
 
             $ticket->is_verified = true;
             $ticket->save();
@@ -27,7 +30,6 @@ class TicketController extends Controller
                 ],
                 'message' => 'Ticket verificado con éxito',
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
