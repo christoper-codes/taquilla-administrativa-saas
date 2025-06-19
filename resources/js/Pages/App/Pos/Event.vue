@@ -56,6 +56,7 @@ const paymentFileds = {
     'amount_returned': useField('amount_returned', 0),
 }
 
+const acceptTerms = ref(false);
 const totalAmount = ref(0);
 const amountReceived = ref(0);
 const amountReturned = ref(0);
@@ -693,6 +694,7 @@ const selectZones = () => {
     paymentInstallmentSelected.value = null;
     getSeatAvailability();
     tab.value = 'seats';
+    acceptTerms.value = false;
 };
 
 /*
@@ -1246,6 +1248,16 @@ const showPaymentDrawer = () => {
 };
 
 const onSubmitConfirm = (isActive) => {
+
+    if(!acceptTerms.value) {
+        toast('Debe aceptar los términos y condiciones para continuar', {
+            "theme": "auto",
+            "type": "error",
+            "autoClose": 10000,
+            "dangerouslyHTMLString": true
+        })
+        return;
+    }
 
     loadingg.value = true;
     loading.value = true;
@@ -2606,12 +2618,16 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                             </div>
                                                                         </v-card-text>
 
-                                                                        <v-card-actions class="tw-mr-3 tw-mb-5">
-                                                                            <v-spacer></v-spacer>
-                                                                            <v-btn color="red" variant="tonal" class="text-none !tw-px-4 lg:!tw-px-8 tw-mr-2 !tw-h-[50px] lg:!tw-h-[70px] !tw-rounded-2xl" text="Cancelar" @click="isActive.value = false"></v-btn>
-                                                                            <v-btn :loading="loading" variant="elevated" class="text-none !tw-px-4 lg:!tw-px-8 !tw-h-[50px] lg:!tw-h-[70px] !tw-rounded-2xl !tw-bg-green-500 !tw-text-white" text="Reservar y comprar" @click="onSubmitConfirm(isActive)"></v-btn>
-                                                                        </v-card-actions>
-
+                                                                        <div class="tw-mb-5">
+                                                                            <div class="tw-flex tw-items-center tw-justify-end tw-gap-3 tw-p-1 lg:tw-mr-5">
+                                                                                <v-switch color="purple" v-model="acceptTerms"></v-switch>
+                                                                                <a href="/politicas-de-privacidad" target="__blank" class="-tw-mt-6">Acepto <span class="tw-underline">terminos y condiciones</span></a>
+                                                                            </div>
+                                                                            <div class="tw-flex tw-items-center tw-justify-end tw-gap-3 tw-p-1 lg:tw-mr-5">
+                                                                                <v-btn color="red" variant="tonal" class="text-none !tw-px-4 lg:!tw-px-8 tw-mr-2 !tw-h-[60px] lg:!tw-h-[70px] !tw-rounded-2xl" text="Cancelar" @click="isActive.value = false"></v-btn>
+                                                                                <v-btn :loading="loading" variant="elevated" class="text-none !tw-px-4 lg:!tw-px-8 !tw-h-[60px] lg:!tw-h-[70px] !tw-rounded-2xl !tw-bg-green-500 !tw-text-white" text="Reservar y comprar" @click="onSubmitConfirm(isActive)"></v-btn>
+                                                                            </div>
+                                                                        </div>
                                                                         </v-card>
                                                                     </template>
                                                                 </v-dialog>

@@ -121,7 +121,7 @@ const qrValue = computed(() => {
                         <div class="tw-text-xs">Fecha del evento</div>
                         <div class="tw-font-bold">{{ dateFormat(ticket.event.start_date) }}</div>
                     </div>
-                    <div class="tw-flex tw-pt-5 tw-pb-3 tw-justify-center tw-items-center tw-text-sm">
+                    <div class="tw-flex tw-flex-col tw-pt-5 tw-pb-3 tw-justify-center tw-items-center tw-text-sm">
                         <qrcode-vue
                             :value="qrValue"
                             :size="100"
@@ -130,6 +130,8 @@ const qrValue = computed(() => {
                             :background="'#ffffff'"
                             :foreground="'#000000'"
                         />
+
+                        <a href="/politicas-de-privacidad" target="__blank" class="tw-mt-3 tw-text-xs"><span class="tw-underline">terminos y condiciones</span></a>
                     </div>
                     </div>
                 </div>
