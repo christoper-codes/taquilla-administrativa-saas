@@ -18,7 +18,7 @@ import GuestLayout from '@/Layouts/GuestLayout.vue';
                 <source type="video/mp4" src="/videos/auth-video.mp4">
             </video>
             <div class="tw-h-full tw-bg-black/60 tw-backdrop-blur-md tw-w-full tw-flex tw-items-center tw-justify-center" style="z-index: 2;">
-               <h3 class="tw-mt-5 tw-inline-block tw-font-metal tw-pr-1 tw-italic tw-text-6xl tw-bg-clip-text tw-bg-gradient-to-r tw-from-primary tw-to-secondary tw-text-transparent">Halcones de xalapa</h3>
+               <h3 class="tw-mt-5 tw-inline-block tw-font-bebas tw-pr-1 tw-font-bold tw-text-7xl tw-bg-clip-text tw-bg-white tw-opacity-50 tw-text-transparent">Halcones de xalapa</h3>
             </div>
         </div>
     </main>
