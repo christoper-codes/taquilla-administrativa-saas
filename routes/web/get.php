@@ -108,6 +108,14 @@ Route::get('/storage-link', function () {
 
 });
 
+Route::get('/optimize', function () {
+
+    Artisan::call('optimize:clear');
+
+    return "optimize";
+
+});
+
 
 /*
 * |--------------------------------------------------------------------------

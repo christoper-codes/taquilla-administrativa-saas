@@ -129,6 +129,21 @@ class AuthController extends Controller
         }
     }
 
+    public function logout(Request $request)
+    {
+        try {
+            auth()->user()->currentAccessToken()->delete();
+
+            return response()->json([
+                'data' => [],
+                'message' => 'Sesión cerrada con éxito',
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function userGenders()
     {
         try {

@@ -13,6 +13,7 @@ Route::controller(EventController::class)->group(function () {
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('/login', 'login')->name('api.auth.login');
+    Route::post('/logout', 'logout')->name('api.auth.logout')->middleware('auth:sanctum');
     Route::post('/register', 'register')->name('api.auth.register');
     Route::get('/user-genders', 'userGenders')->name('api.auth.user.gernders');
     Route::get('/profile', 'profile')->name('api.auth.profile')->middleware('auth:sanctum');
