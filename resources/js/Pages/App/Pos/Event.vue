@@ -1624,7 +1624,8 @@ watch(() => paymentInstallmentSelected.value, () => {
                                 <span class="material-symbols-outlined tw-text-white">arrow_back</span>
                             </div>
                         </Link>
-                        <div class="tw-flex tw-items-center tw-gap-2">
+                        <div class="tw-flex tw-flex-col lg:tw-flex-row lg:tw-items-center tw-gap-2">
+                            <p class="lg:tw-text-lg">{{ event.description }}</p>
                             <v-rating
                                 readonly
                                 :length="5"
@@ -1632,8 +1633,6 @@ watch(() => paymentInstallmentSelected.value, () => {
                                 :model-value="5"
                                 active-color="yellow"
                             />
-                            | <p class="lg:tw-text-lg">{{ event.description }}</p>
-
                         </div>
                         <h2 class="tw-inline-block tw-font-bebas tw-pr-1 tw-mt-1 tw-text-6xl lg:tw-text-8xl tw-font-bold tw-bg-clip-text tw-bg-gradient-to-r tw-from-primary tw-to-secondary tw-text-transparent">
                             {{ event.name }}

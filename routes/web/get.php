@@ -24,6 +24,8 @@ use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\EventSeatCatalog;
 use App\Models\SeasonTicket;
+use Inertia\Inertia;
+
 Route::get('/add-subscriber-to-event-seat-catalog', function (Request $request) {
 
     $event_seat_catalog_with_subscriber_test = EventSeatCatalog::where([
@@ -252,3 +254,13 @@ Route::get('/eventos/ticket/{id}/recibo-pago-plazos', [InstallmentPaymentHistory
 
 
 Route::get('/cyber-source/captura-de-contexto', [CyberSourceController::class, 'getCaptureContext'])->name('cyber.source.capture.context');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* | Terms and Conditions | ROUTES
+*/
+Route::get('/politicas-de-privacidad', function () {
+     return Inertia::render('Guest/PrivacyPolicies');
+})->name('terms.and.conditions');
