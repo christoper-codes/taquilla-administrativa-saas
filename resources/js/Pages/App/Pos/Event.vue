@@ -2621,7 +2621,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                         <div class="tw-mb-5">
                                                                             <div class="tw-flex tw-items-center tw-justify-end tw-gap-3 tw-p-1 lg:tw-mr-5">
                                                                                 <v-switch color="purple" v-model="acceptTerms"></v-switch>
-                                                                                <a href="/politicas-de-privacidad" target="__blank" class="-tw-mt-6">Acepto <span class="tw-underline">terminos y condiciones</span></a>
+                                                                                <a href="/politicas-de-privacidad" target="_blank" class="-tw-mt-6">Acepto <span class="tw-underline">terminos y condiciones</span></a>
                                                                             </div>
                                                                             <div class="tw-flex tw-items-center tw-justify-end tw-gap-3 tw-p-1 lg:tw-mr-5">
                                                                                 <v-btn color="red" variant="tonal" class="text-none !tw-px-4 lg:!tw-px-8 tw-mr-2 !tw-h-[60px] lg:!tw-h-[70px] !tw-rounded-2xl" text="Cancelar" @click="isActive.value = false"></v-btn>

@@ -61,16 +61,16 @@ const year = new Date().getFullYear()
             class="tw-w-full tw-text-center tw-inline-flex tw-flex-col tw-gap-7 2xl:tw-gap-9 tw-text-2xl 2xl:tw-text-3xl tw-z-10 tw-text-neutral-800"
           >
             <div class="tw-inline-block">
-                <a class="tw-relative tw-inline-block tw-transition-colors tw-duration-300 after:tw-content-[''] after:tw-absolute after:tw-left-0 after:tw-bottom-0 after:tw-h-[2px] after:tw-w-0 after:tw-bg-current after:tw-transition-all after:tw-duration-500 hover:after:tw-w-full" href="https://www.facebook.com/halconesdexalapa" target="__blank">Facebook</a>
+                <a class="tw-relative tw-inline-block tw-transition-colors tw-duration-300 after:tw-content-[''] after:tw-absolute after:tw-left-0 after:tw-bottom-0 after:tw-h-[2px] after:tw-w-0 after:tw-bg-current after:tw-transition-all after:tw-duration-500 hover:after:tw-w-full" href="https://www.facebook.com/halconesdexalapa" target="_blank">Facebook</a>
             </div>
             <div class="tw-inline-block">
-                <a class="tw-relative tw-inline-block tw-transition-colors tw-duration-300 after:tw-content-[''] after:tw-absolute after:tw-left-0 after:tw-bottom-0 after:tw-h-[2px] after:tw-w-0 after:tw-bg-current after:tw-transition-all after:tw-duration-500 hover:after:tw-w-full" href="https://www.instagram.com/halconesdexalapa/" target="__blank">Instagram</a>
+                <a class="tw-relative tw-inline-block tw-transition-colors tw-duration-300 after:tw-content-[''] after:tw-absolute after:tw-left-0 after:tw-bottom-0 after:tw-h-[2px] after:tw-w-0 after:tw-bg-current after:tw-transition-all after:tw-duration-500 hover:after:tw-w-full" href="https://www.instagram.com/halconesdexalapa/" target="_blank">Instagram</a>
             </div>
             <div class="tw-inline-block">
-                <a class="tw-relative tw-inline-block tw-transition-colors tw-duration-300 after:tw-content-[''] after:tw-absolute after:tw-left-0 after:tw-bottom-0 after:tw-h-[2px] after:tw-w-0 after:tw-bg-current after:tw-transition-all after:tw-duration-500 hover:after:tw-w-full" href="https://www.youtube.com/@halconesdexalapaoficial" target="__blank">Youtube</a>
+                <a class="tw-relative tw-inline-block tw-transition-colors tw-duration-300 after:tw-content-[''] after:tw-absolute after:tw-left-0 after:tw-bottom-0 after:tw-h-[2px] after:tw-w-0 after:tw-bg-current after:tw-transition-all after:tw-duration-500 hover:after:tw-w-full" href="https://www.youtube.com/@halconesdexalapaoficial" target="_blank">Youtube</a>
             </div>
             <div class="tw-inline-block">
-                <a class="tw-relative tw-inline-block tw-transition-colors tw-duration-300 after:tw-content-[''] after:tw-absolute after:tw-left-0 after:tw-bottom-0 after:tw-h-[2px] after:tw-w-0 after:tw-bg-current after:tw-transition-all after:tw-duration-500 hover:after:tw-w-full" href="https://www.tiktok.com/@halconesdexalapa" target="__blank">TikTok</a>
+                <a class="tw-relative tw-inline-block tw-transition-colors tw-duration-300 after:tw-content-[''] after:tw-absolute after:tw-left-0 after:tw-bottom-0 after:tw-h-[2px] after:tw-w-0 after:tw-bg-current after:tw-transition-all after:tw-duration-500 hover:after:tw-w-full" href="https://www.tiktok.com/@halconesdexalapa" target="_blank">TikTok</a>
             </div>
           </div>
           <div
