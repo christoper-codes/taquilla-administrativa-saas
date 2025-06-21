@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Interfaces\CashRegisterRepositoryInterface;
 use App\Models\CashRegister;
+use Illuminate\Support\Collection;
 
 class CashRegisterRepository implements CashRegisterRepositoryInterface
 {
@@ -56,4 +57,29 @@ class CashRegisterRepository implements CashRegisterRepositoryInterface
     * |--------------------------------------------------------------------------
     * | Custom methods for the repository interface
     */
+    public function close(array $data, CashRegister $cash_register)
+    {
+            $cash_register->is_open = false;
+            $cash_register->confirmed_closure = true;
+            $cash_register->seller_user_closing_id = $data['seller_user_closing_id'];
+            $cash_register->closing_balance = $cash_register->current_balance;
+            $cash_register->closing_time = now();
+            $cash_register->save();
+
+            return $cash_register;
+    }
+
+    public function closeAll(array $data, Collection $cash_registers)
+    {
+        $cash_registers->each(function ($cash_register) use ($data) {
+            $cash_register->is_open = false;
+            $cash_register->confirmed_closure = true;
+            $cash_register->seller_user_closing_id = $data['seller_user_closing_id'];
+            $cash_register->closing_balance = $cash_register->current_balance;
+            $cash_register->closing_time = now();
+            $cash_register->save();
+        });
+
+        return $cash_registers;
+    }
 }

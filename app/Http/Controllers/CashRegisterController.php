@@ -71,10 +71,18 @@ class CashRegisterController extends Controller
 
             DB::commit();
 
-            WebResponseHelper::sendResponse($cash_register, 'Caja registradora abierta correctamente', null, false);
-
+            return response()->json([
+                'data' => $cash_register,
+                'message' => 'Caja registradora aperturada correctamente',
+                'success' => true,
+            ], 200);
         } catch (\Exception $e) {
-            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al abrir la caja registradora');
+            DB::rollBack();
+            return response()->json([
+                'data' => null,
+                'message' => $e->getMessage(),
+                'success' => false,
+            ], 500);
         }
     }
 
@@ -122,13 +130,6 @@ class CashRegisterController extends Controller
             ]);
 
             $response = $this->cash_register_service->closeCashRegister($request->all());
-
-           /*  return response()->json([
-                'data' => $response,
-                'message' => 'success',
-                'success' => false,
-            ], 200); */
-
             $pdf_response = Pdf::loadView('pdfs.hdx.closeCashRegister', ['pdf_data' => $response]);
             $pdfContent = $pdf_response->output();
 
@@ -139,6 +140,36 @@ class CashRegisterController extends Controller
                 'message' => 'Caja registradora cerrada con exito',
                 'success' => true,
                 'pdf' => base64_encode($pdfContent)
+            ], 200);
+
+        } catch(\Exception $e){
+            DB::rollBack();
+            return response()->json([
+                'data' => null,
+                'message' => $e->getMessage(),
+                'success' => false,
+            ], 500);
+        }
+    }
+
+    public function closeTicketOfficeCashRegisters(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+
+            $request->validate([
+                'ticket_office_id' => 'required',
+                'seller_user_closing_id' => 'required'
+            ]);
+
+            $response = $this->cash_register_service->closeTicketOfficeCashRegisters($request->all());
+
+            DB::commit();
+
+            return response()->json([
+                'data' => $response,
+                'message' => 'Cierre de caja registradora por taquilla realizado con exito',
+                'success' => true,
             ], 200);
 
         } catch(\Exception $e){

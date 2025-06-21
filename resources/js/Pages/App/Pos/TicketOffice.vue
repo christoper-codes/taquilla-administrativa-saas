@@ -43,35 +43,34 @@ const cashRegisterData = useFormInertia({
 
 const cashRegisterSubmit = handleSubmit((values, isActive) => {
     loading.value = true;
-    cashRegisterData.ticket_office_id = props.ticket_office.id;
-    cashRegisterData.seller_user_opening_id = props.auth_user.id;
-    cashRegisterData.cash_register_type_id = values.cash_register_type_id.id;
-    cashRegisterData.opening_balance = values.opening_balance;
-    cashRegisterData.post(route('cash-registers.store'), {
-        onSuccess: (response) => {
-            cashRegisterFields.cash_register_type_id.value.value = '';
-            cashRegisterFields.opening_balance.value.value = '';
-            localStorage.setItem('cashRegisterData', JSON.stringify(response.props.active_cash_register));
-            cashRegisterPresent.value = response.props.active_cash_register.cash_register_type_id;
-            toast('Caja aperturada con exito', {
-                "theme": "auto",
-                "type": "success",
-                "dangerouslyHTMLString": true
-            })
-        },
-        onFinish: () => {
+    const data = {
+        ticket_office_id: props.ticket_office.id,
+        seller_user_opening_id: props.auth_user.id,
+        cash_register_type_id: values.cash_register_type_id.id,
+        opening_balance: values.opening_balance,
+    };
+
+    axios.post(route('cash-registers.store'), data)
+        .then(response => {
+            toast(response.data.message, {
+                theme: 'auto',
+                type: 'success',
+                dangerouslyHTMLString: true
+            });
+            router.visit(route('ticket-offices.show', props.ticket_office.id));
+        })
+        .catch(error => {
+            toast(error.response.data.message, {
+                theme: 'auto',
+                type: 'error',
+                autoClose: 10000,
+                dangerouslyHTMLString: true
+            });
+        })
+        .finally(() => {
             loading.value = false;
             isActive.evt.value = false;
-        },
-        onError: (error) => {
-            toast(error.response.data.message, {
-                "theme": "auto",
-                "type": "error",
-                "autoClose": 10000,
-                "dangerouslyHTMLString": true
-            })
-        }
-    });
+        });
 });
 
 const closeCashRegister = (isActive) => {
@@ -122,6 +121,54 @@ const closeCashRegister = (isActive) => {
         loading.value = false;
         isActive.value = false;
     });
+}
+
+const closeTicketOfficeCashRegisters = (isActive) => {
+    loadingCancel.value = true;
+    if(cencellationPasswordEntered.value != cancelPassword.value) {
+        toast('El password no coincide para ejecutar la cancelacion', {
+            "theme": "auto",
+            "type": "error",
+            "autoClose": 10000,
+            "dangerouslyHTMLString": true
+        })
+        loadingCancel.value = false;
+        return
+    }
+
+    const data = {
+        'ticket_office_id': props.ticket_office.id,
+        'seller_user_closing_id': props.auth_user.id,
+    };
+
+    axios.post(route('cash-registers.close.all'), data)
+        .then(response => {
+            toast(response.data.message, {
+                "theme": "auto",
+                "type": "success",
+                "dangerouslyHTMLString": true
+            })
+
+            localStorage.removeItem('cashRegisterData');
+            cashRegisterPresent.value = false;
+            cashRegisterDataId.value = 1;
+            sellerUserId.value = 1;
+            ticketOfficeId.value = 1;
+
+            cencellationPasswordEntered.value = '';
+        })
+        .catch(error => {
+            toast(error.response.data.message, {
+                "theme": "auto",
+                "type": "error",
+                "autoClose": 10000,
+                "dangerouslyHTMLString": true
+            })
+        })
+        .finally(() => {
+            loadingCancel.value = false;
+            isActive.value = false;
+        });
 }
 
 const getCashRegisterSummary = () => {
@@ -453,23 +500,48 @@ const pdf = () => {
                     </Link >
                     <h2 class="tw-text-6xl tw-font-bold tw-font-bebas">{{ ticket_office.name }}</h2>
                     <p>{{ formatFirstLetterUppercase(ticket_office.description) }}</p>
-                    <div v-if="active_cash_register">
-                        <v-dialog max-width="500">
-                            <template v-slot:activator="{ props: activatorProps }">
-                                <v-btn v-bind="activatorProps" variant="elevated" class="text-none !tw-h-[70px] !tw-rounded-2xl !tw-px-12 !tw-bg-gradient-to-r tw-from-red-500 tw-to-pink-500 !tw-text-white">Cerrar caja</v-btn>
-                            </template>
-                            <template v-slot:default="{ isActive }">
-                                <v-card class="!tw-p-5">
-                                    <v-card-title class="!tw-text-lg"> ¿Estás seguro de cerrar la caja registradora #{{ active_cash_register.cash_register_type_id }}? </v-card-title>
-                                    <v-card-actions>
-                                        <div class="tw-flex tw-items-center tw-gap-3 tw-mt-5">
-                                                <v-btn variant="tonal" color="red" class="text-none !tw-px-7" size="large" rounded="xl" @click="isActive.value = false">Cancelar</v-btn>
-                                                <v-btn @click="closeCashRegister(isActive)" :loading="loading" variant="elevated" class="text-none !tw-bg-red-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Cerrar ahora</v-btn>
+                    <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-gap-5">
+                        <v-dialog max-width="800">
+                                <template v-slot:activator="{ props: activatorProps }">
+                                    <v-btn v-bind="activatorProps" variant="elevated" class="text-none !tw-h-[70px] !tw-rounded-2xl !tw-px-12 !tw-bg-gradient-to-r tw-from-primary tw-to-secondary !tw-text-white">Cerrar cajas por lote</v-btn>
+                                </template>
+                                <template v-slot:default="{ isActive }">
+                                    <v-card>
+                                    <v-card-text>
+                                        <div class="tw-flex tw-flex-col tw-items-center tw-justify-center tw-mt-5">
+                                            <p class="tw-inline tw-mt-3 tw-text-center tw-text-xs py-3 px-5 tw-bg-blue-100 tw-text-blue-500 tw-rounded-xl tw-border-l-4 tw-border-l-blue-500">Ingresa el codigo de cancelación y preciona 'Cerrar cajas' para confirmar.</p>
+                                            <v-otp-input v-model="cencellationPasswordEntered"></v-otp-input>
                                         </div>
+                                    </v-card-text>
+
+                                    <v-card-actions class="tw-mb-4 tw-mr-4">
+                                        <v-spacer></v-spacer>
+                                        <v-btn color="red" rounded="lg" variant="tonal" size="large" class="text-none !tw-px-4" text="Cancelar" @click="isActive.value = false"></v-btn>
+                                        <v-btn :loading="loadingCancel" @click="closeTicketOfficeCashRegisters(isActive)" rounded="lg" size="large"  variant="elevated" class="text-none !tw-bg-red-600 !tw-text-white">
+                                            Cerrar cajas
+                                        </v-btn>
                                     </v-card-actions>
-                                </v-card>
-                            </template>
+                                    </v-card>
+                                </template>
                         </v-dialog>
+                        <div v-if="active_cash_register">
+                            <v-dialog max-width="500">
+                                <template v-slot:activator="{ props: activatorProps }">
+                                    <v-btn v-bind="activatorProps" variant="elevated" class="text-none !tw-h-[70px] !tw-rounded-2xl !tw-px-12 !tw-bg-gradient-to-r tw-from-red-500 tw-to-pink-500 !tw-text-white">Cerrar caja actual</v-btn>
+                                </template>
+                                <template v-slot:default="{ isActive }">
+                                    <v-card class="!tw-p-5">
+                                        <v-card-title class="!tw-text-lg">¿Estás seguro de cerrar la caja registradora #{{ active_cash_register.cash_register_type_id }}? </v-card-title>
+                                        <v-card-actions>
+                                            <div class="tw-flex tw-items-center tw-gap-3 tw-mt-5">
+                                                    <v-btn variant="tonal" color="red" class="text-none !tw-px-7" size="large" rounded="xl" @click="isActive.value = false">Cancelar</v-btn>
+                                                    <v-btn @click="closeCashRegister(isActive)" :loading="loading" variant="elevated" class="text-none !tw-bg-red-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Cerrar ahora</v-btn>
+                                            </div>
+                                        </v-card-actions>
+                                    </v-card>
+                                </template>
+                            </v-dialog>
+                        </div>
                     </div>
                 </div>
                 <div class="tw-mt-16 tw-grid tw-grid-cols-3 tw-w-full tw-gap-7">
@@ -488,16 +560,7 @@ const pdf = () => {
                                         <v-select
                                             color="primary"
                                             clearable
-                                            label="Partidos activos"
-                                            hint="Partidos activos"
-                                            multiple
-                                            v-model="selectedEvents"
-                                            :item-props="eventProps"
-                                            :items="events"
-                                        ></v-select>
-                                        <v-select
-                                            color="primary"
-                                            clearable
+                                            variant="outlined"
                                             label="Seleciona la caja"
                                             hint="Selecciona la caja"
                                             v-model= "cashRegisterFields.cash_register_type_id.value.value"
@@ -508,6 +571,7 @@ const pdf = () => {
                                         <v-text-field
                                             color="primary"
                                             label="Saldo de apertura"
+                                            variant="outlined"
                                             placeholder="$1000.00"
                                             hint="Ingresa el saldo de apertura"
                                             v-model="cashRegisterFields.opening_balance.value.value"

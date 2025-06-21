@@ -396,13 +396,7 @@ class CashRegisterService
             /*
             * close cash register
             */
-            $cash_register->is_open = false;
-            $cash_register->confirmed_closure = true;
-            $cash_register->seller_user_closing_id = $data['seller_user_closing_id'];
-            $cash_register->closing_balance = $cash_register->current_balance;
-            $cash_register->closing_time = now();
-            $cash_register->save();
-            $cash_register->sellerUserOpening;
+            $this->cash_register_repository->close($data, $cash_register);
 
             /*
             * Verify if there is any cash register open for the ticket office
@@ -422,6 +416,30 @@ class CashRegisterService
         }
     }
 
+    /*
+    * |--------------------------------------------------------------------------
+    * | Close cash registers for ticket office
+    */
+    public function closeTicketOfficeCashRegisters(array $data)
+    {
+        try {
+            /*
+            * Get all cash registers open for the ticket office
+            */
+            $cash_registers = CashRegister::where('ticket_office_id', $data['ticket_office_id'])
+                                    ->where('is_open', 1)
+                                    ->whereDate('created_at', '!=', now()->toDateString())
+                                    ->get();
+            /*
+            * Close all cash registers by ticket office
+            */
+            $this->cash_register_repository->closeAll($data, $cash_registers);
+
+            return $cash_registers;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
 
     /*
     * |--------------------------------------------------------------------------
