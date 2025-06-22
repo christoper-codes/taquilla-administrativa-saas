@@ -32,6 +32,16 @@ export const registerSchema = {
 
         return true;
     },
+    username(value) {
+        if (!value) {
+          return 'Este campo es obligatorio';
+        }
+        if (value.length < 3) {
+          return 'El nombre de usuario debe tener al menos 3 caracteres';
+        }
+
+        return true;
+    },
     user_gender(value) {
         if (!value) {
           return 'Este campo es obligatorio';
@@ -47,10 +57,6 @@ export const registerSchema = {
         return true;
     },
     global_image(value) {
-        if (!value) {
-          return 'Este campo es obligatorio';
-        }
-
         return true;
     },
     email(value) {

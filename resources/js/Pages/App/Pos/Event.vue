@@ -2129,8 +2129,8 @@ watch(() => paymentInstallmentSelected.value, () => {
 
                                                             <p v-if="!valid" class="tw-py-4 tw-px-4 tw-rounded-lg tw-bg-red-100 tw-border-l-[6px] tw-border-l-red-500 tw-text-red-600 tw-text-xs tw-my-4">{{ error }}</p>
 
-                                                            <div class="tw-mt-5"> <!-- :disabled="!form" -->
-                                                            <div v-if="!viewVendorTopics(user_roles)" class="tw-flex tw-items-center tw-justify-between">
+                                                            <div class="tw-mt-5 tw-text-gray-700 "> <!-- :disabled="!form" -->
+                                                                <div v-if="!viewVendorTopics(user_roles)" class="tw-flex tw-items-center tw-justify-between ">
                                                                     <v-radio-group inline label="Tipo de compra a realizar" v-model="purchaseType">
                                                                         <v-radio
                                                                             v-for="(option, index) in purchase_types"
@@ -2229,7 +2229,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                 </div>
 
                                                                 <p class="tw-opacity-50 tw-text-right tw-mb-3">Subtotal (tipos de precios selecionados): {{ formatPrice(totalAmount) }}</p>
-                                                                <p class="tw-font-bold tw-text-3xl tw-text-right tw-mb-3">Total: {{ formatPrice(totalAmount) }}</p>
+                                                                <p class="tw-font-bold tw-text-3xl lg:tw-text-4xl tw-text-right tw-mb-3 tw-font-bebas">Total: {{ formatPrice(totalAmount) }}</p>
                                                                 <v-btn
                                                                     v-if="showButtonPayment"
                                                                     @click="showPaymentDrawer"
@@ -2540,7 +2540,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                             </v-row>
                                                                         </v-container> -->
                                                                         <v-card class="!tw-relative">
-                                                                            <div class="tw-p-7 tw-relative tw-overflow-y-auto">
+                                                                            <div class="tw-p-7 tw-relative tw-overflow-y-auto tw-text-gray-700 ">
                                                                                 <h2 class="tw-font-bebas tw-font-bold tw-text-3xl">Resumen de compra</h2>
                                                                                 <h2 class="tw-font-bebas tw-font-bold tw-text-2xl tw-mt-5">Total: {{ formatPrice(totalAmount) }}</h2>
                                                                                 <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-3">

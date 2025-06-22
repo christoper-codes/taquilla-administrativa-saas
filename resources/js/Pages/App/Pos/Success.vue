@@ -69,7 +69,7 @@ onMounted(() => {
                 <h1 class="tw-font-bold tw-text-4xl md:tw-text-5xl lg:tw-text-7xl tw-font-bebas">
                     ¡Boletos adquiridos con éxito!
                 </h1>
-                <p>Gracias por su compra! Puede ver sus boletos adquiridos en la seccion 'dashboard'.</p>
+                <p>¡Gracias por su compra! Puede ver sus boletos adquiridos en la seccion 'dashboard'.</p>
             </div>
             <Link :href="route('dashboard')">
                 <PrimaryButton heightbtn="!tw-h-[70px] !tw-text-base !tw-w-full md:!tw-w-auto" paddingbtn="!tw-px-14">

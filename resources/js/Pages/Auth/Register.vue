@@ -13,6 +13,7 @@ const { handleSubmit } = useForm({validationSchema : registerSchema});
 const first_name = useField('first_name');
 const last_name = useField('last_name');
 const middle_name = useField('middle_name');
+const username = useField('username');
 const user_gender = useField('user_gender');
 const birthdate = useField('birthdate');
 const global_image = useField('global_image');
@@ -44,10 +45,10 @@ const submit = handleSubmit((values) => {
     data.first_name = first_name.value;
     data.last_name = last_name.value;
     data.middle_name = middle_name.value;
-    data.username = (first_name.value._value + '-' + last_name.value._value).toLowerCase();
+    data.username = username.value.value.trim().toLowerCase().replace(/\s+/g, '-');
     data.birthdate = birthdate.value;
     data.global_image = global_image.value;
-    data.email = email.value;
+    data.email = email.value.value.trim().toLowerCase();
     data.password = password.value;
     data.password_confirmation = password_confirmation.value;
     data.slug = props.slug;
@@ -68,7 +69,6 @@ const props = defineProps({
         type: Number,
     },
 });
-
 </script>
 
 <template>
@@ -153,18 +153,29 @@ const props = defineProps({
                                 ></v-select>
                                 <InputError :message="data.errors.user_gender" />
                             </div>
-                            <div class="tw-w-full">
-                                <v-date-input
-                                    density="compact"
+                             <div class="tw-w-full">
+                                <v-text-field
                                     color="purple"
-                                    label="Fecha de nacimiento"
-                                    hint="Selecciona tu fecha de nacimiento"
+                                    label="Nickname"
+                                    placeholder="Luna"
+                                    v-model="username.value.value"
+                                    :error-messages="username.errorMessage.value"
                                     variant="outlined"
-                                    v-model="birthdate.value.value"
-                                    :error-messages="birthdate.errorMessage.value"
-                                ></v-date-input>
-                                <InputError :message="data.errors.birthdate" />
+                                ></v-text-field>
+                                <InputError :message="data.errors.username" />
                             </div>
+                        </div>
+                        <div class="tw-w-full">
+                            <v-date-input
+                                density="compact"
+                                color="purple"
+                                label="Fecha de nacimiento"
+                                hint="Selecciona tu fecha de nacimiento"
+                                variant="outlined"
+                                v-model="birthdate.value.value"
+                                :error-messages="birthdate.errorMessage.value"
+                            ></v-date-input>
+                            <InputError :message="data.errors.birthdate" />
                         </div>
                         <div class="tw-flex tw-flex-col lg:tw-flex-row  tw-items-center tw-justify-between lg:tw-gap-5">
                             <div class="tw-w-full">
