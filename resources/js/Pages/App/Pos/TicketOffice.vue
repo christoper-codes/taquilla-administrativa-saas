@@ -534,8 +534,8 @@ const pdf = () => {
                                         <v-card-title class="!tw-text-lg">¿Estás seguro de cerrar la caja registradora #{{ active_cash_register.cash_register_type_id }}? </v-card-title>
                                         <v-card-actions>
                                             <div class="tw-flex tw-items-center tw-gap-3 tw-mt-5">
-                                                    <v-btn variant="tonal" color="red" class="text-none !tw-px-7" size="large" rounded="xl" @click="isActive.value = false">Cancelar</v-btn>
-                                                    <v-btn @click="closeCashRegister(isActive)" :loading="loading" variant="elevated" class="text-none !tw-bg-red-500 !tw-text-white !tw-px-7" size="large" rounded="xl">Cerrar ahora</v-btn>
+                                                    <v-btn variant="tonal" color="red" class="text-none !tw-px-7" rounded="lg" size="large" @click="isActive.value = false">Cancelar</v-btn>
+                                                    <v-btn @click="closeCashRegister(isActive)" :loading="loading" rounded="lg" size="large" variant="elevated" class="text-none !tw-bg-red-500 !tw-text-white !tw-px-7">Cerrar ahora</v-btn>
                                             </div>
                                         </v-card-actions>
                                     </v-card>
@@ -544,7 +544,7 @@ const pdf = () => {
                         </div>
                     </div>
                 </div>
-                <div class="tw-mt-16 tw-grid tw-grid-cols-3 tw-w-full tw-gap-7">
+                <div class="tw-mt-16 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-w-full tw-gap-7">
                     <div>
                          <v-dialog max-width="700">
                             <template v-slot:activator="{ props: activatorProps }">
@@ -676,7 +676,7 @@ const pdf = () => {
                                         </div>
                                     </div>
 
-                                    <div class="tw-font-bold tw-text-4xl tw-text-center tw-inline-flex tw-pt-10 tw-pb-5 tw-text-gray-600">
+                                    <div class="tw-font-bold tw-text-4xl tw-text-center tw-inline-flex tw-pt-10 tw-pb-5">
                                         Historial de transacciones de caja
                                     </div>
 
@@ -831,14 +831,14 @@ const pdf = () => {
                          <v-dialog v-model="dialogPayInstallment" transition="dialog-bottom-transition" fullscreen>
                             <template v-slot:activator="{ props: activatorProps }">
                                 <div v-bind="activatorProps" class="hover:tw-scale-105 tw-transition-all tw-duration-500 tw-full tw-h-48 tw-bg-white/20 tw-backdrop-blur-lg tw-flex tw-items-center tw-justify-center tw-cursor-pointer tw-rounded-md">
-                                    <span class="tw-font-bold tw-uppercase tw-text-lg">Liquidar abonos</span>
+                                    <span class="tw-font-bold tw-uppercase tw-text-lg">Liquidar ventas pendientes</span>
                                 </div>
                             </template>
                             <v-card>
                                 <v-toolbar class="!tw-bg-gradient-to-r !tw-from-slate-950 !tw-via-purple-950 !tw-to-slate-950">
                                     <v-btn class="!tw-text-white" icon="mdi-close" @click="dialogPayInstallment = false"></v-btn>
                                     <v-toolbar-title>
-                                        <div class="tw-font-bold tw-text-white">Liquidar abonos</div>
+                                        <div class="tw-font-bold tw-text-white">Liquidar ventas pendientes</div>
                                     </v-toolbar-title>
                                     <v-spacer></v-spacer>
                                     <v-toolbar-items>
