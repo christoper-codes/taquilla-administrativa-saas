@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\WebResponseHelper;
 use App\Models\Event;
+use App\Services\EventService;
 use App\Services\SaleTicketService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,9 +17,11 @@ class IndicatorController extends Controller
     * Define variables for services
     */
     protected $sale_ticket_service;
+    protected $event_service;
 
-    public function __construct(SaleTicketService $sale_ticket_service)
+    public function __construct(SaleTicketService $sale_ticket_service, EventService $event_service)
     {
+        $this->event_service = $event_service;
         $this->sale_ticket_service = $sale_ticket_service;
     }
 
@@ -29,16 +32,12 @@ class IndicatorController extends Controller
     {
         try {
             $user = Auth::user()->load('globalImages', 'userRoles');
-
-            $data = ['stadium_id' => 1];
-
-            $sale_ticket_per_week = $this->sale_ticket_service->saleTicketsPerWeekInMonth($data);
+            $events = $this->event_service->getAll();
 
             return Inertia::render('App/Administration/Indicators/Index', [
                'user' => $user,
-               'saleTicketsPerWeek' => $sale_ticket_per_week
+               'events' => $events
             ]);
-
         } catch (\Exception $e) {
             WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar los indicadores');
         }
