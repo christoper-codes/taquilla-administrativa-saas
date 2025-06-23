@@ -157,6 +157,7 @@ function priceFinal(seat, priceTypeName) {
     }, 0);
 }
 
+const originalSeatsSelected = ref([]);
 
 const addSeat = (seat) => {
     if(selectedPromotion.value){
@@ -208,12 +209,14 @@ const addSeat = (seat) => {
         seat.global_season_id = props.event.global_season_id;
         seat.serie_id = props.event.serie_id;
         seatsSelected.value.push(seat);
-        snackbar.value = true;
+        originalSeatsSelected.value.push(seat);
 
+        snackbar.value = true;
         const regularPrice = priceFinal(seat, priceFinalType);
         totalAmount.value = (parseFloat(totalAmount.value || 0) + parseFloat(regularPrice));
     } else {
         seatsSelected.value = seatsSelected.value.filter((s) => s.seat_catalogue.code !== seat.seat_catalogue.code);
+        originalSeatsSelected.value = originalSeatsSelected.value.filter((s) => s.seat_catalogue.code !== seat.seat_catalogue.code);
         if(seatsSelected.value.length == 0) {
             snackbar.value = false;
         }
@@ -720,6 +723,7 @@ const selectZones = () => {
     setTimeout(() => tab.value = 'seats', 500);
     tab.value = 'seats';
     acceptTerms.value = viewVendorTopics(props.user_roles);
+    originalSeatsSelected.value = [];
 };
 
 /*
@@ -791,8 +795,6 @@ const props = defineProps({
         required: false
     },
 });
-
-console.log(props.event);
 
 const users_list = [];
 const sale_debtors_list = [];
@@ -1298,6 +1300,23 @@ const onSubmitConfirm = (isActive) => {
         stadium_id: props.event.stadium_id,
     }
 
+    seatsSelected.value.forEach(seat => {
+        const originalSeat = originalSeatsSelected.value.find(
+            s => s.seat_catalogue.code === seat.seat_catalogue.code
+        );
+        if (originalSeat) {
+            if (purchaseType.value == 'abonado') {
+                seat.original_price = parseFloat(
+                    originalSeat.price_types.find(priceType => priceType.name === 'abonado').pivot.price
+                );
+            } else {
+                seat.original_price = parseFloat(
+                    originalSeat.price_types.find(priceType => priceType.name === 'regular').pivot.price
+                );
+            }
+        }
+    });
+
     const seatsSelectedData = {
         purchase_type: purchaseType.value,
         stadium_id: props.event.stadium_id,
@@ -1321,8 +1340,8 @@ const onSubmitConfirm = (isActive) => {
         sale_debtor: saleDebtorData.value,
     };
 
-    /* console.log(seatsSelectedData);
-    return */
+    console.log(seatsSelectedData);
+    return
 
 axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
     .then(response => {
