@@ -19,13 +19,13 @@ const { viewAdminTopics } = useUserPolicy();
 const { viewVendorTopics } = useUserPolicy();
 
 onMounted(() => {
-    const superAdmin = ['/create-users', '/indicadores-generales'];
+    const superAdmin = ['/create-users', '/indicadores-generales', '/indicadores-evento'];
     const admin = ['/series', '/eventos-gestion', '/instituciones', '/promociones', '/convenios'];
-    if(superAdmin.some(route => page.url == route)){
-        open.value = ['super_admin']
+    if (superAdmin.some(route => page.url.includes(route))) {
+        open.value = ['super_admin'];
     }
-    if(admin.some(route => page.url == route)){
-        open.value = ['admin']
+    if (admin.some(route => page.url.includes(route))) {
+        open.value = ['admin'];
     }
 });
 
@@ -179,7 +179,7 @@ console.log(props.user.user_roles)
                                             </AppNavLink>
                                         </div>
                                         <div class="tw-mt-3 tw-w-full">
-                                            <AppNavLink :href="route('indicators.index')" :active="route().current('indicators.index')">
+                                            <AppNavLink :href="route('indicators.index')" :active="route().current('indicators.index') || route().current('indicators.show')">
                                                 <span class="material-symbols-outlined tw-text-lg">monitoring</span>Indicadores
                                             </AppNavLink>
                                         </div>

@@ -382,11 +382,13 @@ watch(selectedPromotion, () => {
 });
 
 watch(selectedAgreementPromotion, () => {
-
     finalPromotion.value = {};
     seatsSelected.value = JSON.parse(JSON.stringify(seatsSelectedCopy.value));
     finalPromotion.value.id = selectedAgreementPromotion.value.id;
     finalPromotion.value.quantity = 0;
+
+    const promoType = selectedAgreementPromotion.value.promotion_type.name;
+
 
     if(selectedAgreementPromotion.value.promotion_type.name == 'descuento_por_compra_multiple') {
         let seatsTopay = selectedAgreementPromotion.value.generic_seats_allowed;
@@ -411,30 +413,48 @@ watch(selectedAgreementPromotion, () => {
             }
             applicableIndex++;
         });
+    } else if (promoType === 'descuento_por_porcentaje_por_boleto') {
+            seatsSelected.value.forEach((seat) => {
+                const promotion = seat.promotions?.find(
+                    (promo) => promo.name === selectedAgreementPromotion.value.name
+                );
 
-    } else if(selectedAgreementPromotion.value.promotion_type.name == 'descuento_por_porcentaje_por_compra'){
-        seatsSelected.value.forEach((seat) => {
-            seat.price_types.forEach(priceType => {
-                finalPromotion.value.quantity++;
-                seat.promotion_id = selectedAgreementPromotion.value.id;
-                seat.agreement_promotion_id = selectedAgreementPromotion.value.pivot.id;
-                if(priceType.name == 'regular'){
-                    const discount = priceType.pivot.price * (selectedAgreementPromotion.value.percent_allow / 100);
-                    priceType.pivot.price = priceType.pivot.price - discount;
+                if (promotion) {
+                    seat.price_types.forEach((priceType) => {
+                        finalPromotion.value.quantity++;
+                        seat.promotion_id = selectedAgreementPromotion.value.id;
+                        seat.agreement_promotion_id = selectedAgreementPromotion.value.pivot.id;
+                        if (priceType.name === 'regular') {
+                            const discount =
+                                priceType.pivot.price *
+                                (selectedAgreementPromotion.value.percent_allow / 100);
+                            priceType.pivot.price = priceType.pivot.price - discount;
+                        }
+                    });
                 }
+            });
+        }else if(selectedAgreementPromotion.value.promotion_type.name == 'descuento_por_porcentaje_por_compra'){
+            seatsSelected.value.forEach((seat) => {
+                seat.price_types.forEach(priceType => {
+                    finalPromotion.value.quantity++;
+                    seat.promotion_id = selectedAgreementPromotion.value.id;
+                    seat.agreement_promotion_id = selectedAgreementPromotion.value.pivot.id;
+                    if(priceType.name == 'regular'){
+                        const discount = priceType.pivot.price * (selectedAgreementPromotion.value.percent_allow / 100);
+                        priceType.pivot.price = priceType.pivot.price - discount;
+                    }
 
-            })
-        });
-    }
+                })
+            });
+        }
 
     updateTotal();
 
     toast('La promoción ha sido aplicada', {
-        "theme": "auto",
-        "type": "success",
-        "dangerouslyHTMLString": true
-    })
-
+        theme: 'auto',
+        type: 'success',
+        dangerouslyHTMLString: true,
+    });
 });
 
 function updateTotal() {
@@ -694,7 +714,7 @@ const selectZones = () => {
     paymentInstallmentSelected.value = null;
     getSeatAvailability();
     tab.value = 'seats';
-    acceptTerms.value = false;
+    acceptTerms.value = viewVendorTopics(props.user_roles);
 };
 
 /*
@@ -1446,6 +1466,10 @@ watch(() => paymentInstallmentSelected.value, () => {
         installmentSale.value = false;
     }
 })
+
+watch(() => agreementSelected.value, () => {
+    console.log(agreementSelected.value);
+});
 </script>
 
 <template>
@@ -1920,7 +1944,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                             <v-expansion-panel-text>
                                                             <div v-if="viewVendorTopics(user_roles) && purchaseType != 'abonado'">
                                                                <div>
-                                                                    <v-switch inset  label="¿Se requiere venta a cuotas?" color="purple" @click="paymentInInstallments"></v-switch>
+                                                                    <v-switch inset  label="¿Se requiere venta a cuotas?" color="purple" class="!tw-inline-flex !tw-mb-4" @click="paymentInInstallments"></v-switch>
                                                                 </div>
                                                             </div>
 
@@ -2103,24 +2127,33 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                 <div v-if="agreementSelected">
                                                                     <v-radio-group v-model="selectedAgreementPromotion">
                                                                         <div v-for="(promotion, index) in agreementSelected.promotions" :key="index">
-                                                                                <div v-if="promotion.generic_seats_allowed ">
-                                                                                    <div class="tw-border-4 tw-border-yellow-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
-                                                                                        <v-radio color="yellow" :key="index" :value="promotion">
-                                                                                            <template v-slot:label>
-                                                                                                <div>{{ promotion.description }}<strong class="tw-text-yellow-700">. Para asientos con precio regular</strong></div>
-                                                                                            </template>
-                                                                                        </v-radio>
-                                                                                    </div>
+                                                                            <div v-if="promotion.generic_seats_allowed ">
+                                                                                <div class="tw-border-4 tw-border-yellow-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
+                                                                                    <v-radio color="yellow" :key="index" :value="promotion">
+                                                                                        <template v-slot:label>
+                                                                                            <div>{{ promotion.name }}<strong class="tw-text-yellow-700">. Promocion por asientos</strong></div>
+                                                                                        </template>
+                                                                                    </v-radio>
                                                                                 </div>
-                                                                                <div v-if="promotion.percent_allow > 0 && promotion.promotion_type.name == 'descuento_por_porcentaje_por_compra'">
-                                                                                    <div class="tw-border-4 tw-border-purple-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
-                                                                                        <v-radio color="purple" :key="index" :value="promotion">
-                                                                                            <template v-slot:label>
-                                                                                                <div>{{ promotion.description }}<strong class="tw-text-purple-700">. Para asientos con precio regular</strong></div>
-                                                                                            </template>
-                                                                                        </v-radio>
-                                                                                    </div>
+                                                                            </div>
+                                                                            <div v-if="promotion.percent_allow > 0 && promotion.promotion_type.name == 'descuento_por_porcentaje_por_compra'">
+                                                                                <div class="tw-border-4 tw-border-blue-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
+                                                                                    <v-radio color="blue" :key="index" :value="promotion">
+                                                                                        <template v-slot:label>
+                                                                                            <div>{{ promotion.name }}<strong class="tw-text-blue-700">. Descuento por porcentaje por compra total</strong></div>
+                                                                                        </template>
+                                                                                    </v-radio>
                                                                                 </div>
+                                                                            </div>
+                                                                            <div v-if="promotion.percent_allow > 0 && promotion.promotion_type.name == 'descuento_por_porcentaje_por_boleto'">
+                                                                                <div class="tw-border-4 tw-border-purple-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
+                                                                                    <v-radio color="purple" :key="index" :value="promotion">
+                                                                                        <template v-slot:label>
+                                                                                            <div>{{ promotion.name }}<strong class="tw-text-purple-700">. Descuento por porcentaje por boleto</strong></div>
+                                                                                        </template>
+                                                                                    </v-radio>
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
                                                                     </v-radio-group>
                                                                 </div>

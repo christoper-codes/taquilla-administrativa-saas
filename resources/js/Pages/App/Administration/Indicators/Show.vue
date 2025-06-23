@@ -2,10 +2,8 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import SuccessSession from '@/Components/SuccessSession.vue';
 import ErrorSession from '@/Components/ErrorSession.vue';
-import BreadcrumbAppSecondary from '@/Components/BreadcrumbAppSecondary.vue';
 import { Head } from '@inertiajs/vue3';
 import { onMounted, ref } from 'vue';
-import EventsIndex from '@/Components/IndicatorsCharts/EventsIndex.vue';
 import usePriceFormat from '@/composables/priceFormat';
 import useDateFormat from '@/composables/dateFormat';
 import Eventshow from '@/Components/IndicatorsCharts/Eventshow.vue';
@@ -117,16 +115,16 @@ const filterByDate = () => {
     });
 
     salesPerDate.value = {efectivo: 0, tarjeta: 0, adeudo: 0, total: 0, venta: 0};
-    amountOwed.value = 0;
 
+    console.log(itemsPerDate.value);
     itemsPerDate.value.forEach((item) => {
         if (item.Estatus === 'pagado' || item.Estatus === 'pendiente') {
-            const paymentTypes = item['Tipos de pago'].split(',').reduce((acc, payment) => {
+           const paymentTypes = item['Tipos de pago'].split(',').reduce((acc, payment) => {
                 const [key, value] = payment.split(':').map(str => str.trim());
-                acc[key] = parseFloat(value);
+                acc[key.toLowerCase()] = parseFloat(value);
                 return acc;
             }, {});
-
+            console.log(paymentTypes);
             const seatsSolt = item.Asientos.split(',').length;
             salesPerDate.value.venta += seatsSolt;
 
@@ -151,6 +149,8 @@ const filterByDate = () => {
         "type": "success",
         "dangerouslyHTMLString": true
     })
+
+    console.log(salesPerDate.value);
 };
 
 const allowedDates = ref([]);
@@ -180,10 +180,10 @@ onMounted(() => {
     <SuccessSession />
     <AppLayout >
         <ErrorSession />
-        <div class="tw-relative tw-w-full tw-block tw-overflow-hidden tw-px-4 tw-pt-10 lg:tw-px-0 lg:tw-pt-0 tw-mb-20 tw-bg-white tw-pb-10">
+        <div class="tw-relative tw-w-full tw-block tw-overflow-hidden tw-px-4 tw-pt-10 lg:tw-px-0 lg:tw-pt-10 tw-mb-20 tw-pb-10">
             <section
-                class="tw-w-full tw-relative tw-bg-cover tw-bg-center lg:tw-h-[400px] tw-flex tw-flex-col tw-items-start tw-justify-center tw-rounded-xl"
-                :style="{ backgroundImage: `url(https://ta.absama.com/storage/event_images/67ea66fbc5758.jpg)` }"
+                class="tw-w-full tw-relative tw-bg-cover tw-bg-center lg:tw-h-[450px] tw-flex tw-flex-col tw-items-start tw-justify-center tw-rounded-2xl tw-overflow-hidden"
+                :style="{ backgroundImage: `url(/storage/${historyPerEvent.event.global_image.file_path})` }"
                 >
                 <div class="tw-w-full tw-rounded-xl lg:tw-rounded-none tw-bg-black/40 tw-p-7 tw-text-white tw-backdrop-blur-md tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-6">
                     <h2 data-aos="fade-left" data-aos-duration="2500" class="tw-font-bold tw-text-2xl lg:tw-text-4xl">
@@ -217,76 +217,7 @@ onMounted(() => {
                 </div>
             </section>
 
-            <div class="tw-w-full lg:tw-px-10 tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-10 tw-mt-16">
-                <div class="tw-w-full lg:tw-w-1/3">
-                    <div class="tw-w-full">
-                        <v-date-picker header="Selecciona una fecha" title=""
-                            v-model="dateToFindResume"
-                            :allowed-dates="isAllowedDate"
-                            class="!tw-w-full"
-                        ></v-date-picker>
-                        <v-btn @click="filterByDate" variant="elevated" block class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" size="large">
-                            Buscar resumen
-                        </v-btn>
-                    </div>
-                </div>
-                <div class="tw-w-full lg:tw-w-2/3">
-                    <div v-if="itemsPerDate.length > 0">
-                        <div class="tw-mb-16">
-                            <div class="tw-mb-10 mt-2">
-                                <h2 class="tw-text-5xl">Venta</h2>
-                                <h3 class="tw-text-lg tw-mt-4">{{ formatPrice(salesPerDate.total) }} MXN</h3>
-                                <h3 class="tw-text-lg">{{ salesPerDate.venta }} asientos vendidos</h3>
-                            </div>
-                            <div class="tw-w-full tw-grid lg:tw-grid-cols-2 tw-gap-10">
-                                <div class="tw-p-5 tw-text-center tw-shadow-xl tw-border-b-8 tw-border-b-green-500 tw-rounded-lg w-full">
-                                    <p class="tw-font-bold tw-opacity-50">Efectivo</p>
-                                    <h3 class="tw-text-2xl tw-font-bold mt-2">{{ formatPrice(salesPerDate.efectivo) }} MXN</h3>
-                                </div>
-                                <div class="tw-p-5 tw-text-center tw-shadow-xl tw-border-b-8 tw-border-b-blue-500 tw-rounded-lg w-full">
-                                    <p class="tw-font-bold tw-opacity-50">Tarjeta</p>
-                                    <h3 class="tw-text-2xl tw-font-bold mt-2">{{ formatPrice(salesPerDate.tarjeta) }} MXN</h3>
-                                </div>
-                                <div class="tw-p-5 tw-text-center tw-shadow-xl tw-border-b-8 tw-border-b-red-500 tw-rounded-lg w-full">
-                                    <p class="tw-font-bold tw-opacity-50">Adeudo</p>
-                                    <h3 class="tw-text-2xl tw-font-bold mt-2">{{ formatPrice(salesPerDate.adeudo) }} MXN</h3>
-                                </div>
-                                <div class="tw-p-5 tw-text-center tw-shadow-xl tw-border-b-8 tw-border-b-yellow-500 tw-rounded-lg w-full">
-                                    <p class="tw-font-bold tw-opacity-50">Total</p>
-                                    <h3 class="tw-text-2xl tw-font-bold mt-2">{{ formatPrice(salesPerDate.total) }} MXN</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-else class="tw-flex tw-items-center tw-justify-center tw-text-center tw-min-h-[500px] tw-shadow-lg tw-rounded-xl tw-opacity-50 tw-flex-col tw-gap-1">
-                        <h2 class="tw-font-bold tw-text-lg">Seleccione una fecha valida para un resumen de venta</h2>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="tw-fill-current tw-w-10 tw-h-auto" viewBox="0 0 24 24"><path d="m2.6 13.083 3.452 1.511L16 9.167l-6 7 8.6 3.916a1 1 0 0 0 1.399-.85l1-15a1.002 1.002 0 0 0-1.424-.972l-17 8a1.002 1.002 0 0 0 .025 1.822zM8 22.167l4.776-2.316L8 17.623z"></path></svg>
-                    </div>
-                </div>
-            </div>
-
-            <div v-if="itemsPerDate.length > 0" class="tw-w-full tw-mt-16 lg:tw-px-10">
-                <v-data-table :items="itemsPerDate" :headers="headers" :header-props="headerProps">
-                    <template v-slot:item.Estatus="{ item }">
-                        <span
-                            class="tw-py-1 tw-px-4 tw-rounded-full"
-                            :class="{
-                                '!tw-text-green-600 tw-bg-green-100': item.Estatus === 'pagado',
-                                '!tw-text-red-600 tw-bg-red-100': item.Estatus === 'cancelado',
-                                '!tw-text-yellow-600 tw-bg-yellow-100': item.Estatus === 'pendiente'
-                            }"
-                        >
-                            {{ item.Estatus }}
-                        </span>
-                    </template>
-
-                    <template v-slot:item.Fecha="{ item }">
-                        {{ dateFormat(item.Fecha) }}
-                    </template>
-                </v-data-table>
-            </div>
-
-            <div class="tw-mt-10 lg:tw-px-10">
+            <div class="tw-mt-16 lg:tw-px-10">
                 <h2 class="tw-text-4xl tw-font-bold">Venta general</h2>
             </div>
             <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-3 tw-gap-8 lg:tw-px-10 tw-mt-5 tw-mb-16">
@@ -325,8 +256,75 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
+            <div class="tw-w-full lg:tw-px-10 tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-10 tw-mt-16">
+                <div class="tw-w-full lg:tw-w-1/3">
+                    <div class="tw-w-full">
+                        <v-date-picker header="Venta por día" title="Selecciona una fecha"
+                            v-model="dateToFindResume"
+                            :allowed-dates="isAllowedDate"
+                            class="!tw-w-full"
+                        ></v-date-picker>
+                        <v-btn @click="filterByDate" variant="elevated" block class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" size="large">
+                            Buscar resumen
+                        </v-btn>
+                    </div>
+                </div>
+                <div class="tw-w-full lg:tw-w-2/3">
+                    <div v-if="itemsPerDate.length > 0">
+                        <div class="tw-mb-16">
+                            <div class="tw-mb-10 mt-2">
+                                <h2 class="tw-text-5xl">Venta</h2>
+                                <h3 class="tw-text-lg tw-mt-4">{{ formatPrice(salesPerDate.total) }} MXN</h3>
+                                <h3 class="tw-text-lg">{{ salesPerDate.venta }} asientos vendidos</h3>
+                            </div>
+                            <div class="tw-w-full tw-grid lg:tw-grid-cols-2 tw-gap-10">
+                                <div class="tw-p-5 tw-text-center tw-shadow-xl tw-border-b-8 tw-border-b-green-500 tw-rounded-lg w-full">
+                                    <p class="tw-font-bold tw-opacity-50">Efectivo</p>
+                                    <h3 class="tw-text-2xl tw-font-bold mt-2">{{ formatPrice(salesPerDate.efectivo) }} MXN</h3>
+                                </div>
+                                <div class="tw-p-5 tw-text-center tw-shadow-xl tw-border-b-8 tw-border-b-blue-500 tw-rounded-lg w-full">
+                                    <p class="tw-font-bold tw-opacity-50">Tarjeta</p>
+                                    <h3 class="tw-text-2xl tw-font-bold mt-2">{{ formatPrice(salesPerDate.tarjeta) }} MXN</h3>
+                                </div>
+                                <div class="tw-p-5 tw-text-center tw-shadow-xl tw-border-b-8 tw-border-b-red-500 tw-rounded-lg w-full">
+                                    <p class="tw-font-bold tw-opacity-50">Adeudo</p>
+                                    <h3 class="tw-text-2xl tw-font-bold mt-2">{{ formatPrice(salesPerDate.adeudo) }} MXN</h3>
+                                </div>
+                                <div class="tw-p-5 tw-text-center tw-shadow-xl tw-border-b-8 tw-border-b-yellow-500 tw-rounded-lg w-full">
+                                    <p class="tw-font-bold tw-opacity-50">Total</p>
+                                    <h3 class="tw-text-2xl tw-font-bold mt-2">{{ formatPrice(salesPerDate.total) }} MXN</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="tw-flex tw-bg-white tw-items-center tw-justify-center tw-text-center tw-min-h-[500px] tw-shadow-lg tw-rounded-xl tw-opacity-50 tw-flex-col tw-gap-1">
+                        <h2 class="tw-text-lg">Seleccione una fecha valida para un resumen de venta</h2>
+                    </div>
+                </div>
+            </div>
 
-            <div class="tw-w-full lg:tw-px-10 tw-mt-10">
+            <div v-if="itemsPerDate.length > 0" class="tw-w-full tw-mt-16 lg:tw-px-10">
+                <v-data-table :items="itemsPerDate" :headers="headers" :header-props="headerProps">
+                    <template v-slot:item.Estatus="{ item }">
+                        <span
+                            class="tw-py-1 tw-px-4 tw-rounded-full"
+                            :class="{
+                                '!tw-text-green-600 tw-bg-green-100': item.Estatus === 'pagado',
+                                '!tw-text-red-600 tw-bg-red-100': item.Estatus === 'cancelado',
+                                '!tw-text-yellow-600 tw-bg-yellow-100': item.Estatus === 'pendiente'
+                            }"
+                        >
+                            {{ item.Estatus }}
+                        </span>
+                    </template>
+
+                    <template v-slot:item.Fecha="{ item }">
+                        {{ dateFormat(item.Fecha) }}
+                    </template>
+                </v-data-table>
+            </div>
+
+            <div class="tw-w-full lg:tw-px-10 tw-mt-10 tw-bg-white">
                 <Eventshow v-bind:salesPerDay="historyPerEvent.sales_per_day" />
             </div>
 
@@ -340,8 +338,9 @@ onMounted(() => {
                         </div>
                         <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xl">
                             <div class="tw-flex tw-items-center tw-gap-2 tw-font-bold">
-                                <span v-if="type != 'total'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-yellow-500 tw-text-white">confirmation_number</span>
-                                <span v-else class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-red-500 tw-text-white">confirmation_number</span>
+                                <span v-if="type != 'total' && type != 'online'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-yellow-500 tw-text-white">confirmation_number</span>
+                                <span v-else-if="type == 'online'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-blue-500 tw-text-white">confirmation_number</span>
+                                <span v-else-if="type == 'total'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-red-500 tw-text-white">confirmation_number</span>
                                 <h3>{{ formatFirstLetterUppercase(type) }}</h3>
                             </div>
                             <p class="tw-block tw-font-bold">{{ sales.sales }} <span class="tw-text-xs">(asientos)</span> </p>
@@ -377,12 +376,3 @@ onMounted(() => {
         </div>
     </AppLayout>
 </template>
-
-<style>
-.fecha-venta {
-  background-color: #b3e5fc; /* Color azul claro */
-  color: #01579b; /* Texto en azul oscuro */
-  border-radius: 50%; /* Círculo para resaltar */
-  font-weight: bold; /* Negrita */
-}
-</style>
