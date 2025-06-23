@@ -1340,8 +1340,8 @@ const onSubmitConfirm = (isActive) => {
         sale_debtor: saleDebtorData.value,
     };
 
-    console.log(seatsSelectedData);
-    return
+    /* console.log(seatsSelectedData);
+    return */
 
 axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
     .then(response => {

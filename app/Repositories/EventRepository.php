@@ -66,7 +66,7 @@ class EventRepository implements EventRepositoryInterface
         return $event;
     }
 
-    public function confirmSeatsPurchase($event_id, $seat_catalogue_id, $member_user_id = null, $sale_ticket_id = null, $qr = null, $price = null, $is_gift = null, $purchase_type = null)
+    public function confirmSeatsPurchase($event_id, $seat_catalogue_id, $member_user_id = null, $sale_ticket_id = null, $qr = null, $price = null,$original_pricde = null,  $is_gift = null, $purchase_type = null)
     {
         $event = Event::findOrFail($event_id);
 
@@ -78,6 +78,7 @@ class EventRepository implements EventRepositoryInterface
             'sale_ticket_id' => $sale_ticket_id,
             'qr' => $qr,
             'price' => $price,
+            'original_price' => $original_pricde,
             'purchase_type' => $purchase_type,
             'is_gift' => $is_gift,
         ]);

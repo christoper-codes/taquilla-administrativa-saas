@@ -619,7 +619,7 @@ class EventService
                     /*
                     * Confirm seat purchase
                     */
-                    $this->event_repository->confirmSeatsPurchase($event->id, $seat['seat_catalogue_id'], $data['member_user_id'], $saleTicket->id, $qr, $seat['final_price'], $seat['is_gift'], $data['purchase_type']);
+                    $this->event_repository->confirmSeatsPurchase($event->id, $seat['seat_catalogue_id'], $data['member_user_id'], $saleTicket->id, $qr, $seat['final_price'], $seat['original_price'], $seat['is_gift'], $data['purchase_type']);
 
                     /*
                     * Create relationship between sale ticket and eventSeatCatalogs
