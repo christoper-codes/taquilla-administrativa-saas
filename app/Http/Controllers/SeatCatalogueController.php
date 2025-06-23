@@ -32,11 +32,10 @@ class SeatCatalogueController extends Controller
     public function index()
     {
         try{
-
             $user = Auth::user()->load('globalImages', 'userRoles');
             $flash = $user->is_new ? 'is_new_user' : null;
             $tickets = $user->EventSeatCatalogues()
-                ->with('event', 'seatCatalogue', 'seatCatalogueStatus')
+                ->with('event', 'seatCatalogue', 'seatCatalogueStatus', 'seasonTicket')
                 ->whereHas('seatCatalogueStatus', function ($query) {
                     $query->where('name', 'vendido');
                 })

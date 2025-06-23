@@ -16,11 +16,12 @@ const props = defineProps({
 const qrValue = computed(() => {
     return props.ticket.qr;
 })
+console.log('ticket', props.ticket);
 </script>
 
 <template>
-      <div class="tw-inline-flex tw-flex-col tw-items-center tw-w-full lg:tw-w-96 tw-justify-center tw-bg-center tw-bg-cover tw-text-gray-600">
-        <div :class="ticket.purchase_type == 'abonado' ? 'tw-from-yellow-500 tw-to-pink-400' : 'tw-from-primary tw-to-blue-500'" class="tw-bg-gradient-to-r tw-w-full lg:tw-w-96 tw-rounded-3xl">
+      <div class="tw-inline-flex tw-flex-col tw-items-center tw-w-full lg:tw-w-[415px] tw-justify-center tw-bg-center tw-bg-cover tw-text-gray-600">
+        <div :class="ticket.purchase_type == 'abonado' ? 'tw-from-yellow-500 tw-to-pink-400' : 'tw-from-primary tw-to-blue-500'" class="tw-bg-gradient-to-r tw-w-full lg:tw-w-[415px] tw-rounded-3xl">
             <div class="tw-flex tw-flex-col">
                 <div class="tw-bg-white tw-relative tw-drop-shadow-2xl tw-rounded-3xl tw-p-4 tw-m-4">
                 <div class="tw-flex-none sm:tw-flex">
@@ -35,8 +36,9 @@ const qrValue = computed(() => {
                         </svg>
                         </button>
                     </div>
-                    <div class="tw-flex tw-items-center tw-justify-center tw-mt-3 tw-mb-5 tw-font-bold tw-text-lg">
-                        {{ ticket.event.name }}
+                    <div class="tw-flex tw-flex-col tw-gap-2 tw-items-center tw-justify-center tw-mt-3 tw-mb-5">
+                        <h2 class="tw-font-bold tw-text-lg">{{ ticket.event.name }}</h2>
+                        <h3 class="tw-text-xs">{{ ticket.season_ticket ? ticket.season_ticket.full_name : '' }}</h3>
                     </div>
                     <div class="tw-flex tw-items-center">
                         <div class="tw-flex tw-flex-col">
