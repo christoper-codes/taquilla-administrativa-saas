@@ -18,4 +18,5 @@ interface SeasonTicketRepositoryInterface
     * |--------------------------------------------------------------------------
     * | Custom methods for the repository interface
     */
+    public function  getBySeason(int $id);
 }

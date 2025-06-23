@@ -48,6 +48,13 @@ class DatabaseSeeder extends Seeder
             //AgreementsSeeder::class,
             SaleDebtorsSeeder::class,
             //AgreementsSeeder::class,
+            WalletCurrencySeeder::class,
+            WalletExchangeRateSeeder::class,
+            WalletAccountTypeSeeder::class,
+            WalletRechargeAmountSeeder::class,
+            WalletTransactionStatusSeeder::class,
+            WalletTransactionTypeSeeder::class,
+            WalletAccountRoleSeeder::class,
         ]);
 
         $controller = app(SeatCatalogueController::class);

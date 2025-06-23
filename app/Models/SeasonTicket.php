@@ -27,6 +27,15 @@ class SeasonTicket extends Model
         'is_active',
     ];
 
+    protected $appends = [
+        'full_name'
+    ];
+
+    public function getFullNameAttribute()
+    {
+        return $this->holder_name.' '.$this->holder_middle_name.' '.$this->holder_last_name;
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -50,5 +59,11 @@ class SeasonTicket extends Model
     public function EventSeatCatalogues()
     {
         return $this->hasMany(EventSeatCatalog::class);
+    }
+
+    public function walletAccounts()
+    {
+        return $this->belongsToMany(WalletAccount::class, 'season_ticket_wallet_account', 'season_ticket_id', 'wallet_account_id')
+            ->withTimestamps();
     }
 }

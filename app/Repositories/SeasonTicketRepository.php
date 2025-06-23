@@ -40,4 +40,13 @@ class SeasonTicketRepository implements SeasonTicketRepositoryInterface
     * |--------------------------------------------------------------------------
     * | Custom methods for the repository interface
     */
+
+    /*
+    * |--------------------------------------------------------------------------
+    * | Primaries methods for the repository interface
+    */
+    public function getBySeason(int $id)
+    {
+        return SeasonTicket::with(['user','globalSeason','seatCatalogue'])->where('global_season_id',$id)->get();
+    }
 }

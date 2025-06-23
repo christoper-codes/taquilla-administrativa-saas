@@ -2,11 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\WebResponseHelper;
 use App\Models\SeasonTicket;
+use App\Services\SeasonTicketService;
 use Illuminate\Http\Request;
 
 class SeasonTicketController extends Controller
 {
+    protected $season_ticket_service;
+
+    public function __construct(SeasonTicketService $season_ticket_service)
+    {
+        $this->season_ticket_service = $season_ticket_service;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -37,6 +46,23 @@ class SeasonTicketController extends Controller
     public function show(SeasonTicket $seasonTicket)
     {
         //
+    }
+
+    /**
+     * Display the list resource.
+     */
+    public function showTicketsBySeasonId(int $id)
+    {
+        try {
+
+            $season_tickets = $this->season_ticket_service->getBySeason($id);
+
+            return response()->json($season_tickets, 200);
+
+        } catch (\Exception $e) {
+
+            WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar los tickets por temporada');
+        }
     }
 
     /**

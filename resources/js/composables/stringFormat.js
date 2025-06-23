@@ -37,8 +37,20 @@ export default function useStringFormat() {
         return applyAccents(string).replace(/_/g, ' ').trim().toLowerCase().replace(/^./, char => char.toUpperCase());
     };
 
+    const maskAccountNumber = (walletAccountNumber) => {
+
+        const maskLength = Math.floor((walletAccountNumber.length - 4) / 2);
+
+        const visibleSection = walletAccountNumber.slice(-4);
+
+        const maskedSection = '*'.repeat(maskLength);
+
+        return maskedSection + visibleSection;
+    };
+
     return {
         formatTitleCase,
-        formatFirstLetterUppercase
+        formatFirstLetterUppercase,
+        maskAccountNumber
     }
 }

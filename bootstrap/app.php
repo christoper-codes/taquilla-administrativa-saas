@@ -17,6 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 Route::middleware('web')
                     ->group(base_path("routes/web/{$method}.php"));
             }
+
+            foreach ($methods as $method) {
+                Route::prefix('api')
+                    ->middleware('api')
+                    ->group(base_path("routes/api/{$method}.php"));
+            }
         }
     )
     ->withMiddleware(function (Middleware $middleware) {

@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PriceCatalogueController;
 use App\Http\Controllers\SaleTicketController;
+use App\Http\Controllers\WalletAccountController;
 
 /*
 * |--------------------------------------------------------------------------
@@ -133,3 +134,11 @@ Route::post('/precio-de-estadio', [PriceCatalogueController::class, 'firstOrCrea
 * | Wallets | ROUTES
 */
 Route::post('/precio-de-asientos', [EventSeatCatalogPriceTypeController::class, 'update'])->name('update.seat.price');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* | Wallets | ROUTES
+*/
+Route::post('/monederos', [WalletAccountController::class, 'store'])->name('wallets.store');

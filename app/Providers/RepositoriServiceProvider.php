@@ -34,6 +34,12 @@ use App\Interfaces\EventSeatCatalogPriceTypeRepositoryInterface;
 use App\Interfaces\OnlinePaymentTransactionRepositoryInterface;
 use App\Interfaces\PriceCatalogRepositoryInterface;
 use App\Interfaces\PriceTypeRepositoryInterface;
+use App\Interfaces\SeasonTicketWalletAccountRepositoryInterface;
+use App\Interfaces\WalletAccountRepositoryInterface;
+use App\Interfaces\WalletAccountRoleRepositoryInterface;
+use App\Interfaces\WalletAccountTypeRepositoryInterface;
+use App\Interfaces\WalletAccountWalletAccountTypeRepositoryInterface;
+use App\Interfaces\WalletCurrencyRepositoryInterface;
 
 use App\Repositories\AgreementRepository;
 use App\Repositories\EventRepository;
@@ -66,6 +72,12 @@ use App\Repositories\OnlinePaymentTransactionRepository;
 use App\Repositories\PriceCatalogRepository;
 use App\Repositories\PriceTypeRepository;
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\SeasonTicketWalletAccountRepository;
+use App\Repositories\WalletAccountRepository;
+use App\Repositories\WalletAccountRoleRepository;
+use App\Repositories\WalletAccountTypeRepository;
+use App\Repositories\WalletAccountWalletAccountTypeRepository;
+use App\Repositories\WalletCurrencyRepository;
 
 class RepositoriServiceProvider extends ServiceProvider
 {
@@ -112,6 +124,12 @@ class RepositoriServiceProvider extends ServiceProvider
         $this->app->bind(CashRegisterMovementTypeRepositoryInterface::class, CashRegisterMovementTypeRepository::class);
         $this->app->bind(CyberSourceRepositoryInterface::class, CyberSourceRepository::class);
         $this->app->bind(OnlinePaymentTransactionRepositoryInterface::class, OnlinePaymentTransactionRepository::class);
+        $this->app->bind(WalletCurrencyRepositoryInterface::class, WalletCurrencyRepository::class);
+        $this->app->bind(WalletAccountTypeRepositoryInterface::class, WalletAccountTypeRepository::class);
+        $this->app->bind(WalletAccountRepositoryInterface::class, WalletAccountRepository::class);
+        $this->app->bind(SeasonTicketWalletAccountRepositoryInterface::class, SeasonTicketWalletAccountRepository::class);
+        $this->app->bind(WalletAccountWalletAccountTypeRepositoryInterface::class, WalletAccountWalletAccountTypeRepository::class);
+        $this->app->bind(WalletAccountRoleRepositoryInterface::class, WalletAccountRoleRepository::class);
     }
 
     /**

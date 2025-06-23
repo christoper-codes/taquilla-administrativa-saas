@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AgreementController;
+use App\Http\Controllers\WalletAccountRoleController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CyberSourceController;
@@ -19,12 +20,23 @@ use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\WalletAccountTemporalController;
 use App\Http\Controllers\PriceTypeController;
+use App\Http\Controllers\SeasonTicketController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\WalletAccountController;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\EventSeatCatalog;
 use App\Models\SeasonTicket;
+use Database\Seeders\WalletAccountRoleSeeder;
+use Database\Seeders\WalletAccountTypeSeeder;
+use Database\Seeders\WalletCurrencySeeder;
+use Database\Seeders\WalletExchangeRateSeeder;
+use Database\Seeders\WalletRechargeAmountSeeder;
+use Database\Seeders\WalletTransactionStatusSeeder;
+use Database\Seeders\WalletTransactionTypeSeeder;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\File;
 
 Route::get('/add-subscriber-to-event-seat-catalog', function (Request $request) {
 
@@ -92,6 +104,25 @@ Route::get('/migrate', function () {
 
 });
 
+Route::get('/db-seed-wallet', function () {
+    $seeders = [
+        WalletCurrencySeeder::class,
+        WalletExchangeRateSeeder::class,
+        WalletAccountTypeSeeder::class,
+        WalletRechargeAmountSeeder::class,
+        WalletTransactionStatusSeeder::class,
+        WalletTransactionTypeSeeder::class,
+        WalletAccountRoleSeeder::class,
+    ];
+
+    foreach ($seeders as $seeder) {
+        Artisan::call('db:seed', ['--class' => $seeder]);
+    }
+
+    return 'Seeders ejecutados correctamente.';
+});
+
+
 Route::get('/db-seed', function () {
 
     Artisan::call('db:seed');
@@ -100,12 +131,34 @@ Route::get('/db-seed', function () {
 
 });
 
-Route::get('/storage-link', function () {
+Route::get('/storage-copy', function () {
+    try {
+        $source = storage_path('app/public');
+        $destination = public_path('storage');
 
-    Artisan::call('storage:link');
+        // Crear destino si no existe
+        if (!File::exists($destination)) {
+            File::makeDirectory($destination, 0755, true);
+        }
 
-    return "storage-link";
+        // Copiar archivos nuevos (no sobreescribir existentes)
+        $files = File::allFiles($source);
 
+        foreach ($files as $file) {
+            $relativePath = $file->getRelativePathname();
+            $destPath = $destination . DIRECTORY_SEPARATOR . $relativePath;
+
+            if (!File::exists($destPath)) {
+                // Crear directorios padre si no existen
+                File::ensureDirectoryExists(dirname($destPath));
+                File::copy($file->getPathname(), $destPath);
+            }
+        }
+
+        return 'Storage copied with only new files.';
+    } catch (\Throwable $e) {
+        return response("Error: " . $e->getMessage(), 500);
+    }
 });
 
 Route::get('/optimize', function () {
@@ -272,3 +325,35 @@ Route::get('/cyber-source/captura-de-contexto', [CyberSourceController::class, '
 Route::get('/politicas-de-privacidad', function () {
      return Inertia::render('Guest/PrivacyPolicies');
 })->name('terms.and.conditions');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* | Wallets | ROUTES
+*/
+Route::get('/monederos', [WalletAccountController::class, 'index'])->name('wallet.index');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* | SeasonTickets | ROUTES
+*/
+Route::get('/boletos-por-temporada/{id}', [SeasonTicketController::class, 'showTicketsBySeasonId'])->name('show.tickets.by.season');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* | Users | ROUTES
+*/
+Route::get('/usuarios', [UserController::class, 'showAllUsers'])->name('show.all.users');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* | Users | ROUTES
+*/
+Route::get('/roles-de-cuentas',[WalletAccountRoleController::class,'index'])->name('wallet.account.roles');

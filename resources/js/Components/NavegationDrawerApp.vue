@@ -40,7 +40,7 @@ const props = defineProps({
     },
 });
 
-console.log(props.user.user_roles)
+
 
 </script>
 
@@ -223,7 +223,11 @@ console.log(props.user.user_roles)
                                                 <span class="material-symbols-outlined tw-text-lg">Handshake</span>Convenios
                                             </AppNavLink>
                                         </div>
-
+                                        <div class=" tw-w-full">
+                                            <AppNavLink :href="route('wallet.index')" :active="route().current('wallet.index')">
+                                                <span class="material-symbols-outlined tw-text-lg">account_balance_wallet</span>Monederos
+                                            </AppNavLink>
+                                        </div>
                                     </v-list-group>
                                 </v-list>
                             </v-card>

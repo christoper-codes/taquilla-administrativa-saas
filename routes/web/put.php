@@ -5,6 +5,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\InstitutionController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\SerieController;
+use App\Http\Controllers\WalletAccountController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -48,3 +49,11 @@ Route::post('/instituciones/{id}', [InstitutionController::class, 'update'])->na
 * |Events | ROUTES
 */
 Route::post('/eventos-gestion/{id}', [EventController::class, 'update'])->name('event.management.update');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* | Wallets | ROUTES
+*/
+Route::put('/monederos/{id}', [WalletAccountController::class, 'update'])->name('wallets.update');
