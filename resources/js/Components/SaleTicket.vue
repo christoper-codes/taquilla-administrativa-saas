@@ -50,7 +50,7 @@ const qrValue = computed(() => {
                             'tw-my-1 tw-w-full tw-flex-none tw-text-lg tw-font-bold tw-leading-none'
                         ]"
                         >
-                        {{ ticket.is_verified ? 'Expiro' : 'Valido' }}
+                        {{ ticket.is_verified ? 'Expiro' : 'Válido' }}
                         </div>
                         <span class="tw-text-xs">Aperturado</span>
                         </div>

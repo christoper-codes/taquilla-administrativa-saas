@@ -2,6 +2,9 @@
 
 namespace App\Interfaces;
 
+use App\Models\CashRegister;
+use Illuminate\Support\Collection;
+
 interface CashRegisterRepositoryInterface
 {
     /*
@@ -18,4 +21,6 @@ interface CashRegisterRepositoryInterface
     * |--------------------------------------------------------------------------
     * | Custom methods for the repository interface
     */
+    public function close(array $data, CashRegister $cash_register);
+    public function closeAll(array $data, Collection $cash_registers);
 }

@@ -126,7 +126,7 @@ const closeImageModal = () => {
                     </div>
 
                     <div class="tw-flex lg:tw-items-center tw-h-full !tw-mb-12 lg:!tw-mb-0 tw-z-20 tw-relative">
-                        <div class="!tw-mx-auto !tw-max-w-7xl !tw-px-6 sm:!tw-px-0 !tw-w-full !tw-py-32 lg:!tw-py-0 lg:!tw--mt-40">
+                        <div class="!tw-mx-auto !tw-max-w-7xl !tw-px-6 lg:!tw-px-0 !tw-w-full !tw-py-32 lg:!tw-py-0 lg:!tw--mt-40">
                             <div>
                                 <h2 data-aos="fade-down" data-aos-duration="1300" data-aos-once="true" class="tw-font-metal tw-pr-1 tw-italic tw-text-2xl tw-inline-block tw-bg-clip-text tw-bg-gradient-to-r tw-from-primary tw-to-secondary/60 tw-text-transparent">Proximo partido</h2>
                                 <h1 data-aos="fade-down" data-aos-duration="1300" data-aos-once="true" class="lg:tw-text-[70px] !tw-max-w-2xl tw-text-4xl md:tw-text-5xl tw-font-bold tw-font-bebas tw-mt-3">

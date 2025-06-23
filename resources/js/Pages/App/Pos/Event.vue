@@ -382,11 +382,13 @@ watch(selectedPromotion, () => {
 });
 
 watch(selectedAgreementPromotion, () => {
-
     finalPromotion.value = {};
     seatsSelected.value = JSON.parse(JSON.stringify(seatsSelectedCopy.value));
     finalPromotion.value.id = selectedAgreementPromotion.value.id;
     finalPromotion.value.quantity = 0;
+
+    const promoType = selectedAgreementPromotion.value.promotion_type.name;
+
 
     if(selectedAgreementPromotion.value.promotion_type.name == 'descuento_por_compra_multiple') {
         let seatsTopay = selectedAgreementPromotion.value.generic_seats_allowed;
@@ -411,30 +413,48 @@ watch(selectedAgreementPromotion, () => {
             }
             applicableIndex++;
         });
+    } else if (promoType === 'descuento_por_porcentaje_por_boleto') {
+            seatsSelected.value.forEach((seat) => {
+                const promotion = seat.promotions?.find(
+                    (promo) => promo.name === selectedAgreementPromotion.value.name
+                );
 
-    } else if(selectedAgreementPromotion.value.promotion_type.name == 'descuento_por_porcentaje_por_compra'){
-        seatsSelected.value.forEach((seat) => {
-            seat.price_types.forEach(priceType => {
-                finalPromotion.value.quantity++;
-                seat.promotion_id = selectedAgreementPromotion.value.id;
-                seat.agreement_promotion_id = selectedAgreementPromotion.value.pivot.id;
-                if(priceType.name == 'regular'){
-                    const discount = priceType.pivot.price * (selectedAgreementPromotion.value.percent_allow / 100);
-                    priceType.pivot.price = priceType.pivot.price - discount;
+                if (promotion) {
+                    seat.price_types.forEach((priceType) => {
+                        finalPromotion.value.quantity++;
+                        seat.promotion_id = selectedAgreementPromotion.value.id;
+                        seat.agreement_promotion_id = selectedAgreementPromotion.value.pivot.id;
+                        if (priceType.name === 'regular') {
+                            const discount =
+                                priceType.pivot.price *
+                                (selectedAgreementPromotion.value.percent_allow / 100);
+                            priceType.pivot.price = priceType.pivot.price - discount;
+                        }
+                    });
                 }
+            });
+        }else if(selectedAgreementPromotion.value.promotion_type.name == 'descuento_por_porcentaje_por_compra'){
+            seatsSelected.value.forEach((seat) => {
+                seat.price_types.forEach(priceType => {
+                    finalPromotion.value.quantity++;
+                    seat.promotion_id = selectedAgreementPromotion.value.id;
+                    seat.agreement_promotion_id = selectedAgreementPromotion.value.pivot.id;
+                    if(priceType.name == 'regular'){
+                        const discount = priceType.pivot.price * (selectedAgreementPromotion.value.percent_allow / 100);
+                        priceType.pivot.price = priceType.pivot.price - discount;
+                    }
 
-            })
-        });
-    }
+                })
+            });
+        }
 
     updateTotal();
 
     toast('La promoción ha sido aplicada', {
-        "theme": "auto",
-        "type": "success",
-        "dangerouslyHTMLString": true
-    })
-
+        theme: 'auto',
+        type: 'success',
+        dangerouslyHTMLString: true,
+    });
 });
 
 function updateTotal() {
@@ -693,8 +713,10 @@ const selectZones = () => {
     seatAvailability.value = [];
     paymentInstallmentSelected.value = null;
     getSeatAvailability();
+    tab.value = 'payment'
+    setTimeout(() => tab.value = 'seats', 500);
     tab.value = 'seats';
-    acceptTerms.value = false;
+    acceptTerms.value = viewVendorTopics(props.user_roles);
 };
 
 /*
@@ -813,6 +835,7 @@ onMounted(() => {
     }
     getSeatAvailability();
     globalPaymentTypesOnlyCard.value = props.global_payment_types.filter(item => item.name === 'tarjeta');
+    acceptTerms.value = viewVendorTopics(props.user_roles);
 });
 
 const getSeatAvailability = () => {
@@ -1445,6 +1468,10 @@ watch(() => paymentInstallmentSelected.value, () => {
         installmentSale.value = false;
     }
 })
+
+watch(() => agreementSelected.value, () => {
+    console.log(agreementSelected.value);
+});
 </script>
 
 <template>
@@ -1919,7 +1946,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                             <v-expansion-panel-text>
                                                             <div v-if="viewVendorTopics(user_roles) && purchaseType != 'abonado'">
                                                                <div>
-                                                                    <v-switch inset  label="¿Se requiere venta a cuotas?" color="purple" @click="paymentInInstallments"></v-switch>
+                                                                    <v-switch inset  label="¿Se requiere venta a cuotas?" color="purple" class="!tw-inline-flex !tw-mb-4" @click="paymentInInstallments"></v-switch>
                                                                 </div>
                                                             </div>
 
@@ -2102,24 +2129,33 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                 <div v-if="agreementSelected">
                                                                     <v-radio-group v-model="selectedAgreementPromotion">
                                                                         <div v-for="(promotion, index) in agreementSelected.promotions" :key="index">
-                                                                                <div v-if="promotion.generic_seats_allowed ">
-                                                                                    <div class="tw-border-4 tw-border-yellow-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
-                                                                                        <v-radio color="yellow" :key="index" :value="promotion">
-                                                                                            <template v-slot:label>
-                                                                                                <div>{{ promotion.description }}<strong class="tw-text-yellow-700">. Para asientos con precio regular</strong></div>
-                                                                                            </template>
-                                                                                        </v-radio>
-                                                                                    </div>
+                                                                            <div v-if="promotion.generic_seats_allowed ">
+                                                                                <div class="tw-border-4 tw-border-yellow-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
+                                                                                    <v-radio color="yellow" :key="index" :value="promotion">
+                                                                                        <template v-slot:label>
+                                                                                            <div>{{ promotion.name }}<strong class="tw-text-yellow-700">. Promocion por asientos</strong></div>
+                                                                                        </template>
+                                                                                    </v-radio>
                                                                                 </div>
-                                                                                <div v-if="promotion.percent_allow > 0 && promotion.promotion_type.name == 'descuento_por_porcentaje_por_compra'">
-                                                                                    <div class="tw-border-4 tw-border-purple-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
-                                                                                        <v-radio color="purple" :key="index" :value="promotion">
-                                                                                            <template v-slot:label>
-                                                                                                <div>{{ promotion.description }}<strong class="tw-text-purple-700">. Para asientos con precio regular</strong></div>
-                                                                                            </template>
-                                                                                        </v-radio>
-                                                                                    </div>
+                                                                            </div>
+                                                                            <div v-if="promotion.percent_allow > 0 && promotion.promotion_type.name == 'descuento_por_porcentaje_por_compra'">
+                                                                                <div class="tw-border-4 tw-border-blue-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
+                                                                                    <v-radio color="blue" :key="index" :value="promotion">
+                                                                                        <template v-slot:label>
+                                                                                            <div>{{ promotion.name }}<strong class="tw-text-blue-700">. Descuento por porcentaje por compra total</strong></div>
+                                                                                        </template>
+                                                                                    </v-radio>
                                                                                 </div>
+                                                                            </div>
+                                                                            <div v-if="promotion.percent_allow > 0 && promotion.promotion_type.name == 'descuento_por_porcentaje_por_boleto'">
+                                                                                <div class="tw-border-4 tw-border-purple-500 tw-rounded-xl tw-bg-white tw-p-2 tw-m-3">
+                                                                                    <v-radio color="purple" :key="index" :value="promotion">
+                                                                                        <template v-slot:label>
+                                                                                            <div>{{ promotion.name }}<strong class="tw-text-purple-700">. Descuento por porcentaje por boleto</strong></div>
+                                                                                        </template>
+                                                                                    </v-radio>
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
                                                                     </v-radio-group>
                                                                 </div>
@@ -2128,8 +2164,8 @@ watch(() => paymentInstallmentSelected.value, () => {
 
                                                             <p v-if="!valid" class="tw-py-4 tw-px-4 tw-rounded-lg tw-bg-red-100 tw-border-l-[6px] tw-border-l-red-500 tw-text-red-600 tw-text-xs tw-my-4">{{ error }}</p>
 
-                                                            <div class="tw-mt-5"> <!-- :disabled="!form" -->
-                                                            <div v-if="!viewVendorTopics(user_roles)" class="tw-flex tw-items-center tw-justify-between">
+                                                            <div class="tw-mt-5 tw-text-gray-700 "> <!-- :disabled="!form" -->
+                                                                <div v-if="!viewVendorTopics(user_roles)" class="tw-flex tw-items-center tw-justify-between ">
                                                                     <v-radio-group inline label="Tipo de compra a realizar" v-model="purchaseType">
                                                                         <v-radio
                                                                             v-for="(option, index) in purchase_types"
@@ -2228,7 +2264,7 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                 </div>
 
                                                                 <p class="tw-opacity-50 tw-text-right tw-mb-3">Subtotal (tipos de precios selecionados): {{ formatPrice(totalAmount) }}</p>
-                                                                <p class="tw-font-bold tw-text-3xl tw-text-right tw-mb-3">Total: {{ formatPrice(totalAmount) }}</p>
+                                                                <p class="tw-font-bold tw-text-3xl lg:tw-text-4xl tw-text-right tw-mb-3 tw-font-bebas">Total: {{ formatPrice(totalAmount) }}</p>
                                                                 <v-btn
                                                                     v-if="showButtonPayment"
                                                                     @click="showPaymentDrawer"
@@ -2514,43 +2550,50 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                         </v-card>
                                                                     </template>
                                                                 </v-dialog>
-                                                                <v-dialog max-width="800">
+                                                                <v-dialog max-width="700">
                                                                     <template v-slot:activator="{ props: activatorProps }">
                                                                         <v-btn id="on-submit-confirm" v-bind="activatorProps" variant="elevated" class="!tw-hidden text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" rounded="xl" size="large" block><span class="material-symbols-outlined tw-text-xl !tw-w-1/2">shopping_cart</span>Adquirir boletos</v-btn>
                                                                     </template>
                                                                     <template v-slot:default="{ isActive }">
-                                                                        <v-card>
-                                                                        <v-card-text>
-                                                                            <v-card-title class="tw-mt-4">Pago</v-card-title>
-                                                                            <v-card-subtitle class="tw-mb-4">
-                                                                                <v-row>
-                                                                                    <v-col cols="12" md="4">
-                                                                                        <strong>Metodos de Pago: </strong>{{ paymentTypesSelected.map(payment => formatFirstLetterUppercase(payment.name)).join(', ') }}
-                                                                                    </v-col>
-                                                                                    <v-col cols="12" md="4">
-                                                                                        <strong>Tipo de Compra: </strong>{{ installmentSale ? "Pago a plazos" : "Pago al contado" }}
-                                                                                    </v-col>
-                                                                                </v-row>
-                                                                                <v-row>
-                                                                                    <v-col cols="12" md="4">
-                                                                                        <strong>Promoción: </strong>{{ selectedPromotion ? `${selectedPromotion.name} (${formatFirstLetterUppercase(selectedPromotion.type)})` :'' }}
-                                                                                    </v-col>
-                                                                                </v-row>
-                                                                            </v-card-subtitle>
-
-                                                                            <!-- Tabla de asientos seleccionados -->
-                                                                                <v-card-title class="tw-mt-4">Asientos</v-card-title>
+                                                                    <!-- <v-container v-if="viewVendorTopics(user_roles)">
+                                                                            <v-row>
+                                                                                <v-col xs12 sm6 md4>
+                                                                                    <v-autocomplete
+                                                                                        v-model="userToTransfer"
+                                                                                        clearable
+                                                                                        color="purple"
+                                                                                        chips
+                                                                                        label="Buscar usuario para asignar la compra"
+                                                                                        hint="El usuario que se seleccione tendra sus boletos en su applicacion."
+                                                                                        persistent-hint=""
+                                                                                        :items="users_list"
+                                                                                        variant="solo-filled"
+                                                                                        item-title="name"
+                                                                                        item-value="value"
+                                                                                    ></v-autocomplete>
+                                                                                </v-col>
+                                                                            </v-row>
+                                                                        </v-container> -->
+                                                                        <v-card class="!tw-relative">
+                                                                            <div class="tw-p-7 tw-relative tw-overflow-y-auto tw-text-gray-700 ">
+                                                                                <h2 class="tw-font-bebas tw-font-bold tw-text-3xl">Resumen de compra</h2>
+                                                                                <h2 class="tw-font-bebas tw-font-bold tw-text-2xl tw-mt-5">Total: {{ formatPrice(totalAmount) }}</h2>
+                                                                                <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-3">
+                                                                                    <v-switch inset color="purple" v-model="acceptTerms"></v-switch>
+                                                                                    <a href="/politicas-de-privacidad" target="_blank" class="-tw-mt-10 lg:tw-mt-3">Acepto <span class="tw-underline tw-text-primary">terminos y condiciones</span></a>
+                                                                                </div>
+                                                                                <!-- Tabla de asientos seleccionados -->
                                                                                 <v-data-table :items="seatsSelected" class="" hide-default-footer items-per-page="-1">
                                                                                     <template v-slot:headers>
                                                                                     <tr>
                                                                                         <th>Asiento</th>
                                                                                         <th>Tipo</th>
                                                                                         <th>Precio</th>
-                                                                                        <th>Promoción</th>
-                                                                                        <th>Abonado</th>
-                                                                                        <th>Titular</th>
-                                                                                        <th>Género</th>
-                                                                                        <th>Talla</th>
+                                                                                        <th v-if="seatsSelected.some(item => item.promotion_id)">Promoción</th>
+                                                                                        <th v-if="purchaseType == 'abonado'">Abonado</th>
+                                                                                        <th v-if="purchaseType == 'abonado'">Titular</th>
+                                                                                        <th v-if="purchaseType == 'abonado'">Género</th>
+                                                                                        <th v-if="purchaseType == 'abonado'">Talla</th>
                                                                                     </tr>
                                                                                     </template>
                                                                                     <template v-slot:item="{ item }">
@@ -2558,76 +2601,36 @@ watch(() => paymentInstallmentSelected.value, () => {
                                                                                         <td>{{ item.seat_catalogue.code }}</td>
                                                                                         <td>{{ item.seat_catalogue.seat_type.name }}</td>
                                                                                         <td>{{ formatPrice(item.final_price) }}</td>
-                                                                                        <td>{{ item.promotion_id ? "Aplicada": '' }}</td>
-                                                                                        <td>{{ `${item.holder_name} ${item.holder_last_name} ${item.holder_middle_name}` }}</td>
-                                                                                        <td>{{ item.is_owner }}</td>
-                                                                                        <td>{{ item.holder_jersey_type }}</td>
-                                                                                        <td>{{ item.holder_jersey_size }}</td>
+                                                                                        <td v-if="item.promotion_id">{{ item.promotion_id ? "Aplicada": '' }}</td>
+                                                                                        <td v-if="purchaseType == 'abonado'">{{ `${item.holder_name} ${item.holder_last_name} ${item.holder_middle_name}` }}</td>
+                                                                                        <td v-if="purchaseType == 'abonado'">{{ item.is_owner }}</td>
+                                                                                        <td v-if="purchaseType == 'abonado'">{{ item.holder_jersey_type }}</td>
+                                                                                        <td v-if="purchaseType == 'abonado'">{{ item.holder_jersey_size }}</td>
                                                                                     </tr>
                                                                                     </template>
                                                                                 </v-data-table>
-
                                                                                 <!-- Información del titular antes de la tabla -->
-                                                                                <v-card-title class="tw-mt-4">Información del Titular</v-card-title>
-                                                                                <v-card-subtitle class="tw-mb-4">
-                                                                                    <v-row>
-                                                                                        <v-col cols="12" md="4">
-                                                                                            <strong>Código Postal: </strong>{{ getHolderInfo('holder_zip_code') }}
-                                                                                        </v-col>
-                                                                                        <v-col cols="12" md="4">
-                                                                                            <strong>Teléfono: </strong>{{ getHolderInfo('holder_phone') }}
-                                                                                        </v-col>
-                                                                                        <v-col cols="12" md="4">
-                                                                                            <strong>Email: </strong>{{ getHolderInfo('holder_email') }}
-                                                                                        </v-col>
-                                                                                    </v-row>
-                                                                                </v-card-subtitle>
+                                                                                <div v-if="seatsSelected.some(seat => seat.is_owner === 'Si')" class="tw-mt-4">
+                                                                                    <h2 class="tw-font-bebas tw-font-bold tw-text-2xl tw-text-right lg:tw-text-left">Titular</h2>
+                                                                                    <div class="tw-flex tw-flex-col lg:tw-flex-row lg:tw-items-center lg:tw-justify-between tw-gap-4 tw-mt-2 tw-text-right">
+                                                                                        <div>Código Postal: <span>{{ getHolderInfo('holder_zip_code') }}</span></div>
+                                                                                        <div>Teléfono: <span>{{ getHolderInfo('holder_phone') }}</span></div>
+                                                                                        <div>Email: <span>{{ getHolderInfo('holder_email') }}</span></div>
+                                                                                    </div>
+                                                                                </div>
 
-                                                                            <!-- <v-container v-if="viewVendorTopics(user_roles)">
-                                                                                <v-row>
-                                                                                    <v-col xs12 sm6 md4>
-                                                                                        <v-autocomplete
-                                                                                            v-model="userToTransfer"
-                                                                                            clearable
-                                                                                            color="purple"
-                                                                                            chips
-                                                                                            label="Buscar usuario para asignar la compra"
-                                                                                            hint="El usuario que se seleccione tendra sus boletos en su applicacion."
-                                                                                            persistent-hint=""
-                                                                                            :items="users_list"
-                                                                                            variant="solo-filled"
-                                                                                            item-title="name"
-                                                                                            item-value="value"
-                                                                                        ></v-autocomplete>
-                                                                                    </v-col>
-                                                                                </v-row>
-                                                                            </v-container> -->
-                                                                            <div class="tw-text-right tw-mt-8">
-                                                                                <p class="tw-opacity-50 tw-mt-5 tw-text-xs lg:tw-text-base">
-                                                                                    Subtotal (precio en compra): {{ formatPrice(totalAmount) }}
-                                                                                </p>
-                                                                                <p v-if="installmentSale" class="tw-font-semibold tw-text-gray-700 tw-mt-4">
-                                                                                    Pago Inicial: {{ formatPrice((parseFloat(amountToPayCard) || 0) + (parseFloat(amountToPayCash) || 0)) }}
-                                                                                </p>
-                                                                                <p class="tw-font-semibold tw-text-gray-700 tw-mt-4">
-                                                                                    {{ installmentSale ? 'Total de compra':'Total' }}: {{ formatPrice(totalAmount) }}
-                                                                                </p>
-                                                                                <p v-if="installmentSale" class="tw-font-semibold tw-text-gray-700 tw-mt-4">
-                                                                                    Total restante : {{ formatPrice( parseFloat(totalAmount) - ((parseFloat(amountToPayCard) || 0) + (parseFloat(amountToPayCash) || 0))  ) }}
-                                                                                </p>
+                                                                                <div class="tw-flex tw-flex-col tw-items-end tw-gap-4 tw-mt-5 tw-opacity-60 tw-text-right tw-pb-20">
+                                                                                    <div>Metodos de Pago: <span>{{ paymentTypesSelected.map(payment => formatFirstLetterUppercase(payment.name)).join(', ') }}</span></div>
+                                                                                    <div>Tipo de Compra: <span>{{ installmentSale ? "Pago a plazos" : "Pago al contado" }}</span></div>
+                                                                                    <div v-if="seatsSelected.some(item => item.promotion_id)">Promoción: <span>{{ selectedPromotion ? `${selectedPromotion.name} (${formatFirstLetterUppercase(selectedPromotion.type)})` :'' }}</span></div>
+                                                                                    <div v-if="installmentSale">Pago Inicial: <span>{{ formatPrice((parseFloat(amountToPayCard) || 0) + (parseFloat(amountToPayCash) || 0)) }}</span></div>
+                                                                                    <div v-if="installmentSale">Total restante : <span>{{ formatPrice( parseFloat(totalAmount) - ((parseFloat(amountToPayCard) || 0) + (parseFloat(amountToPayCash) || 0))  ) }}</span></div>
+                                                                                </div>
                                                                             </div>
-                                                                        </v-card-text>
-
-                                                                        <div class="tw-mb-5">
-                                                                            <div class="tw-flex tw-items-center tw-justify-end tw-gap-3 tw-p-1 lg:tw-mr-5">
-                                                                                <v-switch color="purple" v-model="acceptTerms"></v-switch>
-                                                                                <a href="/politicas-de-privacidad" target="_blank" class="-tw-mt-6">Acepto <span class="tw-underline">terminos y condiciones</span></a>
-                                                                            </div>
-                                                                            <div class="tw-flex tw-items-center tw-justify-end tw-gap-3 tw-p-1 lg:tw-mr-5">
-                                                                                <v-btn color="red" variant="tonal" class="text-none !tw-px-4 lg:!tw-px-8 tw-mr-2 !tw-h-[60px] lg:!tw-h-[70px] !tw-rounded-2xl" text="Cancelar" @click="isActive.value = false"></v-btn>
-                                                                                <v-btn :loading="loading" variant="elevated" class="text-none !tw-px-4 lg:!tw-px-8 !tw-h-[60px] lg:!tw-h-[70px] !tw-rounded-2xl !tw-bg-green-500 !tw-text-white" text="Reservar y comprar" @click="onSubmitConfirm(isActive)"></v-btn>
-                                                                            </div>
-                                                                        </div>
+                                                                              <div class="tw-flex tw-items-center tw-justify-end md:tw-gap-3 tw-absolute tw-bottom-5 tw-pt-5 tw-right-5 tw-bg-white">
+                                                                                    <v-btn color="red" variant="tonal" class="text-none !tw-px-4 lg:!tw-px-8 tw-mr-2 !tw-h-[60px] lg:!tw-h-[70px] !tw-rounded-2xl" text="Cancelar" @click="isActive.value = false"></v-btn>
+                                                                                    <v-btn :loading="loading" variant="elevated" class="text-none !tw-px-4 lg:!tw-px-8 !tw-h-[60px] lg:!tw-h-[70px] !tw-rounded-2xl !tw-bg-green-500 !tw-text-white" text="Reservar y comprar" @click="onSubmitConfirm(isActive)"></v-btn>
+                                                                                </div>
                                                                         </v-card>
                                                                     </template>
                                                                 </v-dialog>
