@@ -713,6 +713,8 @@ const selectZones = () => {
     seatAvailability.value = [];
     paymentInstallmentSelected.value = null;
     getSeatAvailability();
+    tab.value = 'payment'
+    setTimeout(() => tab.value = 'seats', 500);
     tab.value = 'seats';
     acceptTerms.value = viewVendorTopics(props.user_roles);
 };
