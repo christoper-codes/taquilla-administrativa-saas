@@ -204,6 +204,9 @@ const addSeat = (seat) => {
         seat.is_promotion = false;
         seat.promotion_id = '';
         seat.is_gift = false;
+        seat.user_id = viewVendorTopics(props.user_roles) ? null : props.user.id;
+        seat.global_season_id = props.event.global_season_id;
+        seat.serie_id = props.event.serie_id;
         seatsSelected.value.push(seat);
         snackbar.value = true;
 
@@ -789,6 +792,8 @@ const props = defineProps({
     },
 });
 
+console.log(props.event);
+
 const users_list = [];
 const sale_debtors_list = [];
 const userToTransfer = ref(null);
@@ -1316,8 +1321,8 @@ const onSubmitConfirm = (isActive) => {
         sale_debtor: saleDebtorData.value,
     };
 
-    /*console.log(seatsSelectedData);
-    return*/
+    /* console.log(seatsSelectedData);
+    return */
 
 axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
     .then(response => {
