@@ -38,7 +38,7 @@ class AuthController extends Controller
                 'middle_name' => 'nullable|string|max:255',
                 'username' => 'required|string|max:255|unique:users,username',
                 'birthdate' => 'required|date_format:Y-m-d',
-                'email' => 'required|string|lowercase|email|max:255|unique:users,email',
+                'email' => 'required|string|email|max:255|unique:users,email',
                 'password' => 'required|string|min:8',
                 'global_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ]);
@@ -169,7 +169,7 @@ class AuthController extends Controller
                 'user_id' => 'required|integer|exists:users,id',
             ]);
 
-            $user = User::with(['userGender', 'userRoles', 'globalImages'])
+            $user = User::with(['userGender', 'userRoles', 'globalImages', 'seasonTickets'])
                 ->where('id', $request->user_id)
                 ->firstOrFail();
 
