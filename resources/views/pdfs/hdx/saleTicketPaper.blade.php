@@ -15,16 +15,16 @@
     @foreach($pdf_data as $data)
         <div class="ticket">
             <h1>HALCONES DE XALAPA</h1>
-            <p class="info" style="margin-top: 20px;">
+            <p class="info" style="margin-top: 20px; margin-left: 120px">
                 Cultura Veracruzana, Zona Universitaria,<br>
                 Campus Cad, Xalapa Enriquez, 91094
             </p>
-            <h2 style="margin-top: 40px;">TICKET DE VENTA</h2>
-            <table class="w-full" style="margin-top: 40px;">
+            <h2 style="margin-top: 40px; margin-left: 120px">TICKET DE VENTA</h2>
+            <table style="margin-top: 40px; margin-left: 170px">
                 <tr>
-                    <td class="w-half-left">
-                        <p>Taquilla: Taquilla halcones</p>
-                        <p>Vendedor: {{
+                    <th>
+                        <p>Taquilla:<br>Taquilla halcones</p>
+                        <p>Vendedor:<br>{{
                             trim(implode(' ', array_filter([
                                 $data['seller_user']['first_name'],
                                 $data['seller_user']['middle_name'],
@@ -32,31 +32,31 @@
                             ])))
                             }}
                         </p>
-                        <p>Fecha de compra: {{ Carbon::parse($data['ticket_created_at'])->translatedFormat('d F, Y h:i A') }}</p>
+                        <p>Fecha de compra:<br>{{ Carbon::parse($data['ticket_created_at'])->translatedFormat('d F, Y h:i A') }}</p>
                         @if ($data['promotion_ticket'])
-                            <p>Promoción aplicada: {{ $data['promotion_ticket']['name'].' - '. Str::ucfirst(str_replace('_', ' ', $data['promotion_ticket']['promotionType']['name'].(  $data['promotion_ticket']['percent_allow'] ? ' ('.$generic_data['promotion_ticket']['percent_allow'].'%)': '')))}}</p>
+                            <p>Promoción aplicada:<br>{{ $data['promotion_ticket']['name'].' - '. Str::ucfirst(str_replace('_', ' ', $data['promotion_ticket']['promotionType']['name'].(  $data['promotion_ticket']['percent_allow'] ? ' ('.$generic_data['promotion_ticket']['percent_allow'].'%)': '')))}}</p>
                         @endif
-                    </td>
-                    <td class="w-half-right">
-                        <p>Folio de Venta: {{ $data['ticket_id'] }}</p>
+                    </th>
+                    <td>
+                        <p>Folio de Venta:  {{ $data['ticket_id'] }}</p>
                         <p></p>
                         <p>Caja registradora: {{ $data['cash_register_type'] }}</p>
                     </td>
                 </tr>
             </table>
             <h3 style="margin-top: 40px;">{{ $data['seat_code'] }}</h3>
-            <p class="info" style="margin-top: 20px;">
+            <p class="info" style="margin-top: 20px;  margin-left: 120px">
                 La adquisición al inmueble es exclusiva <br>
                 para el asiento y zona especificada
             </p>
-            <h2 style="margin-top: 40px;">{{ $data['event_name'] }}</h2>
-            <table class="w-full" style="margin-top: 40px;">
+            <h2 style="margin-top: 40px; font-size: 27px margin-left: 140px;">{{ $data['event_name'] }}</h2>
+            <table style="margin-top: 40px; margin-left: 170px">
                 <tr>
-                    <td class="w-half-left">
-                        <p>Lugar: USBI "Nido de los Halcones"</p>
-                        <p>Fecha del evento: {{  Carbon::parse($data['event_start_date'])->translatedFormat('d F, Y h:i A') }}</p>
-                    </td>
-                    <td class="w-half-right">
+                    <th>
+                        <p>Lugar:<br>USBI "Nido de los Halcones"</p>
+                        <p>Fecha del evento:<br>{{  Carbon::parse($data['event_start_date'])->translatedFormat('d F, Y h:i A') }}</p>
+                    </th>
+                    <td>
                         <p>Boletos: 1</p>
                         <p>Total: ${{  number_format($data['final_price'], 2, '.', '') }}</p>
                     </td>
@@ -95,6 +95,7 @@
         }
         .ticket h1, .ticket h2, .ticket h3 {
             margin: 0;
+            margin-left: 120px;
             padding: 5px 0;
             text-align: center;
         }
@@ -105,7 +106,7 @@
             font-size: 40px;
             background: #000000;
             color: white;
-            border-radius: 20px;
+            border-radius: 0px;
             padding: 35px 0px
         }
         .ticket h3{
@@ -115,7 +116,7 @@
         }
         .ticket p {
             margin: 5px 0;
-            font-size: 20px;
+            font-size: 25px;
         }
         .ticket .info {
             text-align: center;
@@ -129,12 +130,13 @@
             justify-content: space-between;
         }
         .ticket .footer p, .ticket .footer h5 {
+            margin-left: 120px;
             padding: 20px;
             background: #f1f1f1;
             margin-top: 40px;
             text-align: center;
             border-radius: 20px;
-            font-size: 17px;
+            font-size: 25px;
         }
         .ticket .qr {
             text-align: center;
@@ -147,6 +149,7 @@
             margin-bottom: 3px;
         }
         .ticket .qr img {
+            margin-left: 120px;
             width: 400px;
             height: 400px;
         }

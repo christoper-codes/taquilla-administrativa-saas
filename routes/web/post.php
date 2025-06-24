@@ -18,6 +18,8 @@ use App\Http\Controllers\CyberSourceController;
 use App\Http\Controllers\EventSeatCatalogPriceTypeController;
 use App\Http\Controllers\InstallmentPaymentHistoryController;
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\Process\Process;
+use Illuminate\Http\Request;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PriceCatalogueController;
 use App\Http\Controllers\SaleTicketController;
@@ -133,3 +135,33 @@ Route::post('/precio-de-estadio', [PriceCatalogueController::class, 'firstOrCrea
 * | Wallets | ROUTES
 */
 Route::post('/precio-de-asientos', [EventSeatCatalogPriceTypeController::class, 'update'])->name('update.seat.price');
+
+Route::post('/print-ticket', function (Request $request) {
+    if (!$request->hasFile('pdf')) {
+        return response()->json(['error' => 'No se envió el archivo PDF.'], 400);
+    }
+
+    $pdfFile = $request->file('pdf');
+    $pdfPath = storage_path('app/temp/' . $pdfFile->getClientOriginalName());
+
+    $pdfFile->move(storage_path('app/temp'), $pdfFile->getClientOriginalName());
+
+    //$printerName = 'Star BSC10 (Copiar 1)';
+
+    $process = new Process([
+        'node',
+        base_path('resources/js/print-pdf.js'),
+        $pdfPath,
+      //  $printerName
+    ]);
+
+    $process->run();
+
+    if (!$process->isSuccessful()) {
+        return response()->json(['error' => $process->getErrorOutput()], 500);
+    }
+
+    unlink($pdfPath);
+
+    return response()->json(['message' => 'PDF recibido e impreso.']);
+})->name('print');

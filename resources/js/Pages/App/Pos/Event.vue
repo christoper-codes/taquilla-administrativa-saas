@@ -1304,8 +1304,20 @@ axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
         if(response.data.pdf) {
             const pdfContent = atob(response.data.pdf);
             const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
-            const pdfUrl = window.URL.createObjectURL(pdfBlob);
-            printInKioskMode(pdfUrl, purchaseType.value);
+            const pdfFile = new File([pdfBlob], 'arch.pdf', { type: 'application/pdf' });
+
+            const formData = new FormData();
+            formData.append('pdf', pdfFile);
+
+            axios.post(route('print'), formData)
+                .then(response => {
+                    console.log(response.data);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+            //const pdfUrl = window.URL.createObjectURL(pdfBlob);
+            //printInKioskMode(pdfUrl, purchaseType.value);
             selectZones();
             setTimeout(() => {
                 selectZones();
@@ -1314,6 +1326,7 @@ axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
 
     })
     .catch(error => {
+        console.log(error.response.data.message)
         toast(error.response.data.message, {
             "theme": "auto",
             "type": "error",
