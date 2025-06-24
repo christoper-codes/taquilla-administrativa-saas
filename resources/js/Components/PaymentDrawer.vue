@@ -240,7 +240,7 @@ const confirmSeatsPurchase = (transaction = {}) =>{
             <div class="tw-p-4">
                 <CountdownTimer :initialMinutes="10" />
 
-                <CyberSoruce  :seats="seats" :client-reference-information="{ code: ticketOfficeId}" :order-information-amount-details="{totalAmount: totalAmount, currency: currency}"
+                <!-- <CyberSoruce  :seats="seats" :client-reference-information="{ code: ticketOfficeId}" :order-information-amount-details="{totalAmount: totalAmount, currency: currency}"
                     :orderInformationBillTo="{
                         firstName: 'RTS',
                         lastName: 'VDP',
@@ -254,7 +254,7 @@ const confirmSeatsPurchase = (transaction = {}) =>{
                         email: 'test@cybs.com',
                         phoneNumber: '999999999'
                     }"
-                    @response-payment="responseCyberSource" @cancel-payment="cancelPayment"/>
+                    @response-payment="responseCyberSource" @cancel-payment="cancelPayment"/> -->
 
                 <div id="paypal-button-container" class="tw-mt-4"></div>
                 <div class="tw-mt-10">
