@@ -163,7 +163,7 @@ const responseCyberSource = (value) => {
 
 const cancelPayment = (data) => {
     if(data['status']){
-        router.visit('/eventos');
+        router.visit(route('events.index'));
     }
 }
 
@@ -199,7 +199,7 @@ const confirmSeatsPurchase = (transaction = {}) =>{
                     "type": "default",
                     "dangerouslyHTMLString": true
                 })
-                router.visit('/pago-exitoso');
+                router.visit(route('events.success'));
             }
         })
         .catch((error) => {

@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Interfaces\EventSeatCatalogueRepositoryInterface;
+use App\Models\Event;
 use App\Models\EventSeatCatalog;
 use App\Models\PriceCatalogue;
+use App\Models\SeasonTicket;
 use App\Models\SeatCatalogue;
 
 class EventSeatCatalogueService
@@ -27,31 +29,33 @@ class EventSeatCatalogueService
         $this->seat_catalogue_statuses_service = $seat_catalogue_statuses_service;
     }
 
-
     /*
     * |--------------------------------------------------------------------------
     * | Save new event seat catalogue
     */
-
-    public function saveInBulk(int $event_id)
+    public function saveInBulk(Event $event)
     {
         try {
-
             $get_all_seats_for_stadium = $this->seat_catalogue_service->getAllSeatsForStadium(1);
-
             $event_seat_catalogue = collect([]);
-
-            $get_all_seats_for_stadium->each(function (SeatCatalogue $seat_catalogue) use (&$event_seat_catalogue, $event_id){
+            $get_all_seats_for_stadium->each(function (SeatCatalogue $seat_catalogue) use (&$event_seat_catalogue, $event){
+                $season_ticket = SeasonTicket::where('seat_catalogue_id', $seat_catalogue->id)
+                    ->where('global_season_id', $event->global_season_id)
+                    ->where('is_active', true)
+                    ->first();
 
                 $event_seat_catalogue->push([
-
-                    'event_id' => $event_id,
+                    'event_id' => $event->id,
                     'seat_catalogue_id' => $seat_catalogue->id,
-                    'user_id' => null,
-                    'season_ticket_id' => null,
-                    'seat_catalogue_status_id' => $this->seat_catalogue_statuses_service->getByName("disponible")->id,
-                    'sale_ticket_id' => null,
-                    'price' => null,
+                    'user_id' => $season_ticket ? $season_ticket->user_id : null,
+                    'season_ticket_id' => $season_ticket ? $season_ticket->id : null,
+                    'seat_catalogue_status_id' => $season_ticket ? $this->seat_catalogue_statuses_service->getByName("vendido")->id : $this->seat_catalogue_statuses_service->getByName("disponible")->id,
+                    'sale_ticket_id' => $season_ticket ? $season_ticket->EventSeatCatalogues->first()->sale_ticket_id : null,
+                    'qr' => $season_ticket ? $season_ticket->EventSeatCatalogues->first()->qr : null,
+                    'price' => $season_ticket ? $season_ticket->EventSeatCatalogues->first()->price : null,
+                    'original_price' => $season_ticket ? $season_ticket->EventSeatCatalogues->first()->original_price : null,
+                    'purchase_type' => $season_ticket ? $season_ticket->EventSeatCatalogues->first()->purchase_type : null,
+                    'is_gift' => $season_ticket ? $season_ticket->EventSeatCatalogues->first()->is_gift : false,
                     'is_verified' => false,
                     'is_active' => true,
                     'created_at' => now(),
@@ -67,8 +71,7 @@ class EventSeatCatalogueService
             /*
             * Get all event seat catalogue where event_id
             */
-            $eventSeatCatalogs = EventSeatCatalog::where('event_id', $event_id)->get();
-
+            $eventSeatCatalogs = EventSeatCatalog::where('event_id', $event->id)->get();
             $seatingPrices = [
                 'courtside' => [
                     "id" => 4,
@@ -97,9 +100,7 @@ class EventSeatCatalogueService
             * Attach the price types to the event seat catalogue
             */
             $eventSeatCatalogs->each(function (EventSeatCatalog $eventSeatCatalog) use ($seatingPrices){
-
                 $abono = $seatingPrices[$eventSeatCatalog->seatCatalogue->seatType->name];
-
                 $eventSeatCatalog->priceTypes()->attach([
                     1 => [
                         'price_catalogue_id' => 1,
@@ -114,17 +115,12 @@ class EventSeatCatalogueService
                 ]);
             });
 
-
-
-
             return $newEventSeatCatalogs;
-
         } catch (\Exception $e) {
 
             throw $e;
         }
     }
-
 
     /*
     * |--------------------------------------------------------------------------

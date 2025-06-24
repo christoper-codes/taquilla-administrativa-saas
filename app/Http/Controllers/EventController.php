@@ -163,7 +163,7 @@ class EventController extends Controller
 
             $data = $request->only(['global_season_id','event_type_id','serie_id','name','slug','description','start_date', 'end_date','is_active', 'event_visibility_type_id']);
 
-            $event = $this->event_service->save( $data );
+            $event = $this->event_service->save($data);
 
             if($request->global_image){
 
@@ -174,7 +174,7 @@ class EventController extends Controller
                 $event->save();
             }
 
-            $this->event_seat_catalogue_service->saveInBulk($event->id);
+            $this->event_seat_catalogue_service->saveInBulk($event);
 
             return WebResponseHelper::sendResponse($event, "Evento guardada con éxito", null, false);
 
