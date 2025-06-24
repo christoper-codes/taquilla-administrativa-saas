@@ -291,12 +291,19 @@ class WalletAccountController extends Controller
 
             $wallet_account = $this->wallet_account_service->getByUser($request->id, false);
 
+            if($wallet_account->count()){
+                return response()->json([
+                    'data' => [
+                        'wallet_accounts' => $wallet_account
+                    ],
+                    'message' => 'Cuentas encontradas con éxito!',
+                ], 200);
+            }
+
              return response()->json([
-                'data' => [
-                    'wallet_account' => $wallet_account
-                ],
-                'message' => 'Cuentas encontradas con éxito!',
-            ], 200);
+                'data' => null,
+                'message' => 'No se encontro cuentas relacionadas al usuario!',
+            ], 404);
 
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

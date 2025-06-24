@@ -37,25 +37,31 @@ class EventSeatCatalogueService
     {
         try {
             $get_all_seats_for_stadium = $this->seat_catalogue_service->getAllSeatsForStadium(1);
+            $soldStatusId = $this->seat_catalogue_statuses_service->getByName("vendido")->id;
+            $availableStatusId = $this->seat_catalogue_statuses_service->getByName("disponible")->id;
             $event_seat_catalogue = collect([]);
-            $get_all_seats_for_stadium->each(function (SeatCatalogue $seat_catalogue) use (&$event_seat_catalogue, $event){
+
+            $get_all_seats_for_stadium->each(function (SeatCatalogue $seat_catalogue) use (&$event_seat_catalogue, $event, $soldStatusId, $availableStatusId){
+
                 $season_ticket = SeasonTicket::where('seat_catalogue_id', $seat_catalogue->id)
                     ->where('global_season_id', $event->global_season_id)
                     ->where('is_active', true)
                     ->first();
 
+                $is_season_event_seat_catalogue = $season_ticket && $season_ticket->EventSeatCatalogues->count();
+
                 $event_seat_catalogue->push([
                     'event_id' => $event->id,
                     'seat_catalogue_id' => $seat_catalogue->id,
-                    'user_id' => $season_ticket ? $season_ticket->user_id : null,
-                    'season_ticket_id' => $season_ticket ? $season_ticket->id : null,
-                    'seat_catalogue_status_id' => $season_ticket ? $this->seat_catalogue_statuses_service->getByName("vendido")->id : $this->seat_catalogue_statuses_service->getByName("disponible")->id,
-                    'sale_ticket_id' => $season_ticket ? $season_ticket->EventSeatCatalogues->first()->sale_ticket_id : null,
-                    'qr' => $season_ticket ? $season_ticket->EventSeatCatalogues->first()->qr : null,
-                    'price' => $season_ticket ? $season_ticket->EventSeatCatalogues->first()->price : null,
-                    'original_price' => $season_ticket ? $season_ticket->EventSeatCatalogues->first()->original_price : null,
-                    'purchase_type' => $season_ticket ? $season_ticket->EventSeatCatalogues->first()->purchase_type : null,
-                    'is_gift' => $season_ticket ? $season_ticket->EventSeatCatalogues->first()->is_gift : false,
+                    'user_id' => $is_season_event_seat_catalogue ? $season_ticket->user_id : null,
+                    'season_ticket_id' => $is_season_event_seat_catalogue ? $season_ticket->id : null,
+                    'seat_catalogue_status_id' => $is_season_event_seat_catalogue ? $soldStatusId : $availableStatusId,
+                    'sale_ticket_id' => $is_season_event_seat_catalogue ? $season_ticket->EventSeatCatalogues->first()->sale_ticket_id : null,
+                    'qr' => $is_season_event_seat_catalogue ? $season_ticket->EventSeatCatalogues->first()->qr : null,
+                    'price' => $is_season_event_seat_catalogue ? $season_ticket->EventSeatCatalogues->first()->price : null,
+                    'original_price' => $is_season_event_seat_catalogue ? $season_ticket->EventSeatCatalogues->first()->original_price : null,
+                    'purchase_type' => $is_season_event_seat_catalogue ? $season_ticket->EventSeatCatalogues->first()->purchase_type : null,
+                    'is_gift' => $is_season_event_seat_catalogue ? $season_ticket->EventSeatCatalogues->first()->is_gift : false,
                     'is_verified' => false,
                     'is_active' => true,
                     'created_at' => now(),
