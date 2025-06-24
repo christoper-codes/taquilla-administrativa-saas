@@ -150,4 +150,41 @@ class EventRepository implements EventRepositoryInterface
 
     }
 
+    public function getAllWithTraffic()
+    {
+        $transitoStatusId = SeatCatalogueStatus::where('name', 'transito')->first()->id;
+
+        return Event::with(['globalImage'])
+            ->where('is_active', true)
+            ->whereHas('eventSeatCatalogues', function ($query) use ($transitoStatusId) {
+                $query->where('seat_catalogue_status_id', $transitoStatusId);
+            })
+            ->withCount(['eventSeatCatalogues as traffic_seats_count' => function ($query) use ($transitoStatusId) {
+                $query->where('seat_catalogue_status_id', $transitoStatusId);
+            }])
+            ->get();
+    }
+
+    public function releaseReservedSeats($event_id)
+    {
+        $event = Event::findOrFail($event_id);
+        $seat_catalogue_status = SeatCatalogueStatus::where('name', 'disponible')->first();
+        $transitoStatusId = SeatCatalogueStatus::where('name', 'transito')->first()->id;
+
+        $event->eventSeatCatalogues()
+            ->where('seat_catalogue_status_id', $transitoStatusId)
+            ->where('created_at', '<', now()->subMinutes(20))
+            ->update([
+                'seat_catalogue_status_id' => $seat_catalogue_status->id,
+                'user_id' => null,
+                'sale_ticket_id' => null,
+                'qr' => null,
+                'price' => null,
+                'original_price' => null,
+                'purchase_type' => null,
+                'is_gift' => false,
+            ]);
+
+        return $event;
+    }
 }

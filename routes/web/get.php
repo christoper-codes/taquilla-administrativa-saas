@@ -94,8 +94,6 @@ Route::get('/add-subscriber-to-event-seat-catalog', function (Request $request) 
     return $simulatedUpdates;
 });
 
-
-
 Route::get('/migrate', function () {
 
     Artisan::call('migrate');
@@ -251,7 +249,6 @@ Route::middleware('auth')->group(function() {
 * |Auth | dashboard
 */
 Route::middleware('auth')->group(function () {
-
     Route::get('/dashboard', [SeatCatalogueController::class, 'index'])->name('dashboard');
 
 });
@@ -292,7 +289,7 @@ Route::get('/mis-tarjetas', [WalletAccountTemporalController::class, 'index'])->
 */
 Route::get('/indicadores-generales', [IndicatorController::class, 'index'])->name('indicators.index');
 Route::get('/indicadores-evento/{slug}/{id}', [IndicatorController::class, 'show'])->name('indicators.show');
-
+Route::get('/transito', [IndicatorController::class, 'getAllEventsWithTraffic'])->name('events.with.traffic');
 
 /*
 * |--------------------------------------------------------------------------

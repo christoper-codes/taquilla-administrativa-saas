@@ -65,13 +65,36 @@ class EventService
     public function getAll()
     {
         try {
-
             $event = $this->event_repository->getAll();
-
             return $event;
-
         } catch (\Exception $e) {
+            throw $e;
+        }
+    }
 
+    /*
+    * |--------------------------------------------------------------------------
+    * | Get all events with traffic
+    */
+    public function getAllWithTraffic()
+    {
+        try {
+            $events = $this->event_repository->getAllWithTraffic();
+            return $events;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /*
+    * |--------------------------------------------------------------------------
+    * | Release reserved seats
+    */
+    public function releaseReservedSeats(int $event_id)
+    {
+        try {
+            return $this->event_repository->releaseReservedSeats($event_id);
+        } catch (\Exception $e) {
             throw $e;
         }
     }
@@ -82,9 +105,7 @@ class EventService
     */
     public function getById($id)
     {
-
         try {
-
             $event = $this->event_repository->getById($id);
             $event->serie->globalSeason;
             $payment_installments = [];
@@ -158,7 +179,6 @@ class EventService
     public function reserveSeatsToBuy($data)
     {
         try {
-
             /*
             * Verify if the purchase types is 'partido' or 'serie'
             */
@@ -851,11 +871,8 @@ class EventService
     public function update(int $id, array $data)
     {
         try {
-
             $serie = $this->event_repository->update($id, $data);
-
             return $serie;
-
         } catch (\Exception $e) {
 
             throw $e;
@@ -869,11 +886,8 @@ class EventService
     public function delete(int $id)
     {
         try {
-
             $event = $this->event_repository->delete($id);
-
             return $event;
-
         } catch (\Exception $e) {
 
             throw $e;
@@ -883,11 +897,8 @@ class EventService
     public function getUsersEventForSaleTickets($id)
     {
         try {
-
             $event = $this->event_repository->getUsersEventForSaleTickets($id);
-
             return $event;
-
         } catch (\Exception $e) {
 
             throw $e;

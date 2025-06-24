@@ -16,6 +16,7 @@ use App\Http\Controllers\TicketOfficeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CyberSourceController;
 use App\Http\Controllers\EventSeatCatalogPriceTypeController;
+use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\InstallmentPaymentHistoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
@@ -104,9 +105,7 @@ Route::post('/instituciones', [InstitutionController::class, 'store'])->name('in
 * |Events | ROUTES
 */
 Route::post('/eventos', [EventController::class, 'store'])->name('event.management.store');
-
 Route::post('/payed-aut-setup', [PaymentController::class, 'setupCompletionWithFlexTransientToken'])->name('payment.payed.aut.setup');
-
 Route::post('/crear-usuario-con-roles', [RegisteredUserController::class, 'createUserWithRoles'])->name('create.user.with.roles');
 Route::post('/actualizar-usuario-con-roles', [RegisteredUserController::class, 'updateRolesUser'])->name('update.user.with.roles');
 
@@ -143,3 +142,5 @@ Route::post('/precio-de-asientos', [EventSeatCatalogPriceTypeController::class, 
 * | Wallets | ROUTES
 */
 Route::post('/monederos', [WalletAccountController::class, 'store'])->name('wallets.store');
+
+Route::post('/transito/{id}/liberar-asientos-reservados', [IndicatorController::class, 'releaseReservedSeats'])->name('events.release.reserved.seats');

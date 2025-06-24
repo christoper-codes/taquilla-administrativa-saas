@@ -23,4 +23,6 @@ interface EventRepositoryInterface
     public function getEventsBySerie($serie_id);
     public function getOnlyEvent($id);
     public function getUsersEventForSaleTickets($id);
+    public function getAllWithTraffic();
+    public function releaseReservedSeats($event_id);
 }

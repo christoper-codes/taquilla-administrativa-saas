@@ -19,7 +19,7 @@ const { viewAdminTopics } = useUserPolicy();
 const { viewVendorTopics } = useUserPolicy();
 
 onMounted(() => {
-    const superAdmin = ['/create-users', '/indicadores-generales', '/indicadores-evento'];
+    const superAdmin = ['/create-users', '/indicadores-generales', '/indicadores-evento', '/transito'];
     const admin = ['/series', '/eventos-gestion', '/instituciones', '/promociones', '/convenios'];
     if (superAdmin.some(route => page.url.includes(route))) {
         open.value = ['super_admin'];
@@ -183,7 +183,11 @@ const props = defineProps({
                                                 <span class="material-symbols-outlined tw-text-lg">monitoring</span>Indicadores
                                             </AppNavLink>
                                         </div>
-
+                                        <div class="tw-mt-3 tw-w-full">
+                                            <AppNavLink :href="route('events.with.traffic')" :active="route().current('events.with.traffic')">
+                                                <span class="material-symbols-outlined tw-text-lg">block</span>Transito
+                                            </AppNavLink>
+                                        </div>
                                     </v-list-group>
                                 </v-list>
                             </v-card>
