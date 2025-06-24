@@ -53,7 +53,6 @@ class SaleTicketService
     public function cancellationSaleTickets(array $data)
     {
         try {
-
             /*
             * Update sale ticket status
             */
@@ -81,7 +80,6 @@ class SaleTicketService
             $seat_catalogue_status_id = SeatCatalogueStatus::where('name', 'disponible')->first()->id;
             foreach($sale_ticket->eventSeatCatalogs as $event_seat_catalog) {
                 if($data['is_partial_cancel']){
-
                     if (in_array($event_seat_catalog->seatCatalogue->code, $data['cancel_seat_codes'])) {
                         $balance_to_returned += $event_seat_catalog->price;
                        $this->updateEventSeatCatalog($event_seat_catalog, $seat_catalogue_status_id, $sale_ticket, $data['payment_types_selected_keys']);
@@ -90,9 +88,7 @@ class SaleTicketService
                 } else {
                     $balance_to_returned += $event_seat_catalog->price;
                     $this->updateEventSeatCatalog($event_seat_catalog, $seat_catalogue_status_id, $sale_ticket, $data['payment_types_selected_keys']);
-
                 }
-
             }
 
             /*
@@ -115,7 +111,6 @@ class SaleTicketService
             $cash_register->save();
 
             return true;
-
         } catch(\Exception $e){
             throw $e;
         }

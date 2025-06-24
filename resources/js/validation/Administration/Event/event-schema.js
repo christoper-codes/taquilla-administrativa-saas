@@ -10,12 +10,21 @@ export const eventSchema = {
         return true;
     },
     serie_id(value) {
+        if (!value) {
+          return 'Este campo es obligatorio';
+        }
         return true;
     },
     global_season_id(value) {
+        if (!value) {
+          return 'Este campo es obligatorio';
+        }
         return true;
     },
     global_image(value) {
+        if (!value) {
+          return 'Este campo es obligatorio';
+        }
         return true;
     },
     name(value) {
@@ -27,6 +36,12 @@ export const eventSchema = {
           return 'El nombre debe tener al menos 3 caracteres';
         }
 
+        return true;
+    },
+    event_visibility_type_id(value) {
+        if (!value) {
+          return 'Este campo es obligatorio';
+        }
         return true;
     },
     description(value) {

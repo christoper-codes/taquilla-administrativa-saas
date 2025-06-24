@@ -8,6 +8,7 @@ use App\Helpers\WebResponseHelper;
 use App\Interfaces\EventRepositoryInterface;
 use App\Models\Event;
 use App\Models\EventSeatCatalog;
+use App\Models\EventVisibilityType;
 use App\Models\GlobalCardPaymentType;
 use App\Models\GlobalPaymentType;
 use App\Models\Institution;
@@ -103,6 +104,7 @@ class EventController extends Controller
             $series = $this->serie_service->getAll();
             $global_seasons = $this->global_season_service->getAll();
             $events_for_type = $this->event_service->getAll()->groupBy('event_type_id');
+            $events_visibility_types = EventVisibilityType::all();
 
             $missingEventTypeIds = $event_types->pluck('id')->diff($events_for_type->keys())->values();
             $missingEventTypeIds->each(fn (int $eventTypeId) => $events_for_type->put($eventTypeId, collect()));
@@ -121,6 +123,7 @@ class EventController extends Controller
                 'series' => $series,
                 'global_seasons'=> $global_seasons,
                 'events_for_type' => $events_for_type,
+                'events_visibility_types' => $events_visibility_types,
             ]);
 
       } catch (\Exception $e) {
@@ -153,12 +156,12 @@ class EventController extends Controller
                 'description' => 'required|string|max:255',
                 'start_date' => 'required',
                 'end_date' => 'required',
-                'is_active' => 'required|boolean'
+                'is_active' => 'required|boolean',
+                'event_visibility_type_id' => 'required|exists:event_visibility_types,id',
             ]);
 
             $request->merge([
                 'slug' => Str::slug($request->name, '-'),
-                'event_visibility_type_id' => 1,
             ]);
 
             $data = $request->only(['global_season_id','event_type_id','serie_id','name','slug','description','start_date', 'end_date','is_active', 'event_visibility_type_id']);
