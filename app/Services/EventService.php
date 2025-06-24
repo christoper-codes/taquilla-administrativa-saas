@@ -74,6 +74,20 @@ class EventService
 
     /*
     * |--------------------------------------------------------------------------
+    * | Get all active events
+    */
+    public function getAllActive()
+    {
+        try {
+            $events = $this->event_repository->getAllActive();
+            return $events;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /*
+    * |--------------------------------------------------------------------------
     * | Get all events with traffic
     */
     public function getAllWithTraffic()

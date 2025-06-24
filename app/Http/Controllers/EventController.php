@@ -76,7 +76,7 @@ class EventController extends Controller
     public function index()
     {
       try {
-            $events = $this->event_service->getAll();
+            $events = $this->event_service->getAllActive();
             $user_roles = null;
             if(Auth::user()){
                 $user_roles = Auth::user()->userRoles;
@@ -85,7 +85,6 @@ class EventController extends Controller
                 'events' => $events,
                 'user_roles' => $user_roles
             ]);
-
       } catch (\Exception $e) {
         WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar los eventos');
       }

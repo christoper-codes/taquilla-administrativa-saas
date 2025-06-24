@@ -19,6 +19,13 @@ class EventRepository implements EventRepositoryInterface
         return Event::with(['globalImage','serie.globalSeason.stadium.globalAddress', 'globalSeason', 'eventVisibilityType'])->get();
     }
 
+    public function getAllActive()
+    {
+         return Event::with(['globalImage','serie.globalSeason.stadium.globalAddress', 'globalSeason', 'eventVisibilityType'])
+        ->where('is_active', true)
+        ->get();
+    }
+
     public function getById($id)
     {
         $event = Event::with([

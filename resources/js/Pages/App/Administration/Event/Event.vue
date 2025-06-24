@@ -187,6 +187,7 @@ const editEvent = (selectedEvent) => {
     event.event_type_id.setValue(selectedEvent.event_type_id);
     event.serie_id.setValue(selectedEvent.serie_id);
     event.name.setValue(selectedEvent.name);
+    event.event_visibility_type_id.setValue(selectedEvent.event_visibility_type_id);
     event.description.setValue(selectedEvent.description);
     event.start_date.setValue(formatDateForDataInput(selectedEvent.start_date));
     event.start_time.setValue(formatHourForTimePicker(selectedEvent.start_date));
