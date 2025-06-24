@@ -32,6 +32,7 @@ use App\Interfaces\SerieRepositoryInterface;
 use App\Interfaces\StadiumRepositoryInterface;
 use App\Interfaces\EventSeatCatalogPriceTypeRepositoryInterface;
 use App\Interfaces\OnlinePaymentTransactionRepositoryInterface;
+use App\Interfaces\PlatformSettingRepositoryInterface;
 use App\Interfaces\PriceCatalogRepositoryInterface;
 use App\Interfaces\PriceTypeRepositoryInterface;
 use App\Interfaces\SeasonTicketWalletAccountRepositoryInterface;
@@ -69,6 +70,7 @@ use App\Repositories\StadiumRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\EventSeatCatalogPriceTypeRepository;
 use App\Repositories\OnlinePaymentTransactionRepository;
+use App\Repositories\PlatformSettingRepository;
 use App\Repositories\PriceCatalogRepository;
 use App\Repositories\PriceTypeRepository;
 use Illuminate\Support\ServiceProvider;
@@ -130,6 +132,7 @@ class RepositoriServiceProvider extends ServiceProvider
         $this->app->bind(SeasonTicketWalletAccountRepositoryInterface::class, SeasonTicketWalletAccountRepository::class);
         $this->app->bind(WalletAccountWalletAccountTypeRepositoryInterface::class, WalletAccountWalletAccountTypeRepository::class);
         $this->app->bind(WalletAccountRoleRepositoryInterface::class, WalletAccountRoleRepository::class);
+        $this->app->bind(PlatformSettingRepositoryInterface::class, PlatformSettingRepository::class);
     }
 
     /**

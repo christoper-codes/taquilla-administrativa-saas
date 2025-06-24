@@ -70,17 +70,18 @@ class WalletAccountController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'season_ticket_id' => 'nullable|exists:season_tickets,id',
+            'user_id' => 'nullable|exists:users,id',
+            'wallet_account_type_id' => 'required|exists:wallet_account_types,id',
+            'role_type_id' => 'required',
+            'current_balance' => 'required',
+            'account_number' => 'nullable|string',
+            'expiration_date' => 'required|date',
+        ]);
+
         try {
 
-            $request->validate([
-                'season_ticket_id' => 'nullable|exists:season_tickets,id',
-                'user_id' => 'nullable|exists:users,id',
-                'wallet_account_type_id' => 'required|exists:wallet_account_types,id',
-                'role_type_id' => 'required',
-                'current_balance' => 'required',
-                'account_number' => 'nullable|string',
-                'expiration_date' => 'required|date',
-            ]);
 
             $user_id = $request->user_id;
             $season_ticket_id = $request->season_ticket_id;
@@ -316,9 +317,10 @@ class WalletAccountController extends Controller
      */
     public function showHistoryByAccountNumber(Request $request)
     {
+        $request->validate(['account_number' => 'exists:wallet_accounts,account_number']);
+
         try {
 
-            $request->validate(['account_number' => 'exists:wallet_accounts,account_number']);
 
             $wallet_account = $this->wallet_account_service->getHistoryByAccountNumber($request->account_number);
 
@@ -339,13 +341,14 @@ class WalletAccountController extends Controller
      */
     public function update(Request $request)
     {
+        $request->validate([
+            'id' => 'required',
+            'is_active' => 'required|boolean',
+            'expiration_date' => 'required|date',
+        ]);
+
         try {
 
-            $request->validate([
-                'id' => 'required',
-                'is_active' => 'required|boolean',
-                'expiration_date' => 'required|date',
-            ]);
 
             $request->merge([
                 'expiration_date' => Carbon::parse($request->expiration_date)->format('Y-m-d')
