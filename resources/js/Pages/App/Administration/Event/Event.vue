@@ -14,6 +14,8 @@ import EventSeatCatalogStatus from '@/Components/../Pages/App/Administration/Off
 import useStringFormat from '@/composables/stringFormat';
 import { VTimePicker } from 'vuetify/labs/VTimePicker';
 import useDateFormat from '@/composables/dateFormat';
+import PrimaryButton from '@/Components/buttons/PrimaryButton.vue';
+
 const { formatDateForDataInput, formatHourForTimePicker, combineDateTimeForDatabase } = useDateFormat();
 
 const { formatFirstLetterUppercase } = useStringFormat();
@@ -263,21 +265,17 @@ const openDialogBlockAndReserve = (event, open) => {
             <v-tabs-window v-model="tabEvent">
                 <v-tabs-window-item v-for="event_for_type in events_for_type" :key="event_for_type.event_type_id"
                     :value="event_for_type.event_type_id">
-                    <v-data-table :headers="headersEvent" :items="event_for_type.events">
+                    <v-data-table :headers="headersEvent" :items="event_for_type.events" class="!tw-rounded-xl">
                         <template v-slot:top>
-                            <v-toolbar flat>
+                            <v-toolbar flat class="!tw-p-5 !tw-rounded-xl !tw-shadow-lg !tw-mb-7">
                                 <v-toolbar-title>Eventos</v-toolbar-title>
-                                <v-divider class="mx-4" inset vertical></v-divider>
-                                <v-spacer></v-spacer>
                                 <v-dialog v-model="dialogFormEvent" max-width="800px">
                                     <template v-slot:activator="{ props }">
-                                        <v-btn variant="tonal" class="mb-2 !tw-mr-5 text-none" color="purple"
-                                            rounded="xl" v-bind="props">
-                                            Nuevo evento
-                                        </v-btn>
+                                        <PrimaryButton v-bind="props" heightbtn="!tw-h-[60px]">
+                                            <span>Nuevo evento</span>
+                                        </PrimaryButton>
                                     </template>
                                     <v-card>
-
                                         <v-card-title>
                                             <span class="text-h5">{{ formTitleEvent }}</span>
                                         </v-card-title>
