@@ -18,7 +18,7 @@ import CashRegisterNav from '@/Components/navs/CashRegisterNav.vue';
 const { dateFormat } = useDateFormat();
 const loading = ref(false);
 const filteredEvents = ref([]);
-const { viewVendorTopics } = useUserPolicy();
+const { viewVendorTopics, viewAdminTopics } = useUserPolicy();
 const showEvent = () => {loading.value = true;}
 
 const props = defineProps({
@@ -60,6 +60,9 @@ onMounted(() => {
             if(event.event_visibility_type.name == 'vendedores' && viewVendorTopics(props.user_roles)){
                 return true;
             }
+        }
+        if(event.event_visibility_type.name == 'administradores' && viewAdminTopics(props.user_roles)){
+            return true;
         }
 
         return false;
@@ -130,11 +133,11 @@ const closeImageModal = () => {
                             <div>
                                 <h2 data-aos="fade-down" data-aos-duration="1300" data-aos-once="true" class="tw-font-metal tw-pr-1 tw-italic tw-text-2xl tw-inline-block tw-bg-clip-text tw-bg-gradient-to-r tw-from-primary tw-to-secondary/60 tw-text-transparent">Proximo partido</h2>
                                 <h1 data-aos="fade-down" data-aos-duration="1300" data-aos-once="true" class="lg:tw-text-[70px] !tw-max-w-2xl tw-text-4xl md:tw-text-5xl tw-font-bold tw-font-bebas tw-mt-3">
-                                    {{ filteredEvents[0]?.name || '' }}
+                                    {{ filteredEvents[0]?.name || 'Nuevos partidos próximamente' }}
                                 </h1>
 
                                 <p data-aos="fade-down" data-aos-duration="1300" data-aos-once="true" class="tw-font-medium tw-text-balance sm:!tw-text-xl tw-max-w-[900px] !tw-mt-7">
-                                    {{ filteredEvents[0]?.description || '' }} | {{ dateFormat(filteredEvents[0]?.start_date ) || '' }}.
+                                    {{ filteredEvents[0]?.description || 'El nido del halcon' }} | {{ filteredEvents[0]?.start_date ? dateFormat(filteredEvents[0]?.start_date) : 'Nuevas fechas' }}.
                                     <br>
                                     Vive la emoción del baloncesto con los <span class="tw-font-bold">Halcones de Xalapa</span>.
                                 </p>
@@ -178,7 +181,7 @@ const closeImageModal = () => {
         <div class="tw-max-w-7xl tw-min-h-screen tw-pt-0 tw-mx-auto tw-z-20 tw-relative">
             <div class="lg:tw-grid lg:tw-grid-cols-3 tw-gap-y-8 lg:tw-gap-y-0 lg:tw-gap-x-6">
                 <div class="lg:tw-col-span-2">
-                    <div v-if="events" class="tw-py-8 lg:tw-pe-8">
+                    <div v-if="events.length > 0" class="tw-py-8 lg:tw-pe-8">
                         <div v-for="event in filteredEvents" :key="event.id"  class="tw-space-y-5 lg:tw-space-y-8 tw-pb-10 tw-mt-16 tw-border-b-4 lg:tw-border-b-8 tw-border-neutral-300 tw-border-dashed">
                             <div>
                                 <h2 class="tw-font-bebas tw-text-4xl tw-font-bold lg:tw-text-6xl">{{ event.name }}</h2>
@@ -229,18 +232,24 @@ const closeImageModal = () => {
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <aside class="lg:tw-col-span-1">
-                    <div class="tw-sticky tw-top-10 tw-mb-20 tw-hidden lg:tw-block">
+                </div>
+                <aside :class="events.length > 0 ? 'lg:tw-col-span-1 tw-hidden lg:tw-block' : 'tw-col-span-1 lg:tw-col-span-3'">
+                    <div :class="events.length > 0 ? 'tw-sticky tw-top-10 tw-mb-20' : 'tw-top-10 tw-mb-20'">
                         <div class="tw-h-auto tw-w-full tw-rounded-lg tw-border-8 tw-border-neutral-200 tw-overflow-hidden tw-mt-10 tw-flex tw-items-center tw-justify-center">
-                            <iframe class="tw-rounded-lg" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3760.653263134143!2d-96.91874712501097!3d19.51354808178317!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85db320be3350bd1%3A0xba83c38e6e168a4!2sGimnasio%20Nido%20del%20Halc%C3%B3n%20UV!5e0!3m2!1ses-419!2smx!4v1735482228924!5m2!1ses-419!2smx" width="400" height="400" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                            <iframe v-if="events.length > 0" class="tw-rounded-lg" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3760.653263134143!2d-96.91874712501097!3d19.51354808178317!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85db320be3350bd1%3A0xba83c38e6e168a4!2sGimnasio%20Nido%20del%20Halc%C3%B3n%20UV!5e0!3m2!1ses-419!2smx!4v1735482228924!5m2!1ses-419!2smx" width="400" height="400" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                            <iframe v-else class="tw-w-full" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3760.653263134143!2d-96.91874712501097!3d19.51354808178317!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85db320be3350bd1%3A0xba83c38e6e168a4!2sGimnasio%20Nido%20del%20Halc%C3%B3n%20UV!5e0!3m2!1ses-419!2smx!4v1735482228924!5m2!1ses-419!2smx" height="400" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        </div>
+                    </div>
+                    <div v-if="events.length <= 0" class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-5 tw-mt-10">
+                        <div class="tw-text-center tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-5">
+                            <img class="tw-w-40 lg:tw-w-72 tw-h-auto" src="/storage/public/empty-cart.webp" alt="">
+                            <span>Nuevos partidos próximamente</span>
                         </div>
                     </div>
                 </aside>
             </div>
         </div>
     </main>
-
     <Footer />
 </template>

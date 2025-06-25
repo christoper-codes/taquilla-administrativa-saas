@@ -312,7 +312,7 @@ const openDialogBlockAndReserve = (event, open) => {
                                                             <div class="tw-w-full">
                                                                 <v-select
                                                                     color="purple"
-                                                                    label="Tipo de evento"
+                                                                    label="Visivilidad de evento"
                                                                     :items="events_visibility_types.map(item => ({ title: item.name, value: item.id }))"
                                                                     variant="outlined"
                                                                     v-model="event.event_visibility_type_id.value.value"

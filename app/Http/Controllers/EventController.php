@@ -571,18 +571,18 @@ class EventController extends Controller
         try {
 
             $request->validate([
-                'event_type_id' => 'required|exists:event_types,id',
-                'serie_id' => 'required|exists:series,id',
-                'name' => 'required|string|max:255',
-                'description' => 'required|string|max:255',
-                'start_date' => 'required|date',
-                'end_date' => 'required|date',
-                'is_active' => 'required|boolean'
+                'event_type_id' => 'nullable|exists:event_types,id',
+                'global_season_id' => 'nullable',
+                'serie_id' => 'nullable|exists:series,id',
+                'name' => 'nullable|string|max:255',
+                'description' => 'nullable|string|max:255',
+                'start_date' => 'nullable',
+                'end_date' => 'nullable',
+                'is_active' => 'nullable|boolean',
+                'event_visibility_type_id' => 'nullable|exists:event_visibility_types,id',
             ]);
 
             $request->merge([
-                'start_date' => Carbon::parse($request->start_date)->format('Y-m-d'),
-                'end_date' => Carbon::parse($request->end_date)->format('Y-m-d'),
                 'slug' => Str::of($request->name)->slug('_')
             ]);
 
@@ -593,7 +593,7 @@ class EventController extends Controller
                 $request->merge([ 'global_image_id' => $global_image->id ]);
             }
 
-            $data = $request->only(['event_type_id','serie_id', 'global_image_id','name','slug','description','start_date', 'end_date','is_active']);
+            $data = $request->only(['event_type_id', 'global_season_id', 'serie_id', 'global_image_id','name','slug','description','start_date', 'end_date','is_active', 'event_visibility_type_id']);
 
             $event = $this->event_service->update($request->id, $data );
 

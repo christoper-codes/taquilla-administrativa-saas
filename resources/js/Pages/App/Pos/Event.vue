@@ -1898,7 +1898,7 @@ watch(() => agreementSelected.value, () => {
                                     <div class="lg:tw-px-5 tw-relative tw-flex tw-flex-col-reverse">
                                         <div v-if="seatsSelected.length == 0" class="tw-flex tw-flex-col tw-items-center tw-gap-10 tw-justify-center">
                                             <h3>No hay asientos seleccionados</h3>
-                                            <img class="tw-w-40 lg:tw-w-96 tw-h-auto" src="/storage/public/emty-cart.webp" alt="">
+                                            <img class="tw-w-40 lg:tw-w-96 tw-h-auto" src="/storage/public/empty-cart.webp" alt="">
                                         </div>
                                         <div v-if="seatsSelected.length > 0" class="payment-secction">
                                             <div class="tw-w-full ">
