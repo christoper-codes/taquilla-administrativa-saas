@@ -3,8 +3,8 @@ const year = new Date().getFullYear()
 </script>
 
 <template>
-    <footer class="w-full tw-bg-gradient-to-r tw-from-secondary tw-to-primary tw-pt-2 tw-flex tw-items-center tw-justify-center tw-z-20 tw-relative">
-        <div class="tw-rounded-t-[40px] tw-bg-white tw-pt-12 lg:tw-pt-20 tw-w-full tw-text-center tw-flex tw-items-center tw-justify-center">
+    <footer class="w-full tw-bg-gradient-to-r tw-from-secondary tw-to-primary tw-p-2 tw-flex tw-items-center tw-justify-center tw-z-20 tw-relative">
+        <div class="tw-rounded-3xl tw-bg-white tw-py-12 lg:tw-pt-20 tw-w-full tw-text-center tw-flex tw-items-center tw-justify-center">
             <div class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-5">
                 <div class="tw-flex tw-items-center tw-justify-center tw-gap-3 tw-flex-col tw-w-full tw-z-10">
                     <div class="tw-flex tw-items-center  tw-relative">
