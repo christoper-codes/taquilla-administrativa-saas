@@ -1315,9 +1315,9 @@ axios.post(route('events.reserve-seats-to-buy'), seatsSelectedData)
                 })
                 .catch(error => {
                     console.error(error);
+                    const pdfUrl = window.URL.createObjectURL(pdfBlob);
+                    printInKioskMode(pdfUrl, purchaseType.value);
                 });
-            //const pdfUrl = window.URL.createObjectURL(pdfBlob);
-            //printInKioskMode(pdfUrl, purchaseType.value);
             selectZones();
             setTimeout(() => {
                 selectZones();

@@ -13,14 +13,36 @@
 <body>
 
     @foreach($pdf_data as $data)
+        @if ($loop->first)
+            <div class="alert">
+                <p>EL BOLETO NO ESTÁ SUJETO A REEMBOLSO, CAMBIO O REPOSICIÓN. EL BOLETO TE DA DERECHO A UN ACCESO AL INMUEBLE. El boleto te da derecho a un lugar específico dentro del inmueble. No está permitido el reingreso. Este boleto es válido solo para el evento y asiento descrito en pantalla. Queda prohibido mostrar capturas de pantalla del boleto en la entrada. El poseedor del boleto asume cualquier riesgo o peligro accidental proveniente del evento. La admisión<br>está sujeta a que el espectador permita que se practique la revisión correspondiente para evitar el acceso a alimentos y bebidas alcohólicas, drogas, armas, mochilas, maletas, productos de tabaco, vapeadores, grabadoras, cámaras de cualquier tipo o cualquier otro artículo o sustancia no autorizada. El titular del inmueble del evento<br> o sus representantes se reservan el derecho de admisión o, en su caso, se retirará del inmueble a cualquier persona cuya conducta se considere ofensiva, que induzca al desorden, y en general aquellas conductas que pudieran constituir una infracción o delito, no estando obligado a reembolsar cantidad alguna. El espectador se obliga a cumplir con las reglas del inmueble.</p>
+            </div>
+        @endif
         <div class="ticket">
             <h1>HALCONES DE XALAPA</h1>
-            <p class="info" style="margin-top: 20px; margin-left: 120px">
+            <p class="info" style="margin-top: 20px; margin-left: 160px">
                 Cultura Veracruzana, Zona Universitaria,<br>
                 Campus Cad, Xalapa Enriquez, 91094
             </p>
-            <h2 style="margin-top: 40px; margin-left: 120px">TICKET DE VENTA</h2>
-            <table style="margin-top: 40px; margin-left: 170px">
+            <h2 style="margin-top: 40px; margin-left: 160px">TICKET DE VENTA</h2>
+            <p style="margin-top: 20px; margin-left:30%">Taquilla: Taquilla halcones</p>
+            <p style="margin-top: 20px; margin-left: 30%">Vendedor:{{
+                trim(implode(' ', array_filter([
+                    $data['seller_user']['first_name'],
+                    $data['seller_user']['middle_name'],
+                    $data['seller_user']['last_name']
+                ])))
+                }}
+            </p>
+            <p style="margin-top: 20px; margin-left: 30%">Fecha de compra:{{ Carbon::parse($data['ticket_created_at'])->translatedFormat('d F, Y h:i A') }}</p>
+            @if ($data['promotion_ticket'])
+                <p style="margin-top: 20px; margin-left: 30%">Promoción aplicada: {{ $data['promotion_ticket']['name'].' - '. Str::ucfirst(str_replace('_', ' ', $data['promotion_ticket']['promotionType']['name'].(  $data['promotion_ticket']['percent_allow'] ? ' ('.$generic_data['promotion_ticket']['percent_allow'].'%)': '')))}}</p>
+            @endif
+
+            <p style="margin-top: 20px; margin-left: 30%">Folio de Venta:  {{ $data['ticket_id'] }}</p>
+
+            <p style="margin-top: 20px; margin-left: 30%">Caja registradora: {{ $data['cash_register_type'] }}</p>
+            <!--<table style="margin-top: 40px; margin-left: 170px">
                 <tr>
                     <th>
                         <p>Taquilla:<br>Taquilla halcones</p>
@@ -43,14 +65,18 @@
                         <p>Caja registradora: {{ $data['cash_register_type'] }}</p>
                     </td>
                 </tr>
-            </table>
+            </table>-->
             <h3 style="margin-top: 40px;">{{ $data['seat_code'] }}</h3>
-            <p class="info" style="margin-top: 20px;  margin-left: 120px">
+            <p class="info" style="margin-top: 20px;  margin-left: 160px">
                 La adquisición al inmueble es exclusiva <br>
                 para el asiento y zona especificada
             </p>
-            <h2 style="margin-top: 40px; font-size: 27px margin-left: 140px;">{{ $data['event_name'] }}</h2>
-            <table style="margin-top: 40px; margin-left: 170px">
+            <h2 style="margin-top: 40px;">{{ $data['event_name'] }}</h2>
+            <p style="margin-top: 20px; margin-left: 30%">Lugar:USBI "Nido de los Halcones"</p>
+            <p style="margin-top: 20px; margin-left: 30%">Fecha del evento:{{  Carbon::parse($data['event_start_date'])->translatedFormat('d F, Y h:i A') }}</p>
+            <p style="margin-top: 20px; margin-left: 30%">Boletos: 1</p>
+            <p style="margin-top: 20px; margin-left: 30%">Total: ${{  number_format($data['final_price'], 2, '.', '') }}</p>
+            <!--<table style="margin-top: 40px; margin-left: 170px">
                 <tr>
                     <th>
                         <p>Lugar:<br>USBI "Nido de los Halcones"</p>
@@ -61,7 +87,7 @@
                         <p>Total: ${{  number_format($data['final_price'], 2, '.', '') }}</p>
                     </td>
                 </tr>
-            </table>
+            </table>-->
             <div class="line"></div>
             <div class="qr">
                 <img src="{{ $data['qr_img'] }}" alt="QR Code">
@@ -88,6 +114,16 @@
             justify-content: center;
             align-items: center;
         }
+        .alert {
+            margin-left: 30%;
+            page-break-before: always;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .alert p {
+            font-size: 23px;
+        }
         .ticket {
             background: white;
             border-radius: 10px;
@@ -95,12 +131,12 @@
         }
         .ticket h1, .ticket h2, .ticket h3 {
             margin: 0;
-            margin-left: 120px;
+            margin-left: 25%;
             padding: 5px 0;
             text-align: center;
         }
         .ticket h2, .ticket h3 {
-            font-size: 30px;
+            font-size: 35px;
         }
         .ticket h1{
             font-size: 40px;
@@ -115,6 +151,7 @@
             padding-top: 40px;
         }
         .ticket p {
+            margin-top: 40px;
             margin: 5px 0;
             font-size: 25px;
         }
@@ -130,7 +167,7 @@
             justify-content: space-between;
         }
         .ticket .footer p, .ticket .footer h5 {
-            margin-left: 120px;
+            margin-left: 30%;
             padding: 20px;
             background: #f1f1f1;
             margin-top: 40px;
@@ -149,7 +186,7 @@
             margin-bottom: 3px;
         }
         .ticket .qr img {
-            margin-left: 120px;
+            margin-left: 160px;
             width: 400px;
             height: 400px;
         }
