@@ -87,7 +87,7 @@ const closeImageModal = () => {
 </script>
 
 <template>
-    <Head title="Welcome" />
+    <Head title="Eventos" />
    <!--  <GuestLayout v-bind:user_roles="user_roles" /> -->
     <!-- <NavigationDrawer v-bind:user_roles="user_roles" /> -->
     <CashRegisterNav v-bind:user_roles="user_roles"/>
