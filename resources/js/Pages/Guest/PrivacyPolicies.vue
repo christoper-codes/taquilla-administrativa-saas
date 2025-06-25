@@ -11,7 +11,7 @@ const formattedDate = new Intl.DateTimeFormat('es-MX', {
 
 <template>
 <Head title="Políticas de privacidad" />
-  <div class="tw-bg-white">
+  <div class="tw-bg-white tw-w-full">
     <main class="tw-flex tw-items-center tw-justify-center tw-py-5 lg:tw-py-0 tw-relative tw-bg-white lg:tw-w-[60%] !tw-mx-auto">
     <div class="tw-px-5 lg:tw-px-0 lg:tw-py-5">
       <div class="tw-flex tw-tw-items-center tw-justify-between">

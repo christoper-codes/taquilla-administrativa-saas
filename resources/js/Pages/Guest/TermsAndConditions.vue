@@ -10,10 +10,10 @@ const formattedDate = new Intl.DateTimeFormat('es-MX', {
 </script>
 
 <template>
-<Head title="Términos y Condiciones del Boleto" />
+<Head title="Políticas de privacidad" />
   <div class="tw-bg-white">
     <main class="tw-flex tw-items-center tw-justify-center tw-py-5 lg:tw-py-0 tw-relative tw-bg-white lg:tw-w-[60%] !tw-mx-auto">
-    <div class="tw-px-5 lg:tw-px-0 lg:tw-py-5">
+    <div class="tw-px-5 lg:tw-px-0 lg:tw-py-5 tw-w-full">
       <div class="tw-flex tw-tw-items-center tw-justify-between">
         <div class="tw-flex tw-items-center tw-gap-3">
         <Link :href="route('welcome')" class="tw-block">
@@ -33,30 +33,61 @@ const formattedDate = new Intl.DateTimeFormat('es-MX', {
       <div class="tw-mt-7 tw-leading-7">
         <div class="tw-font-medium  tw-opacity-90">
         <main class="tw-min-h-screen tw-w-full">
-        <div class="tw-w-full tw-mx-auto tw-bg-white tw-py-5 tw-px-4 md:tw-px-10">
-            <h1 class="tw-text-2xl tw-font-bold tw-text-gray-800 tw-mb-4">Términos y Condiciones del Boleto – Halcones de Xalapa</h1>
+            <div class="tw-w-full tw-mx-auto tw-bg-white tw-py-5 tw-px-4 md:tw-px-10">
+                <h1 class="tw-text-2xl tw-font-bold tw-text-gray-800 tw-mb-4">Términos y Condiciones del Boleto – Halcones de Xalapa</h1>
+                <h2 class="tw-text-xl tw-font-bold tw-text-gray-800 tw-mt-8">1. Reembolsos</h2>
+                <p class="tw-text-gray-700 tw-mt-2">
+                  El boleto no está sujeto a reembolso, cambio o reposición.
+                </p>
 
-            <h3 class="tw-text-lg tw-font-bold tw-text-gray-800 tw-mt-4">1. El boleto no está sujeto a reembolso, cambio o reposición.</h3>
-            <h3 class="tw-text-lg tw-font-bold tw-text-gray-800 tw-mt-4">2. El boleto te da derecho a un acceso al inmueble.</h3>
-            <h3 class="tw-text-lg tw-font-bold tw-text-gray-800 tw-mt-4">3. El boleto te da derecho a un lugar específico.</h3>
-            <h3 class="tw-text-lg tw-font-bold tw-text-gray-800 tw-mt-4">4. No está permitido el reingreso al inmueble.</h3>
-            <h3 class="tw-text-lg tw-font-bold tw-text-gray-800 tw-mt-4">5. El boleto es válido sólo para el evento y asiento.</h3>
+                <h2 class="tw-text-xl tw-font-bold tw-text-gray-800 tw-mt-8">2. Acceso</h2>
+                <p class="tw-text-gray-700 tw-mt-2">
+                  El boleto te da derecho a un acceso al inmueble.
+                </p>
 
-            <h3 class="tw-text-lg tw-font-bold tw-text-gray-800 tw-mt-4">6. La admisión está sujeta a revisión para evitar ingreso de:</h3>
+                <h2 class="tw-text-xl tw-font-bold tw-text-gray-800 tw-mt-8">3. Asiento asignado</h2>
+                <p class="tw-text-gray-700 tw-mt-2">
+                  El boleto te da derecho a un lugar específico.
+                </p>
+
+                <h2 class="tw-text-xl tw-font-bold tw-text-gray-800 tw-mt-8">4. Reingreso</h2>
+                <p class="tw-text-gray-700 tw-mt-2">
+                  No está permitido el reingreso al inmueble.
+                </p>
+
+                <h2 class="tw-text-xl tw-font-bold tw-text-gray-800 tw-mt-8">5. Validez del boleto</h2>
+                <p class="tw-text-gray-700 tw-mt-2">
+                  El boleto es válido sólo para el evento y asiento indicado.
+                </p>
+
+                <h2 class="tw-text-xl tw-font-bold tw-text-gray-800 tw-mt-8">6. Revisión de ingreso</h2>
+                <p class="tw-text-gray-700 tw-mt-2">
+                  La admisión está sujeta a revisión para evitar el ingreso de:
+                </p>
                 <ul class="tw-list-disc tw-list-inside tw-text-gray-700 tw-mt-2">
-                <li>Alimentos, bebidas alcohólicas</li>
-                <li>Drogas, armas</li>
-                <li>Mochilas, maletas</li>
-                <li>Tabaco, vapeadores</li>
-                <li>Cámaras, grabadoras</li>
-                <li>Otros artículos no autorizados</li>
-            </ul>
+                  <li>Alimentos, bebidas alcohólicas</li>
+                  <li>Drogas, armas</li>
+                  <li>Mochilas, maletas</li>
+                  <li>Tabaco, vapeadores</li>
+                  <li>Cámaras, grabadoras</li>
+                  <li>Otros artículos no autorizados</li>
+                </ul>
 
-            <h3 class="tw-text-lg tw-font-bold tw-text-gray-800 tw-mt-4">7. El titular se reserva el derecho de admisión.</h3>
-            <h3 class="tw-text-lg tw-font-bold tw-text-gray-800 tw-mt-4">8. Se podrá retirar a personas con conducta ofensiva.</h3>
-            <h3 class="tw-text-lg tw-font-bold tw-text-gray-800 tw-mt-4">9. El espectador debe cumplir las reglas del inmueble.</h3>
+                <h2 class="tw-text-xl tw-font-bold tw-text-gray-800 tw-mt-8">7. Derecho de admisión</h2>
+                <p class="tw-text-gray-700 tw-mt-2">
+                  El titular se reserva el derecho de admisión.
+                </p>
 
-        </div>
+                <h2 class="tw-text-xl tw-font-bold tw-text-gray-800 tw-mt-8">8. Conducta</h2>
+                <p class="tw-text-gray-700 tw-mt-2">
+                  Se podrá retirar a personas con conducta ofensiva.
+                </p>
+
+                <h2 class="tw-text-xl tw-font-bold tw-text-gray-800 tw-mt-8">9. Normas del inmueble</h2>
+                <p class="tw-text-gray-700 tw-mt-2">
+                  El espectador debe cumplir con todas las reglas del inmueble.
+                </p>
+            </div>
         </main>
         </div>
       </div>
