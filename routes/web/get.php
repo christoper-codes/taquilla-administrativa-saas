@@ -94,6 +94,38 @@ Route::get('/add-subscriber-to-event-seat-catalog', function (Request $request) 
     return $simulatedUpdates;
 });
 
+
+/*
+Route::get('/print-reporte', function () {
+    try {
+        $pdfPath = storage_path('app/public/95e292bc-0535-4c4c-a89d-f37c1987a7f0.pdf');
+        $printerName = 'Star BSC10';
+
+        if (!file_exists($pdfPath)) {
+            return response()->json(['error' => 'El archivo PDF no existe en: ' . $pdfPath], 404);
+        }
+
+        $process = new Process([
+            'node',
+            base_path('resources/js/print-pdf.js'),
+            $pdfPath,
+            $printerName
+        ]);
+
+        $process->run();
+
+
+        if (!$process->isSuccessful()) {
+            return response()->json(['error' => $process->getErrorOutput()], 500);
+        }
+
+        return response()->json(['message' => 'PDF enviado a la impresora.']);
+    } catch (\Throwable $th) {
+        return response()->json(['error' => $th->getMessage()], 500);
+    }
+})->name('imprimir.test');
+*/
+
 Route::get('/migrate', function () {
 
     Artisan::call('migrate');
