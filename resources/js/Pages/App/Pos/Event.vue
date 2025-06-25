@@ -1524,7 +1524,7 @@ watch(() => agreementSelected.value, () => {
             class="tw-fixed tw-inset-0 !tw-z-50 tw-flex tw-items-center tw-justify-center tw-bg-black/50 tw-backdrop-blur-[7px] tw-transition-all tw-duration-500"
             @click.self="closeImageModal"
         >
-            <div class="tw-bg-gradient-to-tr tw-from-primary tw-to-yellow-300 tw-shadow-2xl tw-rounded tw-p-3 tw-relative tw-max-w-full tw-w-[90vw] md:tw-w-[520px] tw-flex tw-flex-col tw-items-center tw-transition-all tw-duration-500">
+            <div class="tw-bg-gradient-to-tr tw-from-secondary tw-to-primary tw-shadow-2xl tw-rounded tw-p-3 tw-relative tw-max-w-full tw-w-[90vw] md:tw-w-[520px] tw-flex tw-flex-col tw-items-center tw-transition-all tw-duration-500">
                 <img class="tw-w-full tw-h-auto" :src="modalImageSrc" alt="Imagen ampliada" />
             </div>
         </div>
@@ -1836,7 +1836,7 @@ watch(() => agreementSelected.value, () => {
 
                                             <div class="tw-flex tw-h-[400px] tw-cursor-grab lg:tw-h-[500px] tw-items-center tw-justify-center tw-overflow-hidden tw-bordertw-mt-5 tw-gap-3 tw-relative">
                                                 <div class="tw-size-[100px] lg:tw-size-36 tw-border tw-border-gray-300 tw-absolute tw-top-0 tw-left-0 tw-z-20 tw-bg-white tw-rounded-lg tw-flex tw-items-center tw-justify-center">
-                                                    <img id="stadium-hdx-img" class="tw-size-20 lg:tw-size-32 tw-rotate-0 tw-transition-all tw-duration-1000" src="../../../../../public/img/stadium-hdx-img.svg" alt="">
+                                                    <img id="stadium-hdx-img" class="tw-size-20 lg:tw-size-32 tw-rotate-0 tw-transition-all tw-duration-1000" src="../../../../../public/img/stadium-hdx-img.svg" alt="Webiste image">
                                                 </div>
                                                 <div v-if="isSvgVisible">
                                                     <EstadioHdx  @handle-section-click="handleSectionClick"/>
@@ -1898,7 +1898,7 @@ watch(() => agreementSelected.value, () => {
                                     <div class="lg:tw-px-5 tw-relative tw-flex tw-flex-col-reverse">
                                         <div v-if="seatsSelected.length == 0" class="tw-flex tw-flex-col tw-items-center tw-gap-10 tw-justify-center">
                                             <h3>No hay asientos seleccionados</h3>
-                                            <img class="tw-w-40 lg:tw-w-96 tw-h-auto" src="/storage/public/empty-cart.webp" alt="">
+                                            <img class="tw-w-40 lg:tw-w-96 tw-h-auto" src="/storage/public/empty-cart.webp" alt="Webiste image">
                                         </div>
                                         <div v-if="seatsSelected.length > 0" class="payment-secction">
                                             <div class="tw-w-full ">

@@ -105,7 +105,7 @@ const tab = ref('tab-0');
             <template v-else>
                 <div class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-5 tw-mt-10">
                     <div class="tw-text-center tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-5">
-                        <img class="tw-w-40 lg:tw-w-72 tw-h-auto" src="/storage/public/empty-cart.webp" alt="">
+                        <img class="tw-w-40 lg:tw-w-72 tw-h-auto" src="/storage/public/empty-cart.webp" alt="Webiste image">
                         <span>No cuentas con boletos disponibles. ¡Compra tus boletos para el próximo partido!</span>
                     </div>
                     <div>

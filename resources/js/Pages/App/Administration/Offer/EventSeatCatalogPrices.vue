@@ -697,7 +697,7 @@ const resetSelectedSeats = () => {
                             class="tw-size-[100px] lg:tw-size-36 tw-border tw-border-gray-300 tw-absolute tw-top-0 tw-left-0 tw-z-20 tw-bg-white tw-rounded-lg tw-flex tw-items-center tw-justify-center">
                             <img id="stadium-hdx-img"
                                 class="tw-size-20 lg:tw-size-32 tw-rotate-0 tw-transition-all tw-duration-1000"
-                                src="../../../../../../public/img/stadium-hdx-img.svg" alt="">
+                                src="../../../../../../public/img/stadium-hdx-img.svg" alt="Webiste image">
                         </div>
                         <div v-if="isSvgVisible">
                             <EstadioHdx @handle-section-click="handleSectionClick" />

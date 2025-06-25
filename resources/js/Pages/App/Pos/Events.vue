@@ -102,7 +102,7 @@ const closeImageModal = () => {
             class="tw-fixed tw-inset-0 !tw-z-50 tw-flex tw-items-center tw-justify-center tw-bg-black/50 tw-backdrop-blur-[7px] tw-transition-all tw-duration-500"
             @click.self="closeImageModal"
         >
-            <div class="tw-bg-gradient-to-tr tw-from-primary tw-to-yellow-300 tw-shadow-2xl tw-rounded tw-p-3 tw-relative tw-max-w-full tw-w-[90vw] md:tw-w-[520px] tw-flex tw-flex-col tw-items-center tw-transition-all tw-duration-500">
+            <div class="tw-bg-gradient-to-tr tw-from-secondary tw-to-primary tw-shadow-2xl tw-rounded tw-p-3 tw-relative tw-max-w-full tw-w-[90vw] md:tw-w-[520px] tw-flex tw-flex-col tw-items-center tw-transition-all tw-duration-500">
                 <img class="tw-w-full tw-h-auto" :src="modalImageSrc" alt="Imagen ampliada" />
             </div>
         </div>
@@ -178,7 +178,7 @@ const closeImageModal = () => {
     <main class="tw-max-w-7xl tw-mx-auto tw-px-4 lg:tw-px-0 tw-relative">
         <div class="tw-absolute -tw-right-40 lg:-tw-right-96 -tw-top-52 lg:-tw-top-52 tw-h-[480px] tw-w-[300px] lg:tw-h-[680px] lg:tw-w-[500px] tw-rounded-full tw-blur-[120px] lg:tw-blur-[220px] tw-bg-primary">
         </div>
-        <div class="tw-absolute -tw-bottom-60 -tw-left-72 tw-h-[1300px] tw-w-[1500px] tw-rounded-full tw-blur-[100px] tw-bg-white">
+        <div class="tw-hidden lg:tw-block tw-absolute -tw-bottom-60 -tw-left-72 tw-h-[1300px] tw-w-[1500px] tw-rounded-full tw-blur-[100px] tw-bg-white">
         </div>
         <ErrorSession />
         <div class="tw-max-w-7xl tw-min-h-screen tw-pt-0 tw-mx-auto tw-z-20 tw-relative">
@@ -245,7 +245,7 @@ const closeImageModal = () => {
                     </div>
                     <div v-else class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-5 tw-pt-60">
                         <div class="tw-text-center tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-5">
-                            <img class="tw-w-40 lg:tw-w-72 tw-h-auto" src="/storage/public/empty-cart.webp" alt="">
+                            <img class="tw-w-40 lg:tw-w-72 tw-h-auto" src="/storage/public/empty-cart.webp" alt="Webiste image">
                             <span>Nuevos partidos próximamente</span>
                         </div>
                     </div>

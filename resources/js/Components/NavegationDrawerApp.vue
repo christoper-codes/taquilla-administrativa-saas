@@ -115,7 +115,7 @@ const props = defineProps({
                                         </v-btn>
                                         </Link>
                                     </div>
-                                    <img class="tw-w-[35%] tw-absolute tw-top-0 -tw-right-5" src="https://modernize-nuxt3-main.netlify.app/images/backgrounds/unlimited-bg.png" alt="">
+                                    <img class="tw-w-[35%] tw-absolute tw-top-0 -tw-right-5" src="https://modernize-nuxt3-main.netlify.app/images/backgrounds/unlimited-bg.png" alt="Webiste image">
                                 </div>
                                 </v-card-actions>
                             </v-card>
