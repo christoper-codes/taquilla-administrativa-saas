@@ -171,9 +171,7 @@ const cancelPayment = (data) => {
 }
 
 const confirmSeatsPurchase = (transaction = {}) =>{
-
     loading.value = true;
-
     const seatsSelectedData = {
         purchase_type: props.purchaseType,
         stadium_id: props.stadiumId,

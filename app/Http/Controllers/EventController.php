@@ -366,7 +366,6 @@ class EventController extends Controller
     */
     public function reserveSeatsToBuy(Request $request)
     {
-
         $request->validate([
             'stadium_id' => 'required',
             'ticket_office_id' => 'required',
@@ -412,7 +411,6 @@ class EventController extends Controller
             }
 
             if($request->purchase_type == PurchaseTypes::SEASON_TICKET->value) {
-
                 $generic_data = [
                     'sale_date' => Carbon::now()->format('d/m/Y'),
                     'folio' => $response[0]['ticket_id'],
@@ -455,7 +453,6 @@ class EventController extends Controller
                 'success' => true,
                 'pdf' => base64_encode($pdfContent)
             ], 200);
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -472,7 +469,6 @@ class EventController extends Controller
      */
     public function confirmSeatsPurchase(Request $request)
     {
-
         $request->validate([
             'stadium_id' => 'required',
             'ticket_office_id' => 'required',
@@ -508,11 +504,9 @@ class EventController extends Controller
         DB::beginTransaction();
 
         try {
-
             $response = $this->event_service->confirmSeatsPurchase($request->all());
 
             DB::commit();
-
             if($request->is_online) {
                 return response()->json([
                     'data' => $response,
@@ -520,10 +514,13 @@ class EventController extends Controller
                     'success' => true
                 ], 200);
             }
-
         } catch (\Exception $e) {
             DB::rollBack();
-            return WebResponseHelper::rollback($e, 'Opps! Algo salió mal al confirmar la compra de los asientos');
+            return response()->json([
+                'data' => null,
+                'message' => $e->getMessage() ?? 'Opps! Algo salió mal al confirmar la compra de los asientos',
+                'success' => false
+            ], 500);
         }
     }
 
