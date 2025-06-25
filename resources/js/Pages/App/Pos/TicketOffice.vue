@@ -817,7 +817,7 @@ const pdf = () => {
                                     <div class="tw-font-bold tw-text-center">
                                         No hay cajas abiertas para este usuario en esta taquilla
                                     </div>
-                                    <img class="tw-w-40 lg:tw-w-72 tw-h-auto" src="/storage/public/empty-cart.webp" alt="">
+                                    <img class="tw-w-40 lg:tw-w-72 tw-h-auto" src="/storage/public/empty-cart.webp" alt="Webiste image">
                                 </div>
                             </v-card>
                         </v-dialog>

@@ -78,7 +78,7 @@ function handleImageError() {
 
     <section class="tw-overflow-hidden tw-h-[730px] lg:tw-h-[650px] tw-mt-[0px] lg:tw-mt-[-30px]">
         <div class="tw-rounded-none tw-relative tw-bg-white tw-scale-110 lg:tw-scale-100">
-            <img class="tw-w-[1700px] tw-h-auto tw-absolute tw-right-0 tw-top-0 lg:tw-scale-150 lg:tw-mr-[100px] lg:tw-mt-[80px]" src="../../../../public/img/hero.svg" alt="">
+            <img class="tw-w-[1700px] tw-h-auto tw-absolute tw-right-0 tw-top-0 lg:tw-scale-150 lg:tw-mr-[100px] lg:tw-mt-[80px]" src="../../../../public/img/hero.svg" alt="Webiste image">
             <div class="bg-video tw-mx-auto tw-absolute tw-right-0 -tw-top-10 lg:tw-mr-[-250px] tw-w-[400px] lg:tw-w-[1020px] tw-h-[160px] lg:tw-h-[430px] tw-overflow-hidden">
                 <video id="home_video" class="tw-max-w-full tw-w-full tw-h-auto" autoplay loop muted playsinline>
                     <source type="video/mp4" src="../../../../public/videos/bg-video.mp4">

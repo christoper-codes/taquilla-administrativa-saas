@@ -245,7 +245,7 @@ const closeImageModal = () => {
                     </div>
                     <div v-else class="tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-5 tw-pt-60">
                         <div class="tw-text-center tw-flex tw-items-center tw-justify-center tw-flex-col tw-gap-5">
-                            <img class="tw-w-40 lg:tw-w-72 tw-h-auto" src="/storage/public/empty-cart.webp" alt="">
+                            <img class="tw-w-40 lg:tw-w-72 tw-h-auto" src="/storage/public/empty-cart.webp" alt="Webiste image">
                             <span>Nuevos partidos próximamente</span>
                         </div>
                     </div>

@@ -5,7 +5,7 @@
 <template>
     <section class="tw-h-[250px]">
         <div class="tw-rounded-none tw-h-[300px] tw-relative tw-bg-white">
-            <img class="tw-w-[1300px] tw-h-auto tw-absolute tw-right-0 tw-top-0 lg:tw-mt-[-80px]" src="../../../public/img/hero.svg" alt="">
+            <img class="tw-w-[1300px] tw-h-auto tw-absolute tw-right-0 tw-top-0 lg:tw-mt-[-80px]" src="../../../public/img/hero.svg" alt="Webiste image">
             <div class="d-flex flex-column fill-height justify-center align-center text-white tw-relative tw-px-4 lg:tw-px-0">
                 <div class="tw-max-w-7xl tw-mx-auto tw-flex tw-flex-col tw-w-full tw-gap-10">
                     <div class="tw-flex tw-items-end tw-gap-0 lg:tw-gap-3">

@@ -845,7 +845,7 @@ const seasonTicktesDataConfirm = () => {
 
     <section class="tw-overflow-hidden tw-mt-0">
        <div class="lg:tw-hidden">
-            <img class="tw-w-full" :src="`/storage/${event.global_image.file_path}`" alt="">
+            <img class="tw-w-full" :src="`/storage/${event.global_image.file_path}`" alt="Webiste image">
         </div>
     </section>
     <div class="tw-hidden lg:tw-block tw-w-[72%] tw-h-72 tw-overflow-hidden tw-bg-center tw-bg-cover" :style="{ backgroundImage: `linear-gradient(to bottom, rgba(255,255,255,0) 50%, rgba(255,255,255,1) 100%), url(/storage/${event.global_image.file_path})`, backgroundSize: 'cover' }">
@@ -1005,7 +1005,7 @@ const seasonTicktesDataConfirm = () => {
 
                                 <div class="tw-flex tw-h-[400px] tw-cursor-grab lg:tw-h-[500px] tw-items-center tw-justify-center tw-overflow-hidden tw-bordertw-mt-5 tw-gap-3 tw-relative">
                                     <div class="tw-size-[100px] lg:tw-size-36 tw-border tw-border-gray-300 tw-absolute tw-top-0 tw-left-0 tw-z-20 tw-bg-white tw-rounded-lg tw-flex tw-items-center tw-justify-center">
-                                        <img id="stadium-hdx-img" class="tw-size-20 lg:tw-size-32 tw-rotate-0 tw-transition-all tw-duration-1000" src="../../../../../public/img/stadium-hdx-img.svg" alt="">
+                                        <img id="stadium-hdx-img" class="tw-size-20 lg:tw-size-32 tw-rotate-0 tw-transition-all tw-duration-1000" src="../../../../../public/img/stadium-hdx-img.svg" alt="Webiste image">
                                     </div>
                                     <div v-if="isSvgVisible">
                                         <EstadioHdx  @handle-section-click="handleSectionClick"/>
@@ -1060,7 +1060,7 @@ const seasonTicktesDataConfirm = () => {
                                     <p class="tw-w-full tw-text-center tw-text-xs tw-p-3 tw-rounded-full tw-bg-gray-100 tw-mt-5">No se han selecionado asientos</p>
                                     <h3 class="tw-text-2xl tw-font-bold">Asientos seleccionados</h3>
                                     <h4 class="tw-text-sm mt-1">📍 El nido del halcon | Xalapa Ver.</h4>
-                                    <img class="tw-w-60 tw-h-auto" src="../../../../../public/img/seats-no-selected-img.svg" alt="">
+                                    <img class="tw-w-60 tw-h-auto" src="../../../../../public/img/seats-no-selected-img.svg" alt="Webiste image">
                                 </div>
                                 <div v-if="seatsSelected.length > 0" class="payment-secction">
                                     <div ref="paymentSection" class="tw-w-full ">
