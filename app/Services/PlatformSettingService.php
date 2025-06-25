@@ -22,43 +22,8 @@ class PlatformSettingService
     * |--------------------------------------------------------------------------
     * | Get all platform_setting catalogues
     */
-    public function getAll()
+    public function get()
     {
-        return $this->platform_setting_repository_interface->getAll();
-    }
-
-
-    /*
-    * |--------------------------------------------------------------------------
-    * | Get cash register by key
-    */
-    public function getByKey($key)
-    {
-        try {
-
-            return $this->platform_setting_repository_interface->getByKey($key);
-
-        } catch (\Exception $e) {
-
-            throw $e;
-
-        }
-    }
-
-
-    /*
-    * |--------------------------------------------------------------------------
-    * | Save new platform_setting catalogue
-    */
-    public function save(array $data)
-    {
-        try {
-
-            return $this->platform_setting_repository_interface->save($data);
-
-        } catch (\Exception $e) {
-
-            throw $e;
-        }
+        return $this->platform_setting_repository_interface->get();
     }
 }

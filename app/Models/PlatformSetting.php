@@ -10,8 +10,10 @@ class PlatformSetting extends Model
     use HasFactory;
 
     protected $fillable = [
-        'key',
-        'value',
-        'platform',
+        'settings'
+    ];
+
+    protected $casts = [
+        'settings' => 'json'
     ];
 }

@@ -2604,7 +2604,7 @@ watch(() => agreementSelected.value, () => {
                                                                                 <h2 class="tw-font-bebas tw-font-bold tw-text-2xl tw-mt-5">Total: {{ formatPrice(totalAmount) }}</h2>
                                                                                 <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-3">
                                                                                     <v-switch inset color="purple" v-model="acceptTerms"></v-switch>
-                                                                                    <a href="/politicas-de-privacidad" target="_blank" class="-tw-mt-10 lg:tw-mt-3">Acepto <span class="tw-underline tw-text-primary">terminos y condiciones</span></a>
+                                                                                    <a href="/terminos-y-condiciones" target="_blank" class="-tw-mt-10 lg:tw-mt-3">Acepto <span class="tw-underline tw-text-primary">terminos y condiciones</span></a>
                                                                                 </div>
                                                                                 <!-- Tabla de asientos seleccionados -->
                                                                                 <v-data-table :items="seatsSelected" class="" hide-default-footer items-per-page="-1">

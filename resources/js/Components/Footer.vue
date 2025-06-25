@@ -12,7 +12,7 @@ const year = new Date().getFullYear()
                         <img class="tw-w-7 lg:tw-w-10 tw-h-auto tw-absolute -tw-top-2 lg:-tw-top-5 -tw-left-6 lg:-tw-left-7" src="/storage/public/hdx-logo.png" alt="hdx logo">
                     </div>
                     <div class="tw-text-center tw-text-xs lg:tw-text-base tw-w-full tw-text-neutral-500">
-                        © {{ year }} Todos los derechos reservados. <a href="/politicas-de-privacidad" target="_blank"><span class="tw-underline">terminos y condiciones</span></a>
+                        © {{ year }} Todos los derechos reservados. <a href="/politicas-de-privacidad" target="_blank"><span class="tw-underline">Políticas de privacidad</span></a>
                     </div>
                 </div>
                 <h2 class="tw-inline-block tw-font-bebas tw-mt-5 tw-pr-1 tw-font-bold tw-text-3xl lg:tw-text-9xl tw-opacity-50 tw-bg-clip-text tw-bg-gradient-to-r tw-from-primary tw-to-secondary tw-text-transparent !tw-underline">Halcones de Xalapa</h2>

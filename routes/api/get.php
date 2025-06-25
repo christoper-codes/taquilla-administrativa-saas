@@ -17,5 +17,4 @@ Route::get('/usuarios/monederos', [WalletAccountController::class, 'showByUser']
 Route::get('/monederos/historial', [WalletAccountController::class, 'showHistoryByAccountNumber'])->name('wallets.history.by.account.number');
 
 
-Route::get('/configuraciones', [PlatformSettingController::class, 'getAll'])->name('configs');
-Route::get('/configuraciones/clave', [PlatformSettingController::class, 'getByKey'])->name('config.key');
+Route::get('/configuraciones', [PlatformSettingController::class, 'get'])->name('configs');

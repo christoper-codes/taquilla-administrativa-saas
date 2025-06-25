@@ -132,7 +132,7 @@ const qrValue = computed(() => {
                             :foreground="'#000000'"
                         />
 
-                        <a href="/politicas-de-privacidad" target="_blank" class="tw-mt-3 tw-text-xs"><span class="tw-underline">terminos y condiciones</span></a>
+                        <a href="/terminos-y-condiciones" target="_blank" class="tw-mt-3 tw-text-xs"><span class="tw-underline">Términos y condiciones</span></a>
                     </div>
                     </div>
                 </div>

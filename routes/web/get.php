@@ -321,6 +321,10 @@ Route::get('/cyber-source/captura-de-contexto', [CyberSourceController::class, '
 */
 Route::get('/politicas-de-privacidad', function () {
      return Inertia::render('Guest/PrivacyPolicies');
+})->name('privacy.and.policies');
+
+Route::get('/terminos-y-condiciones', function () {
+     return Inertia::render('Guest/TermsAndConditions');
 })->name('terms.and.conditions');
 
 /*
