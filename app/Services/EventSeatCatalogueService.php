@@ -19,14 +19,16 @@ class EventSeatCatalogueService
     protected $event_seat_catalogue_repository_interface;
     protected $seat_catalogue_service;
     protected $seat_catalogue_statuses_service;
+    protected $util_service;
 
 
     public function __construct(EventSeatCatalogueRepositoryInterface $event_seat_catalogue_repository_interface, SeatCatalogueService $seat_catalogue_service,
-                                SeatCatalogueStatusesService $seat_catalogue_statuses_service)
+                                SeatCatalogueStatusesService $seat_catalogue_statuses_service, UtilService $util_service)
     {
         $this->event_seat_catalogue_repository_interface = $event_seat_catalogue_repository_interface;
         $this->seat_catalogue_service = $seat_catalogue_service;
         $this->seat_catalogue_statuses_service = $seat_catalogue_statuses_service;
+        $this->util_service = $util_service;
     }
 
     /*
@@ -78,7 +80,8 @@ class EventSeatCatalogueService
             * Get all event seat catalogue where event_id
             */
             $eventSeatCatalogs = EventSeatCatalog::where('event_id', $event->id)->get();
-            $seatingPrices = [
+
+            $seatingSubcriberPrices = [
                 'courtside' => [
                     "id" => 4,
                     "price" => 8300
@@ -102,15 +105,48 @@ class EventSeatCatalogueService
                 ],
             ];
 
+            $seatingRegularPrices = [
+                'courtside' => [
+                    "id" => 15,
+                    "price" => 500
+                ],
+                'dorado'    =>
+                [
+                    "id" => 3,
+                    "price" => 300
+                ],
+                'purpura'   => [
+                    "id" => 16,
+                    "price" => 200
+                ],
+                'fan'       => [
+                    "id" => 17,
+                    "price" => 99
+                ],
+                'publico'   => [
+                    "id" => 17,
+                    "price" => 99
+                ],
+            ];
+
             /*
             * Attach the price types to the event seat catalogue
             */
-            $eventSeatCatalogs->each(function (EventSeatCatalog $eventSeatCatalog) use ($seatingPrices){
-                $abono = $seatingPrices[$eventSeatCatalog->seatCatalogue->seatType->name];
+            $eventSeatCatalogs->each(function (EventSeatCatalog $eventSeatCatalog) use ($seatingSubcriberPrices, $seatingRegularPrices){
+
+                $abono = $seatingSubcriberPrices[$eventSeatCatalog->seatCatalogue->seatType->name];
+
+                $regular = $seatingRegularPrices[$eventSeatCatalog->seatCatalogue->seatType->name];
+
                 $eventSeatCatalog->priceTypes()->attach([
                     1 => [
-                        'price_catalogue_id' => 1,
-                        'price' => '100.00',
+                        'price_catalogue_id' => $regular['id'],
+                        'price' => $regular['price'],
+                        'is_active' => true
+                    ],
+                    2 => [
+                        'price_catalogue_id' => 2,
+                        'price' => "0.0000",
                         'is_active' => true
                     ],
                     3 => [
@@ -120,6 +156,8 @@ class EventSeatCatalogueService
                     ],
                 ]);
             });
+
+            $this->util_service->storageCopy();
 
             return $newEventSeatCatalogs;
         } catch (\Exception $e) {

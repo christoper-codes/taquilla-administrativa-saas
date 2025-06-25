@@ -36,6 +36,7 @@ use App\Interfaces\PlatformSettingRepositoryInterface;
 use App\Interfaces\PriceCatalogRepositoryInterface;
 use App\Interfaces\PriceTypeRepositoryInterface;
 use App\Interfaces\SeasonTicketWalletAccountRepositoryInterface;
+use App\Interfaces\UtilRepositoryInterface;
 use App\Interfaces\WalletAccountRepositoryInterface;
 use App\Interfaces\WalletAccountRoleRepositoryInterface;
 use App\Interfaces\WalletAccountTypeRepositoryInterface;
@@ -75,6 +76,7 @@ use App\Repositories\PriceCatalogRepository;
 use App\Repositories\PriceTypeRepository;
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\SeasonTicketWalletAccountRepository;
+use App\Repositories\UtilRepository;
 use App\Repositories\WalletAccountRepository;
 use App\Repositories\WalletAccountRoleRepository;
 use App\Repositories\WalletAccountTypeRepository;
@@ -133,6 +135,7 @@ class RepositoriServiceProvider extends ServiceProvider
         $this->app->bind(WalletAccountWalletAccountTypeRepositoryInterface::class, WalletAccountWalletAccountTypeRepository::class);
         $this->app->bind(WalletAccountRoleRepositoryInterface::class, WalletAccountRoleRepository::class);
         $this->app->bind(PlatformSettingRepositoryInterface::class, PlatformSettingRepository::class);
+        $this->app->bind(UtilRepositoryInterface::class, UtilRepository::class);
     }
 
     /**

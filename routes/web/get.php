@@ -16,84 +16,15 @@ use App\Http\Controllers\SeatCatalogueController;
 use App\Http\Controllers\SeatCatalogueStatusController;
 use App\Http\Controllers\TicketOfficeController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\WalletAccountTemporalController;
 use App\Http\Controllers\PriceTypeController;
 use App\Http\Controllers\SeasonTicketController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UtilController;
 use App\Http\Controllers\WalletAccountController;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
-use App\Models\Event;
-use App\Models\EventSeatCatalog;
-use App\Models\SeasonTicket;
-use Database\Seeders\WalletAccountRoleSeeder;
-use Database\Seeders\WalletAccountTypeSeeder;
-use Database\Seeders\WalletCurrencySeeder;
-use Database\Seeders\WalletExchangeRateSeeder;
-use Database\Seeders\WalletRechargeAmountSeeder;
-use Database\Seeders\WalletTransactionStatusSeeder;
-use Database\Seeders\WalletTransactionTypeSeeder;
+
 use Inertia\Inertia;
-use Illuminate\Support\Facades\File;
-
-Route::get('/add-subscriber-to-event-seat-catalog', function (Request $request) {
-
-    $event_seat_catalog_with_subscriber_test = EventSeatCatalog::where([
-        ['event_id', 1],
-        ['qr', '!=', NULL]
-    ])->get();
-
-    $event_seat_catalog_with_subscriber = EventSeatCatalog::where([
-        ['event_id', 2],
-        ['season_ticket_id','!=', NULL]
-    ])->get()->merge($event_seat_catalog_with_subscriber_test);
-
-    $season_ticket = SeasonTicket::whereNotIn('id', $event_seat_catalog_with_subscriber->pluck('season_ticket_id')->filter())->get();
-
-    $event_seat_catalog_without_subscriber = EventSeatCatalog::where([
-        ['event_id', 2],
-        ['season_ticket_id', NULL],
-        ['qr', '!=', NULL],
-    ])->get();
-
-    $result = $event_seat_catalog_without_subscriber->map(function ($item) use ($season_ticket) {
-        return collect([
-            'EventSeatCatalog' => $item,
-            'Subscribers' => $season_ticket->filter(function ($subscriber) use ($item) {
-                return $subscriber->created_at == $item->updated_at;
-            })->values(),
-        ]);
-    });
-
-    $simulatedUpdates = [];
-
-    $result->each(function ($item) use (&$simulatedUpdates) {
-
-        $subscriberTemp = $item['Subscribers']->filter(function ($subscriber){
-
-            return !$subscriber->is_use;
-
-        })->first();
-
-        if ($subscriberTemp) {
-
-            $simulatedUpdates[] = EventSeatCatalog::where('id', $item['EventSeatCatalog']['id'])->update(['season_ticket_id' => $subscriberTemp->id]);
-
-
-            $item['Subscribers']->each(function ($subscriber) use ($subscriberTemp) {
-
-                if ($subscriber['id'] == $subscriberTemp['id']) {
-                    $subscriber['is_use'] = true;
-                }
-            });
-        }
-    });
-
-    return $simulatedUpdates;
-});
-
 
 /*
 Route::get('/print-reporte', function () {
@@ -126,78 +57,18 @@ Route::get('/print-reporte', function () {
 })->name('imprimir.test');
 */
 
-Route::get('/migrate', function () {
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* |Utils | ROUTES
+*/
 
-    Artisan::call('migrate');
+Route::get('/migrate', [UtilController::class, 'migrate'])->name('utils.migrate');
+Route::get('/limpiar-cache', [UtilController::class, 'cleanAll'])->name('utils.cleanAll');
+Route::get('/refrescar-cache', [UtilController::class, 'refreshCaches'])->name('utils.refreshCaches');
+Route::get('/copiar-storage', [UtilController::class, 'storageCopy'])->name('utils.storage.copy');
 
-    return "migrate";
-
-});
-
-Route::get('/db-seed-wallet', function () {
-    $seeders = [
-        WalletCurrencySeeder::class,
-        WalletExchangeRateSeeder::class,
-        WalletAccountTypeSeeder::class,
-        WalletRechargeAmountSeeder::class,
-        WalletTransactionStatusSeeder::class,
-        WalletTransactionTypeSeeder::class,
-        WalletAccountRoleSeeder::class,
-    ];
-
-    foreach ($seeders as $seeder) {
-        Artisan::call('db:seed', ['--class' => $seeder]);
-    }
-
-    return 'Seeders ejecutados correctamente.';
-});
-
-
-Route::get('/db-seed', function () {
-
-    Artisan::call('db:seed');
-
-    return "db-seed";
-
-});
-
-Route::get('/storage-copy', function () {
-    try {
-        $source = storage_path('app/public');
-        $destination = public_path('storage');
-
-        // Crear destino si no existe
-        if (!File::exists($destination)) {
-            File::makeDirectory($destination, 0755, true);
-        }
-
-        // Copiar archivos nuevos (no sobreescribir existentes)
-        $files = File::allFiles($source);
-
-        foreach ($files as $file) {
-            $relativePath = $file->getRelativePathname();
-            $destPath = $destination . DIRECTORY_SEPARATOR . $relativePath;
-
-            if (!File::exists($destPath)) {
-                // Crear directorios padre si no existen
-                File::ensureDirectoryExists(dirname($destPath));
-                File::copy($file->getPathname(), $destPath);
-            }
-        }
-
-        return 'Storage copied with only new files.';
-    } catch (\Throwable $e) {
-        return response("Error: " . $e->getMessage(), 500);
-    }
-});
-
-Route::get('/optimize', function () {
-
-    Artisan::call('optimize:clear');
-
-    return "optimize";
-
-});
 
 
 /*
