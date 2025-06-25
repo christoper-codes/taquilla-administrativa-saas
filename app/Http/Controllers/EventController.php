@@ -21,6 +21,7 @@ use App\Services\EventService;
 use App\Services\EventTypeService;
 use App\Services\GlobalImageService;
 use App\Services\GlobalSeasonService;
+use App\Services\PlatformSettingService;
 use App\Services\ReasonAgreementService;
 use App\Services\SaleDebtorService;
 use App\Services\SerieService;
@@ -52,11 +53,11 @@ class EventController extends Controller
     protected $event_repository;
     protected $reason_agreement_service;
     protected $sale_debtor_service;
-
+    protected $platform_setting_service;
 
     public function __construct(EventService $event_service, EventTypeService $event_type_service, SerieService $serie_service, GlobalSeasonService $global_season_service,
                                 GlobalImageService $global_image_service, EventSeatCatalogueService $event_seat_catalogue_service, EventRepositoryInterface $event_repository,
-                                ReasonAgreementService $reason_agreement_service, SaleDebtorService $sale_debtor_service)
+                                ReasonAgreementService $reason_agreement_service, SaleDebtorService $sale_debtor_service, PlatformSettingService $platform_setting_service)
     {
         $this->event_service = $event_service;
         $this->event_type_service = $event_type_service;
@@ -67,6 +68,7 @@ class EventController extends Controller
         $this->event_repository = $event_repository;
         $this->reason_agreement_service = $reason_agreement_service;
         $this->sale_debtor_service = $sale_debtor_service;
+        $this->platform_setting_service = $platform_setting_service;
     }
 
 
@@ -77,13 +79,15 @@ class EventController extends Controller
     {
       try {
             $events = $this->event_service->getAllActive();
+            $platform_settings = $this->platform_setting_service->getAll();
             $user_roles = null;
             if(Auth::user()){
                 $user_roles = Auth::user()->userRoles;
             }
             return Inertia::render('App/Pos/Events', [
                 'events' => $events,
-                'user_roles' => $user_roles
+                'user_roles' => $user_roles,
+                'platform_settings' => $platform_settings,
             ]);
       } catch (\Exception $e) {
         WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar los eventos');

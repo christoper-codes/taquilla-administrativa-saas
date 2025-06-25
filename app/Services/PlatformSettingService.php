@@ -22,8 +22,8 @@ class PlatformSettingService
     * |--------------------------------------------------------------------------
     * | Get all platform_setting catalogues
     */
-    public function get()
+    public function getAll()
     {
-        return $this->platform_setting_repository_interface->get();
+        return $this->platform_setting_repository_interface->getAll();
     }
 }

@@ -8,7 +8,7 @@ interface PlatformSettingRepositoryInterface
     * |--------------------------------------------------------------------------
     * | Primaries methods for the repository interface
     */
-    public function get();
+    public function getAll();
 
     /*
     * |--------------------------------------------------------------------------

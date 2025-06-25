@@ -14,6 +14,7 @@ import GuestNavSocial from '@/Components/navs/GuestNavSocial.vue';
 import { menuStateSocialMedia, menuStateApp } from '@/composables/nav/menu-state.js'
 import AppNav from '@/Components/navs/AppNav.vue';
 import CashRegisterNav from '@/Components/navs/CashRegisterNav.vue';
+import Banner from '@/Components/Banner.vue';
 
 const { dateFormat } = useDateFormat();
 const loading = ref(false);
@@ -29,6 +30,10 @@ const props = defineProps({
     user_roles: {
         type: Array,
         required: false,
+    },
+    platform_settings: {
+        type: Array,
+        required: true,
     },
 });
 
@@ -88,14 +93,12 @@ const closeImageModal = () => {
 
 <template>
     <Head title="Eventos" />
-   <!--  <GuestLayout v-bind:user_roles="user_roles" /> -->
-    <!-- <NavigationDrawer v-bind:user_roles="user_roles" /> -->
     <CashRegisterNav v-bind:user_roles="user_roles"/>
     <GuestNavSocial />
     <AppNav />
+    <Banner :banner="platform_settings[0].settings.banner"/>
     <transition name="fade">
-        <div
-            v-if="showImageModal"
+        <div v-if="showImageModal"
             class="tw-fixed tw-inset-0 !tw-z-50 tw-flex tw-items-center tw-justify-center tw-bg-black/50 tw-backdrop-blur-[7px] tw-transition-all tw-duration-500"
             @click.self="closeImageModal"
         >

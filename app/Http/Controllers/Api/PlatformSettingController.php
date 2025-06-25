@@ -15,21 +15,20 @@ class PlatformSettingController extends Controller
         $this->platform_setting_service = $platform_setting_service;
     }
 
-    public function get()
+    public function index()
     {
         try {
-            $platform_settings = $this->platform_setting_service->get();
+            $platform_settings = $this->platform_setting_service->getAll();
 
             return response()->json([
                 'data' => [
-                    'platform_settings' => $platform_settings->settings,
+                    'platform_settings' => $platform_settings,
                 ],
-                'message' => 'Configuraciones recuperados con éxito',
+                'message' => 'Configuraciones recuperadas con éxito',
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
 }

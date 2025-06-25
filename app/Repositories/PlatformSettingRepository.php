@@ -11,8 +11,8 @@ class PlatformSettingRepository implements PlatformSettingRepositoryInterface
     * |--------------------------------------------------------------------------
     * | Primaries methods for the repository interface
     */
-    public function get()
+    public function getAll()
     {
-        return PlatformSetting::get()->first();
+        return PlatformSetting::all();
     }
 }
