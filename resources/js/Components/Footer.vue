@@ -15,7 +15,7 @@ const year = new Date().getFullYear()
                         © {{ year }} Todos los derechos reservados. <a href="/politicas-de-privacidad" target="_blank"><span class="tw-underline">Políticas de privacidad</span></a>
                     </div>
                 </div>
-                <h2 class="tw-inline-block tw-font-bebas tw-mt-5 tw-pr-1 tw-font-bold tw-text-3xl lg:tw-text-9xl tw-opacity-50 tw-bg-clip-text tw-bg-gradient-to-r tw-from-primary tw-to-secondary tw-text-transparent !tw-underline">Halcones de Xalapa</h2>
+                <h2 class="tw-inline-block tw-font-bebas lg:tw-mt-5 tw-pr-1 tw-font-bold tw-text-3xl lg:tw-text-9xl tw-opacity-50 tw-bg-clip-text tw-bg-gradient-to-r tw-from-primary tw-to-secondary tw-text-transparent !tw-underline">Halcones de Xalapa</h2>
             </div>
         </div>
     </footer>

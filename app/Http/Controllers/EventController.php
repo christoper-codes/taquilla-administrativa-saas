@@ -193,6 +193,9 @@ class EventController extends Controller
         try {
             //$response = $this->event_service->getById($id);
             $event = Event::findOrFail($id);
+            if(!$event || $event->is_active == false){
+                throw new \Exception('El evento esta inactivo');
+            }
             $event->globalImage;
             $event->serie->globalSeason;
             $payment_installments = [];
@@ -246,11 +249,7 @@ class EventController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'data' => null,
-                'message' => $e->getMessage() ?? 'Opps! Algo salió mal al reservar los asientos',
-                'success' => false
-            ], 500);
+            return redirect()->route('events.index');
         }
     }
 
