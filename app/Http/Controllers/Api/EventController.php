@@ -18,7 +18,7 @@ class EventController extends Controller
     public function index()
     {
         try {
-            $events = $this->event_service->getAll();
+            $events = $this->event_service->getAllActive();
 
             return response()->json([
                 'data' => [
