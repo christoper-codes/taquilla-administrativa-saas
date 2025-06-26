@@ -102,7 +102,7 @@ const closeImageModal = () => {
             class="tw-fixed tw-inset-0 !tw-z-50 tw-flex tw-items-center tw-justify-center tw-bg-black/50 tw-backdrop-blur-[7px] tw-transition-all tw-duration-500"
             @click.self="closeImageModal"
         >
-            <div class="tw-bg-gradient-to-tr tw-from-secondary tw-to-primary tw-shadow-2xl tw-rounded tw-p-3 tw-relative tw-max-w-full tw-w-[90vw] md:tw-w-[520px] tw-flex tw-flex-col tw-items-center tw-transition-all tw-duration-500">
+            <div class="tw-bg-gradient-to-tr tw-from-white tw-to-primary tw-shadow-2xl tw-rounded tw-p-3 tw-relative tw-max-w-full tw-w-[90vw] md:tw-w-[520px] tw-flex tw-flex-col tw-items-center tw-transition-all tw-duration-500">
                 <img class="tw-w-full tw-h-auto" :src="modalImageSrc" alt="Imagen ampliada" />
             </div>
         </div>
