@@ -80,7 +80,7 @@ class EventController extends Controller
       try {
             $events = $this->event_service->getAllActive();
             $platform_settings = $this->platform_setting_service->getAll();
-            $user_roles = null;
+            $user_roles = [];
             if(Auth::user()){
                 $user_roles = Auth::user()->userRoles;
             }

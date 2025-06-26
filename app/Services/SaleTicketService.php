@@ -480,7 +480,9 @@ class SaleTicketService
                 $sale_ticket->eventSeatCatalogs;
                 $sale_ticket->globalPaymentTypes;
                 $sale_ticket->globalPaymentTypes->each(function ($global_payment_type) {
-                    $global_payment_type->globalCardPaymentType;
+                    if ($global_payment_type->pivot->global_card_payment_type_id) {
+                        $global_payment_type->pivot->card_type_name = GlobalCardPaymentType::find($global_payment_type->pivot->global_card_payment_type_id)->name;
+                    }
                 });
                 $sale_ticket->promotion;
                 $sale_ticket->cashRegister;

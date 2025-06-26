@@ -65,7 +65,11 @@ props.historyPerEvent.new_data.sale_tickets
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .forEach((saleTicket) => {
     const paymentTypes = saleTicket.global_payment_types.map(paymentType => {
-        return `${formatFirstLetterUppercase(paymentType.name)}: ${paymentType.pivot.amount}`;
+        let paymentInfo = `${formatFirstLetterUppercase(paymentType.name)}: ${paymentType.pivot.amount}`;
+        if (paymentType.name === 'tarjeta' && paymentType.pivot.card_type_name) {
+            paymentInfo += ` (${paymentType.pivot.card_type_name})`;
+        }
+        return paymentInfo;
     }).join(', ');
 
     const seatCatalogues = saleTicket.event_seat_catalogs.map(seatCatalogue => {
@@ -116,7 +120,6 @@ const filterByDate = () => {
 
     salesPerDate.value = {efectivo: 0, tarjeta: 0, adeudo: 0, total: 0, venta: 0};
 
-    console.log(itemsPerDate.value);
     itemsPerDate.value.forEach((item) => {
         if (item.Estatus === 'pagado' || item.Estatus === 'pendiente') {
            const paymentTypes = item['Tipos de pago'].split(',').reduce((acc, payment) => {
@@ -124,7 +127,6 @@ const filterByDate = () => {
                 acc[key.toLowerCase()] = parseFloat(value);
                 return acc;
             }, {});
-            console.log(paymentTypes);
             const seatsSolt = item.Asientos.split(',').length;
             salesPerDate.value.venta += seatsSolt;
 
@@ -149,12 +151,9 @@ const filterByDate = () => {
         "type": "success",
         "dangerouslyHTMLString": true
     })
-
-    console.log(salesPerDate.value);
 };
 
 const allowedDates = ref([]);
-
 const generateAllowedDates = () => {
     allowedDates.value = items.value
         .filter(item => item.Estatus === 'pagado' || item.Estatus === 'pendiente')

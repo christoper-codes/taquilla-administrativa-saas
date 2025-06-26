@@ -55,7 +55,6 @@ const handleResize = () => {
   }
 };
 
-
 onMounted(() => {
     filteredEvents.value = props.events.filter((event) => {
         if(event.event_visibility_type.name == 'publico'){
