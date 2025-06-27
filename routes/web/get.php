@@ -7,6 +7,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CyberSourceController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventSeatCatalogPromotionController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\InstallmentPaymentHistoryController;
 use App\Http\Controllers\InstitutionController;
@@ -261,3 +262,13 @@ Route::get('/usuarios', [UserController::class, 'showAllUsers'])->name('show.all
 * | Users | ROUTES
 */
 Route::get('/roles-de-cuentas',[WalletAccountRoleController::class,'index'])->name('wallet.account.roles');
+
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* | Export | ROUTES
+*/
+Route::middleware('auth')->controller(ExportController::class)->group(function () {
+   Route::get('indicadores/export-summary-by-tickets', 'exportSummaryByTickets')->name('indicadores.export.summary.tickets');
+});
