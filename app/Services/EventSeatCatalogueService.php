@@ -165,8 +165,6 @@ class EventSeatCatalogueService
                 ]);
             });
 
-            $this->util_service->storageCopy();
-
             return $newEventSeatCatalogs;
         } catch (\Exception $e) {
 
