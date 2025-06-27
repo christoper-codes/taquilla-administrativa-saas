@@ -48,15 +48,15 @@ const headers = [
     { title: 'Folio', key: 'Folio' },
     { title: 'Estatus', key: 'Estatus' },
     { title: 'Tipo de venta', key: 'Tipo de venta' },
+    { title: 'Total asientos vendidos', key: 'Total asientos vendidos' },
     { title: 'Asientos', key: 'Asientos' },
     { title: 'Monto total de venta', key: 'Monto total de venta' },
     { title: 'Monto Pagado', key: 'Monto Pagado' },
-    { title: 'Cambio', key: 'Cambio' },
+    { title: 'Adeudo', key: 'Adeudo' },
     { title: 'Tipos de pago', key: 'Tipos de pago' },
     { title: 'Promoción', key: 'Promotion' },
     { title: 'Venta a meses', key: 'Venta a meses' },
-    { title: 'Venta a plazos', key: 'Venta a plazos' },
-    { title: 'Adeudo', key: 'Adeudo' },
+    { title: 'Deudor', key: 'Deudor' },
     { title: 'Fecha de venta', key: 'Fecha' },
 ];
 
@@ -87,20 +87,19 @@ props.historyPerEvent.new_data.sale_tickets
     const originalDate = new Date(saleTicket.created_at);
     originalDate.setHours(originalDate.getHours() - 6);
     const adjustedDate = originalDate.toISOString();
-
     items.value.push({
         'Folio': saleTicket.id,
         'Estatus': saleTicket.sale_ticket_status.name,
         'Tipo de venta': saleTicket.is_online ? 'En linea' : 'Taquilla',
+        'Total asientos vendidos': saleTicket.event_seat_catalogs.length,
         'Asientos': seatCatalogues,
         'Monto total de venta': formatPrice(saleTicket.total_amount),
         'Monto Pagado': formatPrice((Number(Number(saleTicket.amount_received) - Number(saleTicket.total_returned)))),
-        'Cambio': formatPrice(totalReturned),
-        'Tipos de pago': paymentTypes,
-        'Promotion': saleTicket.promotion_id ? `${saleTicket.promotion.name}` : 'Sin promoción',
-        'Venta a meses': saleTicket.payment_in_installments ? saleTicket.payment_in_installments : '',
-        'Venta a plazos': saleTicket.sale_debtor_id ? saleTicket.sale_debtor.first_name : '',
         'Adeudo': formatPrice(adeudo.value),
+        'Tipos de pago': paymentTypes,
+        'Promotion': saleTicket.promotion_id ? `${saleTicket.promotion.name}` : 'N/A',
+        'Venta a meses': saleTicket.payment_in_installments ? saleTicket.payment_in_installments : 'N/A',
+        'Deudor': saleTicket.sale_debtor_id ? `${saleTicket.sale_debtor.first_name} ${saleTicket.sale_debtor.last_name}` : 'N/A',
         'Fecha': adjustedDate,
     });
 

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch } from 'vue';
+import { onMounted, watch, ref } from 'vue';
 
 const props = defineProps({
     action: {
@@ -32,7 +32,11 @@ onMounted(() => {
             if (seat.seat_catalogue_status.name === 'disponible') {
                 elemento.classList.add('tw-fill-yellow-500');
             } else if (seat.seat_catalogue_status.name === 'reservado') {
-                elemento.classList.add('tw-fill-pink-600');
+                if (props.purchaseOnline) {
+                    elemento.classList.add('tw-fill-gray-600');
+                } else {
+                    elemento.classList.add('tw-fill-pink-600');
+                }
             } else if (seat.seat_catalogue_status.name === 'inhabilitado') {
                 elemento.classList.add('tw-fill-gray-600');
             }
@@ -148,8 +152,8 @@ onMounted(() => {
                 } else if (seat.seat_catalogue_status.name === 'transito') {
                     elemento.classList.add('tw-cursor-not-allowed','tw-fill-cyan-500');
                 }
+                }
             }
-    }
   });
 });
 
@@ -187,14 +191,14 @@ watch(() => props.seatsSelected, (newSeatsSelected, oldSeatsSelected) => {
                     elemento.classList.add('tw-fill-yellow-500');
                 }
             }else{
-                    if(seat.seat_catalogue_status.name === 'reservado') {
-                        elemento.classList.remove('tw-fill-green-500');
-                        elemento.classList.add('tw-fill-pink-500');
-                    } else {
-                        elemento.classList.remove('tw-fill-green-500');
-                        elemento.classList.add('tw-fill-yellow-500');
-                    }
+                if(seat.seat_catalogue_status.name === 'reservado') {
+                    elemento.classList.remove('tw-fill-green-500');
+                    elemento.classList.add('tw-fill-pink-500');
+                } else {
+                    elemento.classList.remove('tw-fill-green-500');
+                    elemento.classList.add('tw-fill-yellow-500');
                 }
+            }
         }
     }
   });
@@ -202,19 +206,19 @@ watch(() => props.seatsSelected, (newSeatsSelected, oldSeatsSelected) => {
 
 watch(() => props.seatsAutoClic, (newSeatsSelected = [], oldSeatsSelected = []) => {
 
-newSeatsSelected.forEach((seat) => {
+    newSeatsSelected.forEach((seat) => {
 
-    const elemento = document.getElementById(seat.seat_catalogue.code);
+        const elemento = document.getElementById(seat.seat_catalogue.code);
 
-    if (elemento) {
-        const clickEvent = new MouseEvent("click", {
-            bubbles: true,
-            cancelable: true,
-            view: window
-        });
-        elemento.dispatchEvent(clickEvent);
-    }
-});
+        if (elemento) {
+            const clickEvent = new MouseEvent("click", {
+                bubbles: true,
+                cancelable: true,
+                view: window
+            });
+            elemento.dispatchEvent(clickEvent);
+        }
+    });
 });
 </script>
 

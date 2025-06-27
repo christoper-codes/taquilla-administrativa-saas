@@ -25,7 +25,6 @@ const props = defineProps({
 const emit = defineEmits(['add-seat']);
 
 onMounted(() => {
-  console.log(props);
   props.seats.forEach(seat => {
     const elemento = document.getElementById(seat.seat_catalogue.code);
     if (elemento) {
@@ -221,7 +220,6 @@ watch(() => props.seatsAutoClic, (newSeatsSelected = [], oldSeatsSelected = []) 
         }
     });
 });
-
 </script>
 
 <template>

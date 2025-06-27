@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { Line } from 'vue-chartjs'
-import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale } from 'chart.js'
+import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, Interaction } from 'chart.js'
 
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale)
 
@@ -29,6 +29,11 @@ const chartData = ref({
 
 const chartOptions = ref({
   responsive: true,
+  maintainAspectRatio: false,
+  animation: false,
+  hover: {
+    animationDuration: 0
+  },
   plugins: {
     title: {
       display: true,
@@ -36,8 +41,16 @@ const chartOptions = ref({
     },
     tooltip: {
       enabled: true,
+      animation: false,
+      displayColors: false,
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      titleColor: 'white',
+      bodyColor: 'white'
     },
-  }
+    legend: {
+      display: true
+    }
+  },
 })
 
 watch(() => props.salesPerDay, (newData) => {
@@ -54,7 +67,3 @@ watch(() => props.salesPerDay, (newData) => {
         </div>
     </div>
 </template>
-
-  <style scoped>
-
-  </style>

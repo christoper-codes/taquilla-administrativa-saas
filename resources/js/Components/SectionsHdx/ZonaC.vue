@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch } from 'vue';
+import { onMounted, watch, ref } from 'vue';
 
 const props = defineProps({
     action: {
@@ -32,7 +32,11 @@ onMounted(() => {
             if (seat.seat_catalogue_status.name === 'disponible') {
                 elemento.classList.add('tw-fill-yellow-500');
             } else if (seat.seat_catalogue_status.name === 'reservado') {
-                elemento.classList.add('tw-fill-pink-600');
+                if (props.purchaseOnline) {
+                    elemento.classList.add('tw-fill-gray-600');
+                } else {
+                    elemento.classList.add('tw-fill-pink-600');
+                }
             } else if (seat.seat_catalogue_status.name === 'inhabilitado') {
                 elemento.classList.add('tw-fill-gray-600');
             }
@@ -91,10 +95,9 @@ onMounted(() => {
             elemento.addEventListener('click', handleClick);
 
         }else{
-
-            if (seat.seat_catalogue_status.name === 'disponible' || seat.seat_catalogue_status.name === 'reservado') {
-                if(seat.seat_catalogue_status.name === 'reservado' && !props.purchaseOnline){
-                        elemento.classList.add('tw-cursor-pointer', 'tw-fill-purple-500');
+                if (seat.seat_catalogue_status.name === 'disponible' || seat.seat_catalogue_status.name === 'reservado') {
+                    if(seat.seat_catalogue_status.name === 'reservado' && !props.purchaseOnline){
+                        elemento.classList.add('tw-cursor-pointer', 'tw-fill-pink-500');
                     }else if (seat.seat_catalogue_status.name === 'reservado' && props.purchaseOnline){
 
                         elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-purple-500');
@@ -142,15 +145,15 @@ onMounted(() => {
                         elemento.addEventListener('click', handleClick);
                         elemento.addEventListener('touchstart', handleClick);
                     }
-            } else if (seat.seat_catalogue_status.name === 'vendido') {
-                elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-purple-500');
-            } else if (seat.seat_catalogue_status.name === 'inhabilitado') {
-                elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-gray-600');
-            } else if (seat.seat_catalogue_status.name === 'transito') {
-                elemento.classList.add('tw-cursor-not-allowed','tw-fill-cyan-500');
+                } else if (seat.seat_catalogue_status.name === 'vendido') {
+                    elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-purple-500');
+                } else if (seat.seat_catalogue_status.name === 'inhabilitado') {
+                    elemento.classList.add('tw-cursor-not-allowed', 'tw-fill-gray-600');
+                } else if (seat.seat_catalogue_status.name === 'transito') {
+                    elemento.classList.add('tw-cursor-not-allowed','tw-fill-cyan-500');
+                }
+                }
             }
-        }
-    }
   });
 });
 
@@ -217,7 +220,6 @@ watch(() => props.seatsAutoClic, (newSeatsSelected = [], oldSeatsSelected = []) 
         }
     });
 });
-
 </script>
 
 <template>

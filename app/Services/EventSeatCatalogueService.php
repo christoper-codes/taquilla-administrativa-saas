@@ -42,28 +42,36 @@ class EventSeatCatalogueService
             $soldStatusId = $this->seat_catalogue_statuses_service->getByName("vendido")->id;
             $availableStatusId = $this->seat_catalogue_statuses_service->getByName("disponible")->id;
             $event_seat_catalogue = collect([]);
-
             $get_all_seats_for_stadium->each(function (SeatCatalogue $seat_catalogue) use (&$event_seat_catalogue, $event, $soldStatusId, $availableStatusId){
-
                 $season_ticket = SeasonTicket::where('seat_catalogue_id', $seat_catalogue->id)
                     ->where('global_season_id', $event->global_season_id)
                     ->where('is_active', true)
                     ->first();
 
                 $is_season_event_seat_catalogue = $season_ticket && $season_ticket->EventSeatCatalogues->count();
+                $seat_status_id = $availableStatusId;
+                $last_event_seat = null;
+                if ($season_ticket) {
+                    if ($is_season_event_seat_catalogue) {
+                        $last_event_seat = $season_ticket->EventSeatCatalogues->first();
+                        $seat_status_id = $last_event_seat->seat_catalogue_status_id;
+                    } else {
+                        $seat_status_id = $soldStatusId;
+                    }
+                }
 
                 $event_seat_catalogue->push([
                     'event_id' => $event->id,
                     'seat_catalogue_id' => $seat_catalogue->id,
-                    'user_id' => $is_season_event_seat_catalogue ? $season_ticket->user_id : null,
-                    'season_ticket_id' => $is_season_event_seat_catalogue ? $season_ticket->id : null,
-                    'seat_catalogue_status_id' => $is_season_event_seat_catalogue ? $soldStatusId : $availableStatusId,
-                    'sale_ticket_id' => $is_season_event_seat_catalogue ? $season_ticket->EventSeatCatalogues->first()->sale_ticket_id : null,
-                    'qr' => $is_season_event_seat_catalogue ? $season_ticket->EventSeatCatalogues->first()->qr : null,
-                    'price' => $is_season_event_seat_catalogue ? $season_ticket->EventSeatCatalogues->first()->price : null,
-                    'original_price' => $is_season_event_seat_catalogue ? $season_ticket->EventSeatCatalogues->first()->original_price : null,
-                    'purchase_type' => $is_season_event_seat_catalogue ? $season_ticket->EventSeatCatalogues->first()->purchase_type : null,
-                    'is_gift' => $is_season_event_seat_catalogue ? $season_ticket->EventSeatCatalogues->first()->is_gift : false,
+                    'user_id' => $season_ticket ? $season_ticket->user_id : null,
+                    'season_ticket_id' => $season_ticket ? $season_ticket->id : null,
+                    'seat_catalogue_status_id' => $seat_status_id,
+                    'sale_ticket_id' => $last_event_seat?->sale_ticket_id,
+                    'qr' => $last_event_seat?->qr,
+                    'price' => $last_event_seat?->price,
+                    'original_price' => $last_event_seat?->original_price,
+                    'purchase_type' => $last_event_seat?->purchase_type,
+                    'is_gift' => $last_event_seat?->is_gift ?? false,
                     'is_verified' => false,
                     'is_active' => true,
                     'created_at' => now(),
