@@ -435,6 +435,7 @@ class EventController extends Controller
 
                 return response()->json([
                     'data' => $response,
+                    'subscriber' => true,
                     'message' => 'Asientos reservados y comprados correctamente',
                     'success' => true,
                     'pdf' => base64_encode($pdfContent)
@@ -454,6 +455,7 @@ class EventController extends Controller
                 'data' => $response,
                 'message' => 'Asientos reservados y comprados correctamente',
                 'success' => true,
+                'subscriber' => false,
                 'pdf' => base64_encode($pdfContent)
             ], 200);
         } catch (\Exception $e) {
@@ -665,31 +667,56 @@ class EventController extends Controller
         try {
             $response = $this->event_service->printSubscriber($request->id);
 
-            $generic_data = [
-                'sale_date' => Carbon::now()->format('d/m/Y'),
-                'folio' => $response[0]['ticket_id'],
-                'total_amount' => $response[0]['sale_ticket']['total_amount'],
-                'global_payment_types' => $response[0]['global_payment_types'],
-                'seller_user' => $response[0]['seller_user'],
-                'payment_in_installments' => $response[0]['payment_in_installments'],
-                'promotion_ticket' => $response[0]['promotion_ticket'],
-                'sale_debtor' => $response[0]['sale_debtor'],
-                'installment_payment_histories'=>$response[0]['installment_payment_histories']
-            ];
+            if($request->purchase_type == PurchaseTypes::SEASON_TICKET->value) {
 
-            $pdf_response = Pdf::loadView('pdfs.hdx.saleTicket', [
-                'pdf_data' => $response,
-                'generic_data' => $generic_data
-            ]);
+                $generic_data = [
+                    'sale_date' => Carbon::now()->format('d/m/Y'),
+                    'folio' => $response[0]['ticket_id'],
+                    'total_amount' => $response[0]['sale_ticket']['total_amount'],
+                    'global_payment_types' => $response[0]['global_payment_types'],
+                    'seller_user' => $response[0]['seller_user'],
+                    'payment_in_installments' => $response[0]['payment_in_installments'],
+                    'promotion_ticket' => $response[0]['promotion_ticket'],
+                    'sale_debtor' => $response[0]['sale_debtor'],
+                    'installment_payment_histories'=>$response[0]['installment_payment_histories']
+                ];
 
+                $pdf_response = Pdf::loadView('pdfs.hdx.saleTicket', [
+                    'pdf_data' => $response,
+                    'generic_data' => $generic_data
+                ]);
+
+                $pdfContent = $pdf_response->output();
+
+                return response()->json([
+                    'data' => $response,
+                    'subscriber' => true,
+                    'message' => 'Asientos reservados y comprados correctamente',
+                    'success' => true,
+                    'pdf' => base64_encode($pdfContent)
+                ], 200);
+
+
+            }
+
+            $generic_data = [];
+            if($response[0]['promotion_ticket']){
+                $generic_data = [
+                    'promotion_ticket' => $response[0]['promotion_ticket'],
+                ];
+            }
+            $pdf_response = Pdf::loadView('pdfs.hdx.saleTicketPaper', ['pdf_data' => $response, 'generic_data' => $generic_data]);
             $pdfContent = $pdf_response->output();
 
             return response()->json([
                 'data' => $response,
+                'subscriber' => false,
                 'message' => 'Asientos reservados y comprados correctamente',
                 'success' => true,
                 'pdf' => base64_encode($pdfContent)
             ], 200);
+
+
 
         } catch (\Exception $e) {
             DB::rollBack();
