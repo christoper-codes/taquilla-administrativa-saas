@@ -31,8 +31,8 @@ const props = defineProps({
         type: Number,
         required: true,
     },
-    eventId: {
-        type: Number,
+    event: {
+        type: Object,
         required: true,
     },
     cashRegisterId: {
@@ -106,6 +106,13 @@ onMounted(async () => {
           label: 'paypal'
         },
         createOrder: async (data, actions) => {
+
+            const seatSummary = props.seats.map(seat => {
+                const code = seat.seat_catalogue?.code ?? 'SIN_CODIGO';
+                const price = seat.final_price ?? 0;
+                return `${code} ($${Number(price).toFixed(2)})`;
+            }).join(', ');
+
           return actions.order.create({
             purchase_units: [
                 {
@@ -114,6 +121,7 @@ onMounted(async () => {
                         currency_code: currency
                     },
                     custom_id: props.memberUserId ? props.memberUserId : null,
+                    description: `Compra de boletos Halcones (${ props.memberUserId ?? 0 }) - Evento ${props.event.name} (${props.event.id}), Asientos: ${seatSummary}`
                 }
             ]
           })
@@ -176,7 +184,7 @@ const confirmSeatsPurchase = (transaction = {}) =>{
         purchase_type: props.purchaseType,
         stadium_id: props.stadiumId,
         ticket_office_id: props.ticketOfficeId,
-        event_id: props.eventId,
+        event_id: props.event.id,
         cash_register_id: props.cashRegisterId,
         member_user_id: props.memberUserId,
         seller_user_id: props.sellerUserId,

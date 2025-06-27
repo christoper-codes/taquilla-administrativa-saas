@@ -1626,7 +1626,7 @@ watch(() => agreementSelected.value, () => {
             v-bind:purchaseType="purchaseType"
             v-bind:stadiumId="event.stadium_id"
             v-bind:ticketOfficeId="ticketOfficeId"
-            v-bind:eventId="event.id"
+            v-bind:event="event"
             v-bind:cashRegisterId="cashRegisterDataId"
             v-bind:memberUserId="user.id"
             v-bind:sellerUserId="sellerUserId"
