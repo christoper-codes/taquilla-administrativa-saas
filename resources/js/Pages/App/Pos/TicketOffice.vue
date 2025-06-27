@@ -324,7 +324,8 @@ if (props.cash_register_general_history && props.cash_register_general_history.c
             'Monto Pagado': formatPrice((Number(Number(saleTicket.amount_received)-Number(saleTicket.total_returned)))),
             'Monto restante': formatPrice(saleTicket.remaining_amount),
             'Tipos de pago': paymentTypes,
-            'Deudor': saleTicket.sale_debtor
+            'Deudor': saleTicket.sale_debtor,
+            'PurcharseType': saleTicket.purchase_type
         });
     });
 }
@@ -373,12 +374,30 @@ loadingPrint.value = true;
             })
 
     }else{
-        axios.get(route('events.printSubscriber', { id: item.Folio }))
+        axios.get(route('events.printSubscriber', { id: item.Folio , purchase_type:item.PurcharseType }))
             .then(response => {
                 const pdfContent = atob(response.data.pdf);
                 const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
-                const pdfUrl = window.URL.createObjectURL(pdfBlob);
-                printInKioskMode(pdfUrl);
+
+                if (response.data.subscriber) {
+                    const pdfUrl = window.URL.createObjectURL(pdfBlob);
+                    printInKioskMode(pdfUrl);
+                }else{
+                    const pdfFile = new File([pdfBlob], 'arch.pdf', { type: 'application/pdf' });
+                    const formData = new FormData();
+                    formData.append('pdf', pdfFile);
+                    axios.post(route('print'), formData)
+                        .then(response => {
+                            console.log(response.data);
+                        })
+                        .catch(error => {
+                            console.error(error);
+                            const pdfUrl = window.URL.createObjectURL(pdfBlob);
+                            printInKioskMode(pdfUrl);
+                        });
+                }
+                    //const pdfUrl = window.URL.createObjectURL(pdfBlob);
+                    //printInKioskMode(pdfUrl);
             })
             .catch(error => {
                 console.log(error);
