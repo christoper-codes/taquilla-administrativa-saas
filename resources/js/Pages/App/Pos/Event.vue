@@ -2678,11 +2678,8 @@ watch(() => agreementSelected.value, () => {
                                                                         </v-card>
                                                                     </template>
                                                                 </v-dialog>
-
                                                             </div>
                                                         </v-expansion-panel-text>
-
-
                                                         </v-form>
                                                     </v-expansion-panel>
                                                 </v-expansion-panels>

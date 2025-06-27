@@ -188,6 +188,19 @@ class EventService
 
     /*
     * |--------------------------------------------------------------------------
+    * | Get event by id with only event
+    */
+    public function getOnlyEvent($id)
+    {
+        try {
+            return $this->event_repository->getOnlyEvent($id);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /*
+    * |--------------------------------------------------------------------------
     * | Reserve seats to buy
     */
     public function reserveSeatsToBuy($data)

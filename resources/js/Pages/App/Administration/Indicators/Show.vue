@@ -6,13 +6,17 @@ import { Head } from '@inertiajs/vue3';
 import { onMounted, ref } from 'vue';
 import usePriceFormat from '@/composables/priceFormat';
 import useDateFormat from '@/composables/dateFormat';
+import useEventResume from '@/composables/exports/eventResume';
 import Eventshow from '@/Components/IndicatorsCharts/Eventshow.vue';
 import { toast } from 'vue3-toastify';
 import useStringFormat from '@/composables/stringFormat';
+import ExportButton from '@/Components/buttons/ExportButton.vue';
+import PrimaryButton from '@/Components/buttons/PrimaryButton.vue';
 
 const { formatPrice } = usePriceFormat();
 const { dateFormat } = useDateFormat();
 const { formatFirstLetterUppercase } = useStringFormat();
+const { exportSummaryByTickets } = useEventResume();
 
 const dateToFindResume = ref(null);
 const itemsPerDate = ref([]);
@@ -29,15 +33,12 @@ const props = defineProps({
     },
 })
 
-console.log(props.historyPerEvent);
-
 const today = new Date();
 const currentDay = today.getDate();
 const currentMonth = today.getMonth() + 1;
 const currentYear = today.getFullYear();
 
 // Headers for the data table
-
 const amountOwed = ref(0);
 const items = ref([]);
 const headerProps = {
@@ -262,16 +263,17 @@ onMounted(() => {
                             :allowed-dates="isAllowedDate"
                             class="!tw-w-full"
                         ></v-date-picker>
-                        <v-btn @click="filterByDate" variant="elevated" block class="text-none !tw-text-white !tw-bg-gradient-to-r !tw-from-purple-600 !tw-to-pink-400" size="large">
-                            Buscar resumen
-                        </v-btn>
+
+                        <PrimaryButton @click="filterByDate" heightbtn="!tw-h-[60px]" paddingbtn="!tw-w-full !tw-block">
+                            <span>Buscar resumen</span>
+                        </PrimaryButton>
                     </div>
                 </div>
                 <div class="tw-w-full lg:tw-w-2/3">
                     <div v-if="itemsPerDate.length > 0">
                         <div class="tw-mb-16">
                             <div class="tw-mb-10 mt-2">
-                                <h2 class="tw-text-5xl">Venta</h2>
+                                <h2 class="tw-text-4xl tw-font-bold">Venta</h2>
                                 <h3 class="tw-text-lg tw-mt-4">{{ formatPrice(salesPerDate.total) }} MXN</h3>
                                 <h3 class="tw-text-lg">{{ salesPerDate.venta }} asientos vendidos</h3>
                             </div>
@@ -330,15 +332,20 @@ onMounted(() => {
                 <div v-for="(sales, type) in historyPerEvent.type_sales" :key="type">
                     <div  class="tw-p-5 tw-shadow-lg tw-rounded-2xl tw-bg-white tw-flex tw-flex-col tw-justify-between tw-gap-5">
                         <div class="tw-flex tw-items-center tw-justify-between tw-gap-3">
-                            <h3 v-if="type != 'total'">Tipos de asientos vendidos</h3>
-                            <h3 v-else class="tw-text-2xl tw-font-bold">Ventas totales</h3>
-                            <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-full tw-bg-blue-100 tw-text-blue-600">trending_up</span>
+                            <div v-if="type != 'total'" class="tw-flex tw-items-center tw-justify-between tw-gap-3">
+                                <h3>Tipos de asientos vendidos</h3>
+                                 <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-full tw-bg-blue-100 tw-text-blue-600">trending_up</span>
+                            </div>
+                            <div v-else class="tw-flex tw-items-center tw-justify-between tw-gap-3">
+                                <h3 class="tw-text-2xl tw-font-bold">Ventas totales</h3>
+                                <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-full tw-bg-blue-100 tw-text-green-600">trending_up</span>
+                            </div>
                         </div>
                         <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xl">
                             <div class="tw-flex tw-items-center tw-gap-2 tw-font-bold">
                                 <span v-if="type != 'total' && type != 'online'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-yellow-500 tw-text-white">confirmation_number</span>
                                 <span v-else-if="type == 'online'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-blue-500 tw-text-white">confirmation_number</span>
-                                <span v-else-if="type == 'total'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-red-500 tw-text-white">confirmation_number</span>
+                                <span v-else-if="type == 'total'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-green-500 tw-text-white">confirmation_number</span>
                                 <h3>{{ formatFirstLetterUppercase(type) }}</h3>
                             </div>
                             <p class="tw-block tw-font-bold">{{ sales.sales }} <span class="tw-text-xs">(asientos)</span> </p>
@@ -351,7 +358,12 @@ onMounted(() => {
             </div>
 
             <div class="tw-w-full tw-mt-16 tw-px-0 lg:tw-px-10">
-                <h2 class="tw-font-bold tw-text-3xl tw-mb-5">Historial de ventas</h2>
+                <div class="tw-flex tw-items-center tw-justify-between tw-gap-5 tw-mb-5">
+                    <h2 class="tw-font-bold tw-text-4xl">Historial de ventas</h2>
+                    <ExportButton @click="exportSummaryByTickets(historyPerEvent.event.id)" heightbtn="!tw-h-[60px]" paddingbtn="!tw-px-14" bgbtn="!tw-bg-green-500">
+                        <span>Exportar a Excel</span>
+                    </ExportButton>
+                </div>
                 <v-data-table :items="items" :headers="headers" :header-props="headerProps">
                     <template v-slot:item.Estatus="{ item }">
                         <span
