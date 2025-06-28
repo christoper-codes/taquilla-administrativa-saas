@@ -109,8 +109,7 @@ onMounted(async () => {
 
             const seatSummary = props.seats.map(seat => {
                 const code = seat.seat_catalogue?.code ?? 'SIN_CODIGO';
-                const price = seat.final_price ?? 0;
-                return `${code} ($${Number(price).toFixed(2)})`;
+                return `${code}`;
             }).join(', ');
 
           return actions.order.create({
