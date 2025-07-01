@@ -106,7 +106,7 @@ const props = defineProps({
                         <div class="tw-flex lg:tw-flex-col tw-flex-col tw-justify-between">
                            <div class="tw-flex tw-items-center tw-justify-between">
                                 <v-switch label="Recordar sesión" v-model="remember.value.value" color="purple"></v-switch>
-                                <Link :href="route('login')" class="tw-text-primary tw-underline tw-mb-7">¿Olvidaste tu contraseña?</Link>
+                                <Link :href="route('password.request')" class="tw-text-primary tw-underline tw-mb-7">¿Olvidaste tu contraseña?</Link>
                            </div>
                             <PrimaryButton @click="submit" :disabled="data.processing" heightbtn="!tw-h-[60px] !tw-text-base !tw-w-full md:!tw-w-auto" paddingbtn="!tw-px-10" :loading="loading">
                                 <span class="material-symbols-outlined tw-text-2xl !tw-w-1/2">fingerprint</span>Iniciar sesion
