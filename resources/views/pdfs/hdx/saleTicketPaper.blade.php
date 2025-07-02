@@ -68,7 +68,7 @@
             </table>-->
             <h3 style="margin-top: 40px;">{{ $data['seat_code'] }}</h3>
             <p class="info" style="margin-top: 20px;  margin-left: 160px">
-                La adquisición al inmueble es exclusiva <br>
+                El ingreso al inmueble es exclusivo <br>
                 para el asiento y zona especificada
             </p>
             <h2 style="margin-top: 40px;">{{ $data['event_name'] }}</h2>
