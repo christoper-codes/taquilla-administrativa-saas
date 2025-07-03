@@ -13,10 +13,14 @@ class TicketController extends Controller
         try {
 
              $request->validate([
-                'tikcet_id' => 'required|integer|exists:event_seat_catalog,id',
+                'event_id' => 'required|integer|exists:events,id',
+                'qr' => 'required|string|exists:event_seat_catalog,qr',
             ]);
 
-            $ticket = EventSeatCatalog::where('id', $request->tikcet_id)->first();
+            $ticket = EventSeatCatalog::where('event_id', $request->event_id)
+                ->where('qr', $request->qr)
+                ->first();
+
             if($ticket->is_verified) {
                 throw new \Exception('El boleto ya ha sido verificado');
             }
