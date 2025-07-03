@@ -130,6 +130,8 @@ onMounted(async () => {
                 const transaction = {
                     source: 'paypal',
 
+                    user_id: props.memberUserId ? props.memberUserId : null,
+
                     order_id: data.orderID ?? null,
                     payment_id: data.paymentID ?? null,
                     payer_id: data.payerID ?? null,
