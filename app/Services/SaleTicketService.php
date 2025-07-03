@@ -462,6 +462,7 @@ class SaleTicketService
                 'type_sales' => $new_data['type_sales'],
                 'sales_per_day' => $days,
                 'new_data' => $new_data['event'],
+                'availability' => $new_data['availability'],
             ];
 
             return $response;
@@ -507,6 +508,7 @@ class SaleTicketService
                 'abonado' => ['sales' => 0],
                 'regular' => ['sales' => 0],
                 'online' => ['sales' => 0],
+                'taquilla' => ['sales' => 0],
             ];
 
             $sale_tickets = $event->saleTickets()
@@ -537,7 +539,6 @@ class SaleTicketService
                         return $installment_payment_history->globalPaymentTypes;
                     }));
                 }
-
 
                 foreach ($sale_ticket->globalPaymentTypes as $global_payment_type) {
                     $name = $global_payment_type->name;
@@ -583,9 +584,36 @@ class SaleTicketService
 
                             if($sale_ticket->is_online){
                                 $type_sales['online']['sales']++;
+                            } else {
+                                $type_sales['taquilla']['sales']++;
                             }
                         }
                     }
+                }
+            });
+
+            $status_ids = [
+                'disponible' => SeatCatalogueStatus::where('name', 'disponible')->first()->id,
+                'reservado' => SeatCatalogueStatus::where('name', 'reservado')->first()->id,
+                'inhabilitado' => SeatCatalogueStatus::where('name', 'inhabilitado')->first()->id,
+                'transito' => SeatCatalogueStatus::where('name', 'transito')->first()->id,
+            ];
+
+            $availability = [
+                'disponibles' => 0,
+                'inhabilitados' => 0,
+                'abonados' => 0,
+            ];
+
+            $event->EventSeatCatalogues->each(function ($event_seat_catalog) use (&$availability, $status_ids) {
+                if ($event_seat_catalog->seat_catalogue_status_id == $status_ids['disponible'] || $event_seat_catalog->seat_catalogue_status_id == $status_ids['transito'] || $event_seat_catalog->seat_catalogue_status_id == $status_ids['reservado']) {
+                    $availability['disponibles']++;
+                }
+                if ($event_seat_catalog->seat_catalogue_status_id == $status_ids['inhabilitado']) {
+                    $availability['inhabilitados']++;
+                }
+                if($event_seat_catalog->season_ticket_id){
+                    $availability['abonados']++;
                 }
             });
 
@@ -594,6 +622,7 @@ class SaleTicketService
                 'total_seats_sold' => $total_seats_sold,
                 'type_payments' => $type_payments,
                 'type_sales' => $type_sales,
+                'availability' => $availability,
             ];
         } catch (\Exception $e) {
             throw $e;

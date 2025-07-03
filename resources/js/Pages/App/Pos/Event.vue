@@ -451,10 +451,9 @@ watch(selectedAgreementPromotion, () => {
             });
         }
 
-    console.log(finalPromotion.value);
     updateTotal();
 
-    toast('La promoción ha sido aplicada', {
+    toast('El convenio ha sido aplicado', {
         theme: 'auto',
         type: 'success',
         dangerouslyHTMLString: true,

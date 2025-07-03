@@ -191,8 +191,8 @@ onMounted(() => {
                     <div>
                     <div v-for="(sales, type) in historyPerEvent.type_sales" :key="type">
                         <div v-if="type == 'total'">
-                        <h4 data-aos="fade-left" data-aos-duration="2500" class="tw-font-bold tw-text-xl">
-                            Aforo esperado: {{ sales.sales }}
+                       <h4 class="tw-font-bold tw-text-xl">
+                            Aforo esperado: {{ sales.sales + (historyPerEvent.availability.abonados || 0) }}
                             <span class="tw-text-base">(asistentes)</span>
                         </h4>
                         </div>
@@ -216,6 +216,26 @@ onMounted(() => {
                 </div>
             </section>
 
+            <div class="tw-mt-16 lg:tw-px-10">
+                <h2 class="tw-text-4xl tw-font-bold">Disponibilidad de asientos</h2>
+                <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-3 tw-gap-8 tw-mt-5 tw-mb-16">
+                    <div v-for="(count, type) in historyPerEvent.availability" :key="type">
+                        <div  class="tw-p-5 tw-shadow-lg tw-rounded-2xl tw-bg-white tw-flex tw-flex-col tw-justify-between tw-gap-5">
+                            <div class="tw-flex tw-items-center tw-justify-end">
+                                <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-full tw-bg-blue-100 tw-text-blue-600">check_circle</span>
+                            </div>
+                            <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xl">
+                                <div class="tw-flex tw-items-center tw-gap-2 tw-font-bold">
+                                    <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-blue-500 tw-text-white">check_circle</span>
+                                    <h3>{{ formatFirstLetterUppercase(type) }}</h3>
+                                </div>
+                                <span class="tw-block tw-font-bold">{{ count }}</span>
+                            </div>
+                            <p class="tw-text-right tw-text-xs">Actualizado al día: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="tw-mt-16 lg:tw-px-10">
                 <h2 class="tw-text-4xl tw-font-bold">Venta general</h2>
             </div>
@@ -297,7 +317,7 @@ onMounted(() => {
                             </div>
                         </div>
                     </div>
-                    <div v-else class="tw-flex tw-bg-white tw-items-center tw-justify-center tw-text-center tw-min-h-[500px] tw-shadow-lg tw-rounded-xl tw-opacity-50 tw-flex-col tw-gap-1">
+                    <div v-else class="tw-flex tw-bg-white tw-items-center tw-justify-center tw-text-center tw-min-h-[500px] tw-shadow-lg tw-rounded-xl tw-flex-col tw-gap-1">
                         <h2 class="tw-text-lg">Seleccione una fecha valida para un resumen de venta</h2>
                     </div>
                 </div>
@@ -334,7 +354,9 @@ onMounted(() => {
                         <div class="tw-flex tw-items-center tw-justify-between tw-gap-3">
                             <div v-if="type != 'total'" class="tw-flex tw-items-center tw-justify-between tw-gap-3">
                                 <h3>Tipos de asientos vendidos</h3>
-                                 <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-full tw-bg-blue-100 tw-text-blue-600">trending_up</span>
+                                <span v-if="type == 'online'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-full tw-bg-blue-100 tw-text-blue-600">trending_up</span>
+                                <span v-else-if="type == 'taquilla'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-full tw-bg-pink-100 tw-text-pink-600">trending_up</span>
+                                <span v-else class="material-symbols-outlined tw-block tw-p-2 tw-rounded-full tw-bg-yellow-100 tw-text-yellow-600">trending_up</span>
                             </div>
                             <div v-else class="tw-flex tw-items-center tw-justify-between tw-gap-3">
                                 <h3 class="tw-text-2xl tw-font-bold">Ventas totales</h3>
@@ -343,9 +365,10 @@ onMounted(() => {
                         </div>
                         <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xl">
                             <div class="tw-flex tw-items-center tw-gap-2 tw-font-bold">
-                                <span v-if="type != 'total' && type != 'online'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-yellow-500 tw-text-white">confirmation_number</span>
+                                <span v-if="type != 'total' && type != 'online'  && type != 'taquilla'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-yellow-500 tw-text-white">confirmation_number</span>
                                 <span v-else-if="type == 'online'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-blue-500 tw-text-white">confirmation_number</span>
                                 <span v-else-if="type == 'total'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-green-500 tw-text-white">confirmation_number</span>
+                                <span v-else-if="type == 'taquilla'" class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-pink-500 tw-text-white">confirmation_number</span>
                                 <h3>{{ formatFirstLetterUppercase(type) }}</h3>
                             </div>
                             <p class="tw-block tw-font-bold">{{ sales.sales }} <span class="tw-text-xs">(asientos)</span> </p>
@@ -358,7 +381,7 @@ onMounted(() => {
             </div>
 
             <div class="tw-w-full tw-mt-16 tw-px-0 lg:tw-px-10">
-                <div class="tw-flex tw-items-center tw-justify-between tw-gap-5 tw-mb-5">
+                <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-gap-5 tw-mb-5">
                     <h2 class="tw-font-bold tw-text-4xl">Historial de ventas</h2>
                     <ExportButton @click="exportSummaryByTickets(historyPerEvent.event.id)" heightbtn="!tw-h-[60px]" paddingbtn="!tw-px-14" bgbtn="!tw-bg-green-500">
                         <span>Exportar a Excel</span>
