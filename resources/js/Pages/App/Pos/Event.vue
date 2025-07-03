@@ -421,16 +421,13 @@ watch(selectedAgreementPromotion, () => {
         });
     } else if (promoType === 'descuento_por_porcentaje_por_boleto') {
             seatsSelected.value.forEach((seat) => {
-                const promotion = seat.promotions?.find(
-                    (promo) => promo.name === selectedAgreementPromotion.value.name
-                );
-
+                const promotion = selectedAgreementPromotion.value;
                 if (promotion) {
                     seat.price_types.forEach((priceType) => {
-                        finalPromotion.value.quantity++;
-                        seat.promotion_id = selectedAgreementPromotion.value.id;
+                        seat.promotion_id = selectedAgreementPromotion.value.pivot.promotion_id;
                         seat.agreement_promotion_id = selectedAgreementPromotion.value.pivot.id;
                         if (priceType.name === 'regular') {
+                            finalPromotion.value.quantity++;
                             const discount =
                                 priceType.pivot.price *
                                 (selectedAgreementPromotion.value.percent_allow / 100);
@@ -442,10 +439,10 @@ watch(selectedAgreementPromotion, () => {
         }else if(selectedAgreementPromotion.value.promotion_type.name == 'descuento_por_porcentaje_por_compra'){
             seatsSelected.value.forEach((seat) => {
                 seat.price_types.forEach(priceType => {
-                    finalPromotion.value.quantity++;
                     seat.promotion_id = selectedAgreementPromotion.value.id;
                     seat.agreement_promotion_id = selectedAgreementPromotion.value.pivot.id;
                     if(priceType.name == 'regular'){
+                        finalPromotion.value.quantity++;
                         const discount = priceType.pivot.price * (selectedAgreementPromotion.value.percent_allow / 100);
                         priceType.pivot.price = priceType.pivot.price - discount;
                     }
@@ -454,6 +451,7 @@ watch(selectedAgreementPromotion, () => {
             });
         }
 
+    console.log(finalPromotion.value);
     updateTotal();
 
     toast('La promoción ha sido aplicada', {
@@ -2623,8 +2621,7 @@ watch(() => agreementSelected.value, () => {
                                                                                 <h2 class="tw-font-bebas tw-font-bold tw-text-3xl">Resumen de compra</h2>
                                                                                 <h2 class="tw-font-bebas tw-font-bold tw-text-2xl tw-mt-5">Total: {{ formatPrice(totalAmount) }}</h2>
                                                                                 <div class="tw-flex tw-flex-col lg:tw-flex-row tw-gap-3">
-                                                                                    <v-switch inset color="purple" v-model="acceptTerms"></v-switch>
-                                                                                    <a href="/terminos-y-condiciones" target="_blank" class="-tw-mt-10 lg:tw-mt-3">Acepto <span class="tw-underline tw-text-primary">terminos y condiciones</span></a>
+                                                                                    <v-switch inset color="purple" label="Acepto terminos y condiciones" v-model="acceptTerms"></v-switch>
                                                                                 </div>
                                                                                 <!-- Tabla de asientos seleccionados -->
                                                                                 <v-data-table :items="seatsSelected" class="" hide-default-footer items-per-page="-1">
