@@ -1,11 +1,10 @@
 <script setup>
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import AuthenticationCard from '@/Components/AuthenticationCard.vue';
+import { Head, useForm, Link } from '@inertiajs/vue3';
 import { toast } from 'vue3-toastify'
+import PrimaryButton from '@/Components/buttons/PrimaryButton.vue';
+import { ref } from 'vue';
+import ErrorSession from '@/Components/ErrorSession.vue';
 
 const props = defineProps({
     email: {
@@ -25,85 +24,92 @@ const form = useForm({
     password_confirmation: '',
 });
 
+const loading = ref(false);
+const show = ref(false);
+
 const submit = () => {
+    loading.value = true;
     form.post(route('password.store'), {
         onSuccess: () => {
             toast("Contraseña Restablecida", {
                 theme: "auto",
                 type: "success",
+                autoClose: false,
                 dangerouslyHTMLString: true
             });
         },
         onError: (errors) => {
-            if (errors) {
-                toast("Opps! intente de nuevo", {
-                    theme: "auto",
-                    type: "error",
-                    dangerouslyHTMLString: true
-                });
-            } else {
-                toast("Ha ocurrido un error. Inténtalo de nuevo.", {
-                    theme: "auto",
-                    type: "error"
-                });
-            }
+            console.error(errors);
+            toast(errors.password || errors.password_confirmation || errors.email, {
+                theme: "auto",
+                type: "error",
+                dangerouslyHTMLString: true
+            });
         },
         onFinish: () => {
             form.reset('password', 'password_confirmation')
+            loading.value = false;
         },
     });
 };
 </script>
 
 <template>
-    <GuestLayout/>
-        <Head title="Reset Password"/>
-        <div class="tw-flex tw-justify-center tw-items-center tw-my-8">
-            <form @submit.prevent="submit" class="tw-w-full tw-max-w-md tw-space-y-3">
+    <Head title="Restablecer contraseña" />
+    <AuthenticationCard>
+        <div class="tw-w-full lg:tw-w-[70%] tw-h-auto tw-mx-auto tw-px-5 lg:tw-px-0 tw-py-10 lg:tw-py-0">
+            <div class="">
+                <ErrorSession />
+                <Link :href="route('events.index')" class="tw-inline-block">
+                    <div class="tw-size-10 tw-shadow-md tw-rounded-full tw-bg-primary tw-p-2 tw-flex tw-items-center tw-justify-center tw-mb-3">
+                        <span class="material-symbols-outlined tw-text-white">arrow_back</span>
+                    </div>
+                </Link>
+                <h2 class="tw-font-bebas tw-text-4xl tw-font-bold lg:tw-text-5xl">Restablecer contraseña</h2>
+                <p class="tw-text-gray-600 tw-text-base tw-mt-2">Ingresa la nueva contraseña para restablecerla.</p>
+            </div>
 
-                <h1 class="tw-font-bold tw-text-xl">Restablecer contraseña</h1>
-                <div>
-
-
-                    <v-text-field
-                        id="password"
-                        type="password"
-                        color="purple"
-                        placeholder="●●●●●●●●"
-                        label="Contraseña"
-                        autocomplete="new-password"
-                        hint="Ingresa tu contraseña nueva"
-                        v-model="form.password"
-                        variant="outlined"
-                        class="!tw-rounded-2xl"
-                    ></v-text-field>
-
-                    <InputError class="mt-2" :message="form.errors.password" />
-                </div>
-
-                <div>
-
-                    <v-text-field
-                        id="password_confirmation"
-                        type="password"
-                        color="purple"
-                        placeholder="●●●●●●●●"
-                        label="Confirma tu contraseña"
-                        autocomplete="new-password"
-                        hint="Confirma tu contraseña nueva"
-                        v-model="form.password_confirmation"
-                        variant="outlined"
-                        class="!tw-rounded-2xl"
-                    ></v-text-field>
-
-                    <InputError class="mt-2" :message="form.errors.password_confirmation" />
-                </div>
-
-                <div  class="tw-flex tw-justify-center">
-                    <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="!tw-bg-purple-600 hover:!tw-bg-purple-700 !tw-text-white !tw-px-10 !tw-h-[60px] !tw-text-base !tw-rounded-2xl">
-                       Confirmar Contraseña
-                    </PrimaryButton>
-                </div>
-            </form>
+            <div class="tw-mt-5 tw-flex tw-flex-col tw-gap-3">
+                <v-form class="tw-mt-5 tw-flex tw-flex-col tw-gap-1">
+                    <div class="tw-flex tw-flex-col">
+                        <v-text-field
+                            id="password"
+                            :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                            :type="show ? 'text' : 'password'"
+                            @click:append="show = !show"
+                            color="purple"
+                            placeholder="●●●●●●●●"
+                            label="Contraseña"
+                            autocomplete="new-password"
+                            hint="Ingresa tu contraseña nueva"
+                            v-model="form.password"
+                            variant="outlined"
+                            class="!tw-rounded-2xl"
+                            :error-messages="form.errors.password"
+                        ></v-text-field>
+                        <v-text-field
+                            id="password_confirmation"
+                            :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                            :type="show ? 'text' : 'password'"
+                            @click:append="show = !show"
+                            color="purple"
+                            placeholder="●●●●●●●●"
+                            label="Confirmar contraseña"
+                            autocomplete="new-password"
+                            hint="Confirma tu contraseña nueva"
+                            v-model="form.password_confirmation"
+                            variant="outlined"
+                            class="!tw-rounded-2xl"
+                            :error-messages="form.errors.password_confirmation"
+                        ></v-text-field>
+                    </div>
+                    <div class="tw-flex lg:tw-flex-col tw-flex-col tw-justify-between">
+                        <PrimaryButton @click="submit" heightbtn="!tw-h-[60px] !tw-text-base !tw-w-full md:!tw-w-auto" paddingbtn="!tw-px-10" :loading="loading" :disabled="form.processing">
+                            <span class="material-symbols-outlined tw-text-2xl !tw-w-1/2">fingerprint</span>Restablecer
+                        </PrimaryButton>
+                    </div>
+                </v-form>
+            </div>
         </div>
+    </AuthenticationCard>
 </template>

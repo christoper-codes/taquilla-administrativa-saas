@@ -129,6 +129,7 @@ const props = defineProps({
                             <div class="tw-w-full">
                                 <v-text-field
                                     color="purple"
+                                    type="email"
                                     label="E-mail"
                                     placeholder="user@gmail.com"
                                     hint="Ingresa tu correo electronico"
