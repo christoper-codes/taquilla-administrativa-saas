@@ -95,7 +95,7 @@ const closeImageModal = () => {
     <CashRegisterNav v-bind:user_roles="user_roles"/>
     <GuestNavSocial />
     <AppNav />
-    <Banner :banner="platform_settings[0].settings.banner"/>
+    <!--<Banner :banner="platform_settings[0].settings.banner"/>-->
     <transition name="fade">
         <div v-if="showImageModal"
             class="tw-fixed tw-inset-0 !tw-z-50 tw-flex tw-items-center tw-justify-center tw-bg-black/50 tw-backdrop-blur-[7px] tw-transition-all tw-duration-500"
@@ -133,13 +133,13 @@ const closeImageModal = () => {
                     <div class="tw-flex lg:tw-items-center tw-h-full !tw-mb-12 lg:!tw-mb-0 tw-z-20 tw-relative">
                         <div class="!tw-mx-auto !tw-max-w-7xl !tw-px-6 lg:!tw-px-0 !tw-w-full !tw-py-32 lg:!tw-py-0 lg:!tw--mt-40">
                             <div>
-                                <h2 data-aos="fade-down" data-aos-duration="1300" data-aos-once="true" class="tw-font-metal tw-pr-1 tw-italic tw-text-2xl tw-inline-block tw-bg-clip-text tw-bg-gradient-to-r tw-from-primary tw-to-secondary/60 tw-text-transparent">Proximo partido</h2>
+                                <h2 data-aos="fade-down" data-aos-duration="1300" data-aos-once="true" class="tw-font-metal tw-pr-1 tw-italic tw-text-2xl tw-inline-block tw-bg-clip-text tw-bg-gradient-to-r tw-from-primary tw-to-secondary/60 tw-text-transparent">Próximo partido</h2>
                                 <h1 data-aos="fade-down" data-aos-duration="1300" data-aos-once="true" class="lg:tw-text-[70px] !tw-max-w-2xl tw-text-4xl md:tw-text-5xl tw-font-bold tw-font-bebas tw-mt-3">
                                     {{ filteredEvents[0]?.name || 'Nuevos partidos próximamente' }}
                                 </h1>
 
                                 <p data-aos="fade-down" data-aos-duration="1300" data-aos-once="true" class="tw-font-medium tw-text-balance sm:!tw-text-xl tw-max-w-[900px] !tw-mt-7">
-                                    {{ filteredEvents[0]?.description || 'El nido del halcon' }} | {{ filteredEvents[0]?.start_date ? dateFormat(filteredEvents[0]?.start_date) : 'Nuevas fechas' }}.
+                                    {{ filteredEvents[0]?.description || 'El nido del halcón' }} | {{ filteredEvents[0]?.start_date ? dateFormat(filteredEvents[0]?.start_date) : 'Nuevas fechas' }}.
                                     <br>
                                     Vive la emoción del baloncesto con los <span class="tw-font-bold">Halcones de Xalapa</span>.
                                 </p>

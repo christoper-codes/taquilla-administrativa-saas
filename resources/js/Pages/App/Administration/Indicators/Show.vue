@@ -318,7 +318,7 @@ onMounted(() => {
                         </div>
                     </div>
                     <div v-else class="tw-flex tw-bg-white tw-items-center tw-justify-center tw-text-center tw-min-h-[500px] tw-shadow-lg tw-rounded-xl tw-flex-col tw-gap-1">
-                        <h2 class="tw-text-lg">Seleccione una fecha valida para un resumen de venta</h2>
+                        <h2 class="tw-text-lg">Seleccione una fecha válida para un resumen de venta</h2>
                     </div>
                 </div>
             </div>

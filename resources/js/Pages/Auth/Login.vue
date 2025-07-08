@@ -76,9 +76,9 @@ const props = defineProps({
                             color="purple"
                             type="email"
                             placeholder="user@gmail.com"
-                            label="Correo electronico"
+                            label="Correo electrónico"
                             autocomplete="email"
-                            hint="Ingresa tu correo electronico"
+                            hint="Ingresa tu correo electrónico"
                             v-model="email.value.value"
                             variant="outlined"
                             :error-messages="email.errorMessage.value"
@@ -110,10 +110,10 @@ const props = defineProps({
                             <Link :href="route('password.request')" class="tw-text-primary tw-underline tw-mb-7">¿Olvidaste tu contraseña?</Link>
                         </div>
                         <PrimaryButton @click="submit" :disabled="data.processing" heightbtn="!tw-h-[60px] !tw-text-base !tw-w-full md:!tw-w-auto" paddingbtn="!tw-px-10" :loading="loading">
-                            <span class="material-symbols-outlined tw-text-2xl !tw-w-1/2">fingerprint</span>Iniciar sesion
+                            <span class="material-symbols-outlined tw-text-2xl !tw-w-1/2">fingerprint</span>Iniciar sesión
                         </PrimaryButton>
                         <div class="lg:tw-hidden tw-mt-5">
-                            ¿Aun no tienes cuenta?
+                            ¿Aún no tienes cuenta?
                             <Link :href="route('register', { slug: slug, id: id})">
                                 <span class="tw-text-primary tw-underline">Registrarte ahora</span>
                             </Link>
@@ -123,7 +123,7 @@ const props = defineProps({
                         <p class="tw-font-bold tw-text-xs">Preparando las zonas para el evento...</p>
                     </div>
                     <div class="tw-hidden lg:tw-block tw-mt-7">
-                        ¿Aun no tienes cuenta?
+                        ¿Aún no tienes cuenta?
                         <Link :href="route('register', { slug: slug, id: id})">
                             <span class="tw-text-primary tw-underline">Registrarte ahora</span>
                         </Link>
