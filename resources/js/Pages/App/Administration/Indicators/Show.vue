@@ -179,7 +179,7 @@ onMounted(() => {
     <SuccessSession />
     <AppLayout >
         <ErrorSession />
-        <div class="tw-relative tw-w-full tw-block tw-overflow-hidden tw-px-4 tw-pt-10 lg:tw-px-0 lg:tw-pt-10 tw-mb-20 tw-pb-10 tw-bg-white">
+        <div class="tw-relative tw-w-full tw-block tw-overflow-hidden tw-px-4 tw-pt-10 lg:tw-px-0 lg:tw-pt-10 tw-mb-20 tw-pb-10">
             <section
                 class="tw-w-full tw-relative tw-bg-cover tw-bg-center lg:tw-h-[450px] tw-flex tw-flex-col tw-items-start tw-justify-center tw-rounded-2xl tw-overflow-hidden"
                 :style="{ backgroundImage: `url(/storage/${historyPerEvent.event.global_image.file_path})` }"
