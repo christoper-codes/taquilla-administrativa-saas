@@ -46,6 +46,19 @@ class SaleTicketService
         }
     }
 
+    /*
+    * |--------------------------------------------------------------------------
+    * | Get SaleTicket by id
+    */
+    public function getByIdWithRelations($id)
+    {
+        try {
+            return $this->sale_ticket_repository->getByIdWithRelations($id);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
      /*
     * |--------------------------------------------------------------------------
     * | Cacellation of tickets

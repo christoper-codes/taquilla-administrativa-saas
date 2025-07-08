@@ -2,7 +2,7 @@
 
 namespace App\Interfaces;
 
-interface SaleTicketRepositoryInterface 
+interface SaleTicketRepositoryInterface
 {
      /*
     * |--------------------------------------------------------------------------
@@ -19,4 +19,5 @@ interface SaleTicketRepositoryInterface
     * | Custom methods for the repository interface
     */
     public function cancelSaleTicket();
+    public function getByIdWithRelations($id);
 }

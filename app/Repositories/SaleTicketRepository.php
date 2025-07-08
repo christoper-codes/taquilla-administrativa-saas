@@ -41,6 +41,11 @@ class SaleTicketRepository implements SaleTicketRepositoryInterface
     */
     public function cancelSaleTicket()
     {
-        
+
+    }
+
+    public function getByIdWithRelations($id)
+    {
+
     }
 }
