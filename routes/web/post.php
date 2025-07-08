@@ -38,8 +38,8 @@ Route::middleware('auth')->group(function() {
     Route::post('/caja-registradora/close', [CashRegisterController::class, 'closeCashRegister'])->name('cash-registers.close');
     Route::post('/caja-registradora/close-all', [CashRegisterController::class, 'closeTicketOfficeCashRegisters'])->name('cash-registers.close.all');
     Route::post('/caja-registradora/resumen', [CashRegisterController::class, 'getCashRegisterSummary'])->name('cash-registers.summary');
-    Route::post('/estadios/caja-registradora/tickets/pendientes', [SaleTicketController::class, 'getSaleTicketStatusPending'])->name('cash-registers.ticket-office.status.pending');
-    Route::post('/estadios/caja-registradora/tickets/pagados', [SaleTicketController::class, 'getTicketsWithInstallmentPaymentsCompleted'])->name('cash-registers.tickets.with.installment.payments.completed');
+    Route::post('/estadios/caja-registradora/tickets/pendientes', [SaleTicketController::class, 'saleTicketStatusPendingDebtor'])->name('cash-registers.ticket-office.status.pending');
+    Route::post('/estadios/caja-registradora/tickets/pagados', [SaleTicketController::class, 'saleTicketStatusPaidDebtor'])->name('cash-registers.tickets.with.installment.payments.completed');
     Route::post('/pago-a-plazos/guardar', [InstallmentPaymentHistoryController::class, 'store'])->name('installment.payment.store');
     Route::post('/cyber-source/pago-con-token-transitorio-flex', [CyberSourceController::class, 'paymentWithFlexTransientToken'])->name('cyber.source.payment.with.flex.transient.token');
 });

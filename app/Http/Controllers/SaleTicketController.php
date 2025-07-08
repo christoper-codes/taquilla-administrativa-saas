@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SalesTicketDebtorExport;
 use App\Models\SaleTicket;
 use App\Services\SaleTicketService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SaleTicketController extends Controller
 {
@@ -117,15 +119,15 @@ class SaleTicketController extends Controller
         }
     }
 
-    public function getSaleTicketStatusPending (Request $request)
+    public function saleTicketStatusPendingDebtor (Request $request)
     {
         try {
 
             $request->validate([
-                'id' => 'required',
+                'stadium_id' => 'required',
             ]);
 
-            $response = $this->sale_ticket_service->pendingSaleTickets($request->get('id'));
+            $response = $this->sale_ticket_service->saleTicketStatusPendingDebtor($request->get('stadium_id'));
 
             return response()->json([
                 'data' => $response,
@@ -142,21 +144,55 @@ class SaleTicketController extends Controller
         }
     }
 
-    public function getTicketsWithInstallmentPaymentsCompleted(Request $request)
+    public function exportSaleTicketStatusPendingDebtor($stadium_id)
+    {
+        try {
+
+            $response = $this->sale_ticket_service->saleTicketStatusPendingDebtor($stadium_id);
+
+            return Excel::download(new SalesTicketDebtorExport($response), 'tickets_pendientes.xlsx');
+
+        } catch(\Exception $e){
+            return response()->json([
+                'data' => null,
+                'message' => $e->getMessage(),
+                'success' => false,
+            ], 500);
+        }
+    }
+
+    public function saleTicketStatusPaidDebtor(Request $request)
     {
         try {
 
             $request->validate([
-                'id' => 'required',
+                'stadium_id' => 'required',
             ]);
 
-            $response = $this->sale_ticket_service->ticketsWithInstallmentPaymentsCompleted($request->get('id'));
+            $response = $this->sale_ticket_service->saleTicketStatusPaidDebtor($request->get('stadium_id'));
 
             return response()->json([
                 'data' => $response,
                 'message' => 'Tickets pagados consultados con exito',
                 'success' => true,
             ], 200);
+
+        } catch(\Exception $e){
+            return response()->json([
+                'data' => null,
+                'message' => $e->getMessage(),
+                'success' => false,
+            ], 500);
+        }
+    }
+
+    public function exportSaleTicketStatusPaidDebtor($stadium_id)
+    {
+        try {
+
+            $response = $this->sale_ticket_service->saleTicketStatusPaidDebtor($stadium_id);
+
+            return Excel::download(new SalesTicketDebtorExport($response), 'tickets_pagados.xlsx');
 
         } catch(\Exception $e){
             return response()->json([

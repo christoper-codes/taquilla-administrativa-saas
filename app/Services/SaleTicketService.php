@@ -635,20 +635,27 @@ class SaleTicketService
     * |--------------------------------------------------------------------------
     * | Get all pending sale tickets
     */
-    public function saleTicketsSaleDebtor($status)
+    public function saleTicketsSaleDebtor($status, $stadium_id)
     {
         try {
 
             $pending_status_id = SaleTicketStatus::where('name', $status)->first()->id;
             $global_card_payment_type = GlobalCardPaymentType::all();
 
-            return $this->sale_ticket_repository->getAll()->filter(function ($sale_ticket) use ($pending_status_id) {
-                return $sale_ticket->sale_ticket_status_id == $pending_status_id && $sale_ticket->sale_debtor_id != null;;
+            return $this->sale_ticket_repository->getAll()->filter(function ($sale_ticket) use ($pending_status_id, $stadium_id) {
+                return $sale_ticket->sale_ticket_status_id == $pending_status_id && $sale_ticket->sale_debtor_id != null && $sale_ticket->stadium_id == $stadium_id;
             })->each(function ($sale_ticket) use ($global_card_payment_type) {
 
                 $sale_ticket->loadMissing([
                     'sellerUser','saleTicketStatus', 'globalPaymentTypes', 'EventSeatCatalogues.seatCatalogue', 'saleDebtor',
                     'installmentPaymentHistories.globalPaymentTypes','installmentPaymentHistories.cashRegister.sellerUserOpening','promotion.promotionType']);
+
+                $sale_ticket->setRelation('EventSeatCatalogues',
+                    $sale_ticket->EventSeatCatalogues
+                        ->sortBy('created_at')
+                        ->unique('seat_catalogue_id')
+                        ->values()
+                );
 
                 $sale_ticket->installmentPaymentHistories->each(function ($installment_payment_history) use ($global_card_payment_type){
                     $installment_payment_history->globalPaymentTypes->each(function ($global_payment_type) use ($global_card_payment_type) {
@@ -679,11 +686,11 @@ class SaleTicketService
     * |--------------------------------------------------------------------------
     * | Get all pending sale tickets
     */
-    public function pendingSaleTickets()
+    public function saleTicketStatusPendingDebtor($stadium_id)
     {
         try {
 
-            return $this->saleTicketsSaleDebtor('pendiente');
+            return $this->saleTicketsSaleDebtor('pendiente', $stadium_id);
 
         } catch (\Exception $e) {
 
@@ -695,11 +702,11 @@ class SaleTicketService
     * |--------------------------------------------------------------------------
     * | Get all pending sale tickets
     */
-    public function ticketsWithInstallmentPaymentsCompleted()
+    public function saleTicketStatusPaidDebtor($stadium_id)
     {
         try {
 
-            return $this->saleTicketsSaleDebtor('pagado');
+            return $this->saleTicketsSaleDebtor('pagado', $stadium_id);
 
         } catch (\Exception $e) {
 

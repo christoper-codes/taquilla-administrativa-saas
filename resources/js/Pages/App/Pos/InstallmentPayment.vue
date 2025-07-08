@@ -55,6 +55,7 @@ const pendingTickets = ref([]);
 const loadingPaidTickets = ref(true);
 const loadingSaleTicketStatusPending = ref(true);
 const loadingPayment = ref(false);
+const loadingDownload = ref(false);
 
 const formatPaymentTypesSummary = (histories) => {
     const paymentSummary = {};
@@ -101,7 +102,7 @@ const getSaleTicketStatusPending = () => {
 
     loadingSaleTicketStatusPending.value = true;
 
-    axios.post(route('cash-registers.ticket-office.status.pending', { id: props.stadium_id }))
+    axios.post(route('cash-registers.ticket-office.status.pending', { stadium_id: props.stadium_id }))
         .then(response => {
 
             pendingTickets.value = tranformData(response.data.data);
@@ -114,12 +115,29 @@ const getSaleTicketStatusPending = () => {
         })
 };
 
+const exportExcelPending = () => {
+
+    loadingDownload.value = true;
+
+    axios.get(route('stadium.tickets.pending_debtor.exportar', props.stadium_id),{
+        responseType: 'blob'
+    }).then((response) => {
+        window.location.href = response.request.responseURL;
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        loadingDownload.value = false;
+    });
+};
+
 
 const getSaleTicketStatusPaid = () => {
 
     loadingPaidTickets.value = true;
 
-    axios.post(route('cash-registers.tickets.with.installment.payments.completed', { id: props.stadium_id }))
+    axios.post(route('cash-registers.tickets.with.installment.payments.completed', { stadium_id: props.stadium_id }))
         .then(response => {
 
             paidTickets.value = tranformData(response.data.data);
@@ -130,6 +148,23 @@ const getSaleTicketStatusPaid = () => {
         .finally(() => {
             loadingPaidTickets.value = false;
         })
+};
+
+const exportExcelPaid = () => {
+
+    loadingDownload.value = true;
+
+    axios.get(route('stadium.tickets.paid_debtor.exportar', props.stadium_id),{
+        responseType: 'blob'
+    }).then((response) => {
+        window.location.href = response.request.responseURL;
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        loadingDownload.value = false;
+    });
 };
 
 /////////////////////////////////////////
@@ -425,7 +460,12 @@ onMounted(() => {
         </v-tabs>
         <v-tabs-window v-model="tab" class="tw-my-10 tw-mx-10">
             <v-tabs-window-item value="pending">
-                <v-text-field v-model="searchPending" label="Buscar" prepend-inner-icon="mdi-magnify" variant="outlined" hide-details single-line></v-text-field>
+                <div class="tw-flex tw-justify-between tw-items-center">
+                    <v-text-field v-model="searchPending" label="Buscar" prepend-inner-icon="mdi-magnify" variant="outlined" hide-details single-line></v-text-field>
+                    <v-btn size="x-large" color="success" class="tw-mx-2" @click="exportExcelPending" :loading="loadingDownload" :disabled="loadingDownload">
+                        <span class="material-symbols-outlined">Download</span> Excel
+                    </v-btn>
+                </div>
                 <v-data-table :items="pendingTickets" :headers="headers" :header-props="headerProps" :search="searchPending" :loading="loadingSaleTicketStatusPending">
                     <template v-slot:item.status="{ item }">
                         <span class="tw-py-1 tw-px-4 tw-rounded-full" :class="item.status === 'pagado' ? '!tw-text-green-600 tw-bg-green-100' : '!tw-text-red-600 tw-bg-red-100'">
@@ -663,7 +703,12 @@ onMounted(() => {
                 </v-data-table>
             </v-tabs-window-item>
             <v-tabs-window-item value="paid">
-                <v-text-field v-model="searchPaid" label="Buscar" prepend-inner-icon="mdi-magnify" variant="outlined" hide-details single-line></v-text-field>
+                <div class="tw-flex tw-justify-between tw-items-center">
+                    <v-text-field v-model="searchPaid" label="Buscar" prepend-inner-icon="mdi-magnify" variant="outlined" hide-details single-line></v-text-field>
+                    <v-btn size="x-large" color="success" class="tw-mx-2" @click="exportExcelPaid" :loading="loadingDownload" :disabled="loadingDownload">
+                        <span class="material-symbols-outlined">Download</span> Excel
+                    </v-btn>
+                </div>
                 <v-data-table :items="paidTickets" :headers="headers" :header-props="headerProps" :search="searchPaid" :loading="loadingPaidTickets">
                     <template v-slot:item.status="{ item }">
                         <span class="tw-py-1 tw-px-4 tw-rounded-full" :class="item.status === 'pagado' ? '!tw-text-green-600 tw-bg-green-100' : '!tw-text-red-600 tw-bg-red-100'">

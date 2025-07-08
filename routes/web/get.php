@@ -24,7 +24,7 @@ use App\Http\Controllers\SeasonTicketController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UtilController;
 use App\Http\Controllers\WalletAccountController;
-
+use App\Http\Controllers\SaleTicketController;
 use Inertia\Inertia;
 
 /*
@@ -272,3 +272,7 @@ Route::get('/roles-de-cuentas',[WalletAccountRoleController::class,'index'])->na
 Route::middleware('auth')->controller(ExportController::class)->group(function () {
    Route::get('indicadores/export-summary-by-tickets', 'exportSummaryByTickets')->name('indicadores.export.summary.tickets');
 });
+
+Route::get('estadios/{id_stadium}/tickets/deudores/pendientes/exportar', [SaleTicketController::class, 'exportSaleTicketStatusPendingDebtor'])->name('stadium.tickets.pending_debtor.exportar');
+Route::get('estadios/{id_stadium}/tickets/deudores/pagado/exportar', [SaleTicketController::class, 'exportSaleTicketStatusPaidDebtor'])->name('stadium.tickets.paid_debtor.exportar');
+

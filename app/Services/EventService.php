@@ -421,6 +421,13 @@ class EventService
                     });
                 });
 
+                $saleTicket->setRelation('EventSeatCatalogues',
+                    $saleTicket->EventSeatCatalogues
+                        ->sortBy('created_at')
+                        ->unique('seat_catalogue_id')
+                        ->values()
+                );
+
                 $saleTicket->EventSeatCatalogues->each(function ($data) use ($saleTicket){
                     /**
                      * Load Promotion
