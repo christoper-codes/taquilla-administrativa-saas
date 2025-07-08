@@ -515,13 +515,14 @@ class SaleTicketService
             $total_seats_sold = 0;
             $type_sales = [
                 'total' => ['sales' => 0],
+                'online' => ['sales' => 0],
+                'taquilla' => ['sales' => 0],
+                'taquilla cortesias' => ['sales' => 0],
                 'promocion' => ['sales' => 0],
                 'convenio' => ['sales' => 0],
                 'cortesia' => ['sales' => 0],
                 'abonado' => ['sales' => 0],
                 'regular' => ['sales' => 0],
-                'online' => ['sales' => 0],
-                'taquilla' => ['sales' => 0],
             ];
 
             $sale_tickets = $event->saleTickets()
@@ -597,6 +598,8 @@ class SaleTicketService
 
                             if($sale_ticket->is_online){
                                 $type_sales['online']['sales']++;
+                            } elseif(!$sale_ticket->is_online && $has_cortesia){
+                                $type_sales['taquilla cortesias']['sales']++;
                             } else {
                                 $type_sales['taquilla']['sales']++;
                             }
