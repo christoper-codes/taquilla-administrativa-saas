@@ -42,8 +42,13 @@ Route::middleware('auth')->group(function() {
     Route::post('/estadios/caja-registradora/tickets/pagados', [SaleTicketController::class, 'saleTicketStatusPaidDebtor'])->name('cash-registers.tickets.with.installment.payments.completed');
     Route::post('/pago-a-plazos/guardar', [InstallmentPaymentHistoryController::class, 'store'])->name('installment.payment.store');
     Route::post('/cyber-source/pago-con-token-transitorio-flex', [CyberSourceController::class, 'paymentWithFlexTransientToken'])->name('cyber.source.payment.with.flex.transient.token');
+    Route::post('/cyber-source/configuracion-de-autenticacion', [CyberSourceController::class, 'authenticationSetup'])->name('cyber.source.authentication.setup');
+    Route::post('/cyber-source/enroll-con-token-transitorio', [CyberSourceController::class, 'enrollWithTransientToken'])->name('cyber.source.enroll.with.transient.token');
+    Route::post('/cyber-source/validacion-de-autenticacion', [CyberSourceController::class, 'validateAuthentication'])->name('cyber.source.validate.authentication');
+    Route::post('/cyber-source/pago', [CyberSourceController::class, 'paymentApi'])->name('cyber.source.payment');
 });
 
+    Route::post('/cyber-source/autenticacion-cliente', [CyberSourceController::class, 'clientAuthentication'])->name('cyber.client.authentication');
 /*
 * |--------------------------------------------------------------------------
 * | Web Routes

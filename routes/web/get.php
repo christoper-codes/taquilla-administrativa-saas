@@ -270,9 +270,18 @@ Route::get('/roles-de-cuentas',[WalletAccountRoleController::class,'index'])->na
 * | Export | ROUTES
 */
 Route::middleware('auth')->controller(ExportController::class)->group(function () {
-   Route::get('indicadores/export-summary-by-tickets', 'exportSummaryByTickets')->name('indicadores.export.summary.tickets');
+    Route::get('indicadores/export-summary-by-tickets', 'exportSummaryByTickets')->name('indicadores.export.summary.tickets');
 });
 
 Route::get('estadios/{id_stadium}/tickets/deudores/pendientes/exportar', [SaleTicketController::class, 'exportSaleTicketStatusPendingDebtor'])->name('stadium.tickets.pending_debtor.exportar');
 Route::get('estadios/{id_stadium}/tickets/deudores/pagado/exportar', [SaleTicketController::class, 'exportSaleTicketStatusPaidDebtor'])->name('stadium.tickets.paid_debtor.exportar');
 
+/*
+* |--------------------------------------------------------------------------
+* | Web Routes
+* |--------------------------------------------------------------------------
+* | Export | ROUTES
+*/
+
+
+Route::get('/getCp', [UtilController::class, 'getCP'])->name('get.cp');

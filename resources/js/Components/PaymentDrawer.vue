@@ -1,7 +1,7 @@
 <script setup>
 import { drawerPaymentState } from '@/composables/drawersStates';
 import { loadScript } from '@paypal/paypal-js';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import CountdownTimer from '@/Components/CountdownTimer.vue';
 import CyberSoruce from '@/Components/CyberSoruce.vue';
@@ -169,13 +169,16 @@ onMounted(async () => {
 
 const responseCyberSource = (value) => {
     if(value['status']){
-        confirmSeatsPurchase('Cyber Source');
+        confirmSeatsPurchase(value['response']);
+    }else{
+        // Hacer algo aqui si la respuesta es negativa
     }
 };
 
 const cancelPayment = (data) => {
     if(data['status']){
-        router.visit(route('events.index'));
+        drawerPaymentState.value = false;
+        router.visit('/eventos');
     }
 }
 
@@ -226,6 +229,15 @@ const confirmSeatsPurchase = (transaction = {}) =>{
     });
 }
 
+const clientReferenceInformation = computed(() => ({
+  code: `${props.stadiumId}-${props.ticketOfficeId}-${props.cashRegisterId}-${props.event.id}-${props.seats.map(({ seat_catalogue }) => seat_catalogue?.code).join('-')}`
+}));
+
+const orderInformationAmountDetails = computed(() => ({
+  totalAmount: props.totalAmount,
+  currency: currency
+}));
+
 </script>
 <template>
   <div class="tw-z-50">
@@ -250,21 +262,8 @@ const confirmSeatsPurchase = (transaction = {}) =>{
             <div class="tw-p-4">
                 <CountdownTimer :initialMinutes="10" />
 
-                <!-- <CyberSoruce  :seats="seats" :client-reference-information="{ code: ticketOfficeId}" :order-information-amount-details="{totalAmount: totalAmount, currency: currency}"
-                    :orderInformationBillTo="{
-                        firstName: 'RTS',
-                        lastName: 'VDP',
-                        address1: '201 S. Division St.',
-                        locality: 'Ann Arbor',
-                        administrativeArea: 'MI',
-                        postalCode: '48104-2201',
-                        country: 'US',
-                        district: 'MI',
-                        buildingNumber: '123',
-                        email: 'test@cybs.com',
-                        phoneNumber: '999999999'
-                    }"
-                    @response-payment="responseCyberSource" @cancel-payment="cancelPayment"/> -->
+                <!-- <CyberSoruce  :seats='seats' :client-reference-information="clientReferenceInformation"
+                :order-information-amount-details="orderInformationAmountDetails" @response-payment="responseCyberSource" @cancel-payment="cancelPayment"/> -->
 
                 <div id="paypal-button-container" class="tw-mt-4"></div>
                 <div class="tw-mt-10">

@@ -4,22 +4,29 @@ namespace App\Repositories;
 
 use App\Interfaces\CyberSourceRepositoryInterface;
 use CyberSource\Api\MicroformIntegrationApi;
-use CyberSource\Api\PaymentsApi;
 use CyberSource\ApiClient;
 use CyberSource\Authentication\Core\MerchantConfiguration;
 use CyberSource\Configuration;
 use CyberSource\Logging\LogConfiguration;
-use CyberSource\Model\CreatePaymentRequest;
 use CyberSource\Model\GenerateCaptureContextRequest;
+use CyberSource\Model\PayerAuthSetupRequest;
+use CyberSource\Api\PayerAuthenticationApi;
+use CyberSource\Api\PaymentsApi;
+use CyberSource\Model\CheckPayerAuthEnrollmentRequest;
+use CyberSource\Model\CreatePaymentRequest;
 use CyberSource\Model\Ptsv2paymentsClientReferenceInformation;
+use CyberSource\Model\Ptsv2paymentsConsumerAuthenticationInformation;
 use CyberSource\Model\Ptsv2paymentsOrderInformation;
 use CyberSource\Model\Ptsv2paymentsOrderInformationAmountDetails;
 use CyberSource\Model\Ptsv2paymentsOrderInformationBillTo;
+use CyberSource\Model\Ptsv2paymentsPaymentInformation;
+use CyberSource\Model\Ptsv2paymentsPaymentInformationCard;
+use CyberSource\Model\Ptsv2paymentsProcessingInformation;
 use CyberSource\Model\Ptsv2paymentsTokenInformation;
+use CyberSource\Model\ValidateRequest;
 
 class CyberSourceRepository implements CyberSourceRepositoryInterface
 {
-
     public function generateCaptureContextRequest(array $data)
     {
         return new GenerateCaptureContextRequest($data);
@@ -75,38 +82,86 @@ class CyberSourceRepository implements CyberSourceRepositoryInterface
         return $logConfiguration;
     }
 
-    public function clientReferenceInformation($data)
+    public function payerAuthSetupRequest(array $data)
     {
-        return new Ptsv2paymentsClientReferenceInformation($data);
+        return new PayerAuthSetupRequest($data);
     }
 
-    public function orderInformationAmountDetails($data)
+    public function payerAuthenticationApi(ApiClient $apiClient)
     {
-        return new Ptsv2paymentsOrderInformationAmountDetails($data);
+        return new PayerAuthenticationApi($apiClient);
     }
 
-    public function orderInformationBillTo($data)
+    public function checkPayerAuthEnrollmentRequest(array $data)
     {
-        return new Ptsv2paymentsOrderInformationBillTo($data);
+        return new CheckPayerAuthEnrollmentRequest($data);
     }
 
-    public function orderInformation($data)
+    public function validateRequest(array $data)
     {
-        return new Ptsv2paymentsOrderInformation($data);
+        return new ValidateRequest($data);
     }
 
-    public function tokenInformation($data)
+    public function paymentsApi(ApiClient $apiClient)
     {
-        return new Ptsv2paymentsTokenInformation($data);
+        return new PaymentsApi($apiClient);
     }
 
-    public function createPayment($data)
+    public function createPaymentRequestVisa(Array $clientReferenceInformation, Array $amountDetails, Array $billTo, Array $consumerAuthenticationInformation, string $jti, string $expirationMonth, string $expirationYear)
     {
-        return new CreatePaymentRequest($data);
+        return new CreatePaymentRequest([
+            "clientReferenceInformation" => new Ptsv2paymentsClientReferenceInformation($clientReferenceInformation),
+            "processingInformation" => new Ptsv2paymentsProcessingInformation([
+                "capture"=> true,
+                "commerceIndicator"=> $consumerAuthenticationInformation['ecommerceIndicator'] ?? $consumerAuthenticationInformation['indicator'],
+            ]),
+            "orderInformation" => new Ptsv2paymentsOrderInformation([
+                "amountDetails" => new Ptsv2paymentsOrderInformationAmountDetails($amountDetails),
+                "billTo" => new Ptsv2paymentsOrderInformationBillTo($billTo)
+            ]),
+            "consumerAuthenticationInformation" => new Ptsv2paymentsConsumerAuthenticationInformation([
+                'cavv' => $consumerAuthenticationInformation['cavv'],
+                'eciRaw' => $consumerAuthenticationInformation['eciRaw'],
+                'xid' => $consumerAuthenticationInformation['xid'],
+                'directoryServerTransactionId' => $consumerAuthenticationInformation['directoryServerTransactionId'],
+            ]),
+            "tokenInformation" => new Ptsv2paymentsTokenInformation([
+                "jti" => $jti
+            ]),
+            "paymentInformation" => new Ptsv2paymentsPaymentInformation([
+                "card" => new Ptsv2paymentsPaymentInformationCard([
+                    "expirationMonth" => $expirationMonth,
+                    "expirationYear" => $expirationYear
+                ])
+            ]),
+        ]);
     }
 
-    public function paymentsApi($api_client)
+    public function createPaymentRequestMaster(Array $clientReferenceInformation, Array $amountDetails, Array $billTo, Array $consumerAuthenticationInformation, string $jti, string $expirationMonth, string $expirationYear)
     {
-        return new PaymentsApi($api_client);
+        return new CreatePaymentRequest([
+            "clientReferenceInformation" => new Ptsv2paymentsClientReferenceInformation($clientReferenceInformation),
+            "processingInformation" => new Ptsv2paymentsProcessingInformation([
+                "capture"=> true,
+                "commerceIndicator"=> $consumerAuthenticationInformation['ecommerceIndicator'] ?? $consumerAuthenticationInformation['indicator']
+            ]),
+            "orderInformation" => new Ptsv2paymentsOrderInformation([
+                "amountDetails" => new Ptsv2paymentsOrderInformationAmountDetails($amountDetails),
+                "billTo" => new Ptsv2paymentsOrderInformationBillTo($billTo)
+            ]),
+            "consumerAuthenticationInformation" => new Ptsv2paymentsConsumerAuthenticationInformation([
+                'ucafCollectionIndicator' => $consumerAuthenticationInformation['ucafCollectionIndicator'],
+                'ucafAuthenticationData' => $consumerAuthenticationInformation['ucafAuthenticationData'],
+            ]),
+            "tokenInformation" => new Ptsv2paymentsTokenInformation([
+                "jti" => $jti
+            ]),
+            "paymentInformation" => new Ptsv2paymentsPaymentInformation([
+                "card" => new Ptsv2paymentsPaymentInformationCard([
+                    "expirationMonth" => $expirationMonth,
+                    "expirationYear" => $expirationYear
+                ])
+            ]),
+        ]);
     }
 }

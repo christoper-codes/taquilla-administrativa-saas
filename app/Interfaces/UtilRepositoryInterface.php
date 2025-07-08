@@ -8,4 +8,5 @@ interface UtilRepositoryInterface
     public function cleanAll();
     public function refreshCaches();
     public function storageCopy();
+    public function getCP(string $cp);
 }

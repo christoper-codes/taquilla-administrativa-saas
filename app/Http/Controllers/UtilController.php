@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\UtilService;
+use Illuminate\Http\Request;
 
 class UtilController extends Controller
 {
@@ -82,6 +83,23 @@ class UtilController extends Controller
 
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getCP(Request $request)
+    {
+        $request->validate(['cp' => 'required|max:5|min:5']);
+
+        try{
+            $getCP  = $this->utils_service->getCP($request->cp);
+
+            return response()->json($getCP, 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+                'message' => "No se pudo obtener información para el código postal ingresado"
+            ], 500);
         }
     }
 

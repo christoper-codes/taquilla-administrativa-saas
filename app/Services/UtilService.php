@@ -37,4 +37,9 @@ class UtilService
     {
         return  $this->utils_repository_interface->storageCopy();
     }
+
+    public function getCP(string $cp)
+    {
+        return  $this->utils_repository_interface->getCP($cp);
+    }
 }

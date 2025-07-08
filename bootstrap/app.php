@@ -36,6 +36,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\XAuthorizationHeader::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            'cyber-source/autenticacion-cliente',
+        ]);
+
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {

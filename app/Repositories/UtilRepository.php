@@ -63,4 +63,18 @@ class UtilRepository implements UtilRepositoryInterface
 
         return 'Storage copied with only new files.';
     }
+
+    public function getCP(string $cp)
+    {
+        $client = new \GuzzleHttp\Client();
+
+        $response = $client->request('GET', "https://api.tau.com.mx/dipomex/v1/codigo_postal?cp={$cp}", [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'APIKEY' => env('DIPOMEX_KEY'),
+            ],
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
 }
