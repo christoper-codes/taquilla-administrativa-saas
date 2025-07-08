@@ -44,7 +44,7 @@ const isMobile = ref(window.innerWidth < 1024);
         </div>
    </div>
 
-   <div class="lg:tw-ml-[270px] tw-mt-[65px] lg:tw-mt-[100px]">
+   <div class="lg:tw-ml-[270px] tw-mt-[65px] lg:tw-mt-[100px] tw-bg-white">
         <main class="tw-px-5 lg:tw-px-0 lg:tw-pr-5 tw-space-y-4 sm:tw-space-y-6 tw-min-h-screen tw-overflow-hidden tw-relative">
            <div class="tw-z-20 tw-relative !tw-m-0  tw-min-h-screen" data-aos="fade-right" data-aos-duration="1500">
             <div class="tw-absolute -tw-right-40 lg:-tw-right-96 -tw-top-52 lg:-tw-top-52 tw-h-[480px] tw-w-[300px] lg:tw-h-[680px] lg:tw-w-[500px] tw-rounded-full tw-blur-[120px] lg:tw-blur-[220px] tw-bg-primary">
