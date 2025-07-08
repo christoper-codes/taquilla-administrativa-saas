@@ -81,7 +81,7 @@ const globalPayementTypeProps = (item) => {
                     <div class="tw-mt-3">
                         <h3 class="tw-text-lg tw-font-bold tw-mt-3">{{ event.name }}</h3>
                         <p class="tw-text-sm">{{ dateFormat(event.start_date) }}</p>
-                        <p class="tw-text-sm tw-font-bold tw-text-primary">{{ event.traffic_seats_count }} Asientos en transito</p>
+                        <p class="tw-text-sm tw-font-bold tw-text-primary">{{ event.traffic_seats_count }} Asientos en tránsito</p>
                     </div>
                     <div @click="showEvent(event.id)" class="mt-3 tw-block">
                         <SecondaryButton heightbtn="!tw-h-[60px]" paddingbtn="!tw-w-full !tw-block" :loading="loadingEventId === event.id">

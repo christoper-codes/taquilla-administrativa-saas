@@ -56,7 +56,7 @@ const { formatFirstLetterUppercase } = useStringFormat();
                     <div class="tw-flex tw-flex-col tw-gap-3">
                          <div class="tw-flex tw-items-center tw-gap-x-5">
                             <div class="tw-flex tw-items-center tw-gap-x-2">
-                                <span class="material-symbols-outlined tw-text-xl">location_on</span>El nido del halcon
+                                <span class="material-symbols-outlined tw-text-xl">location_on</span>El nido del halcón
                             </div>
                             <div class="tw-flex tw-items-center tw-gap-x-2">
                                 <span class="material-symbols-outlined tw-text-xl">calendar_today</span>{{formattedDate}}
@@ -76,7 +76,7 @@ const { formatFirstLetterUppercase } = useStringFormat();
                                 <img class="tw-size-full tw-absolute tw-top-0 tw-start-0 tw-object-cover tw-group-hover:tw-scale-105 tw-group-focus:tw-scale-105 tw-transition-transform tw-duration-500 tw-ease-in-out tw-rounded-xl" src="https://images.pexels.com/photos/4921264/pexels-photo-4921264.jpeg" alt="Blog Image">
                                  <div class="tw-absolute tw-top-0 tw-w-full tw-h-full tw-z-50 tw-bg-black/60 tw-backdrop-blur-sm tw-flex tw-items-center tw-justify-center tw-text-white">
                                     <div class="tw-font-bold">
-                                        Taquilla numero {{ ticketOffice.id }}
+                                        Taquilla Número {{ ticketOffice.id }}
                                     </div>
                                 </div>
                             </div>

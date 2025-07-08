@@ -129,9 +129,9 @@ const props = defineProps({
                             <div class="tw-w-full">
                                 <v-text-field
                                     color="purple"
-                                    label="E-mail"
+                                    label="Correo electrónico"
                                     placeholder="user@gmail.com"
-                                    hint="Ingresa tu correo electronico"
+                                    hint="Ingresa tu correo electrónico"
                                     v-model="email.value.value"
                                     :error-messages="email.errorMessage.value"
                                     variant="outlined"
@@ -144,9 +144,9 @@ const props = defineProps({
                                 <v-select
                                     color="purple"
                                     clearable
-                                    label="Genero identificado"
-                                    hint="Selecciona tu genero"
-                                    :items="['masculino', 'femenino', 'no binario', 'otro']"
+                                    label="Género identificado"
+                                    hint="Selecciona tu género"
+                                    :items="['Masculino', 'Femenino', 'No binario', 'Otro']"
                                     variant="outlined"
                                     v-model="user_gender.value.value"
                                     :error-messages="user_gender.errorMessage.value"

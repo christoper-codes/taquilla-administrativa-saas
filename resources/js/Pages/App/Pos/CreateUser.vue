@@ -177,7 +177,7 @@ var headersTab = ref([
     {align: 'start',key: 'name',sortable: false,title: 'Nombre',},
     { key: 'lastName', title: 'Apell. Paterno' },
     { key: 'middleName', title: 'Apell. Materno' },
-    { key: 'email', title: 'Correo' },
+    { key: 'email', title: 'Correo electrónico' },
     { key: 'username', title: 'Username' },
     { key: 'rol', title: 'Rol' },]
 );

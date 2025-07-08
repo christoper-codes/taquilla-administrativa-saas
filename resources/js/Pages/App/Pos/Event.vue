@@ -1833,7 +1833,7 @@ watch(() => agreementSelected.value, () => {
                                                 </div>
                                                 <div class="tw-flex tw-items-center tw-gap-3">
                                                     <v-btn @click="resetZoom" variant="tonal" class="!tw-h-[50px] lg:!tw-h-[60px] !tw-px-9 lg:!tw-px-12 !tw-bg-white !tw-border-2 !tw-border-neutral-300 !tw-rounded-2xl !tw-text-neutral-700">
-                                                        <span class="material-symbols-outlined tw-text-2xl">my_location</span>reset
+                                                        <span class="material-symbols-outlined tw-text-2xl">my_location</span>Restablecer
                                                     </v-btn>
                                                     <v-btn @click="selectZones" variant="tonal" class="!tw-h-[50px] lg:!tw-h-[60px] !tw-px-9 lg:!tw-px-12 !tw-bg-white !tw-border-2 !tw-border-neutral-300 !tw-rounded-2xl !tw-text-neutral-700">
                                                         <span class="material-symbols-outlined tw-text-2xl">location_on</span>zonas
@@ -1944,7 +1944,7 @@ watch(() => agreementSelected.value, () => {
                                                                         </th>
                                                                         <th scope="col" class=" tw-p-2 tw-text-start tw-whitespace-nowrap">
                                                                             <span class="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-gray-800">
-                                                                                Accion
+                                                                                Acción
                                                                             </span>
                                                                         </th>
                                                                         </tr>
@@ -2148,7 +2148,7 @@ watch(() => agreementSelected.value, () => {
                                                                 </h4>
                                                                 <v-select
                                                                     color="purple"
-                                                                    label="selecciona una instutucion"
+                                                                    label="selecciona una institución"
                                                                     :item-props="institutionsProps"
                                                                     :items="institutions"
                                                                     v-model="institutionSelected"
@@ -2295,16 +2295,16 @@ watch(() => agreementSelected.value, () => {
                                                                 </div>
 
                                                                 <div v-if="purchaseStatus == 'retry'">
-                                                                    <p class="tw-py-4 tw-px-4 tw-rounded-lg tw-bg-red-100 tw-border-l-[6px] tw-border-l-red-500 tw-text-red-600 tw-text-xs tw-my-4">Estas en el proceso final de compra, si se require agregar otro asiento cancele la seleccion actual y reintente.</p>
+                                                                    <p class="tw-py-4 tw-px-4 tw-rounded-lg tw-bg-red-100 tw-border-l-[6px] tw-border-l-red-500 tw-text-red-600 tw-text-xs tw-my-4">Estás en el proceso final de compra. Si se requiere agregar otro asiento, cancele la selección actual y vuelva a reintente.</p>
                                                                 </div>
                                                                 <div v-if="purchaseType == 'partido'">
-                                                                    <p class="tw-py-4 tw-px-4 tw-rounded-lg tw-bg-green-100 tw-border-l-[6px] tw-border-l-green-500 tw-text-green-600 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para un partido.</p>
+                                                                    <p class="tw-py-4 tw-px-4 tw-rounded-lg tw-bg-green-100 tw-border-l-[6px] tw-border-l-green-500 tw-text-green-600 tw-text-xs tw-my-4">Los boletos adquiridos serán válidos solo para un partido.</p>
                                                                 </div>
                                                                 <div v-else-if="purchaseType == 'serie'">
-                                                                    <p class="tw-py-4 tw-px-4 tw-rounded-lg tw-bg-purple-100 tw-border-l-[6px] tw-border-l-purple-500 tw-text-purple-600 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para dos partidos del mismo evento.</p>
+                                                                    <p class="tw-py-4 tw-px-4 tw-rounded-lg tw-bg-purple-100 tw-border-l-[6px] tw-border-l-purple-500 tw-text-purple-600 tw-text-xs tw-my-4">Los boletos adquiridos serán válidos solo para dos partidos del mismo evento.</p>
                                                                 </div>
                                                                 <div v-else-if="purchaseType == 'abonado'">
-                                                                    <p class="tw-py-4 tw-px-4 tw-rounded-lg tw-bg-yellow-100 tw-border-l-[6px] tw-border-l-yellow-500 tw-text-yellow-600 tw-text-xs tw-my-4">Los boletos adquiridos seran validos solo para la temporada a la que pertenece este evento.</p>
+                                                                    <p class="tw-py-4 tw-px-4 tw-rounded-lg tw-bg-yellow-100 tw-border-l-[6px] tw-border-l-yellow-500 tw-text-yellow-600 tw-text-xs tw-my-4">Los boletos adquiridos serán validos solo para la temporada a la que pertenece este evento.</p>
                                                                 </div>
 
                                                                 <p class="tw-opacity-50 tw-text-right tw-mb-3">Subtotal (tipos de precios selecionados): {{ formatPrice(totalAmount) }}</p>
@@ -2515,7 +2515,7 @@ watch(() => agreementSelected.value, () => {
                                                                                                         <v-textarea
                                                                                                             class="tw-w-full"
                                                                                                             append-inner-icon="mdi-file-document"
-                                                                                                            label="Descripcion adicional"
+                                                                                                            label="Descripción adicional"
                                                                                                             row-height="30"
                                                                                                             color="purple"
                                                                                                             clearable
@@ -2529,7 +2529,7 @@ watch(() => agreementSelected.value, () => {
                                                                                                                 <v-text-field
                                                                                                                     class="tw-w-full"
                                                                                                                     append-inner-icon="mdi-qrcode"
-                                                                                                                    label="Codigo postal"
+                                                                                                                    label="Código postal"
                                                                                                                     color="purple"
                                                                                                                     clearable
                                                                                                                     hint="Ingresa el codigo postal del titular"
@@ -2563,11 +2563,11 @@ watch(() => agreementSelected.value, () => {
                                                                                                                 ></v-select>
                                                                                                                 <v-text-field
                                                                                                                     append-inner-icon="mdi-email"
-                                                                                                                    label="Email"
+                                                                                                                    label="Correo electrónico del titular"
                                                                                                                     color="purple"
                                                                                                                     autocomplete="email"
                                                                                                                     clearable
-                                                                                                                    hint="Ingresa el email del titular"
+                                                                                                                    hint="Ingresa el correo electrónico del titular"
                                                                                                                     :rules="[rules.required, rules.isEmail]"
                                                                                                                     v-model="seatsSelected[index].holder_email"
                                                                                                                     variant="outlined"

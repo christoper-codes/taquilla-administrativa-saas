@@ -185,7 +185,7 @@ const props = defineProps({
                                         </div>
                                         <div class="tw-mt-3 tw-w-full">
                                             <AppNavLink :href="route('events.with.traffic')" :active="route().current('events.with.traffic')">
-                                                <span class="material-symbols-outlined tw-text-lg">block</span>Transito
+                                                <span class="material-symbols-outlined tw-text-lg">block</span>Tránsito
                                             </AppNavLink>
                                         </div>
                                     </v-list-group>
@@ -283,7 +283,7 @@ const props = defineProps({
                                         </v-btn>
                                     </template>
                                     <template v-slot:default="{ isActive }">
-                                        <v-card title="¿Estas seguro de finalizar tu sesión?">
+                                        <v-card title="¿Estás seguro de finalizar tu sesión?">
 
                                         <v-card-actions class="!tw-my-4 !tw-px-4">
                                             <v-spacer></v-spacer>
