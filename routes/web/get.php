@@ -273,10 +273,11 @@ Route::middleware('auth')->controller(ExportController::class)->group(function (
     Route::get('indicadores/export-summary-by-tickets', 'exportSummaryByTickets')->name('indicadores.export.summary.tickets');
 });
 
+
 Route::get('/getCp', [UtilController::class, 'getCP'])->name('get.cp');
 
 Route::middleware('auth')->controller(SaleTicketController::class)->group(function () {
-    Route::get('/estadios/{id_stadium}/tickets/deudores/pendientes', 'getSaleTicketStatusPendingDebtor')->name('stadium.tickets.pending_debtor');
-    Route::get('/estadios/{id_stadium}/tickets/deudores/pagado', 'getSaleTicketStatusPaidDebtor')->name('stadium.tickets.paid_debtor');
-   Route::get('/sale-ticket/{id}', 'show')->name('sale.ticket.show');
+    Route::get('/estadios/{id_stadium}/tickets/deudores/pendientes/exportar', 'exportSaleTicketStatusPendingDebtor')->name('stadium.tickets.pending_debtor.exportar');
+    Route::get('/estadios/{id_stadium}/tickets/deudores/pagado/exportar', 'exportSaleTicketStatusPaidDebtor')->name('stadium.tickets.paid_debtor.exportar');
+    Route::get('/sale-ticket/{id}', 'show')->name('sale.ticket.show');
 });
