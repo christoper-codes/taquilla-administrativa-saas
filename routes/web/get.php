@@ -143,6 +143,7 @@ Route::middleware('auth')->group(function() {
     Route::get('/pago-exitoso', [EventController::class, 'success'])->name('events.success');
     Route::get('/taquillas', [TicketOfficeController::class, 'index'])->name('ticket-offices.index');
     Route::get('/taquillas/{ticketOffice}', [TicketOfficeController::class, 'show'])->name('ticket-offices.show');
+    Route::get('/taquillas/tickte-datalles/{id}', [TicketOfficeController::class, 'ticketDetails'])->name('ticket-offices.ticket.details');
 });
 
 
