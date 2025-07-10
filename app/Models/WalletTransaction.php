@@ -14,8 +14,7 @@ class WalletTransaction extends Model
         'wallet_transaction_status_id',
         'wallet_transaction_type_id',
         'wallet_recharge_amount_id',
-        'cash_register_id',
-        'related_transaction_id',
+        'pos_cash_register_id',
         'pos_ticket_id',
         'description',
         'movement_amount',
@@ -26,6 +25,7 @@ class WalletTransaction extends Model
         'cashback_balance_account_after_transaction',
         'cashless_balance_account_before_transaction',
         'cashless_balance_account_after_transaction',
+        'related_transaction_id',
     ];
 
     /**
@@ -58,5 +58,10 @@ class WalletTransaction extends Model
         return $this->belongsToMany(GlobalPaymentType::class, 'global_payment_type_sale_ticket', 'wallet_transaction_id', 'global_payment_type_id')
             ->withPivot('global_card_payment_type_id', 'amount', 'is_active')
             ->withTimestamps();
+    }
+
+    public function relatedTransaction()
+    {
+        return $this->belongsTo(WalletTransaction::class, 'related_transaction_id');
     }
 }

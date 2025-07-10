@@ -2,12 +2,12 @@
 
 namespace App\Interfaces;
 
-interface WalletRechargeAmountRepositoryInterface
+interface WalletTransactionTypeRepositoryInterface
 {
      /*
     * |--------------------------------------------------------------------------
     * | Primaries methods for the repository interface
     */
     public function getAll();
-    public function find(int $id);
+    public function getById(int $id);
 }

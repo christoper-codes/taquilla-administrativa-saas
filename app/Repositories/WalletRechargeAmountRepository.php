@@ -15,4 +15,9 @@ class WalletRechargeAmountRepository implements WalletRechargeAmountRepositoryIn
     {
         return WalletRechargeAmount::all();
     }
+
+    public function find(int $id)
+    {
+        return WalletRechargeAmount::find($id);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Interfaces\WalletAccountRepositoryInterface;
+use App\Models\WalletAccount;
 
 class WalletAccountService
 {
@@ -144,6 +145,23 @@ class WalletAccountService
             $unique_account_number = $this->wallet_account_repository_interface->generateUniqueAccountNumber();
 
             return $unique_account_number;
+
+        } catch (\Exception $e) {
+
+            throw $e;
+
+        }
+    }
+
+    /*
+    * |--------------------------------------------------------------------------
+    * | Get wallet account by id
+    */
+    public function prepareWalletAccountData(WalletAccount $wallet_account, $maskWalletAccountNumber)
+    {
+        try {
+
+            return $this->wallet_account_repository_interface->prepareWalletAccountData($wallet_account, $maskWalletAccountNumber);
 
         } catch (\Exception $e) {
 

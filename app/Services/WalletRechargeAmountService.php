@@ -34,4 +34,16 @@ class WalletRechargeAmountService
             throw $e;
         }
     }
+
+    public function find(int $id)
+    {
+        try {
+
+            return $this->wallet_recharge_amount_repository_interface->find($id);
+
+        } catch (\Exception $e) {
+
+            throw $e;
+        }
+    }
 }

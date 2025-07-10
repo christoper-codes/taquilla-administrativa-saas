@@ -42,7 +42,9 @@ use App\Interfaces\WalletAccountRoleRepositoryInterface;
 use App\Interfaces\WalletAccountTypeRepositoryInterface;
 use App\Interfaces\WalletAccountWalletAccountTypeRepositoryInterface;
 use App\Interfaces\WalletCurrencyRepositoryInterface;
-
+use App\Interfaces\WalletRechargeAmountRepositoryInterface;
+use App\Interfaces\WalletTransactionRepositoryInterface;
+use App\Interfaces\WalletTransactionTypeRepositoryInterface;
 use App\Repositories\AgreementRepository;
 use App\Repositories\EventRepository;
 use App\Repositories\GlobalCardPaymentTypeRepository;
@@ -82,6 +84,9 @@ use App\Repositories\WalletAccountRoleRepository;
 use App\Repositories\WalletAccountTypeRepository;
 use App\Repositories\WalletAccountWalletAccountTypeRepository;
 use App\Repositories\WalletCurrencyRepository;
+use App\Repositories\WalletRechargeAmountRepository;
+use App\Repositories\WalletTransactionRepository;
+use App\Repositories\WalletTransactionTypeRepository;
 
 class RepositoriServiceProvider extends ServiceProvider
 {
@@ -136,6 +141,9 @@ class RepositoriServiceProvider extends ServiceProvider
         $this->app->bind(WalletAccountRoleRepositoryInterface::class, WalletAccountRoleRepository::class);
         $this->app->bind(PlatformSettingRepositoryInterface::class, PlatformSettingRepository::class);
         $this->app->bind(UtilRepositoryInterface::class, UtilRepository::class);
+        $this->app->bind(WalletTransactionTypeRepositoryInterface::class, WalletTransactionTypeRepository::class);
+        $this->app->bind(WalletTransactionRepositoryInterface::class, WalletTransactionRepository::class);
+        $this->app->bind(WalletRechargeAmountRepositoryInterface::class, WalletRechargeAmountRepository::class);
     }
 
     /**
