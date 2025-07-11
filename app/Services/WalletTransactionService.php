@@ -44,7 +44,7 @@ class WalletTransactionService
 
             if($data['paid_with_cashless']){
                 if($cashlessBalanceBeforeTransaction < $data['movement_amount']){
-                    throw new \Exception('El saldo cashless no es suficiente para realizar la transacción.');
+                    throw new \Exception('El saldo cashless no es suficiente para realizar la transaccion.');
                 }else{
                     $cashlessBalanceAfterTransaction = ($cashlessBalanceBeforeTransaction - $data['movement_amount']);
                 }
@@ -191,7 +191,7 @@ class WalletTransactionService
 
             $data['wallet_account_id'] = $wallet_account->id;
             $data['wallet_transaction_status_id'] = WalletTransactionStatus::where('name', 'cancelado')->first()->id;
-            $data['description'] = 'Cancelación de transacción';
+            $data['description'] = 'Cancelacion de transaccion';
             $data['cashless_balance_account_before_transaction'] = $cashlessBalanceBeforeTransaction;
             $data['cashless_balance_account_after_transaction'] = $cashlessBalanceBeforeTransaction;
             $data['cashback_balance_account_before_transaction'] = $cashbackBalanceBeforeTransaction;

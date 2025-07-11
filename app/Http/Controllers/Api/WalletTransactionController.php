@@ -23,6 +23,7 @@ class WalletTransactionController extends Controller
             'wallet_account_number' => 'required|string|exists:wallet_accounts,account_number',
             'wallet_transaction_type_id' => 'required|integer|exists:wallet_transaction_types,id',
             'pos_ticket_id' => 'nullable|integer',
+            'pos_cash_register_id' => 'nullable|integer',
             'seller_id' => 'nullable|integer',
             'movement_amount' => 'required|numeric',
             'cash_back' => 'required|numeric',
@@ -39,6 +40,7 @@ class WalletTransactionController extends Controller
                 'wallet_account_number',
                 'wallet_transaction_type_id',
                 'pos_ticket_id',
+                'pos_cash_register_id',
                 'seller_id',
                 'movement_amount',
                 'cash_back',
@@ -50,7 +52,7 @@ class WalletTransactionController extends Controller
 
             return response()->json([
                 'data' => $wallet_transaction,
-                'message' => 'transacción registrada correctamente.',
+                'message' => 'transaccion registrada correctamente.',
             ], 200);
 
         } catch (\Exception $e) {
@@ -89,7 +91,7 @@ class WalletTransactionController extends Controller
 
             return response()->json([
                 'data' => $wallet_transaction,
-                'message' => 'transacción registrada correctamente.',
+                'message' => 'transaccion registrada correctamente.',
             ], 200);
 
         } catch (\Exception $e) {
@@ -121,7 +123,7 @@ class WalletTransactionController extends Controller
 
             return response()->json([
                 'data' => $wallet_transaction,
-                'message' => 'transacción registrada correctamente.',
+                'message' => 'transaccion registrada correctamente.',
             ], 200);
 
         } catch (\Exception $e) {
@@ -141,7 +143,7 @@ class WalletTransactionController extends Controller
             if($wallet_transaction->count()){
                 return response()->json([
                     'data' => $wallet_transaction,
-                    'message' => 'Tipos de transacciones encontradas con éxito!',
+                    'message' => 'Tipos de transacciones encontradas con exito!',
                 ], 200);
             }
 
