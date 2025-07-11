@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\CashRegisterService;
 use App\Services\EventService;
 use App\Models\SalesTicketCancellationCode;
+use App\Models\SaleTicket;
 use App\Services\GlobalCardPaymentTypeService;
 use App\Services\GlobalPaymentTypeService;
 use App\Services\TicketOfficeService;
@@ -241,6 +242,24 @@ class TicketOfficeController extends Controller
 
         } catch (\Exception $e) {
             WebResponseHelper::rollback($e, 'Opps! Algo salió mal al cargar la taquilla');
+        }
+    }
+
+    public function ticketDetails($id)
+    {
+        try {
+            $ticket_details = $this->cash_register_service->getSaleTicketDetailHistory($id);
+
+            return response()->json([
+                'data' => $ticket_details,
+                'message' => 'Detalles del ticket obtenidos correctamente',
+                'success' => true
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'success' => false
+            ], 500);
         }
     }
 

@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router,  useForm as useFormInertia } from '@inertiajs/vue3';
 import Footer from '@/Components/Footer.vue';
 import { ref } from 'vue';
 import ErrorSession from '@/Components/ErrorSession.vue';
@@ -8,8 +8,13 @@ import AppNav from '@/Components/navs/AppNav.vue';
 import GuestNav from '@/Components/navs/GuestNav.vue';
 import PrimaryButton from '@/Components/buttons/PrimaryButton.vue';
 import SecondaryButton from '@/Components/buttons/SecondaryButton.vue';
+import useDateFormat from '@/composables/dateFormat';
+import usePriceFormat from '@/composables/priceFormat';
 import axios from 'axios';
 import { toast } from 'vue3-toastify'
+
+const { dateFormat } = useDateFormat();
+const { formatPrice } = usePriceFormat();
 
 const props =  defineProps({
     'ticket_offices': {
@@ -36,7 +41,6 @@ const loadingPrint = ref(false);
 const loadingCancel = ref(false);
 const cancelSeatCodes = ref([]);
 const cancelPassword = ref('');
-const cencellationPasswordEntered = ref('');
 const { formatFirstLetterUppercase } = useStringFormat();
 const headers = [
     { title: 'Folio', key: 'Folio' },
@@ -45,6 +49,7 @@ const headers = [
     { title: 'Fecha de venta', key: 'Fecha de venta' },
     { title: 'Fue transferido', key: 'Fue transferido' },
     { title: 'Asientos', key: 'Asientos' },
+    { title: 'Verificados', key: 'Verificados' },
     { title: 'Monto Pagado', key: 'Monto Pagado' },
     { title: 'Monto total', key: 'Monto total' },
     { title: 'Adeudo', key: 'Monto restante' },
@@ -55,7 +60,6 @@ const headerProps = {
     class: '!tw-font-bold'
 };
 const updateSaleTicketsSelected = (item) => {
-    cencellationPasswordEntered.value = '';
     paymentTypesSelected.value = [];
     cancelSeatCodes.value = [];
     saleTicketsSelected.value = item.Asientos.split(',');
@@ -63,15 +67,6 @@ const updateSaleTicketsSelected = (item) => {
 }
 
 const cancelTicket = (item, isActive) => {
-    if(cencellationPasswordEntered.value != cancelPassword.value) {
-        toast('El password no coincide para ejecutar la cancelacion', {
-            "theme": "auto",
-            "type": "error",
-            "autoClose": 10000,
-            "dangerouslyHTMLString": true
-        })
-        return
-    }
     if(paymentTypes.value.length != paymentTypesSelected.value.length) {
         toast('Se deben selecionar todos los tipos de pago para ordenar el descuento de la venta', {
             "theme": "auto",
@@ -105,6 +100,8 @@ const cancelTicket = (item, isActive) => {
                 "type": "success",
                 "dangerouslyHTMLString": true
             })
+            searchSaleTicket();
+            isActive.value = false;
         },
         onError: (error) => {
             toast('Hubo un error al cancelar los asientos', {
@@ -138,8 +135,117 @@ const searchSaleTicket = () => {
         return;
     }
     loadingSearch.value = true;
+    items.value = [];
+    axios.get(route('ticket-offices.ticket.details', {id: sale_ticket_id.value}))
+        .then(response => {
+            console.log(response.data);
+            const saleTicket = response.data.data.sale_ticket;
+            const paymentTypes = saleTicket.global_payment_types.map(paymentType => {
+                return `${formatFirstLetterUppercase(paymentType.name)}: ${paymentType.pivot.amount}`;
+            }).join(', ');
+            const seatCatalogues  = saleTicket.event_seat_catalogues.map(seatCatalogue => {
+                return `${seatCatalogue.seat_catalogue.code}`;
+            }).join(', ');
+
+            const seatCataloguesVerified = saleTicket.event_seat_catalogues.map(seatCatalogue => {
+                return `${seatCatalogue.seat_catalogue.code} - ${seatCatalogue.seat_catalogue.is_verified ? 'Verificado' : 'No verificado'}`;
+            }).join(', ');
+
+            items.value.push({
+                'Folio': saleTicket.id,
+                'Estatus': saleTicket.sale_ticket_status.name,
+                'Promotion': saleTicket.promotion,
+                'Fecha de venta': dateFormat(saleTicket.created_at),
+                'Fue transferido': saleTicket.is_transfer ? 'Si' : 'No',
+                'Asientos': seatCatalogues,
+                'Verificados': seatCataloguesVerified,
+                'Monto total': formatPrice(saleTicket.total_amount),
+                'Monto Pagado': formatPrice((Number(Number(saleTicket.amount_received)-Number(saleTicket.total_returned)))),
+                'Monto restante': formatPrice(saleTicket.remaining_amount),
+                'Tipos de pago': paymentTypes,
+                'Deudor': saleTicket.sale_debtor,
+                'PurcharseType': saleTicket.purchase_type
+            });
+            openned.value = true;
+        })
+        .catch(error => {
+            console.error(error);
+            toast(error.message, {
+                "theme": "auto",
+                "type": "error",
+                "autoClose": 10000,
+                "dangerouslyHTMLString": true
+            })
+        })
+        .finally(() => {
+            loadingSearch.value = false;
+        });
 
 };
+
+const printTicketAbonado = (item, isActive) => {
+loadingPrint.value = true;
+    if(item.Deudor){
+        axios.get(route('events.subscribers.installment.receipt', { id: item.Folio }))
+            .then(response => {
+                const pdfContent = atob(response.data.pdf);
+                const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
+                const pdfUrl = window.URL.createObjectURL(pdfBlob);
+                printInKioskMode(pdfUrl);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+            .finally(() => {
+                loadingPrint.value = false;
+                isActive.value = false;
+            })
+
+    }else{
+        axios.get(route('events.printSubscriber', { id: item.Folio , purchase_type:item.PurcharseType }))
+            .then(response => {
+                const pdfContent = atob(response.data.pdf);
+                const pdfBlob = new Blob([new Uint8Array([...pdfContent].map(char => char.charCodeAt(0)))], { type: 'application/pdf' });
+
+                if (response.data.subscriber) {
+                    const pdfUrl = window.URL.createObjectURL(pdfBlob);
+                    printInKioskMode(pdfUrl);
+                }else{
+                    const pdfFile = new File([pdfBlob], 'arch.pdf', { type: 'application/pdf' });
+                    const formData = new FormData();
+                    formData.append('pdf', pdfFile);
+                    axios.post(route('print'), formData)
+                        .then(response => {
+                            console.log(response.data);
+                        })
+                        .catch(error => {
+                            console.error(error);
+                            const pdfUrl = window.URL.createObjectURL(pdfBlob);
+                            printInKioskMode(pdfUrl);
+                        });
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            })
+            .finally(() => {
+                loadingPrint.value = false;
+                isActive.value = false;
+            })
+    };
+}
+
+function printInKioskMode(url, close = true) {
+    const ventana = window.open(url, '_blank', 'fullscreen=yes,kiosk=yes');
+    ventana.onload = () => {
+        ventana.print();
+        if (close){
+            setTimeout(() => {
+                //ventana.close();
+            }, 4000);
+        }
+    };
+}
 </script>
 
 <template>
@@ -216,9 +322,9 @@ const searchSaleTicket = () => {
                                                             <v-btn @click="updateSaleTicketsSelected(item)" v-bind="activatorProps" density="default" icon="mdi-printer-settings" class="!tw-text-purple-600 !tw-bg-purple-300"></v-btn>
                                                         </template>
                                                         <template v-slot:default="{ isActive }">
-                                                            <v-card title="¿Estas seguro de reimprimir el abono?">
+                                                            <v-card title="¿Estas seguro de reimprimir el ticket?">
                                                             <v-card-text>
-                                                                <p class="tw-opacity-50 tw-mt-3 tw-text-center">Preciona 'Imprimir abono' para ejecutar la acción.</p>
+                                                                <p class="tw-opacity-50 tw-mt-3 tw-text-center">Preciona 'Imprimir' para ejecutar la acción.</p>
                                                                 <div class="tw-flex tw-items-center tw-justify-center tw-gap-3 mt-5">
                                                                     <p v-for="code in saleTicketsSelected" :key="code" class="tw-py-2 tw-px-7 tw-bg-purple-200 tw-text-purple-700 tw-rounded-md tw-text-xl">{{ code }}</p>
                                                                 </div>
@@ -228,7 +334,7 @@ const searchSaleTicket = () => {
                                                                 <v-spacer></v-spacer>
                                                                 <v-btn color="red" rounded="large" variant="tonal" class="text-none !tw-px-4" text="Cancelar" @click="isActive.value = false"></v-btn>
                                                                 <v-btn :loading="loadingPrint" @click="printTicketAbonado(item, isActive)" rounded="large" variant="elevated" class="text-none !tw-bg-purple-600 !tw-text-white">
-                                                                    Imprimir abono
+                                                                    Imprimir
                                                                 </v-btn>
                                                             </v-card-actions>
                                                             </v-card>
@@ -241,10 +347,6 @@ const searchSaleTicket = () => {
                                                         <template v-slot:default="{ isActive }">
                                                             <v-card title="¿Estas seguro de cancelar el ticket?">
                                                             <v-card-text>
-                                                                <div class="tw-flex tw-flex-col tw-items-center tw-justify-center">
-                                                                    <p class="tw-inline tw-mt-3 tw-text-center tw-text-xs py-1 px-5 tw-bg-red-100 tw-text-red-500 tw-rounded-full">Ingresa el codigo de cancelacion y preciona 'Ejecutar Cancelaciòn' para confirmar.</p>
-                                                                    <v-otp-input v-model="cencellationPasswordEntered"></v-otp-input>
-                                                                </div>
                                                                 <div class="tw-flex tw-flex-col tw-items-center tw-justify-center">
                                                                     <p class="tw-text-xs py-1 px-5 tw-bg-red-100 tw-text-red-500 tw-rounded-full">Selecciona el tipo de pago y orden en el que descontara la venta</p>
                                                                     <div v-if="paymentTypesSelected.length > 0" class="tw-mt-3 tw-text-purple-600 tw-font-bold tw-flex tw-items-center tw-justify-center tw-gap-3">

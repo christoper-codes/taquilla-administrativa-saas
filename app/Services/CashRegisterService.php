@@ -8,7 +8,9 @@ use App\Models\CashRegisterType;
 use App\Models\GlobalPaymentType;
 use App\Models\SeatCatalogueStatus;
 use App\Models\GlobalCardPaymentType;
+use App\Models\SaleTicket;
 use App\Models\SaleTicketStatus;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class CashRegisterService
@@ -241,6 +243,174 @@ class CashRegisterService
                 'cash_register' => $cash_register,
                 'sale_tickets' => $sale_tickets->concat($sale_tickets_intallment_payment)->sortByDesc('created_at')->values(),
                 'type_payments' => $type_payments,
+            ];
+
+            return $response;
+
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /*
+    * |--------------------------------------------------------------------------
+    * | Get sale ticket detail history with seats
+    */
+    public function getSaleTicketDetailHistory($sale_ticket_id)
+    {
+        try {
+            // Obtener el ticket específico
+            $sale_ticket = SaleTicket::with([
+                'saleTicketStatus',
+                'globalPaymentTypes',
+                'EventSeatCatalogues.seatCatalogue',
+                'saleDebtor',
+                'installmentPaymentHistories.globalPaymentTypes',
+                'promotion.promotionType',
+                'cashRegister',
+                'sellerUser',
+                'events'
+            ])->findOrFail($sale_ticket_id);
+
+            $globalCardPaymentType = GlobalCardPaymentType::all();
+            $status = collect(['pagado', 'pendiente', 'parcialmente cancelado']);
+
+            $type_payments = [];
+            $seat_details = [];
+
+            // Calcular monto restante si es pago a plazos
+            $remaining_amount = $sale_ticket->saleDebtor ?
+                ($sale_ticket->total_amount - $sale_ticket->installmentPaymentHistories->sortBy('created_at')->first()->total_amount) : 0;
+
+            $sale_ticket->setAttribute('remaining_amount', $remaining_amount);
+
+            // Actualizar status si está pagado pero tiene deuda pendiente
+            if($sale_ticket->saleTicketStatus->name == 'pagado' && $sale_ticket->remaining_amount > 0){
+                $sale_ticket->setRelation('saleTicketStatus', SaleTicketStatus::where('name', 'pendiente')->first());
+            }
+
+            // Procesar tipos de pago del ticket principal
+            $sale_ticket->globalPaymentTypes->each(function ($global_payment_type) use (&$type_payments, &$sale_ticket, $globalCardPaymentType, $status) {
+
+                if ($global_payment_type->pivot->global_card_payment_type_id) {
+                    $cardType = $globalCardPaymentType->firstWhere('id', $global_payment_type->pivot->global_card_payment_type_id);
+                    $global_payment_type->name .= " (".$cardType->name.")".($sale_ticket->saleDebtor ? " - Deuda a plazos" : '');
+                } else {
+                    $global_payment_type->name .= ($sale_ticket->saleDebtor ? " - Deuda a plazos" : '');
+                }
+
+                if (!isset($type_payments[$global_payment_type->name])) {
+                    $type_payments[$global_payment_type->name] = ['amount' => 0];
+                }
+
+                // Sumar montos solo si el ticket está en status válido
+                if($status->contains($sale_ticket->saleTicketStatus->name)){
+                    if ($sale_ticket->saleDebtor) {
+                        $type_payments[$global_payment_type->name]['amount'] += ($sale_ticket->total_amount - $sale_ticket->installmentPaymentHistories->sortBy('created_at')->first()->total_amount);
+
+                        $dataTemp = Str::replace(" - Deuda a plazos", '', $global_payment_type->name);
+                        if (!isset($type_payments[$dataTemp])) {
+                            $type_payments[$dataTemp] = ['amount' => 0];
+                        }
+                        $type_payments[$dataTemp]['amount'] += $sale_ticket->installmentPaymentHistories->sortBy('created_at')->first()->total_amount;
+                    } else {
+                        $type_payments[$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
+                    }
+                }
+
+                $global_payment_type->name = Str::replace(" - Deuda a plazos", '', $global_payment_type->name);
+            });
+
+            // Procesar historial de pagos a plazos
+            $installment_payments = $sale_ticket->installmentPaymentHistories->map(function ($installmentPaymentHistory) use (&$type_payments, $globalCardPaymentType, $sale_ticket) {
+
+                $installmentPayment = clone $installmentPaymentHistory;
+                $installmentPayment->setAttribute('sale_ticket_id', $sale_ticket->id);
+                $installmentPayment->setAttribute('remaining_amount', $sale_ticket->total_amount - $sale_ticket->installmentPaymentHistories->sum('total_amount'));
+
+                $installmentPaymentHistory->globalPaymentTypes->each(function ($global_payment_type) use (&$type_payments, $globalCardPaymentType) {
+
+                    if ($global_payment_type->pivot->global_card_payment_type_id) {
+                        $cardType = $globalCardPaymentType->firstWhere('id', $global_payment_type->pivot->global_card_payment_type_id);
+                        $global_payment_type->name .= " (".$cardType->name.")"." - Abonos a Deuda";
+                    } else {
+                        $global_payment_type->name .= " - Abonos a Deuda";
+                    }
+
+                    if (!isset($type_payments[$global_payment_type->name])) {
+                        $type_payments[$global_payment_type->name] = ['amount' => 0];
+                    }
+
+                    $type_payments[$global_payment_type->name]['amount'] += $global_payment_type['pivot']['amount'];
+                });
+
+                return $installmentPayment;
+            });
+
+            // Obtener detalles de los asientos asociados
+            $sale_ticket->EventSeatCatalogues->each(function ($eventSeatCatalogue) use (&$seat_details) {
+                $seat_details[] = [
+                    'seat_id' => $eventSeatCatalogue->id,
+                    'seat_code' => $eventSeatCatalogue->seatCatalogue->code,
+                    'zone' => $eventSeatCatalogue->seatCatalogue->zone,
+                    'row' => $eventSeatCatalogue->seatCatalogue->row,
+                    'seat' => $eventSeatCatalogue->seatCatalogue->seat,
+                    'seat_type' => $eventSeatCatalogue->seatCatalogue->seatType->name ?? 'N/A',
+                    'status' => $eventSeatCatalogue->seatCatalogueStatus->name ?? 'N/A',
+                    'final_price' => $eventSeatCatalogue->final_price,
+                    'original_price' => $eventSeatCatalogue->original_price,
+                    'qr_code' => $eventSeatCatalogue->qr,
+                    'is_gift' => $eventSeatCatalogue->is_gift,
+                    'purchase_type' => $eventSeatCatalogue->purchase_type,
+                    'is_verified' => $eventSeatCatalogue->is_verified,
+                ];
+            });
+
+            // Calcular totales por tipo de pago
+            $totals = [
+                'efectivo' => [
+                    'keys' => ['efectivo', 'efectivo - Abonos a Deuda'],
+                    'total_key' => 'efectivo - Total',
+                ],
+                'tarjeta' => [
+                    'keys' => ['tarjeta (credito)', 'tarjeta (credito) - Abonos a Deuda', 'tarjeta (debito)', 'tarjeta (debito) - Abonos a Deuda'],
+                    'total_key' => 'tarjeta - Total',
+                ],
+            ];
+
+            foreach ($totals as $group) {
+                $type_payments[$group['total_key']] = ['amount' => 0];
+                foreach ($group['keys'] as $key) {
+                    if (isset($type_payments[$key])) {
+                        $type_payments[$group['total_key']]['amount'] += $type_payments[$key]['amount'];
+                    }
+                }
+            }
+
+            // Reordenar totales al final
+            $last_two = array_slice($type_payments, -2, 2, true);
+            $rest = array_slice($type_payments, 0, -2, true);
+            $type_payments = $last_two + $rest;
+
+            // Filtrar pagos de deuda a plazos del resultado final
+            $type_payments = collect($type_payments)->filter(function ($value, $key) {
+                return !str_contains($key, ' - Deuda a plazos');
+            });
+
+            $response = [
+                'sale_ticket' => $sale_ticket,
+                'seats' => $seat_details,
+                'installment_payments' => $installment_payments,
+                'type_payments' => $type_payments,
+                'total_seats' => count($seat_details),
+                'payment_summary' => [
+                    'total_amount' => $sale_ticket->total_amount,
+                    'amount_received' => $sale_ticket->amount_received,
+                    'remaining_amount' => $sale_ticket->remaining_amount,
+                    'total_returned' => $sale_ticket->total_returned,
+                    'is_installment' => $sale_ticket->payment_in_installments ? true : false,
+                    'installment_months' => $sale_ticket->payment_in_installments,
+                ]
             ];
 
             return $response;
