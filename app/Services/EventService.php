@@ -7,6 +7,7 @@ use App\Enums\PurchaseTypes;
 use App\Interfaces\EventRepositoryInterface;
 use App\Models\CashRegisterMovement;
 use App\Models\CashRegisterMovementType;
+use App\Models\EventSeatCatalog;
 use App\Models\EventSeatCatalogPriceType;
 use App\Models\PriceTypeSeatCatalogue;
 use App\Models\SaleTicket;
@@ -24,6 +25,7 @@ use Endroid\QrCode\Label\Font\OpenSans;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 
 class EventService
 {
@@ -206,60 +208,76 @@ class EventService
     public function reserveSeatsToBuy($data)
     {
         try {
-            /*
-            * Verify if the purchase types is 'partido' or 'serie'
-            */
-            if($data['purchase_type'] == PurchaseTypes::SERIE->value) {
-                $events_by_serie = $this->event_repository->getEventsBySerie($data['serie_id']);
-                if ($events_by_serie->count() === 1) {
-                    throw new \Exception('No se puede realizar la compra de una serie de eventos con un solo evento');
-                }
+            $seat_catalogue_ids = collect($data['seats'])->pluck('seat_catalogue_id')->toArray();
 
-                foreach ($events_by_serie as $event) {
-                    foreach ($data['seats'] as $seat) {
-                        /*
-                        * Verificar si el asiento está disponible para comprar
-                        */
-                        $event_seat_catalogue = $event->eventSeatCatalogues->where('seat_catalogue_id', $seat['seat_catalogue_id'])->first();
-                        if (!in_array($event_seat_catalogue->seatCatalogueStatus->name, ['disponible', 'reservado'])) {
-                            throw new \Exception('El asiento ' . $event_seat_catalogue->seatCatalogue->code . ' no está disponible para comprar en el evento ' . $event->name . ' del dia ' . $event->start_date . ' ya que esta comprado o reservado');
-                        }
-
-                        /*
-                        * Reservar asiento para comprar
-                        */
-                        $this->event_repository->reserveSeatsToBuy($event->id, $seat['seat_catalogue_id'], $data['seller_user_id']);
-                    }
-                }
-            }  else {
-                foreach ($data['seats'] as $seat) {
-                    /*
-                    * Verificar si el asiento está disponible para comprar
-                    */
-                    $event_seat_catalogue = $this->event_repository->getById($data['event_id'])->eventSeatCatalogues->where('seat_catalogue_id', $seat['seat_catalogue_id'])->first();
-                    if (!in_array($event_seat_catalogue->seatCatalogueStatus->name, ['disponible', 'reservado'])) {
-                        throw new \Exception('El asiento ' . $event_seat_catalogue->seatCatalogue->code . ' no está disponible para comprar');
-                    }
-
-                    /*
-                    * Reservar asiento para comprar
-                    */
-                    $this->event_repository->reserveSeatsToBuy($data['event_id'], $seat['seat_catalogue_id'], $data['seller_user_id']);
-                }
+            if ($data['purchase_type'] == PurchaseTypes::SERIE->value) {
+                return $this->handleSerieReservation($data, $seat_catalogue_ids);
+            } else {
+                return $this->handleSingleEventReservation($data, $seat_catalogue_ids);
             }
-
-            if(!$data['is_online']){
-                $pdf_data = $this->confirmSeatsPurchase($data);
-
-                return $pdf_data;
-            }
-
-            return true;
 
         } catch (\Exception $e) {
-
             throw $e;
         }
+    }
+
+    private function handleSerieReservation($data, $seat_catalogue_ids)
+    {
+        $events_by_serie = $this->event_repository->getEventsBySerie($data['serie_id']);
+
+        if ($events_by_serie->count() === 1) {
+            throw new \Exception('No se puede realizar la compra de una serie de eventos con un solo evento');
+        }
+
+        foreach ($events_by_serie as $event) {
+            $event_seats = EventSeatCatalog::where('event_id', $event->id)
+                ->whereIn('seat_catalogue_id', $seat_catalogue_ids)
+                ->with([
+                    'seatCatalogue:id,code,zone',
+                    'seatCatalogueStatus:id,name'
+                ])
+                ->get()
+                ->keyBy('seat_catalogue_id');
+
+            foreach ($data['seats'] as $seat) {
+                $event_seat_catalogue = $event_seats->get($seat['seat_catalogue_id']);
+
+                if (!$event_seat_catalogue || !in_array($event_seat_catalogue->seatCatalogueStatus->name, ['disponible', 'reservado'])) {
+                    $seat_code = $event_seat_catalogue ? $event_seat_catalogue->seatCatalogue->code : $seat['seat_catalogue_id'];
+                    throw new \Exception("El asiento {$seat_code} no está disponible para comprar en el evento {$event->name} del día {$event->start_date}");
+                }
+            }
+
+            $this->event_repository->reserveSeatsToBuyBatch($event->id, $seat_catalogue_ids, $data['seller_user_id']);
+        }
+
+        return !$data['is_online'] ? $this->confirmSeatsPurchase($data) : true;
+    }
+
+
+    private function handleSingleEventReservation($data, $seat_catalogue_ids)
+    {
+        $event_seats = EventSeatCatalog::where('event_id', $data['event_id'])
+            ->whereIn('seat_catalogue_id', $seat_catalogue_ids)
+            ->with([
+                'seatCatalogue:id,code,zone',
+                'seatCatalogueStatus:id,name'
+            ])
+            ->get()
+            ->keyBy('seat_catalogue_id');
+
+        foreach ($data['seats'] as $seat) {
+            $event_seat_catalogue = $event_seats->get($seat['seat_catalogue_id']);
+
+            if (!$event_seat_catalogue || !in_array($event_seat_catalogue->seatCatalogueStatus->name, ['disponible', 'reservado'])) {
+                $seat_code = $event_seat_catalogue ? $event_seat_catalogue->seatCatalogue->code : $seat['seat_catalogue_id'];
+                throw new \Exception("El asiento {$seat_code} no está disponible para comprar");
+            }
+        }
+
+        $this->event_repository->reserveSeatsToBuyBatch($data['event_id'], $seat_catalogue_ids, $data['seller_user_id']);
+
+        return !$data['is_online'] ? $this->confirmSeatsPurchase($data) : true;
     }
 
     /*
@@ -543,25 +561,30 @@ class EventService
             /*
             * Create sale ticket
             */
-            $saleTicket = new SaleTicket();
-            $saleTicket->event_id = $data['event_id'];
-            $saleTicket->stadium_id = $data['stadium_id'];
-            $saleTicket->ticket_office_id = $data['ticket_office_id'];
-            $saleTicket->seller_user_id = $data['seller_user_id'];
-            $saleTicket->cash_register_id = $data['cash_register_id'];
-            $saleTicket->sale_ticket_status_id = $sale_debtor_id ? SaleTicketStatus::where('name', 'pendiente')->first()->id : SaleTicketStatus::where('name', 'pagado')->first()->id;
-            $saleTicket->price_type_id = null;
-            $saleTicket->sale_debtor_id = $sale_debtor_id ?? null;
-            $saleTicket->amount_received = $data['amount_received'];
-            $saleTicket->total_amount = $data['total_amount'];
-            $saleTicket->total_returned = $data['total_returned'];
-            $saleTicket->payment_in_installments = $data['payment_in_installments'] ?? null;
-            $saleTicket->promotion_id = $data['final_promotion']['id'] ?? null;
-            $saleTicket->promotion_quantity = $data['final_promotion']['quantity'] ?? null;
-            $saleTicket->purchase_type = $data['purchase_type'];
-            $saleTicket->is_online = $data['is_online'];
-            $saleTicket->is_transfer = $data['is_transfer'] ?? false;
-            $saleTicket->save();
+            $status_id = $sale_debtor_id
+                ? Cache::remember('sale_ticket_status_pendiente_id', 3600, fn() => SaleTicketStatus::where('name', 'pendiente')->value('id'))
+                : Cache::remember('sale_ticket_status_pagado_id', 3600, fn() => SaleTicketStatus::where('name', 'pagado')->value('id'));
+
+            $saleTicket = SaleTicket::create([
+                'event_id' => $data['event_id'],
+                'stadium_id' => $data['stadium_id'],
+                'ticket_office_id' => $data['ticket_office_id'],
+                'seller_user_id' => $data['seller_user_id'],
+                'cash_register_id' => $data['cash_register_id'],
+                'sale_ticket_status_id' => $status_id,
+                'price_type_id' => null,
+                'sale_debtor_id' => $sale_debtor_id,
+                'amount_received' => $data['amount_received'],
+                'total_amount' => $data['total_amount'],
+                'total_returned' => $data['total_returned'],
+                'payment_in_installments' => $data['payment_in_installments'] ?? null,
+                'promotion_id' => $data['final_promotion']['id'] ?? null,
+                'promotion_quantity' => $data['final_promotion']['quantity'] ?? null,
+                'purchase_type' => $data['purchase_type'],
+                'is_online' => $data['is_online'],
+                'is_transfer' => $data['is_transfer'] ?? false,
+            ]);
+
 
             /*
             * Create relationship between installment payment history service and sale ticket
@@ -582,22 +605,32 @@ class EventService
             * Assign payment types to the sale ticket and installment payment history if is needed
             */
             $total_actual_paid = 0;
+            $payment_data = [];
+            $installment_payment_data = [];
             foreach ($data['global_payment_types'] as $global_payment_type) {
-                $saleTicket->globalPaymentTypes()->attach($global_payment_type['id'], [
+                $amount = $global_payment_type['amount'];
+                $total_actual_paid += $amount;
+
+                $payment_data[$global_payment_type['id']] = [
                     'global_card_payment_type_id' => $global_payment_type['global_card_payment_type_id'] ?? null,
                     'reason_agreement_id' => $global_payment_type['reason_agreement_id'] ?? null,
-                    'amount' => $global_payment_type['amount'],
-                    'original_amount' => $global_payment_type['amount'],
+                    'amount' => $amount,
+                    'original_amount' => $amount,
                     'reason_courtesy' => $global_payment_type['reason_agreement'] ?? null,
-                ]);
-                $total_actual_paid += $global_payment_type['amount'];
+                ];
+
                 if($sale_debtor_id){
-                    $installment_payment_history_service->globalPaymentTypes()->attach($global_payment_type['id'], [
+                    $installment_payment_data[$global_payment_type['id']] = [
                         'global_card_payment_type_id' => $global_payment_type['global_card_payment_type_id'] ?? null,
-                        'amount' => $global_payment_type['amount'],
-                        'original_amount' => $global_payment_type['amount'],
-                    ]);
+                        'amount' => $amount,
+                        'original_amount' => $amount,
+                    ];
                 }
+            }
+
+            $saleTicket->globalPaymentTypes()->attach($payment_data);
+            if($sale_debtor_id){
+                $installment_payment_history_service->globalPaymentTypes()->attach($installment_payment_data);
             }
 
             /*
@@ -605,7 +638,7 @@ class EventService
             */
             $events = ($data['purchase_type'] == PurchaseTypes::SERIE->value)
                 ? $this->event_repository->getEventsBySerie($data['serie_id'])
-                : collect([$this->event_repository->getById($data['event_id'])]);
+                : collect([$this->event_repository->getOnlyById($data['event_id'])]);
 
             if ($events->count() === 1 && $data['purchase_type'] == PurchaseTypes::SERIE->value) {
                 throw new \Exception('No se puede realizar la compra de una serie de eventos con un solo evento');
@@ -622,46 +655,61 @@ class EventService
             }
 
 
-            $event_seat_catalogues = [];
             $pdf_data = [];
-
             /*
             * Assign seats to the sale ticket for each event
             */
-            foreach ($events as $event) {
-                /*
-                * RelationShip between sale ticket and event
-                */
-                $saleTicket->events()->attach($event->id, [
-                    'is_active' => true,
-                ]);
+            $globalCardPaymentTypes = GlobalCardPaymentType::all()->keyBy('id');
 
-                /**
-                 * Add Card Payment Type
-                 */
-                $saleTicket->globalPaymentTypes->each(function ($global_payment_type) {
+            // Preparar datos para inserción en lote
+            $event_attachments = [];
+            $seat_attachments = [];
+            $seat_catalogue_ids = collect($data['seats'])->pluck('seat_catalogue_id')->toArray();
 
-                    $global_payment_type->pivot->amount;
-
-                    if ($global_payment_type->pivot->global_card_payment_type_id) {
-
-                        $globalCardPaymentType = GlobalCardPaymentType::find($global_payment_type->pivot->global_card_payment_type_id);
-
-                        if ($globalCardPaymentType) {
-                            $global_payment_type->name .= " (".$globalCardPaymentType->name.")";
-                        }
+            // Procesar tipos de pago de tarjeta UNA SOLA VEZ
+            $saleTicket->globalPaymentTypes->each(function ($global_payment_type) use ($globalCardPaymentTypes) {
+                if ($global_payment_type->pivot->global_card_payment_type_id) {
+                    $cardType = $globalCardPaymentTypes->get($global_payment_type->pivot->global_card_payment_type_id);
+                    if ($cardType) {
+                        $global_payment_type->name .= " ({$cardType->name})";
                     }
-                });
+                }
+            });
+
+            // Cargar relaciones fuera del loop
+            if ($saleTicket->promotion) {
+                $saleTicket->promotion->loadMissing('promotionType');
+            }
+
+            // Cargar deudor e historiales UNA SOLA VEZ
+            if (!$saleTicket->relationLoaded('saleDebtor')) {
+                $saleTicket->load('saleDebtor');
+            }
+            if (!$saleTicket->relationLoaded('installmentPaymentHistories')) {
+                $saleTicket->load('installmentPaymentHistories');
+            }
+
+            foreach ($events as $event) {
+                // Preparar datos para attach en lote
+                $event_attachments[$event->id] = [
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+
+                // Obtener asientos del evento con una sola consulta optimizada
+                $event_seats = $event->eventSeatCatalogues
+                    ->whereIn('seat_catalogue_id', $seat_catalogue_ids)
+                    ->keyBy('seat_catalogue_id');
 
                 foreach ($data['seats'] as $seat) {
-                    $qr = $data['purchase_type'] == PurchaseTypes::SERIE->value ? $seat_qrs[$seat['seat_catalogue']['code']] : 'qr_evento_' . $event->id . '_asiento_' . $seat['seat_catalogue']['code'] . '_ticket_' . $saleTicket->id . '_key_' . uniqid();
+                    $event_seat_catalogue = $event_seats->get($seat['seat_catalogue_id']);
 
-                    /*
-                    * Verify if the seat is available to buy
-                    */
-                    $event_seat_catalogue = $event->eventSeatCatalogues->where('seat_catalogue_id', $seat['seat_catalogue_id'])->first();
-                    $event_seat_catalogues[] = $event_seat_catalogue;
+                    if (!$event_seat_catalogue) {
+                        throw new \Exception("Asiento {$seat['seat_catalogue_id']} no encontrado");
+                    }
 
+                    // Validar asiento
                     if ($event_seat_catalogue->seatCatalogueStatus->name !== 'transito') {
                         throw new \Exception('El asiento ' . $event_seat_catalogue->seatCatalogue->code . ' no está disponible para comprar ya que no se encuentra en tránsito');
                     }
@@ -670,58 +718,45 @@ class EventService
                         throw new \Exception('El asiento ' . $event_seat_catalogue->seatCatalogue->code . ' no está disponible para comprar ya que no se encuentra reservado para el mismo usuario');
                     }
 
-                    /*
-                    * Confirm seat purchase
-                    */
+                    // Generar QR
+                    $qr = $data['purchase_type'] == PurchaseTypes::SERIE->value
+                        ? $seat_qrs[$seat['seat_catalogue']['code']]
+                        : 'qr_evento_' . $event->id . '_asiento_' . $seat['seat_catalogue']['code'] . '_ticket_' . $saleTicket->id . '_key_' . uniqid();
+
+                    // Confirmar compra del asiento
                     $this->event_repository->confirmSeatsPurchase($event->id, $seat['seat_catalogue_id'], $data['member_user_id'], $saleTicket->id, $qr, $seat['final_price'], $seat['original_price'], $seat['is_gift'], $data['purchase_type']);
 
-                    /*
-                    * Create relationship between sale ticket and eventSeatCatalogs
-                    */
-                    $saleTicket->eventSeatCatalogs()->attach($event_seat_catalogue->id, [
+                    // Preparar datos para attach batch
+                    $seat_attachments[] = [
+                        'event_seat_catalog_id' => $event_seat_catalogue->id,
                         'user_id' => $data['member_user_id'],
                         'promotion_id' => $seat['promotion_id'],
                         'agreement_promotion_id' => $seat['agreement_promotion_id'] ?? null,
                         'is_active' => true,
-                    ]);
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ];
 
-                    /**
-                     * Load Promotion
-                     */
+                    // Cargar promociones si existen
                     if ($saleTicket->promotion) {
-                        $saleTicket->promotion->loadMissing('promotionType');
                         $event_seat_catalogue->load(['promotions' => function ($query) use ($saleTicket) {
                             $query->where('promotion_id', $saleTicket->promotion_id);
                         }]);
                     }
 
-                    /**
-                     * Load debtor and details
-                     */
-                    $saleTicket->saleDebtor;
-                    $saleTicket->installmentPaymentHistories;
-
-                    /*
-                    * Validate if the sale is abonado
-                    */
+                    // Procesar abono
                     if($data['purchase_type'] == PurchaseTypes::SEASON_TICKET->value){
-                        $seat['is_owner'] = $seat['is_owner'] == 'Si' ? true : false;
+                        $seat['is_owner'] = $seat['is_owner'] == 'Si';
                         $season_ticket = $this->season_ticket_service->save($seat);
-                        $event_seat_catalogue->season_ticket_id = $season_ticket->id;
-                        $event_seat_catalogue->save();
+                        $event_seat_catalogue->update(['season_ticket_id' => $season_ticket->id]);
                     }
 
-                    /**
-                     * Load Original Price
-                     */
+                    // Cargar precios originales
                     $event_seat_catalogue->load(['priceTypes' => function ($query) use ($data) {
                         $query->where('name', $data['purchase_type']);
                     }]);
 
-
-                    /*
-                    * create qr
-                    */
+                    // Generar QR imagen
                     $builder = new Builder(
                         writer: new PngWriter(),
                         writerOptions: [],
@@ -737,14 +772,9 @@ class EventService
                         labelAlignment: LabelAlignment::Center
                     );
 
-                    $result = $builder->build();
+                    $qr_img = $builder->build()->getDataUri();
 
-                    $qr_img = $result->getDataUri();
-
-                    /*
-                    * pdf structure
-                    */
-
+                    // Estructura PDF
                     $pdf_data[] = [
                         'event_name' => $event->name,
                         'event_start_date' => $event->start_date,
@@ -777,28 +807,43 @@ class EventService
                         'promotion' => $event_seat_catalogue->promotions,
                         'original_price' => $event_seat_catalogue->priceTypes,
                         'sale_debtor' => $saleTicket->saleDebtor,
-                        'installment_payment_histories'=>$saleTicket->installmentPaymentHistories
+                        'installment_payment_histories' => $saleTicket->installmentPaymentHistories
                     ];
                 }
             }
 
+            // Insertar todas las relaciones en lote (UNA SOLA CONSULTA CADA UNA)
+            $saleTicket->events()->attach($event_attachments);
+
+            // Insertar todas las relaciones de asientos en lote
+            foreach ($seat_attachments as $attachment) {
+                $saleTicket->eventSeatCatalogs()->attach($attachment['event_seat_catalog_id'], [
+                    'user_id' => $attachment['user_id'],
+                    'promotion_id' => $attachment['promotion_id'],
+                    'agreement_promotion_id' => $attachment['agreement_promotion_id'],
+                    'is_active' => $attachment['is_active'],
+                    'created_at' => $attachment['created_at'],
+                    'updated_at' => $attachment['updated_at']
+                ]);
+            }
             /*
             * Create cash register movement
             */
-            $cash_register_movement = new CashRegisterMovement();
-            $cash_register_movement->cash_register_id = $data['cash_register_id'];
-            $cash_register_movement->cash_register_movement_type_id = CashRegisterMovementType::where('name', 'venta')->first()->id;
-            $cash_register_movement->sale_ticket_id = $saleTicket->id;
-            $cash_register_movement->previous_balance = $cash_register->current_balance;
-            $cash_register_movement->movement_amount = $total_actual_paid;
-            $cash_register_movement->new_balance = $cash_register->current_balance + $total_actual_paid;
-            $cash_register_movement->save();
+           $movement_type_id = Cache::remember('cash_register_movement_type_venta_id', 3600, fn() => CashRegisterMovementType::where('name', 'venta')->value('id'));
+            $cash_register_movement = CashRegisterMovement::create([
+                'cash_register_id' => $data['cash_register_id'],
+                'cash_register_movement_type_id' => $movement_type_id,
+                'sale_ticket_id' => $saleTicket->id,
+                'previous_balance' => $cash_register->current_balance,
+                'movement_amount' => $total_actual_paid,
+                'new_balance' => $cash_register->current_balance + $total_actual_paid,
+            ]);
 
             /*
             * Update cash register balance
             */
-            $cash_register->current_balance = $cash_register_movement->new_balance;
-            $cash_register->save();
+            $cash_register->update(['current_balance' => $cash_register_movement->new_balance]);
+
 
             if(!$data['is_online']){
                 return $pdf_data;

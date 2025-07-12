@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\SeatCatalogueStatus;
 use App\Models\EventSeatCatalog;
 use App\Models\SaleTicket;
+use Illuminate\Support\Facades\Cache;
 
 class EventRepository implements EventRepositoryInterface
 {
@@ -61,16 +62,21 @@ class EventRepository implements EventRepositoryInterface
     */
     public function reserveSeatsToBuy($event_id, $seat_catalogue_id, $member_user_id)
     {
-        $event = Event::findOrFail($event_id);
+       $seat_catalogue_status_id = $this->getTransitoStatusId();
 
-        $seat_catalogue_status = SeatCatalogueStatus::where('name', 'transito')->first();
-
-        $event->eventSeatCatalogues()->where('seat_catalogue_id', $seat_catalogue_id)->update([
-            'seat_catalogue_status_id' => $seat_catalogue_status->id,
+      return EventSeatCatalog::where('event_id', $event_id)
+        ->where('seat_catalogue_id', $seat_catalogue_id)
+        ->update([
+            'seat_catalogue_status_id' => $seat_catalogue_status_id,
             'user_id' => $member_user_id,
         ]);
+    }
 
-        return $event;
+    private function getTransitoStatusId()
+    {
+        return Cache::remember('seat_status_transito_id', 3600, function () {
+            return SeatCatalogueStatus::where('name', 'transito')->value('id');
+        });
     }
 
     public function confirmSeatsPurchase($event_id, $seat_catalogue_id, $member_user_id = null, $sale_ticket_id = null, $qr = null, $price = null,$original_pricde = null,  $is_gift = null, $purchase_type = null)
@@ -95,10 +101,21 @@ class EventRepository implements EventRepositoryInterface
 
     public function getEventsBySerie($serie_id)
     {
-        return Event::where('serie_id', $serie_id)
-            ->where('enabled_for_season_tickets', false)
-            ->where('is_active', true)
-            ->get();
+       $cache_key = "events_serie_{$serie_id}";
+
+        return Cache::remember($cache_key, 3600, function () use ($serie_id) {
+            return Event::where([
+                    ['serie_id', '=', $serie_id],
+                    ['enabled_for_season_tickets', '=', false],
+                    ['is_active', '=', true]
+                ])
+                ->get();
+        });
+    }
+
+    public function getOnlyById($id)
+    {
+        return Event::findOrFail($id);
     }
 
     public function getOnlyEvent($id)
@@ -193,5 +210,18 @@ class EventRepository implements EventRepositoryInterface
             ]);
 
         return $event;
+    }
+
+    public function reserveSeatsToBuyBatch($event_id, $seat_catalogue_ids, $member_user_id)
+    {
+        $seat_catalogue_status_id = $this->getTransitoStatusId();
+
+        return EventSeatCatalog::where('event_id', $event_id)
+            ->whereIn('seat_catalogue_id', $seat_catalogue_ids)
+            ->update([
+                'seat_catalogue_status_id' => $seat_catalogue_status_id,
+                'user_id' => $member_user_id,
+                'updated_at' => now()
+            ]);
     }
 }

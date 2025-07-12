@@ -26,4 +26,6 @@ interface EventRepositoryInterface
     public function getUsersEventForSaleTickets($id);
     public function getAllWithTraffic();
     public function releaseReservedSeats($event_id);
+    public function getOnlyById($id);
+    public function reserveSeatsToBuyBatch($event_id, $seat_catalogue_ids, $member_user_id);
 }

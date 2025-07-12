@@ -66,14 +66,15 @@ class EventSeatCatalog extends Model
         return $this->belongsToMany(PriceType::class, 'event_seat_catalog_price_type', 'event_seat_catalog_id', 'price_type_id')
                 ->withPivot('price_catalogue_id', 'price', 'is_active')
                 ->withTimestamps()
-                ->wherePivot('is_active', true);
+                ->wherePivot('event_seat_catalog_price_type.is_active', true);
     }
 
     public function promotions()
     {
         return $this->belongsToMany(Promotion::class, 'event_seat_catalog_promotion', 'event_seat_catalog_id', 'promotion_id')
                     ->withPivot('is_active')
-                    ->withTimestamps();
+                    ->withTimestamps()
+                    ->wherePivot('event_seat_catalog_promotion.is_active', true);
     }
 
     public function saleTickets()
