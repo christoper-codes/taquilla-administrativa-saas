@@ -704,9 +704,7 @@ const selectZones = () => {
     selectedAgreementPromotion.value = null;
     seatsSelectedCopy.value = [];
     showPromotionToast.value = false;
-    seatAvailability.value = [];
     paymentInstallmentSelected.value = null;
-    getSeatAvailability();
     tab.value = 'payment'
     setTimeout(() => tab.value = 'seats', 500);
     tab.value = 'seats';
@@ -834,6 +832,7 @@ onMounted(() => {
 });
 
 const getSeatAvailability = () => {
+    seatAvailability.value = [];
     const data = {event_id: props.event.id};
     axios.get(route('events.availability'), { params: data })
         .then(response => {
@@ -1733,6 +1732,9 @@ watch(() => paymentInstallmentSelected.value, () => {
                                             <p class="tw-text-[10px] lg:tw-text-xs tw-font-bold">Zona {{ availability.zone }}</p>
                                             <p class="tw-text-[10px] lg:tw-text-xs">{{ availability.available_seats }} <br> asientos libres</p>
                                         </div>
+                                    </div>
+                                    <div v-if="viewVendorTopics(props.user_roles)" @click="getSeatAvailability()" class="tw-p-3 tw-border-2 tw-rounded-lg tw-bg-primary/30 tw-text-center">
+                                        <p class="tw-text-[10px] lg:tw-text-xs tw-font-bold">Refrescar</p>
                                     </div>
                                 </div>
                                 <div v-else class="tw-w-full lg:tw-w-auto tw-grid tw-grid-cols-3 tw-gap-5 tw-items-center tw-justify-center">
