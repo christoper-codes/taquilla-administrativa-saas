@@ -195,7 +195,6 @@ class EventController extends Controller
     {
 
         try {
-            //$response = $this->event_service->getById($id);
             $event = Event::findOrFail($id);
             if(!$event || $event->is_active == false){
                 throw new \Exception('El evento esta inactivo');
@@ -219,7 +218,6 @@ class EventController extends Controller
                 $purchase_types[] = PurchaseTypes::SEASON_TICKET->value;
                 $payment_installments = PaymentInstallments::toArray();
             }
-
 
             /*
             * get all reason agreement by stadium
@@ -294,21 +292,17 @@ class EventController extends Controller
                 'event_id' => 'required'
             ]);
 
-            $seat_catalogues = SeatCatalogue::where('zone', $request->zone)->get();
-            $event_seat_catalogues = $seat_catalogues->map(function ($seat_catalogue) use ($request) {
-                $actual_event_seat_catalogue = EventSeatCatalog::where([
-                    ['event_id', $request->event_id],
-                    ['seat_catalogue_id', $seat_catalogue->id],
-                ])->with([
+           $event_seat_catalogues = EventSeatCatalog::where('event_id', $request->event_id)
+                ->whereHas('seatCatalogue', function ($query) use ($request) {
+                    $query->where('zone', $request->zone);
+                })
+                ->with([
                     'seatCatalogue.seatType',
                     'priceTypes',
                     'seatCatalogueStatus',
                     'promotions.promotionType'
-                ])->first();
-
-                return $actual_event_seat_catalogue ? $actual_event_seat_catalogue : null;
-
-            })->filter()->values();
+                ])
+                ->get();
 
             return response()->json([
                 'data' => $event_seat_catalogues,
@@ -323,7 +317,6 @@ class EventController extends Controller
                 'success' => false
             ], 500);
         }
-
     }
 
     /**

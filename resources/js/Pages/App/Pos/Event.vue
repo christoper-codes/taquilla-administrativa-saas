@@ -1,11 +1,7 @@
 <script setup>
-import NavigationDrawer from '@/Components/NavigationDrawer.vue';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
 import { Head, Link, useForm as useFormInertia, usePage } from '@inertiajs/vue3';
 import Footer from '@/Components/Footer.vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
-import StadiumSVG from '@/Components/SectionsHdx/StadiumSVG.vue';
-import FZona from '@/Components/SectionsHdx/FZona.vue';
 import EstadioHdx from '@/Components/SectionsHdx/EstadioHdx.vue';
 import ZonaA from '@/Components/SectionsHdx/ZonaA.vue';
 import ZonaC from '@/Components/SectionsHdx/ZonaC.vue';
@@ -14,11 +10,7 @@ import usePriceFormat from '@/composables/priceFormat';
 import PaymentDrawer from '@/Components/PaymentDrawer.vue';
 import useUserPolicy from '@/composables/UserPolicy';
 import panzoom from 'panzoom';
-import ErrorSession from '@/Components/ErrorSession.vue';
-import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { drawerPaymentState } from '@/composables/drawersStates';
-import SuccessSession from '@/Components/SuccessSession.vue';
-import CountdownTimer from '@/Components/CountdownTimer.vue';
 import useDateFormat from '@/composables/dateFormat';
 import useTicketOfficeState from '@/composables/TicketOfficeState';
 import { saleTicketSchema } from '@/validation/pos/sale-ticket-schema';
@@ -32,7 +24,6 @@ import useStringFormat from '@/composables/stringFormat';
 import GuestNav from '@/Components/navs/GuestNav.vue';
 import AppNav from '@/Components/navs/AppNav.vue';
 import CashRegisterNav from '@/Components/navs/CashRegisterNav.vue';
-import SecondaryButton from '@/Components/buttons/SecondaryButton.vue';
 import PrimaryButton from '@/Components/buttons/PrimaryButton.vue';
 
 const { dateFormat } = useDateFormat();
@@ -962,51 +953,6 @@ watch(() => purchaseType.value, (newValue) => {
     }
 });
 
-function completePurchase(isActive) {
-
-    if(viewVendorTopics(props.user_roles)) {
-        // vendedor
-        purchaseOnline.value = false;
-        sellerUserId.value = props.user.id;
-
-    } else {
-        globalPaymentTypes.value = globalPaymentTypes.value.map((item) => {
-            return {
-            ...item,
-            amount: totalAmount.value,
-            }
-        })
-    }
-
-    const seatsSelectedData = useFormInertia({
-        event_id: props.event.id,
-        cash_register_id: cashRegisterDataId.value,
-        member_user_id: props.user.id,
-        seller_user_id: sellerUserId.value,
-        price_type_id: priceTypeId.value,
-        seats: seatsSelected.value,
-        amount_received: amountReceived.value,
-        total_amount: totalAmount.value,
-        total_returned: amountReturned.value,
-        global_payment_types: globalPaymentTypes.value,
-        is_online: purchaseOnline.value,
-    });
-
-    loading.value = true;
-
-    seatsSelectedData.post(route('events.reserve-seats-to-buy'), {
-        onSuccess: (response) => {
-            if(!response.props.flash.error) {
-                drawerPaymentState.value = true;
-            }
-        },
-        onFinish: () => {
-            isActive.value = false;
-            loading.value = false;
-        }
-    });
-}
-
 watch(() => installmentSale.value, () => {
     if(!installmentSale.value){
         saleDeptorSelected.value = null;
@@ -1509,17 +1455,10 @@ watch(() => paymentInstallmentSelected.value, () => {
         installmentSale.value = false;
     }
 })
-
-watch(() => agreementSelected.value, () => {
-    console.log(agreementSelected.value);
-});
 </script>
 
 <template>
     <Head title="Evento" />
-    <!-- <GuestLayout  v-bind:user_roles="user_roles" v-bind:isEventsShow="isEventsShow"/> -->
-   <!--  <NavigationDrawer v-bind:user_roles="user_roles"/> -->
-   <!--  <SuccessSession /> -->
     <AppNav/>
     <CashRegisterNav v-bind:user_roles="user_roles"/>
     <transition name="fade">
