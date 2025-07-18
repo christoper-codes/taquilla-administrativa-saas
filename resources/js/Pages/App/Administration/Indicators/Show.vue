@@ -64,7 +64,7 @@ const headers = [
 props.historyPerEvent.new_data.sale_tickets
     .slice()
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .forEach((saleTicket) => {
+    .forEach((saleTicket) => {     
     const paymentTypes = saleTicket.global_payment_types.map(paymentType => {
         let paymentInfo = `${formatFirstLetterUppercase(paymentType.name)}: ${paymentType.pivot.amount}`;
         if (paymentType.name === 'tarjeta' && paymentType.pivot.card_type_name) {
@@ -179,12 +179,12 @@ onMounted(() => {
     <SuccessSession />
     <AppLayout >
         <ErrorSession />
-        <div class="tw-relative tw-w-full tw-block tw-overflow-hidden tw-px-4 tw-pt-10 lg:tw-px-0 lg:tw-pt-10 tw-mb-20 tw-pb-10">
+        <div class="tw-relative tw-w-full tw-block tw-overflow-hidden tw-px-4 tw-pt-5 lg:tw-px-0 lg:tw-pt-5 tw-mb-2 tw-pb-2">
             <section
-                class="tw-w-full tw-relative tw-bg-cover tw-bg-center lg:tw-h-[450px] tw-flex tw-flex-col tw-items-start tw-justify-center tw-rounded-2xl tw-overflow-hidden"
+                class="tw-w-full tw-relative tw-bg-cover tw-bg-center lg:tw-h-[350px] tw-flex tw-flex-col tw-items-start tw-justify-center tw-rounded-2xl tw-overflow-hidden"
                 :style="{ backgroundImage: `url(/storage/${historyPerEvent.event.global_image.file_path})` }"
                 >
-                <div class="tw-w-full tw-rounded-xl lg:tw-rounded-none tw-bg-black/40 tw-p-7 tw-text-white tw-backdrop-blur-md tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-6">
+                <div class="tw-w-full tw-rounded-xl lg:tw-rounded-none tw-bg-black/40 tw-p-7 tw-text-white tw-backdrop-blur-md tw-h-full tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3">
                     <h2 data-aos="fade-left" data-aos-duration="2500" class="tw-font-bold tw-text-2xl lg:tw-text-4xl">
                         {{ historyPerEvent.event.name }}
                     </h2>
@@ -192,8 +192,8 @@ onMounted(() => {
                     <div v-for="(sales, type) in historyPerEvent.type_sales" :key="type">
                         <div v-if="type == 'total'">
                        <h4 class="tw-font-bold tw-text-xl">
-                            Aforo esperado: {{ sales.sales + (historyPerEvent.availability.abonados || 0) }}
-                            <span class="tw-text-base">(asistentes)</span>
+                            Asientos ocupados: {{ sales.sales + (historyPerEvent.availability.abonados || 0) }}
+                            <span class="tw-text-base">(boletaje + abonados)</span>
                         </h4>
                         </div>
                     </div>
@@ -236,6 +236,82 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
+
+            
+            <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-3 tw-gap-8 tw-mt-10 lg:tw-p-4">
+                <div class="lg:tw-col-span-3">
+                    <div class="tw-p-4 tw-rounded-2xl tw-bg-white tw-flex tw-flex-col tw-justify-between tw-gap-5">
+                        <div class="tw-flex tw-flex-col tw-items-left tw-gap-3">
+                            <h3 class="tw-text-4xl tw-font-bold tw-mb-2">Boletaje general</h3>
+                            <div class="tw-border-[3px] tw-border-gray-200 tw-flex tw-items-center tw-gap-4 tw-p-4 tw-rounded-2xl tw-bg-pink-500 tw-justify-between tw-text-white tw-w-full">
+                                <div class="tw-flex tw-items-center tw-gap-3">
+                                    <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-white tw-text-pink-500">data_thresholding</span>
+                                    <span class="tw-text-xl tw-font-bold">Totales:</span>
+                                </div>
+                                <div>
+                                    <p class="tw-text-right tw-text-md">Actualizado al día: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
+                                </div>
+                            </div>
+                            <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-4 tw-w-full">
+                                <div class="tw-border-[3px] tw-border-gray-200 tw-p-3 tw-rounded-2xl tw-bg-white tw-shadow-sm ">
+                                    <p class="tw-font-bold tw-text-gray-900 tw-text-xl tw-flex tw-items-center tw-gap-2">
+                                        <span class="material-symbols-outlined tw-p-2 tw-rounded-md tw-bg-white tw-text-pink-500">confirmation_number</span>
+                                        Total: {{ historyPerEvent.type_sales.total.sales }} asientos
+                                    </p>
+                                </div>
+                                <div class="tw-border-[3px] tw-border-gray-200 tw-p-3 tw-rounded-2xl tw-bg-white tw-shadow-sm">
+                                    <p class="tw-font-bold tw-text-gray-900 tw-text-xl tw-flex tw-items-center tw-gap-2">
+                                        <span class="material-symbols-outlined tw-p-2 tw-rounded-md tw-bg-white tw-text-pink-500">confirmation_number</span>
+                                        Taquilla: {{ historyPerEvent.type_sales.taquilla.sales }} asientos
+                                    </p>
+                                </div>
+                                <div class="tw-border-[3px] tw-border-gray-200 tw-p-3 tw-rounded-2xl tw-bg-white tw-shadow-sm">
+                                    <p class="tw-font-bold tw-text-gray-900 tw-text-xl tw-flex tw-items-center tw-gap-2">
+                                        <span class="material-symbols-outlined tw-p-2 tw-rounded-md tw-bg-white tw-text-pink-500">confirmation_number</span>
+                                        Web: {{ historyPerEvent.type_sales.web.sales }} asientos
+                                    </p>
+                                </div>
+                                <div class="tw-border-[3px] tw-border-gray-200 tw-p-3 tw-rounded-2xl tw-bg-white tw-shadow-sm">
+                                    <p class="tw-font-bold tw-text-gray-900 tw-text-xl tw-flex tw-items-center tw-gap-2">
+                                        <span class="material-symbols-outlined tw-p-2 tw-rounded-md tw-bg-white tw-text-pink-500">confirmation_number</span>
+                                        Web + Taquilla: {{ historyPerEvent.type_sales.web_taquilla_total.sales }} asientos
+                                    </p>
+                                </div>
+                                <div class="tw-border-[3px] tw-border-gray-200 tw-p-3 tw-rounded-2xl tw-bg-white tw-shadow-sm">
+                                    <p class="tw-font-bold tw-text-gray-900 tw-text-xl tw-flex tw-items-center tw-gap-2">
+                                        <span class="material-symbols-outlined tw-p-2 tw-rounded-md tw-bg-white tw-text-pink-500">confirmation_number</span>
+                                        Cortesías: {{ historyPerEvent.type_sales.cortesías.sales }} asientos
+                                    </p>
+                                </div>                              
+                            </div>
+
+                            <div class="tw-border-[3px] tw-border-gray-200 tw-flex tw-items-center tw-rounded-2xl tw-gap-4 tw-p-4 tw-bg-blue-500 tw-justify-between tw-text-white tw-w-full">
+                                <div class="tw-flex tw-items-center tw-gap-3">
+                                    <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-white tw-text-blue-500">sell</span>
+                                    <span class="tw-text-xl tw-font-bold">Desglose boletos regulares, promociones y convenios:</span>
+                                </div>
+                                <div>
+                                    <p class="tw-text-right tw-text-md">Actualizado al día: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
+                                </div>
+                            </div>
+                                <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-4 tw-w-full">
+                                    <template v-for="(sales, type) in historyPerEvent.type_sales" :key="type">
+                                        <div v-if="!['total', 'web_taquilla_total', 'cortesías', 'taquilla', 'web'].includes(type)"
+                                        class="tw-border-[3px] tw-border-gray-200 tw-p-3 tw-rounded-2xl tw-bg-white tw-shadow-sm">
+                                            <p class="tw-font-bold tw-text-gray-900 tw-text-xl tw-flex tw-items-center tw-gap-2">
+                                                <span class="material-symbols-outlined tw-p-2 tw-rounded-md tw-bg-white tw-text-pink-500">confirmation_number</span>
+                                                {{ formatFirstLetterUppercase(type) + ': ' + sales.sales + ' asientos' }}
+                                            </p>
+                                        </div>
+
+                                    </template>
+                                </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
             <div class="tw-mt-16 lg:tw-px-10">
                 <h2 class="tw-text-4xl tw-font-bold">Venta general</h2>
             </div>
@@ -348,81 +424,6 @@ onMounted(() => {
                 <Eventshow v-bind:salesPerDay="historyPerEvent.sales_per_day" />
             </div>
 
-            <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-3 tw-gap-8 tw-mt-10  lg:tw-p-10">
-                <div v-for="(sales, type) in historyPerEvent.type_sales" :key="type" :class="{ 'lg:tw-col-span-3': type == 'total'}">
-                    <div class="tw-border-[3px] tw-border-gray-200 tw-p-5 tw-rounded-2xl tw-bg-white tw-flex tw-flex-col tw-justify-between tw-gap-5">
-                        <div v-if="type == 'total'" class="tw-flex tw-flex-col tw-items-center tw-gap-3">
-                            <h3 class="tw-text-3xl tw-font-bold tw-mb-2">Asientos vendidos</h3>
-                            <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xl">
-                                <div class="tw-flex tw-items-center tw-gap-2 tw-font-bold">
-                                    <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-green-500 tw-text-white">trending_up</span>
-                                    <h3>{{ formatFirstLetterUppercase(type) }}</h3>
-                                </div>
-                                <p class="tw-block tw-font-bold">{{ sales.sales }} <span class="tw-text-xs">(asientos)</span> </p>
-                            </div>
-                            <div>
-                                <p class="tw-text-right tw-text-xs">Actualizado al día: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
-                            </div>
-                        </div>
-                        <div v-else-if="type == 'online'">
-                            <div class="tw-flex tw-flex-col tw-items-center tw-justify-between tw-gap-3">
-                                <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xl">
-                                    <div class="tw-flex tw-items-center tw-gap-2 tw-font-bold">
-                                        <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-blue-500 tw-text-white">confirmation_number</span>
-                                        <h3>{{ formatFirstLetterUppercase(type) }}</h3>
-                                    </div>
-                                    <p class="tw-block tw-font-bold">{{ sales.sales }} <span class="tw-text-xs">(asientos)</span> </p>
-                                </div>
-                                <div>
-                                    <p class="tw-text-right tw-text-xs">Actualizado al día: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else-if="type == 'taquilla'">
-                            <div class="tw-flex tw-flex-col tw-items-center tw-justify-between tw-gap-3">
-                                <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xl">
-                                    <div class="tw-flex tw-items-center tw-gap-2 tw-font-bold">
-                                        <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-pink-500 tw-text-white">confirmation_number</span>
-                                        <h3>{{ formatFirstLetterUppercase(type) }}</h3>
-                                    </div>
-                                    <p class="tw-block tw-font-bold">{{ sales.sales }} <span class="tw-text-xs">(asientos)</span> </p>
-                                </div>
-                                <div>
-                                    <p class="tw-text-right tw-text-xs">Actualizado al día: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else-if="type == 'taquilla cortesias'">
-                            <div class="tw-flex tw-flex-col tw-items-center tw-justify-between tw-gap-3">
-                                <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xl">
-                                    <div class="tw-flex tw-items-center tw-gap-2 tw-font-bold">
-                                        <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-pink-500 tw-text-white">confirmation_number</span>
-                                        <h3>{{ formatFirstLetterUppercase(type) }}</h3>
-                                    </div>
-                                    <p class="tw-block tw-font-bold">{{ sales.sales }} <span class="tw-text-xs">(asientos cortesias)</span> </p>
-                                </div>
-                                <div>
-                                    <p class="tw-text-right tw-text-xs">Actualizado al día: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else>
-                            <div class="tw-flex tw-flex-col tw-items-center tw-justify-between tw-gap-3">
-                                <div class="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xl">
-                                    <div class="tw-flex tw-items-center tw-gap-2 tw-font-bold">
-                                        <span class="material-symbols-outlined tw-block tw-p-2 tw-rounded-md tw-bg-yellow-500 tw-text-white">confirmation_number</span>
-                                        <h3>{{ formatFirstLetterUppercase(type) }}</h3>
-                                    </div>
-                                    <p class="tw-block tw-font-bold">{{ sales.sales }} <span class="tw-text-xs">(asientos)</span> </p>
-                                </div>
-                                <div>
-                                    <p class="tw-text-right tw-text-xs">Actualizado al día: {{currentDay + '/' + currentMonth + '/' + currentYear }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <div class="tw-w-full tw-mt-16 tw-px-0 lg:tw-px-10">
                 <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-gap-5 tw-mb-5">
