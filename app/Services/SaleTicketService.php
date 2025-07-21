@@ -515,15 +515,16 @@ class SaleTicketService
             $total_seats_sold = 0;
             $type_sales = [
                 'total' => ['sales' => 0],
-                'online' => ['sales' => 0],
+                'web' => ['sales' => 0],
                 'taquilla' => ['sales' => 0],
-                'taquilla cortesias' => ['sales' => 0],
+                'cortesías' => ['sales' => 0],
                 'promocion' => ['sales' => 0],
                 'convenio' => ['sales' => 0],
-                'cortesia' => ['sales' => 0],
-                'abonado' => ['sales' => 0],
                 'regular' => ['sales' => 0],
+                'web_taquilla_total' => ['sales' => 0],
             ];
+
+            $Is_Only_One_Seasson_Ticket = 0;
 
             $sale_tickets = $event->saleTickets()
                 ->where('sale_tickets.stadium_id', 1)
@@ -540,7 +541,8 @@ class SaleTicketService
                 &$seat_catalogue_status_vendido_id,
                 &$total_seats_sold,
                 &$type_sales,
-                &$global_payment_type_cortesia_id
+                &$global_payment_type_cortesia_id,
+                &$Is_Only_One_Seasson_Ticket
             ) {
                 $sale_ticket->load('globalPaymentTypes');
 
@@ -588,20 +590,24 @@ class SaleTicketService
                                 $type_sales['convenio']['sales']++;
                             } elseif ($sale_ticket->promotion_id && !$has_agreement_promotion) {
                                 $type_sales['promocion']['sales']++;
-                            } elseif ($has_cortesia) {
-                                $type_sales['cortesia']['sales']++;
                             } elseif ($event_seat_catalog->purchase_type == PurchaseTypes::SEASON_TICKET->value) {
-                                $type_sales['abonado']['sales']++;
+                                $Is_Only_One_Seasson_Ticket++;
                             } else {
                                 $type_sales['regular']['sales']++;
                             }
 
                             if($sale_ticket->is_online){
-                                $type_sales['online']['sales']++;
+                                $type_sales['web']['sales']++;
+                                $type_sales['web_taquilla_total']['sales']++;
                             } elseif(!$sale_ticket->is_online && $has_cortesia){
-                                $type_sales['taquilla cortesias']['sales']++;
+                                $type_sales['cortesías']['sales']++;
                             } else {
                                 $type_sales['taquilla']['sales']++;
+                                $type_sales['web_taquilla_total']['sales']++; 
+                            }
+
+                            if ($Is_Only_One_Seasson_Ticket > 0) {
+                                $type_sales['abonado'] = ['sales' => $abonado_count];
                             }
                         }
                     }
