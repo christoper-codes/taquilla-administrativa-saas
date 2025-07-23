@@ -17,6 +17,7 @@ class SaleTicket extends Model
         'cash_register_id',
         'sale_ticket_status_id',
         'price_type_id',
+        'sale_debtor_id',
         'amount_received',
         'total_amount',
         'total_returned',
