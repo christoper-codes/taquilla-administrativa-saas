@@ -15,6 +15,7 @@ use App\Services\WalletAccountTypeService;
 use App\Services\WalletAccountWalletAccountTypeService;
 use Carbon\Carbon;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Validator;
 
 class WalletAccountController extends Controller
 {
@@ -264,16 +265,23 @@ class WalletAccountController extends Controller
      */
     public function showByAccountNumber(Request $request)
     {
-        $request->validate([ 'account_number' => 'required|exists:wallet_accounts,account_number']);
-
         try {
+
             $wallet_account = $this->wallet_account_service->getByAccountNumber($request->account_number, false);
-             return response()->json([
+
+            if (!$wallet_account) {
+                return response()->json([
+                    'data' => null,
+                    'message' => 'No se encontro la cuenta con el numero proporcionado.',
+                ], 404);
+            }
+
+            return response()->json([
                    'data' => [
                        'wallet_account' => $wallet_account,
                    ],
                     'message' => 'Cuenta encontrada con exito!',
-                ], 200);
+            ], 200);
 
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -301,7 +309,7 @@ class WalletAccountController extends Controller
                 ], 200);
             }
 
-             return response()->json([
+            return response()->json([
                 'data' => null,
                 'message' => 'No se encontro cuentas relacionadas al usuario!',
             ], 404);
@@ -317,12 +325,15 @@ class WalletAccountController extends Controller
      */
     public function showHistoryByAccountNumber(Request $request)
     {
-        $request->validate(['account_number' => 'exists:wallet_accounts,account_number']);
-
         try {
-
-
             $wallet_account = $this->wallet_account_service->getHistoryByAccountNumber($request->account_number);
+
+            if (!$wallet_account) {
+                return response()->json([
+                    'data' => null,
+                    'message' => 'No se encontro la cuenta con el numero proporcionado.',
+                ], 404);
+            }
 
             return response()->json([
                 'data' => [

@@ -6,6 +6,7 @@ use App\Interfaces\WalletAccountRepositoryInterface;
 use App\Models\GlobalCardPaymentType;
 use App\Models\SeasonTicket;
 use App\Models\WalletAccount;
+use Illuminate\Validation\ValidationException;
 
 class WalletAccountRepository implements WalletAccountRepositoryInterface
 {
@@ -108,13 +109,27 @@ class WalletAccountRepository implements WalletAccountRepositoryInterface
             },
             'user',
             'walletAccountPrivilegeHistory'
-        ])->where('account_number', $account_number)->where('is_active', true)->first();
+        ])->where(function ($query) use ($account_number) {
+            $query->where('account_number', $account_number)
+                ->orWhere(function ($q) use ($account_number) {
+                    $q->where('account_number', 'like', "%_{$account_number}_%")
+                        ->where('account_number', 'like', 'qr_evento%');
+                });
+        })
+        ->where('is_active', true)
+        ->get();
 
-        if(is_null($wallet_account)){
-            return $wallet_account;
+        if($wallet_account->isEmpty()){
+            return null;
         }
 
-        return $this->prepareWalletAccountData($wallet_account, $maskWalletAccountNumber);
+        if ($wallet_account->count() > 1) {
+            throw ValidationException::withMessages([
+                'account_number' => 'Se encontraron multiples cuentas con ese identificador. Use el numero completo.'
+            ]);
+        }
+
+        return $this->prepareWalletAccountData($wallet_account->first(), $maskWalletAccountNumber);
     }
 
     public function getByUser($id, $maskWalletAccountNumber)
@@ -233,7 +248,27 @@ class WalletAccountRepository implements WalletAccountRepositoryInterface
                 'walletRechargeAmount',
                 'globalPaymentTypes'
             ]);
-        }])->where('account_number', $account_number)->first();
+        }])->where(function ($query) use ($account_number) {
+            $query->where('account_number', $account_number)
+                ->orWhere(function ($q) use ($account_number) {
+                    $q->where('account_number', 'like', "%_{$account_number}_%")
+                        ->where('account_number', 'like', 'qr_evento%');
+                });
+        })
+        ->where('is_active', true)
+        ->get();
+
+        if($walletAccount->isEmpty()){
+            return null;
+        }
+
+        if ($walletAccount->count() > 1) {
+            throw ValidationException::withMessages([
+                'account_number' => 'Se encontraron multiples cuentas con ese identificador. Use el numero completo.'
+            ]);
+        }
+
+        $walletAccount = $walletAccount->first();
 
         foreach ($walletAccount->walletTransaction as $transaction) {
 
