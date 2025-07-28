@@ -362,23 +362,10 @@ class SaleTicketService
     public function getHistoryPerEvent(array $data)
     {
         try {
-            $event = Event::find($data['event_id']);
-            $event->globalImage;
-            $event->serie->globalSeason;
 
             $seat_catalogue_status_vendido_id = SeatCatalogueStatus::where('name', 'vendido')->first()->id;
-            $global_payment_type_cortesia_id = GlobalPaymentType::where('name', 'cortesia')->first()->id;
-            $type_payments = [];
-            $total_seats_sold = 0;
-            $type_sales = [
-                'total' => ['sales' => 0],
-                'promocion' => ['sales' => 0],
-                'convenio' => ['sales' => 0],
-                'cortesia' => ['sales' => 0],
-                'abonado' => ['sales' => 0],
-                'regular' => ['sales' => 0],
-                'online' => ['sales' => 0],
-            ];
+            $new_data = $this->getHistoryPerEventTotal($data);
+            $sale_tickets = $new_data['sale_tickets'];
 
             $current_date = Carbon::now();
             $start_date = $current_date->copy()->startOfMonth();
@@ -386,90 +373,25 @@ class SaleTicketService
             $days = [];
 
             while ($start_date->lte($end_date)) {
-                $total_seats_sold_day = 0;
                 $day_start = $start_date->copy()->startOfDay();
                 $day_end = $start_date->copy()->endOfDay();
 
-                $sale_tickets = $event->saleTickets()
-                    ->whereBetween('sale_tickets.created_at', [$day_start, $day_end])
-                    ->where('sale_tickets.stadium_id', 1)
-                    ->where(function ($query) {
-                        $pagado_status_id = SaleTicketStatus::where('name', 'pagado')->first()->id;
-                        $pendiente_status_id = SaleTicketStatus::where('name', 'pendiente')->first()->id;
-                        $query->where('sale_tickets.sale_ticket_status_id', $pagado_status_id)
-                            ->orWhere('sale_tickets.sale_ticket_status_id', $pendiente_status_id);
-                    })
-                    ->get();
-
-                $sale_tickets->each(function ($sale_ticket) use (&$type_payments, &$seat_catalogue_status_vendido_id, &$total_seats_sold, &$total_seats_sold_day, &$type_sales, &$global_payment_type_cortesia_id) {
-                    /*
-                    * Get all global payment types associated with the sale ticket
-                    */
-
-                    if($sale_ticket->saleDebtor){
-                        $sale_ticket->setRelation('globalPaymentTypes',  $sale_ticket->installmentPaymentHistories->flatMap(function ($installment_payment_history) {
-                            return $installment_payment_history->globalPaymentTypes;
-                        }));
-                    }
-
-                    $sale_ticket->globalPaymentTypes->each(function ($global_payment_type) use (&$type_payments) {
-                        if (!isset($type_payments[$global_payment_type->name])) {
-                            $type_payments[$global_payment_type->name] = [
-                                'amount' => 0,
-                                'transactions' => 0,
-                            ];
-                        }
-                        $type_payments[$global_payment_type->name]['amount'] += $global_payment_type->pivot->amount;
-                        $type_payments[$global_payment_type->name]['transactions']++;
-                    });
-
-                    if ($sale_ticket->saleTicketStatus->name == 'pagado' || $sale_ticket->saleTicketStatus->name == 'parcialmente cancelado' || $sale_ticket->saleTicketStatus->name == 'pendiente') {
-                        foreach ($sale_ticket->eventSeatCatalogs as $event_seat_catalog) {
-                            if ($event_seat_catalog->seat_catalogue_status_id == $seat_catalogue_status_vendido_id) {
-                                $total_seats_sold++;
-                                $total_seats_sold_day++;
-                                $type_sales['total']['sales']++;
-
-                                $has_agreement_promotion = $sale_ticket->eventSeatCatalogs->contains(function ($eventSeatCatalog) {
-                                    return $eventSeatCatalog->pivot->agreement_promotion_id !== null;
-                                });
-
-                                $has_cortesia = $sale_ticket->globalPaymentTypes->contains(function ($global_payment_type) use ($global_payment_type_cortesia_id) {
-                                    return $global_payment_type->pivot->global_payment_type_id == $global_payment_type_cortesia_id;
-                                });
-
-                                if ($has_agreement_promotion) {
-                                    $type_sales['convenio']['sales']++;
-                                } else if ($sale_ticket->promotion_id && !$has_agreement_promotion) {
-                                    $type_sales['promocion']['sales']++;
-                                } else if ($has_cortesia) {
-                                    $type_sales['cortesia']['sales']++;
-                                } else if($event_seat_catalog->purchase_type == PurchaseTypes::SEASON_TICKET->value){
-                                    $type_sales['abonado']['sales']++;
-                                } else {
-                                    $type_sales['regular']['sales']++;
-                                }
-
-                                if($sale_ticket->is_online){
-                                    $type_sales['online']['sales']++;
-                                }
-                            }
-                        }
-                    }
+                $tickets_count = $sale_tickets->filter(function($sale_ticket) use ($day_start, $day_end) {
+                    return $sale_ticket->created_at >= $day_start && $sale_ticket->created_at <= $day_end;
+                })->sum(function($sale_ticket) use ($seat_catalogue_status_vendido_id) {
+                    return $sale_ticket->eventSeatCatalogs->where('seat_catalogue_status_id', $seat_catalogue_status_vendido_id)->count();
                 });
 
                 $days[] = [
                     'day' => $day_start->toDateString(),
-                    'tickets' => $total_seats_sold_day,
+                    'tickets' => $tickets_count,
                 ];
 
                 $start_date->addDay();
             }
 
-            $new_data = $this->getHistoryPerEventTotal($data);
-
             $response = [
-                'event' => $event,
+                'event' => $new_data['event'],
                 'total_seats_sold' => $new_data['total_seats_sold'],
                 'type_payments' => $new_data['type_payments'],
                 'type_sales' => $new_data['type_sales'],
@@ -489,6 +411,9 @@ class SaleTicketService
     {
         try {
             $event = Event::find($data['event_id']);
+            $event->globalImage;
+            $event->serie->globalSeason;
+            $sale_tickets = [];
             $event->saleTickets->each(function ($sale_ticket) {
                 $sale_ticket->installmentPaymentHistories;
                 $sale_ticket->eventSeatCatalogs;
@@ -507,6 +432,8 @@ class SaleTicketService
                     $event_seat_catalog->seatCatalogue->seatCatalogueStatus;
                     $event_seat_catalog->seasonTicket;
                 });
+
+                $sale_tickets[] = $sale_ticket;
             });
             $seat_catalogue_status_vendido_id = SeatCatalogueStatus::where('name', 'vendido')->first()->id;
             $global_payment_type_cortesia_id = GlobalPaymentType::where('name', 'cortesia')->first()->id;
@@ -603,7 +530,7 @@ class SaleTicketService
                                 $type_sales['cortesías']['sales']++;
                             } else {
                                 $type_sales['taquilla']['sales']++;
-                                $type_sales['web_taquilla_total']['sales']++; 
+                                $type_sales['web_taquilla_total']['sales']++;
                             }
 
                             if ($Is_Only_One_Seasson_Ticket > 0) {
@@ -645,6 +572,7 @@ class SaleTicketService
                 'type_payments' => $type_payments,
                 'type_sales' => $type_sales,
                 'availability' => $availability,
+                'sale_tickets' => $sale_tickets,
             ];
         } catch (\Exception $e) {
             throw $e;
