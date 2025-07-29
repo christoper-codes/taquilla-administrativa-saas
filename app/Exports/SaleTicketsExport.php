@@ -44,6 +44,8 @@ class SaleTicketsExport implements FromArray, WithHeadings, WithStyles, WithColu
                 foreach ($sorted_sale_tickets as $index => $sale_ticket) {
                     try {
                         $payment_types = '';
+                        $payment_type = 'N/A';
+                        $card_type = 'N/A';
                         if (isset($sale_ticket['global_payment_types']) && is_array($sale_ticket['global_payment_types'])) {
                             $payment_types = collect($sale_ticket['global_payment_types'])->map(function($payment_type) {
                                 $payment_info = ucfirst($payment_type['name']) . ': ' . $payment_type['pivot']['amount'];
@@ -52,6 +54,15 @@ class SaleTicketsExport implements FromArray, WithHeadings, WithStyles, WithColu
                                 }
                                 return $payment_info;
                             })->implode(', ');
+
+                            if (count($sale_ticket['global_payment_types']) == 1) {
+                                $payment_type = ucfirst($sale_ticket['global_payment_types'][0]['name']);
+                                if (strtolower($payment_type) == 'tarjeta' && isset($sale_ticket['global_payment_types'][0]['pivot']['card_type_name'])) {
+                                    $card_type = $sale_ticket['global_payment_types'][0]['pivot']['card_type_name'];
+                                }
+                            } else {
+                                $payment_type = 'Compuesto';
+                            }
                         }
 
                         $seat_catalogues = '';
@@ -71,7 +82,6 @@ class SaleTicketsExport implements FromArray, WithHeadings, WithStyles, WithColu
                         }
 
                         $original_date = new \DateTime($sale_ticket['created_at']);
-                        $original_date->modify('-6 hours');
                         $adjusted_date = $original_date->format('Y-m-d H:i:s');
 
                         $total_amount = number_format($sale_ticket['total_amount'] ?? 0, 2);
@@ -89,6 +99,8 @@ class SaleTicketsExport implements FromArray, WithHeadings, WithStyles, WithColu
                             $total_amount, // Monto total de venta
                             $amount_paid, // Monto Pagado
                             $adeudo_formatted, // Adeudo
+                            $payment_type, // Tipo de pago principal
+                            $card_type, // Tipo de tarjeta
                             $payment_types, // Tipos de pago
                             ($sale_ticket['promotion_id'] ?? null) ? ($sale_ticket['promotion']['name'] ?? 'N/A') : 'N/A', // Promoción
                             $sale_ticket['payment_in_installments'] ?? 'N/A', // Venta a meses
@@ -120,7 +132,9 @@ class SaleTicketsExport implements FromArray, WithHeadings, WithStyles, WithColu
             'Monto total de venta',
             'Monto Pagado',
             'Adeudo',
-            'Tipos de pago',
+            'Pago principal',
+            'Tipo de tarjeta',
+            'Tipos de pago (Detalle)',
             'Promoción',
             'Venta a meses',
             'Deudor',
@@ -148,7 +162,8 @@ class SaleTicketsExport implements FromArray, WithHeadings, WithStyles, WithColu
         return [
             'A' => 10, 'B' => 15, 'C' => 15, 'D' => 20, 'E' => 30,
             'F' => 20, 'G' => 15, 'H' => 15, 'I' => 40, 'J' => 20,
-            'K' => 15, 'L' => 25, 'M' => 20,
+            'K' => 30, 'L' => 25, 'M' => 20, 'N' => 30, 'O' => 20,
+            'P' => 20,
         ];
     }
 }
