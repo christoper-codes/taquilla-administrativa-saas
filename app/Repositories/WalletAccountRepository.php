@@ -110,14 +110,15 @@ class WalletAccountRepository implements WalletAccountRepositoryInterface
             'user',
             'walletAccountPrivilegeHistory'
         ])->where(function ($query) use ($account_number) {
-            $query->where('account_number', $account_number)
+            $query->whereRaw('BINARY account_number = ?', [$account_number])
                 ->orWhere(function ($q) use ($account_number) {
-                    $q->where('account_number', 'like', "%_{$account_number}_%")
-                        ->where('account_number', 'like', 'qr_evento%');
+                    $q->whereRaw('BINARY account_number LIKE ?', ["%\_{$account_number}\_%"])
+                        ->whereRaw('BINARY account_number LIKE ?', ['qr_evento%']);
                 });
         })
         ->where('is_active', true)
         ->get();
+
 
         if($wallet_account->isEmpty()){
             return null;
@@ -251,7 +252,7 @@ class WalletAccountRepository implements WalletAccountRepositoryInterface
         }])->where(function ($query) use ($account_number) {
             $query->where('account_number', $account_number)
                 ->orWhere(function ($q) use ($account_number) {
-                    $q->where('account_number', 'like', "%_{$account_number}_%")
+                    $q->where('account_number', 'like', "%\_{$account_number}\_%")
                         ->where('account_number', 'like', 'qr_evento%');
                 });
         })
